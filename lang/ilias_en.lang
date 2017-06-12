@@ -1,0 +1,32 @@
+/**
+/ English Language File for Notify on Cron Failure Cron-Plugin
+**/
+
+title#:#Update Users from Evento-Soap Interface
+description#:#Updates all ILIAS-Users by querying the HSLU Soap interface to Evento. Users and Course-Memberships are updated
+ws_user#:#SOAP User
+ws_user_desc#:#Username to access the SOAP Interface
+ws_password#:#SOAP Password
+ws_password_desc#:#Password to access the SOAP Interface
+wsdl#:#SOAP Server URL
+wsdl_desc#:#URL of the SOAP Server
+ilias_auth_mode#:#Authmode of new users
+ilias_auth_mode_desc#:#New users will be assigned this authentication mode in ILIAS
+ws_send_emails_to_users#:#Send e-mails to users
+ws_send_emails_to_users_desc#:#Should Users be notified about changes
+pagesize#:#Pagesize
+pagesize_desc#:#How many Records should be fetched at once. A bigger number is quicker, but needs more RAM.
+max_pages#:#Max Pages
+max_pages_desc#:#The maximum number of pages that should be fetch. -1 means no limit.
+max_retries#:#Max Retries
+max_retries_desc#:#Max number of retries that should be made to fetch the data.
+seconds_before_retry#:#Wait Time
+seconds_before_retry_desc#:#How many seconds should be waited before retrying to fetch the data.
+mail_account_changed_subject#:#Subject
+email_account_changed_subject_desc#:#Please enter a subject-line for the e-mail sent out to users who's login-name needed to be changed.
+email_account_changed_body#:#Text
+email_account_changed_body_desc#:#Please enter a text for the e-mail sent out to users who's login-name needed to be changed (without salutation). The following tags will be replaced by the corresponding user-information: [oldlogin], [newlogin] and [email].
+account_duration#:#Account Validity
+account_duration_desc#:#Max validity of accounts in months. If accounts with unlimited or longer validity are created, they are reduced to this duration. 0 means unlimited duration.
+standard_user_role_id#:#Default User Role
+standard_user_role_id_desc#:#ID of the default user role assigned to all users.

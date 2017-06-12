@@ -1,0 +1,32 @@
+/**
+/ German Language File for Notify on Cron Failure Cron-Plugin
+**/
+
+title#:#Benutzer über Evento-SOAP-Schnittstelle aktualisieren
+description#:#Aktualisiert die ILIAS-Benutzer über die HSLU-SOAP-Schnittstelle zu Evento. Neben den Benutzern werden auch ihre Mitgliedschaften in Kursen und Gruppen aktualisiert.
+ws_user#:#SOAP-Benutzer
+ws_user_desc#:#Benutzername zum Zugriff auf die SOAP-Schnittstelle
+ws_password#:#SOAP-Passwort
+ws_password_desc#:#Passwort zum Zugriff auf die SOAP-Schnittstelle
+wsdl#:#SOAP-Server URL
+wsdl_desc#:#URL des SOAP-Servers
+ilias_auth_mode#:#Authmode neuer Benutzer
+ilias_auth_mode_desc#:#Neu abgelegte ILIAS-Benutzer erhalten diesen Authentifizierungsmechanismus zugewiesen
+ws_send_emails_to_users#:#E-Mails an Benutzer senden
+ws_send_emails_to_users_desc#:#Sollen Benutzer über Änderungen per E-Mail benachrichtigt werden?
+pagesize#:#Seitengrösse
+pagesize_desc#:#Anzahl er Datensätze die in einem Rutsch ausgelesen werden sollen. Eine grössere Anzahl beschläunigt den Prozess, braucht aber auch mehr Arbeitsspeicher.
+max_pages#:#Maximale Seitenanzahl
+max_pages_desc#:#Wieviele Seiten sollen maximal geholt werden? -1 bedeutet unbeschränkt.
+max_retries#:#Anzahl Versuche
+max_retries_desc#:#Wie häufig soll bei Problemen versucht werden, die Daten auszulesen.
+seconds_before_retry#:#Wartezeit
+seconds_before_retry_desc#:#Wartezeit zwischen den Versuchen in Sekunden
+email_account_changed_subject#:#Betreff
+email_account_changed_subject_desc#:#Bitte hier den Betreff für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wird.
+email_account_changed_body_#:#Text
+email_account_changed_body_desc#:#Bitte hier den Text für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wir (ohne Anrede). Die Platzhalter [oldlogin], [newlogin] und [email] werden durch die entsprechenden Angaben des Benutzers ersetzt.
+account_duration#:#Gültigkeit Account
+account_duration_desc#:#Maximale Gültigkeitsdauer für einen Account in Monaten. Werden unlimitierte Accounts oder Accounts mit längerer Gültigkeit erstellt, werden sie auf diese Dauer beschränkt. 0 bedeutet, dass es keine Einschränkungen gibt.
+standard_user_role_id#:#Standard Benutzerrolle
+standard_user_role_id_desc#:#ID der standard Benutzerrolle, die allen Nutzern zugeteilt werden soll.
