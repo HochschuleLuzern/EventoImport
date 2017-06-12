@@ -3,7 +3,8 @@ require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/c
 require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImporterIterator.php';
 require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportLogger.php';
 require_once './Services/User/classes/class.ilObjUser.php';
-require_once 'Services/LDAP/classes/class.ilLDAPServer.php';
+require_once './Services/Utilities/classes/class.ilUtil.php';
+require_once './Services/LDAP/classes/class.ilLDAPServer.php';
 
 class ilEventoImportImportUsers {
 	private static $instance;
@@ -28,11 +29,16 @@ class ilEventoImportImportUsers {
 		$this->ilDB = $DIC['ilDB'];
 		$this->rbacadmin = $DIC['rbacadmin'];
 		$this->rbacreview = $DIC['rbacreview'];
+		if (!ilContext::usesTemplate()) {
+			ilStyleDefinition::setCurrentStyle('Desktop');
+		}
 		
 		$settings = new ilSetting("crevento");
 
+		$this->now = time();
+		
 		if ($settings->get('crevento_account_duration') != 0 ) {
-			$this->until = $this->now + mktime(date('H'), date('i'), date('s'), date('n') + ($settings->get('crevento_account_duration')% 12), date('j'), date('Y')+ (intdiv($settings->get('crevento_account_duration'), 12)));
+			$this->until = mktime(date('H'), date('i'), date('s'), date('n') + ($settings->get('crevento_account_duration')% 12), date('j'), date('Y')+ (intdiv($settings->get('crevento_account_duration'), 12)));
 		} else {
 			$this->until = 0;
 		}
@@ -192,7 +198,11 @@ class ilEventoImportImportUsers {
 				// The user account by login has a different evento number.
 				// --> Rename and deactivate conflicting account
 				//     and then insert new user account.
-				$this->renameAndDeactivateUser($data['id_by_login']);
+				$changed_user_data['user_id'] = $data['id_by_login'];
+				$changed_user_data['EvtID'] = trim(substr($objByLogin->getMatriculation(), 8));
+				$changed_user_data['new_user_info'] = 'EventoID: '.$data['EvtID'];
+				$changed_user_data['found_by'] = 'Login';
+				$this->renameAndDeactivateUser($changed_user_data);
 				$action = 'new';
 	
 			} else if ($objByLogin->getMatriculation() == $objByLogin->getLogin()) {
@@ -226,7 +236,11 @@ class ilEventoImportImportUsers {
 				// The user account by e-mail has a different evento number.
 				// --> Rename and deactivate conflicting account
 				//     and then insert new user account.
-				$this->renameAndDeactivateUser($data['ids_by_email'][0]);
+				$changed_user_data['user_id'] = $data['ids_by_email'][0];
+				$changed_user_data['EvtID'] = trim(substr($objByEmail->getMatriculation(), 8));
+				$changed_user_data['new_user_info'] = 'EventoID: '.$data['EvtID'];
+				$changed_user_data['found_by'] = 'E-Mail';
+				$this->renameAndDeactivateUser($changed_user_data);
 				$action = 'new';
 			} else if (strlen($objByEmail->getMatriculation()) != 0) {
 				// The user account by login has a matriculation of some kind
@@ -262,7 +276,14 @@ class ilEventoImportImportUsers {
 			// We found a user account by matriculation but with the wrong
 			// login. The login is taken by another user account.
 			// --> Rename and deactivate conflicting account, then update user account.
-			$$this->renameAndDeactivateUser($data['id_by_login']);
+			$objByLogin = new ilObjUser($data['id_by_login']);
+			$objByLogin->read();
+			
+			$changed_user_data['user_id'] = $data['id_by_login'];
+			$changed_user_data['EvtID'] = trim(substr($objByLogin->getMatriculation(), 8));
+			$changed_user_data['new_user_info'] = 'EventoID: '.$data['EvtID'];
+			$changed_user_data['found_by'] = 'Login';
+			$this->renameAndDeactivateUser($changed_user_data);
 			$action = 'update';
 			$usrId = $data['ids_by_matriculation'][0];
 		} else {
@@ -331,11 +352,7 @@ class ilEventoImportImportUsers {
 		// Assign user to global user role
 		$this->rbacadmin->assignUser($this->usr_role_id, $userObj->getId());
 	
-		// Upload image
-		$imageFile = $this->imageDir.'/'.$data['PictureFilename'];
-		if (file_exists($imageFile)) {
-			ilObjUser::_uploadPersonalPicture($imageFile, $userObj->getId());
-		}
+		$this->addPersonalPicture($data['EvtID'], $userObj->getId());
 		
 		$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $data);
 	}
@@ -406,11 +423,7 @@ class ilEventoImportImportUsers {
 	
 		// Upload image
 		if (strpos(ilObjUser::_getPersonalPicturePath($userObj->getId(), "small", false),'/no_photo') !== false) {
-			$imageFile = $this->imageDir.'/'.$data['PictureFilename'];
-		
-			if (file_exists($imageFile)) {
-				ilObjUser::_uploadPersonalPicture($imageFile, $userObj->getId());
-			}
+			$this->addPersonalPicture($data['EvtID'], $userObj->getId());
 		}
 	
 		$oldLogin = $userObj->getLogin();
@@ -431,6 +444,16 @@ class ilEventoImportImportUsers {
 		}
 	}
 	
+	private function renameAndDeactivateUser($data) {
+		$userObj = new ilObjUser($data['user_id']);
+		$userObj->read();
+		$userObj->setActive(false);
+		$userObj->update();
+		$userObj->setLogin(date('Ymd').'_'.$userObj->getLogin());
+		$userObj->updateLogin($userObj->getLogin());
+		$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_RENAMED, $data);
+	}
+	
 	private function setMailPreferences($usrId) {
 		$this->ilDB->manipulateF("UPDATE mail_options SET incoming_type = '2' WHERE user_id = %s", array("integer"), array($usrId)); //mail nur intern nach export
 	}
@@ -441,6 +464,18 @@ class ilEventoImportImportUsers {
 	private function changeLoginName($usr_id, $new_login) {	
 		$q="UPDATE usr_data SET login = '".$new_login."' WHERE usr_id = '".$usr_id."'";
 		$this->ilDB->manipulate($q);		
+	}
+	
+	private function addPersonalPicture($eventoid, $id) {
+		// Upload image
+		$has_picture_result = $this->evento_importer->getRecord('HasPhoto', array('parameters'=>array('eventoId'=>$eventoid)));
+		
+		if (isset($has_picture_result->{HasPhotoResult}) && $has_picture_result->{HasPhotoResult} === true) {
+			$picture_result = $this->evento_importer->getRecord('GetPhoto', array('parameters'=>array('eventoId'=>$eventoid)));
+			$tmp_file = ilUtil::ilTempnam();
+			imagepng(imagecreatefromstring($picture_result->{GetPhotoResult}), $tmp_file, 0);
+			ilObjUser::_uploadPersonalPicture($tmp_file, $id);
+		}
 	}
 	
 	/**

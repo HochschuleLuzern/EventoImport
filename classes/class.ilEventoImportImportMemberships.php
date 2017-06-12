@@ -27,6 +27,7 @@ class ilEventoImportImportMemberships {
 		
 		global $DIC;
 		$this->ilDB = $DIC['ilDB'];
+		$this->rbacreview = $DIC['rbacreview'];
 		$this->rbacadmin = $DIC['rbacadmin'];
 	}
 	
@@ -61,38 +62,43 @@ class ilEventoImportImportMemberships {
 					if (count($roleIds) == 1) {
 						$row['role_id'] = $roleIds[0];
 						
-						$r = $this->ilDB->queryF("SELECT * FROM crnhk_crevento_mas WHERE evento_id = '{$row['AnlassBezKurz']}'");
+						$r = $this->ilDB->query("SELECT * FROM crnhk_crevento_mas WHERE evento_id = '{$row['AnlassBezKurz']}'");
 						
 						if (count($mas = $this->ilDB->fetchAll($r)) == 0) {
-							if (($ref_ids = $this->rbacreview->getFoldersAssignedToRole($role_id, true)) > 0) {
-								$row['ref_id'] = $ref_ids[0];
-							} else {
-								$row['ref_id'] = "null";
-							}
-							
-							$this->evento_logger->log(ilEventoImportLogger::CREVENTO_MA_FIRST_IMPORT, $row);
-							$result = ilEventoImportLogger::CREVENTO_MA_FIRST_IMPORT;
+							$first_import = true;
+						}
+						
+						if (($ref_ids = $this->rbacreview->getFoldersAssignedToRole($row['role_id'], true)) > 0) {
+							$row['ref_id'] = $ref_ids[0];
 						} else {
-							$row['ref_id'] = $mas['ref_id'];
+							$row['ref_id'] = "null";
 						}
 						
 						$row['subscribed_users'] = $this->importEventSubscriptions('GetAnmeldungenByAnlassID', $row['AnlassID'], $row['role_id']);
 						
-						if ($subscribedUsers != false) {
+						if (count($row['subscribed_users']) > 0) {
 							$row['number_of_subs'] = count($subscribedUsers);
 							
-							if ($this->MAActive($roleId)) $row['number_removed_subs']  = $this->removeFromRoleWithParents($subscribedUsers, $row['role_id']. $row['ref_id']);
-							
-							if ($result == ilEventoImportLogger::CREVENTO_MA_FIRST_IMPORT) {
-								$this->evento_logger->log(ilEventoImportLogger::CREVENTO_MA_FIRST_IMPORT, $row);
+							if ($first_import) {
+								$message = ilEventoImportLogger::CREVENTO_MA_FIRST_IMPORT;
 							} else {
-								$this->evento_logger->log(ilEventoImportLogger::CREVENTO_MA_SUBS_UPDATED, $row);
+								$message = ilEventoImportLogger::CREVENTO_MA_SUBS_UPDATED;
 							}
 						} else {
-							if ($result != ilEventoImportLogger::CREVENTO_MA_FIRST_IMPORT) {
-								$this->evento_logger->log(ilEventoImportLogger::CREVENTO_MA_NO_SUBS, $row);
+							$row['number_of_subs'] = 0;
+							if ($first_import) {
+								$message = ilEventoImportLogger::CREVENTO_MA_FIRST_IMPORT_NO_SUBS;
+							} else {
+								$message = ilEventoImportLogger::CREVENTO_MA_NO_SUBS;
 							}
 						}
+						
+						if ((!strtotime($row['EndDatum']) || strtotime($row['EndDatum']) > time())  && 
+								($row['number_removed_subs'] = $this->removeFromRoleWithParents($row['subscribed_users'], $row['role_id'], $row['ref_id'])) > 0) {
+							$message = ilEventoImportLogger::CREVENTO_MA_SUBS_UPDATED;
+						}
+						
+						$this->evento_logger->log($message, $row);
 						
 						$row['obj_id'] = $this->rbacreview->getObjectOfRole($roleIds[0]);
 						$this->updateObjectDescription($row);
@@ -104,10 +110,10 @@ class ilEventoImportImportMemberships {
 				} else {
 					$this->evento_logger->log(ilEventoImportLogger::CREVENTO_MA_NOTICE_NAME_INVALID, $row);
 				}
-				
-				if ($result['is_last']) {
-					break;
-				}				
+			}
+			
+			if ($result['is_last']) {
+				break;
 			}
 		}
 	}
@@ -116,11 +122,13 @@ class ilEventoImportImportMemberships {
 	 * Returns the number of rows.
 	 */
 	private function importEventSubscriptions($operation, $object_id, $role_id) {
-		$subscribedUsers = false;
+		$subscribedUsers = [];
 		
-		while (!($result = &$this->evento_importer->getRecords($operation, 'Anmeldungen', array('parameters'=>array('anlassid'=>$object_id))))['finished']) {			
+		$iterator = new ilEventoImporterIterator;
+		
+		while (!($result = &$this->evento_importer->getRecords($operation, 'Anmeldungen', $iterator, array('parameters'=>array('anlassid'=>$object_id))))['finished']) {			
 			foreach ($result['data'] as $row) {
-				if ($roleId != null) {
+				if ($role_id != null) {
 					$idsByMatriculation = array(0);
 					$idsByMatriculation = ilEventoImportImportUsers::_getUserIdsByMatriculation('Evento:'.$row['EvtID']);
 					if (count($idsByMatriculation) != 0) {
@@ -153,7 +161,8 @@ class ilEventoImportImportMemberships {
 				"";
 		
 		$r = $this->ilDB->manipulate($q);
-		if (!$this->ilDB->isError($r) && !$this->ilDB->isError($r->result)) {
+
+		if ($r == 1) {
 			require_once 'Services/Object/classes/class.ilObjectFactory.php';
 			$obj = ilObjectFactory::getInstanceByObjId($data['obj_id']);
 			if ($obj != null) {
@@ -183,7 +192,7 @@ class ilEventoImportImportMemberships {
 		// If it is a course role, use the ilCourseMember object to assign
 		// the user to the role
 		
-		if (!$this->rbacreview->isAssigned($user_id, $role_id) && $this->rbacadmin->assignUser($role_id, $user_id)) {
+		if (!($assigned = $this->rbacreview->isAssigned($user_id, $role_id)) && $this->rbacadmin->assignUser($role_id, $user_id)) {
 			if (in_array($role_id,$this->roleToObjectCache)) {
 				$obj_id = $this->roleToObjectCache[$role_id];
 			} else {
@@ -198,31 +207,40 @@ class ilEventoImportImportMemberships {
 					$ref_id = current((array) $ref_ids);
 					if($ref_id)
 					{
-						ilObjUser::_addDesktopItem($a_user_id,$ref_id,$type);
+						ilObjUser::_addDesktopItem($user_id,$ref_id,$type);
 					}
 					break;
 				default:
 					break;
 			}
 			
-			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_CREATED, array("usr_id" => $user_id, "obj_id" => $role_id));
-		} else if (!$this->rbacreview->isAssigned($user_id, $role_id)) {
-			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_ERROR_CREATING, array("usr_id" => $user_id, "obj_id" => $role_id));
+			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_CREATED, array("usr_id" => $user_id, "role_id" => $role_id));
+		} else if (!$assigned) {
+			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_ERROR_CREATING, array("usr_id" => $user_id, "role_id" => $role_id));
+		} else {
+			$r = $this->ilDB->queryF("SELECT 1 FROM crnhk_crevento_subs WHERE role_id=%s AND usr_id=%s LIMIT 1", array("integer", "integer"), array($role_id, $user_id));
+			if ($this->ilDB->numRows($r) != 1) {
+				$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_ADDED, array("usr_id" => $user_id, "role_id" => $role_id));
+			}
 		}
 	}
 	
 	private function removeFromRoleWithParents($user_ids, $role_id, $ref_id) {
 		$user_ids = $this->getDeletedUsersInRole($role_id, $user_ids);
-		$parent_role_ids = $this->getParentRoleIds($role_id);
-		
-		foreach ($user_ids as $user_id) {
-			$this->removeFromRole($user_id, $role_id, $ref_id, false);
-		
-			foreach ($parent_role_ids as $parent_role_id) {
-				if (($parent_ref_id = $this->rbacreview->getFoldersAssignedToRole($parent_role_id, true)) > 0) {
-					$this->removeFromRole($user_id, $parent_role_id, $parent_ref_id, true);
-				}	
-			}
+		if ($user_ids !== false) {
+			$parent_role_ids = $this->getParentRoleIds($role_id);
+			
+			foreach ($user_ids as $user_id) {
+				$this->removeFromRole($user_id, $role_id, $ref_id, false);
+			
+				foreach ($parent_role_ids as $parent_role_id) {
+					if (($parent_ref_id = $this->rbacreview->getFoldersAssignedToRole($parent_role_id, true)) > 0) {
+						$this->removeFromRole($user_id, $parent_role_id, $parent_ref_id, true);
+					}	
+				}
+			}		
+		} else {
+			return 0;
 		}
 		
 		return count($user_ids);
@@ -250,16 +268,16 @@ class ilEventoImportImportMemberships {
 					$ref_id = current((array) $ref_ids);
 					if($ref_id)
 					{
-						ilObjUser::_dropDesktopItem($a_user_id,$ref_id,$type);
+						ilObjUser::_dropDesktopItem($user_id, $ref_id, $type);
 					}
 					break;
 				default:
 					break;
 			}
 			
-			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_REMOVED, array("usr_id" => $user_id, "obj_id" => $role_id));
+			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_REMOVED, array("usr_id" => $user_id, "role_id" => $role_id));
 		} else if (!$deass_success) {
-			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_ERROR_REMOVING,  array("usr_id" => $user_id, "obj_id" => $role_id));
+			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_ERROR_REMOVING,  array("usr_id" => $user_id, "role_id" => $role_id));
 		}
 	}
 	
@@ -352,13 +370,17 @@ class ilEventoImportImportMemberships {
 		return $this->rbacreview->isAssignedToAtLeastOneGivenRole($user_id, $evento_roles);
 	}
 	
-	private function MAActive () {
-		include_once('./Services/Utilities/classes/class.ilUtil.php');
+	/**
+	 * Formats the KursBezLang value.
+	 */
+	private function toFormattedAnlassBezLang($value) {
 		
-		$ref_id = $this->rbacreview->getObjectReferenceOfRole($role_id);
+		// Remove the prefix from the description.
+		$value = preg_replace('/^([a-zA-Z0-9._]+_|[a-zA-Z0-9]+\.)/u','',$value);
 		
-		$r = $this->ilDB->query("Select end_date FROM crnhk_crevento_mas WHERE ref_id='$ref_id';");
-		return ((ilUtil::date_mysql2time($this->ilDB->fetchAssoc($r))['end_date']) > time());
+		// Remove the suffix from the description.
+		$value = preg_replace('/(\.[a-zA-Z0-9]+| [A-Z]S [0-9]{4})$/u','',$value);
 		
+		return $value;
 	}
 }

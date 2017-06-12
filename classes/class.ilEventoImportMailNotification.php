@@ -27,7 +27,7 @@ class ilEventoImportMailNotification extends ilMailNotification {
 	private $newLogin;
 	private $email;
 	
-	public const MAIL_TYPE_USER_NAME_CHANGED = 101;
+	const MAIL_TYPE_USER_NAME_CHANGED = 101;
 	
 	public function __construct()
 	{
@@ -44,7 +44,7 @@ class ilEventoImportMailNotification extends ilMailNotification {
 	}
 	
 	private function setMainBody () {
-		$mainBody = $this->settings->get('crevento_email_accout_changed');
+		$mainBody = $this->settings->get('crevento_email_account_changed_body');
 		
 		$mainBody = str_replace('[oldLogin]', $this->oldLogin, $mainBody);
 		$mainBody = str_replace('[newLogin]', $this->newLogin, $mainBody);
@@ -61,7 +61,7 @@ class ilEventoImportMailNotification extends ilMailNotification {
 		foreach($this->getRecipients() as $rcp) {
 			$this->initLanguage($rcp);
 			$this->initMail();
-			$this->setSubject($this->settings->get('crevento_email_accout_changed_subject'));
+			$this->setSubject($this->settings->get('crevento_email_account_changed_subject'));
 			$this->setBody(ilMail::getSalutation($rcp,$this->getLanguage()));
 			$this->appendBody("\n\n");
 			$this->appendBody($this->setMainBody());

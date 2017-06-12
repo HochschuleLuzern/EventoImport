@@ -30,16 +30,14 @@ class ilEventoImportSOAPClient extends ilSoapClient {
 							'connection_timeout' => (int) $this->getTimeout()
 					)
 					);
-			return true;
-		}
-		catch (SoapFault $ex) {
-			
+			$return = true;
+		} catch (Exception $ex) {
 			$this->error_message = $ex->getMessage();
 			$this->resetSocketTimeout();
-			return false;
-		}
-		finally {
+			$return = false;
+		} finally {
 			$this->resetSocketTimeout();
+			return $return;
 		}
 	}
 	
@@ -53,16 +51,13 @@ class ilEventoImportSOAPClient extends ilSoapClient {
 		$this->setSocketTimeout(false);
 		try {
 			$this->error_message = null;
-			return $this->client->__call($a_operation, $a_params);
-		}
-		catch(Exception $exception) {
+			$return = $this->client->__call($a_operation, $a_params);
+		} catch(Exception $exception) {
 			$this->error_message = $exception->getMessage();
-		}
-		catch(Exception $exception) {
-			$this->error_message = $exception->getMessage();
-		}
-		finally {
+			$return = false;
+		} finally {
 			$this->resetSocketTimeout();
+			return $return;
 		}
 	}
 }

@@ -60,7 +60,7 @@
 				'length' => 8,
 				'notnull' => true
 			),
-			'obj_id' => array(
+			'role_id' => array(
 				'type' => 'integer',
 				'length' => 8,
 				'notnull' => true
@@ -77,7 +77,7 @@
 		);
 
 		$ilDB->createTable("crnhk_crevento_subs", $fields);
-		$ilDB->addPrimaryKey('crnhk_crevento_subs', array('usr_id', 'obj_id'));
+		$ilDB->addPrimaryKey('crnhk_crevento_subs', array('usr_id', 'role_id'));
 	}
 
 	if(!$ilDB->tableExists('crnhk_crevento_mas'))
@@ -100,6 +100,16 @@
 			),
 			'end_date' => array(
 				'type' => 'timestamp',
+				'notnull' => false
+			),
+			'number_of_subs' => array(
+				'type' => 'integer',
+				'length' => 8,
+				'notnull' => false
+			),
+			'last_import_data' => array(
+				'type' => 'text',
+				'length' => 4000,
 				'notnull' => false
 			),
 			'last_import_date' => array(

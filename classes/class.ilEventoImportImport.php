@@ -106,6 +106,7 @@ class ilEventoImportImport extends ilCronJob {
 	}
 	
 	public function run() {
+		require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImporter.php';
 		require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportResult.php';
 		require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImportUsers.php';
 		require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImportMemberships.php';
@@ -117,8 +118,7 @@ class ilEventoImportImport extends ilCronJob {
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
 		} catch (Exception $e) {
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_CRASHED, 'Cron job crashed: ' . $e->getMessage());
-		}
-		
+		}	
 	}
 	
 	public function addCustomSettingsToForm(ilPropertyFormGUI $a_form)
@@ -137,9 +137,9 @@ class ilEventoImportImport extends ilCronJob {
 		foreach ($auth_modes as $auth_mode => $auth_name) {
 			if(ilLDAPServer::isAuthModeLDAP($auth_mode)) {
 				$server = ilLDAPServer::getInstanceByServerId(ilLDAPServer::getServerIdByAuthMode($auth_mode));
-				if ($server->isActive()) $options[$auth_mode] = $auth_name;
+				if ($server->isActive()) $options[$auth_name] = $auth_name;
 			} else if ($settings->get($auth_name.'_active') || $auth_mode == AUTH_LOCAL) {
-				$options[$auth_mode] = $auth_name;
+				$options[$auth_name] = $auth_name;
 			}
 		}
 		$ws_item->setOptions($options);
@@ -199,15 +199,6 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->setValue($settings->get('crevento_wsdl', ""));
 		$a_form->addItem($ws_item);
 		
-		include_once 'Services/Form/classes/class.ilCheckboxInputGUI.php';
-		$ws_item = new ilCheckboxInputGUI(
-				$this->cp->txt('ws_send_emails_to_users'),
-				'crevento_ws_send_emails_to_users'
-				);
-		$ws_item->setInfo($this->cp->txt('ws_send_emails_to_users_desc'));		
-		$ws_item->setChecked($settings->get('crevento_ws_send_emails_to_users', '0'));
-		$a_form->addItem($ws_item);
-		
 		$ws_item = new ilNumberInputGUI(
 				$this->cp->txt('pagesize'),
 				'crevento_pagesize'
@@ -260,12 +251,14 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->setValue($settings->get('crevento_email_account_changed_subject', ''));
 		$a_form->addItem($ws_item);
 		
-		$ws_item = new ilTextInputGUI(
+		include_once 'Services/Form/classes/class.ilTextAreaInputGUI.php';
+		$ws_item = new ilTextAreaInputGUI(
 				$this->cp->txt('email_account_changed_body'),
 				'crevento_email_account_changed_body'
 				);
 		$ws_item->setInfo($this->cp->txt('email_account_changed_body_desc'));
 		$ws_item->setRequired(true);
+		$ws_item->usePurifier(true);
 		$ws_item->setValue($settings->get('crevento_email_account_changed_body', ''));
 		$a_form->addItem($ws_item);
 	}
@@ -298,10 +291,6 @@ class ilEventoImportImport extends ilCronJob {
 			$settings->set('crevento_wsdl', $_POST['crevento_wsdl']);
 		}
 		
-		if ($_POST['crevento_ws_send_emails_to_users'] != null) {
-			$settings->set('crevento_ws_send_emails_to_users', $_POST['crevento_ws_send_emails_to_users']);
-		}
-		
 		if ($_POST['crevento_pagesize'] != null) {
 			$settings->set('crevento_pagesize', $_POST['crevento_pagesize']);
 		}
@@ -311,7 +300,7 @@ class ilEventoImportImport extends ilCronJob {
 		}
 		
 		if ($_POST['crevento_max_retries'] != null) {
-			$settings->set('crevento_max_retries', $_POST['crevento_retries']);
+			$settings->set('crevento_max_retries', $_POST['crevento_max_retries']);
 		}
 		
 		
