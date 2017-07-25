@@ -21,6 +21,12 @@
 
 require_once './Services/Mail/classes/class.ilMailNotification.php';
 
+/**
+ * Class ilNotifyOnCronFailureResult
+ *
+ * @author Stephan Winiker <stephan.winiker@hslu.ch>
+ */
+
 class ilEventoImportMailNotification extends ilMailNotification {
 	private $settings;
 	private $oldLogin;

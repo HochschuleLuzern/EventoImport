@@ -1,4 +1,24 @@
 <?php
+/**
+ * Copyright (c) 2017 Hochschule Luzern
+ *
+ * This file is part of the NotifyOnCronFailure-Plugin for ILIAS.
+ 
+ * NotifyOnCronFailure-Plugin for ILIAS is free software: you can redistribute
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ 
+ * NotifyOnCronFailure-Plugin for ILIAS is distributed in the hope that
+ * it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ 
+ * You should have received a copy of the GNU General Public License
+ * along with NotifyOnCronFailure-Plugin for ILIAS.  If not,
+ * see <http://www.gnu.org/licenses/>.
+ */
+
 require_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImporter.php';
 require_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImporterIterator.php';
 require_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImportUsers.php';
@@ -7,20 +27,54 @@ require_once 'Services/AccessControl/classes/class.ilObjRole.php';
 require_once 'Services/Mail/classes/Address/Type/class.ilMailRoleAddressType.php';
 require_once 'Services/Object/classes/class.ilObject.php';
 
+/**
+ * Class ilNotifyOnCronFailureResult
+ * 
+ * Retrieves Events and Memberships from SOAP-Interface and imports them into ILIAS
+ *
+ * @author Stephan Winiker <stephan.winiker@hslu.ch>
+ */
+
 class ilEventoImportImportMemberships {
+	/**
+	 * @var ilEventoImportImportMembership Instance of itself
+	 */
 	private static $instance;
 	
+	/**
+	 * @var ilEventoImporter Instance of the Importer
+	 */
 	private $evento_importer;
+	/**
+	 * @var ilEventoImportLogger Instance of the Logger
+	 */
 	private $evento_logger;
 	
+	/**
+	 * @var ilDB Instance of the ILIAS Database
+	 */
 	private $ilDB;
+	
+	/**
+	 * @var rbacreview Instance of the Access Controller
+	 */
 	private $rbacreview;
+	
+	/**
+	 * @var rbacadmin Instance of the Access Administrator
+	 */
 	private $rbacadmin;
 	
+	/**
+	 * Different caches to avoid to much database traffic
+	 */
 	private $roleToObjectCache = array();
 	private $parentRolesCache = array();
 	private $localRoleCache = array();
 	
+	/**
+	 * Constructor
+	 */
 	private function __construct() {
 		$this->evento_importer = ilEventoImporter::getInstance();
 		$this->evento_logger = ilEventoImportLogger::getInstance();
@@ -31,6 +85,9 @@ class ilEventoImportImportMemberships {
 		$this->rbacadmin = $DIC['rbacadmin'];
 	}
 	
+	/**
+	 * Runs the cron job
+	 */
 	static function run() {
 		if (! isset(self::$instance)) {
 			self::$instance = new self();
@@ -41,21 +98,16 @@ class ilEventoImportImportMemberships {
 	}
 	
 	/**
-	 * Imports events from evento and optionally assigns users to the corresponding
+	 * Retrieves events from evento and assigns users to the corresponding
 	 * groups and courses in ILIAS.
 	 *
-	 * param $aFile the filename into which to write log data
-	 * param $aRequest the name of the Soap-Request for Evento
-	 * param $aDataset the name of the dataset object returned by Evento.
-	 * param $aTitle the title used on the log data
-	 *
-	 * Returns false on failure, returns the number of events in case of success.
+	 * @param string Type of event to retrieve, GetModulAnlaesse for Bachelor, GetHauptAnlasse for Master Events
 	 */
 	private function updateEvents($operation) {
 		$iterator = new ilEventoImporterIterator;
 		while (!($result = &$this->evento_importer->getRecords($operation, 'Anlaesse', $iterator))['finished']) {
 			foreach ($result['data'] as $row) {
-				if (preg_match('/^(HSLU|DK|SA|M|TA|W)(\\.[A-Z0-9]([A-Za-z0-9\\-+_&]*[A-Za-z0-9])?){2,}$/', $row['AnlassBezKurz'])) {
+				if (preg_match('/^(HSLU|DK|SA|M|TA|W|I)(\\.[A-Z0-9]([A-Za-z0-9\\-+_&]*[A-Za-z0-9])?){2,}$/', $row['AnlassBezKurz'])) {
 					$searchName = '#member@['.$row['AnlassBezKurz'].']';
 					$roleIds = ilMailRoleAddressType::searchRolesByMailboxAddressList($searchName);
 					
@@ -119,7 +171,12 @@ class ilEventoImportImportMemberships {
 	}
 	
 	/**
-	 * Returns the number of rows.
+	 * Assigns the users to the corresponding role in ILIAS
+	 * 
+	 * @param string $operation
+	 * @param string $object_id
+	 * @param string $role_id
+	 * @return array Contains ids of all subscribed users
 	 */
 	private function importEventSubscriptions($operation, $object_id, $role_id) {
 		$subscribedUsers = [];
@@ -146,6 +203,11 @@ class ilEventoImportImportMemberships {
 		return $subscribedUsers;
 	}
 	
+	/**
+	 * Updates the description in ILIAS if it is empty
+	 * 
+	 * @param array $data Contains data describing the event
+	 */
 	private function updateObjectDescription($data) {
 		$description = $this->toFormattedAnlassBezLang($data['AnlassBezLang']);
 		if (strlen($description) == 0) {
@@ -174,6 +236,8 @@ class ilEventoImportImportMemberships {
 	
 	/**
 	 * Assigns a user to a role and to all parent roles.
+	 * @param string $user_id
+	 * @param string $role_id
 	 */
 	private function assignToRoleWithParents($user_id, $role_id) {
 		$this->assignToRole($user_id, $role_id);
@@ -187,6 +251,9 @@ class ilEventoImportImportMemberships {
 	
 	/**
 	 * Assigns a user to a role.
+	 * 
+	 * @param string $user_id
+	 * @param string $role_id
 	 */
 	private function assignToRole($user_id, $role_id) {
 		// If it is a course role, use the ilCourseMember object to assign
@@ -225,6 +292,13 @@ class ilEventoImportImportMemberships {
 		}
 	}
 	
+	/**
+	 * Remove all users that where removed from an event in Evento from the corresponding role in ILIAS and all parent roles.
+	 *
+	 * @param string $user_ids All users subscribed to an event
+	 * @param string $role_id Role id of the event
+	 * @param string $ref_id Reference id of the corresponding ILIAS course or group
+	 */
 	private function removeFromRoleWithParents($user_ids, $role_id, $ref_id) {
 		$user_ids = $this->getDeletedUsersInRole($role_id, $user_ids);
 		if ($user_ids !== false) {
@@ -247,13 +321,14 @@ class ilEventoImportImportMemberships {
 	}
 	
 	/**
-	 * Assigns a user to a role.
+	 * Removes a user from a role, the subtree underneath the object is checked for other existing role assingments of the user that are comming from evento
+	 * 
+	 * @param string $user_id
+	 * @param string $role_id
+	 * @param string $ref_id
+	 * @param boolean $check_subtree
 	 */
 	private function removeFromRole($user_id, $role_id, $ref_id, $check_subtree) {
-	
-		// If it is a course role, use the ilCourseMember object to assign
-		// the user to the role
-		
 		if ((!$check_subtree || ($check_subtree && !$this->userHasEventoRoleInSubtree($user_id , $ref_id))) && ($deass_success = $this->rbacadmin->deassignUser($role_id, $user_id))) {
 			if (in_array($role_id,$this->roleToObjectCache)) {
 				$obj_id = $this->roleToObjectCache[$role_id];
@@ -285,6 +360,9 @@ class ilEventoImportImportMemberships {
 	/**
 	 * Get array of parent role ids from cache.
 	 * If necessary, create a new cache entry.
+	 * 
+	 * @param string $role_id
+	 * @return array
 	 */
 	private function getParentRoleIds($role_id)	{
 		if (! array_key_exists($role_id, $this->parentRolesCache)) {
@@ -329,6 +407,9 @@ class ilEventoImportImportMemberships {
 	
 	/**
 	 * Returns the parent object of the role folder object which contains the specified role.
+	 * 
+	 * @param string $role_id
+	 * @return ilObjRole
 	 */
 	private function getRoleObject($role_id) {
 		if (array_key_exists($role_id, $this->localRoleCache)) {

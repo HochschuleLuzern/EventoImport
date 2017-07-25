@@ -31,19 +31,31 @@ require_once './Services/Administration/classes/class.ilSetting.php';
 
 class ilEventoImportImport extends ilCronJob {
 	
+	/**
+	 * @var string The ID of the cron job
+	 */
 	const ID = "crevento_import";
 	
 	private $cp;
-
+	
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 		$this->cp = new ilEventoImportPlugin();
 	}
 	
+	/**
+	 * Retrieve the ID of the cron job
+	 * @return string
+	 */
 	public function getId() {
 		return self::ID;
 	}
 	
 	/**
+	 * Cron job will not be activated on Plugin activation
+	 * 
 	 * @return bool
 	 */
 	public function hasAutoActivation() {
@@ -51,6 +63,8 @@ class ilEventoImportImport extends ilCronJob {
 	}
 	
 	/**
+	 * Cron job schedule can be set in the interface
+	 * 
 	 * @return bool
 	 */
 	public function hasFlexibleSchedule() {
@@ -58,6 +72,8 @@ class ilEventoImportImport extends ilCronJob {
 	}
 	
 	/**
+	 * Cron job schedule is set to daily by default
+	 * 
 	 * @return int
 	 */
 	public function getDefaultScheduleType() {
@@ -65,7 +81,9 @@ class ilEventoImportImport extends ilCronJob {
 	}
 	
 	/**
-	 * @return array|inttitle
+	 * Defines the interval between cron job runs in SCHEDULE_TYPE
+	 * 
+	 * @return array|int
 	 */
 	public function getDefaultScheduleValue() {
 		return 1;
@@ -92,7 +110,8 @@ class ilEventoImportImport extends ilCronJob {
 	}
 	
 	/**
-	 * Defines whether or not a cron job can be started manually
+	 * Cron job can be started manually
+	 * 
 	 * @return bool
 	 */
 	public function isManuallyExecutable()
@@ -100,6 +119,11 @@ class ilEventoImportImport extends ilCronJob {
 		return true;
 	}
 	
+	/**
+	 * Cron job has custom settings in the cron job admin section
+	 * 
+	 * @return boolean
+	 */
 	public function hasCustomSettings()
 	{
 		return true;
@@ -121,6 +145,11 @@ class ilEventoImportImport extends ilCronJob {
 		}	
 	}
 	
+	/**
+	 * Defines the custom settings form and returns it to plugin slot
+	 * 
+	 * @param ilPropertyFormGUI $a_form
+	 */
 	public function addCustomSettingsToForm(ilPropertyFormGUI $a_form)
 	{
 		$settings = new ilSetting("crevento");
@@ -263,6 +292,12 @@ class ilEventoImportImport extends ilCronJob {
 		$a_form->addItem($ws_item);
 	}
 	
+	/**
+	 * Saves the custom settings values
+	 * 
+	 * @param ilPropertyFormGUI $a_form
+	 * @return boolean
+	 */
 	public function saveCustomSettings(ilPropertyFormGUI $a_form)
 	{
 		$settings = new ilSetting("crevento");

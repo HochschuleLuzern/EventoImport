@@ -1,5 +1,31 @@
 <?php
+/**
+ * Copyright (c) 2017 Hochschule Luzern
+ *
+ * This file is part of the NotifyOnCronFailure-Plugin for ILIAS.
+ 
+ * NotifyOnCronFailure-Plugin for ILIAS is free software: you can redistribute
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ 
+ * NotifyOnCronFailure-Plugin for ILIAS is distributed in the hope that
+ * it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ 
+ * You should have received a copy of the GNU General Public License
+ * along with NotifyOnCronFailure-Plugin for ILIAS.  If not,
+ * see <http://www.gnu.org/licenses/>.
+ */
+
 require_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportLogger.php';
+
+/**
+ * Class ilNotifyOnCronFailureResult
+ *
+ * @author Stephan Winiker <stephan.winiker@hslu.ch>
+ */
 
 class ilEventoImporter {
 	protected static $instance;
@@ -56,6 +82,10 @@ class ilEventoImporter {
 	
 	}
 	
+	/**
+	 * Provides an instance of the importer
+	 * @return ilEventoImporter
+	 */
 	public static function getInstance() {
 		if (! isset(self::$instance)) {
 			self::$instance = new self();
@@ -64,6 +94,10 @@ class ilEventoImporter {
 		return self::$instance;
 	}
 	
+	/**
+	 * Retrieves a login token from the SOAP-Interface
+	 * @throws Exception
+	 */
 	private function login() {
 		do {
 			$result = $this->soap_client->call('Login', array('parameters' => array('username'=>$this -> ws_user, 'password' => $this->ws_password)));
@@ -88,6 +122,12 @@ class ilEventoImporter {
 		}
 	}
 	
+	/**
+	 * Retrieves a single record from the SOAP-interface
+	 * @param string $operation
+	 * @param array $params
+	 * @return array or false
+	 */
 	public function getRecord($operation, $params) {
 		try {
 			$return = &$this->callWebService($operation, $params);
@@ -99,6 +139,14 @@ class ilEventoImporter {
 		}
 	}
 	
+	/**
+	 * Retrieves multiple records from the SOAP-Interface
+	 * @param string $operation
+	 * @param string $dataset
+	 * @param ilEventoImporterIterator $iterator
+	 * @param array $params
+	 * @return array with the records containing if no further records can be retrieved $return['is_last'] is set to true, if no records could be retrieved $return['finished'] is set to true.
+	 */
 	public function getRecords($operation, $dataset, &$iterator, $params = array()) {
 		try {
 			if ($this->max_pages == -1 || $iterator->getPage() <= $this->max_pages) {
@@ -140,6 +188,12 @@ class ilEventoImporter {
 		}
 	}
 	
+	/**
+	 * Triggers an action on the SOAP-Interface
+	 * @param string $operation
+	 * @param array $params
+	 * @return boolean true on success, false on failure
+	 */
 	public function trigger($operation, $params = array()) {
 		try {
 			$result = &$this->callWebService($operation, $params);
@@ -152,6 +206,12 @@ class ilEventoImporter {
 		}
 	}
 	
+	/**
+	 * Calls the SOAP-Interface
+	 * @param string $operation
+	 * @param array $params
+	 * @return array or false
+	 */
 	private function callWebservice($operation, $params) {
 		$i = 1;
 		do {

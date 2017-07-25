@@ -39,7 +39,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
 	protected static $instance;
 	
 	/**
-	 * @return ilNotifyOnCronFailurePlugin
+	 * @return ilEventoImportPlugin
 	 */
 	public static function getInstance() {
 		if (! isset(self::$instance)) {
@@ -59,7 +59,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
 	protected static $cron_job_instances;
 	
 	/**
-	 * @return  ilNotifyOnCronFailureJobInstances[]
+	 * @return  ilEventoImportJobInstances[]
 	 */
 	public function getCronJobInstances() {
 		$this->loadCronJobInstance();
@@ -68,7 +68,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
 	}
 	
 	/**
-	 * @return  ilNotifyOnCronFailureJobInstance or false on failure
+	 * @return  ilEventoImportJobInstance or false on failure
 	 */
 	public function getCronJobInstance($a_job_id) {
 		$this->loadCronJobInstance();		
