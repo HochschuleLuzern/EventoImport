@@ -473,9 +473,16 @@ class ilEventoImportImportUsers {
 	private function renameAndDeactivateUser($data) {
 		$userObj = new ilObjUser($data['user_id']);
 		$userObj->read();
+		
+		$data['Login'] = date('Ymd').'_'.$userObj->getLogin();
+		$data['FirstName'] = $userObj->getFirstname();
+		$data['LastName'] = $userObj->getLastname();
+		$data['Gender'] = $userObj->getGender();
+		$data['Matriculation'] = $userObj->getMatriculation();
+		
 		$userObj->setActive(false);
 		$userObj->update();
-		$userObj->setLogin(date('Ymd').'_'.$userObj->getLogin());
+		$userObj->setLogin($data['Login']);
 		$userObj->updateLogin($userObj->getLogin());
 		$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_RENAMED, $data);
 	}
