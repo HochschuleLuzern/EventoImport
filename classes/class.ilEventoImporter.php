@@ -220,11 +220,12 @@ class ilEventoImporter {
 			$result = &$this->soap_client->call($operation, $params);
 
 			if ($this->soap_client->getError()) {
-			    if (strpos($this->soap_client->getError(),'Token:') !== false) {
+			    if (strpos($this->soap_client->getError(),'Token') !== false) {
 					// Session timed out. Clear token, wait and then retry
 					$this->token = null;
 					sleep($this->seconds_before_retry);
 					$this->login();
+					$result = false;
 				} else {
 					sleep($this->seconds_before_retry);
 					$result = false;

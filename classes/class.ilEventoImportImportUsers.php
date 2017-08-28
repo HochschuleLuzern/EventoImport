@@ -160,16 +160,16 @@ class ilEventoImportImportUsers {
 	 * two years since their creation.
 	 */
 	private function setUserTimeLimits() {
-		//jeder user hat mind. 90 tage zugriff (fix shibboleth)
+		//all users have at least 90 days of access (needed for Shibboleth)
 		$q="UPDATE `usr_data` SET time_limit_until=time_limit_until+7889229 WHERE DATEDIFF(FROM_UNIXTIME(time_limit_until),create_date)<90";
 		$r = $this->ilDB->manipulate($q);
 		
 		if ($this->until != 0) {
-			//keine unlimited user
+			//no unlimited users
 			$q = "UPDATE usr_data set time_limit_unlimited=0 WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous')";
 			$r = $this->ilDB->manipulate($q);
 			
-			//alle user reset auf max 2 jahre lang zugriff (heute +2jahre)
+			//all users are constraint to a value defined in the configuration
 			$q = "UPDATE usr_data set time_limit_until='".$this->until."' WHERE time_limit_until>'".$this->until."'";
 			$this->ilDB->manipulate($q);
 		}

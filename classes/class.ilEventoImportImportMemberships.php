@@ -71,6 +71,7 @@ class ilEventoImportImportMemberships {
 	private $roleToObjectCache = array();
 	private $parentRolesCache = array();
 	private $localRoleCache = array();
+	private $eventoRolesInSubtreeCache = array();
 	
 	/**
 	 * Constructor
@@ -305,12 +306,10 @@ class ilEventoImportImportMemberships {
 			$parent_role_ids = $this->getParentRoleIds($role_id);
 			
 			foreach ($user_ids as $user_id) {
-				$this->removeFromRole($user_id, $role_id, $ref_id, false);
+				$this->removeFromRole($user_id, $role_id, false);
 			
 				foreach ($parent_role_ids as $parent_role_id) {
-					if (($parent_ref_id = $this->rbacreview->getFoldersAssignedToRole($parent_role_id, true)) > 0) {
-						$this->removeFromRole($user_id, $parent_role_id, $parent_ref_id, true);
-					}	
+					$this->removeFromRole($user_id, $parent_role_id, true);
 				}
 			}		
 		} else {
@@ -328,19 +327,22 @@ class ilEventoImportImportMemberships {
 	 * @param string $ref_id
 	 * @param boolean $check_subtree
 	 */
-	private function removeFromRole($user_id, $role_id, $ref_id, $check_subtree) {
-		if ((!$check_subtree || ($check_subtree && !$this->userHasEventoRoleInSubtree($user_id , $ref_id))) && ($deass_success = $this->rbacadmin->deassignUser($role_id, $user_id))) {
-			if (in_array($role_id,$this->roleToObjectCache)) {
-				$obj_id = $this->roleToObjectCache[$role_id];
-			} else {
-				$obj_id = $this->rbacreview->getObjectOfRole($role_id);
-				$this->roleToObjectCache[$role_id]=$obj_id;
-			}
+	private function removeFromRole($user_id, $role_id, $check_subtree) {
+	    if (in_array($role_id,$this->roleToObjectCache)) {
+	        $obj_id = $this->roleToObjectCache[$role_id];
+	    } else {
+	        $obj_id = $this->rbacreview->getObjectOfRole($role_id);
+	        $this->roleToObjectCache[$role_id]=$obj_id;
+	    }
+	    $ref_ids = ilObject::_getAllReferences($obj_id);
+	    $ref_id = current((array) $ref_ids);
+	    
+	    $deass_success = true;
+	    
+	    if ((!$check_subtree || !$ref_id || ($check_subtree && !$this->userHasEventoRoleInSubtree($user_id , $ref_id))) && ($deass_success = $this->rbacadmin->deassignUser($role_id, $user_id))) {
 			switch($type = ilObject::_lookupType($obj_id)) {
 				case 'grp':
 				case 'crs':
-					$ref_ids = ilObject::_getAllReferences($obj_id);
-					$ref_id = current((array) $ref_ids);
 					if($ref_id)
 					{
 						ilObjUser::_dropDesktopItem($user_id, $ref_id, $type);
@@ -439,16 +441,24 @@ class ilEventoImportImportMemberships {
 	}
 	
 	private function userHasEventoRoleInSubtree($user_id, $ref_id) {
-		$roles = $this->rbacreview->getAssignableRolesInSubtree($ref_id);
-		
-		foreach ($roles as $role) {
-			$r = $this->ilDB->query("SELECT * FROM crnhk_crevento_mas WHERE role_id = '$role'");
-			if ($this->ilDB->fetchAll($r) > 0) {
-				$evento_roles[] = $role;
-			}
-		}
-		
-		return $this->rbacreview->isAssignedToAtLeastOneGivenRole($user_id, $evento_roles);
+	    if (!array_key_exists($ref_id, $this->eventoRolesInSubtreeCache)) {
+	        $roles = $this->rbacreview->getAssignableRolesInSubtree($ref_id);
+	        
+	        $this->eventoRolesInSubtreeCache[$ref_id] = [];
+	        
+	        foreach ($roles as $role) {
+	            $r = $this->ilDB->query("SELECT * FROM crnhk_crevento_mas WHERE role_id = '$role'");
+	            if ($this->ilDB->fetchAssoc($r)) {
+	                $this->eventoRolesInSubtreeCache[$ref_id][] = $role;
+	            }
+	        } 
+	    } 		
+	
+	    if (empty($this->eventoRolesInSubtreeCache[$ref_id])) {
+	        return false;
+	    } else {
+    	    return $this->rbacreview->isAssignedToAtLeastOneGivenRole($user_id, $this->eventoRolesInSubtreeCache[$ref_id]);
+	    }
 	}
 	
 	/**
