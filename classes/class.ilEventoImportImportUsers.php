@@ -138,7 +138,7 @@ class ilEventoImportImportUsers {
 					$login=$row['login'];
 					$result = $this->evento_importer->getRecord('ExistsHSLUDomainUser',array('parameters'=>array('login'=>$login,'evtid'=>$eventoid)));
 					
-					if(is_array($result) && $result['ExistsHSLUDomainUserResult']=='false'){
+					if($result->{ExistsHSLUDomainUserResult}===false){
 						//user nicht mehr aktiv in ldap
 						if ($deactivate) {
 							$sql="UPDATE usr_data SET auth_mode='default', time_limit_until=UNIX_TIMESTAMP() WHERE matriculation LIKE '".$row['matriculation']."'";
