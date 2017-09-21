@@ -43,13 +43,14 @@ class ilEventoImportImportUsers {
 	
 	private $now;
 	private $until;
+	private $until_max;
 	
 	private $auth_mode;
 	private $usr_role_id;
 	
 	private function __construct() {
 		$this->evento_importer = ilEventoImporter::getInstance();
-		$this->evento_logger = ilEventoImportLogger::getInstance();
+        $this->evento_logger = ilEventoImportLogger::getInstance();
 		
 		global $DIC;
 		$this->ilDB = $DIC['ilDB'];
@@ -63,11 +64,14 @@ class ilEventoImportImportUsers {
 
 		$this->now = time();
 		
-		if ($settings->get('crevento_account_duration') != 0 ) {
-			$this->until = mktime(date('H'), date('i'), date('s'), date('n') + ($settings->get('crevento_account_duration')% 12), date('j'), date('Y')+ (intdiv($settings->get('crevento_account_duration'), 12)));
-		} else {
-			$this->until = 0;
+		foreach (["", "_max"] as $duration) {
+    		if ($settings->get('crevento'.$duration.'_account_duration') != 0 ) {
+    		    $this->{until.$duration} = mktime(date('H'), date('i'), date('s'), date('n') + ($settings->get('crevento'.$duration.'_account_duration')% 12), date('j'), date('Y')+ (intdiv($settings->get('crevento'.$duration.'_account_duration'), 12)));
+    		} else {
+    			$this->{until.$duration} = 0;
+    		}
 		}
+
 		$this->auth_mode = $settings->get("crevento_ilias_auth_mode");
 		$this->usr_role_id = $settings->get("crevento_standard_user_role_id");
 	}
@@ -170,7 +174,7 @@ class ilEventoImportImportUsers {
 			$r = $this->ilDB->manipulate($q);
 			
 			//all users are constraint to a value defined in the configuration
-			$q = "UPDATE usr_data set time_limit_until='".$this->until."' WHERE time_limit_until>'".$this->until."'";
+			$q = "UPDATE usr_data set time_limit_until='".$this->until_max."' WHERE time_limit_until>'".$this->until_max."'";
 			$this->ilDB->manipulate($q);
 		}
 	}

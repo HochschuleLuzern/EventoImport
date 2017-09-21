@@ -187,6 +187,18 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->setValue($settings->get('crevento_account_duration', '0'));
 		$a_form->addItem($ws_item);
 		
+		include_once 'Services/Form/classes/class.ilNumberInputGUI.php';
+		$ws_item = new ilNumberInputGUI(
+		    $this->cp->txt('max_account_duration'),
+		    'crevento_max_account_duration'
+		    );
+		$ws_item->setInfo($this->cp->txt('max_account_duration_desc'));
+		$ws_item->allowDecimals(false);
+		$ws_item->setMinValue(0);
+		$ws_item->setRequired(true);
+		$ws_item->setValue($settings->get('crevento_max_account_duration', '0'));
+		$a_form->addItem($ws_item);
+		
 		$ws_item = new ilNumberInputGUI(
 				$this->cp->txt('standard_user_role_id'),
 				'crevento_standard_user_role_id'
@@ -308,6 +320,10 @@ class ilEventoImportImport extends ilCronJob {
 		
 		if ($_POST['crevento_account_duration'] != null) {
 			$settings->set('crevento_account_duration', $_POST['crevento_account_duration']);
+		}
+		
+		if ($_POST['crevento_max_account_duration'] != null) {
+		    $settings->set('crevento_max_account_duration', $_POST['crevento_max_account_duration']);
 		}
 		
 		if ($_POST['crevento_standard_user_role_id'] != null) {

@@ -23,7 +23,7 @@
 	$id = 'crevento';
 	
 	// Version Information of Plugin & compatible versions of ILIAS
-	$version = '0.1';
+	$version = '0.9';
 	$ilias_min_version = '5.2.0';
 	$ilias_max_version = '5.2.999';
 	

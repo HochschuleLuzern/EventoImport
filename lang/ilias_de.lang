@@ -26,7 +26,9 @@ email_account_changed_subject#:#Betreff
 email_account_changed_subject_desc#:#Bitte hier den Betreff für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wird.
 email_account_changed_body#:#Text
 email_account_changed_body_desc#:#Bitte hier den Text für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wir (ohne Anrede). Die Platzhalter [oldlogin], [newlogin] und [email] werden durch die entsprechenden Angaben des Benutzers ersetzt.
-account_duration#:#Gültigkeit Account
-account_duration_desc#:#Maximale Gültigkeitsdauer für einen Account in Monaten. Werden unlimitierte Accounts oder Accounts mit längerer Gültigkeit erstellt, werden sie auf diese Dauer beschränkt. 0 bedeutet, dass es keine Einschränkungen gibt.
+account_duration#:#Gültigkeit von importierten Account
+account_duration_desc#:#Vom Importer erstellte Accounts erhalten diese Gültigkeitsdauer (in Monaten).
+max_account_duration#:#Maximale gültigkeit von Accounts
+max_account_duration_desc#:#Maximale Gültigkeitsdauer für einen Account in Monaten. Werden unlimitierte Accounts oder Accounts mit längerer Gültigkeit erstellt, werden sie auf diese Dauer beschränkt. 0 bedeutet, dass es keine Einschränkungen gibt.
 standard_user_role_id#:#Standard Benutzerrolle
 standard_user_role_id_desc#:#ID der standard Benutzerrolle, die allen Nutzern zugeteilt werden soll.

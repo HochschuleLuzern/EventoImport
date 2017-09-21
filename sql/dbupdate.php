@@ -1,3 +1,4 @@
+<?php
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -17,9 +18,11 @@
  * along with NotifyOnCronFailure-Plugin for ILIAS.  If not,
  * see <http://www.gnu.org/licenses/>.
  */
+?>
 	 
 <#1>
 
+<?php
 /**
  * We need three tables to track the imports:
  
@@ -34,7 +37,6 @@
  
  * The update_info_code is defined in hte class ilEventoImportLogger
  */
-<?php
 	if(!$ilDB->tableExists('crnhk_crevento_usrs')) {
 		$fields = array(
 			'evento_id' => array(

@@ -26,7 +26,9 @@ mail_account_changed_subject#:#Subject
 email_account_changed_subject_desc#:#Please enter a subject-line for the e-mail sent out to users who's login-name needed to be changed.
 email_account_changed_body#:#Text
 email_account_changed_body_desc#:#Please enter a text for the e-mail sent out to users who's login-name needed to be changed (without salutation). The following tags will be replaced by the corresponding user-information: [oldlogin], [newlogin] and [email].
-account_duration#:#Account Validity
-account_duration_desc#:#Max validity of accounts in months. If accounts with unlimited or longer validity are created, they are reduced to this duration. 0 means unlimited duration.
+account_duration#:#Validity of imported Accounts
+account_duration_desc#:#Accounts created by this cron job have this validity (in months).
+max_account_duration#:#Maximal Account Validity
+max_account_duration_desc#:#Max validity of accounts in months. If accounts with unlimited or longer validity are created, they are reduced to this duration. 0 means unlimited duration.
 standard_user_role_id#:#Default User Role
 standard_user_role_id_desc#:#ID of the default user role assigned to all users.

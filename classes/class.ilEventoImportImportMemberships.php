@@ -155,7 +155,7 @@ class ilEventoImportImportMemberships {
 						
 						$row['obj_id'] = $this->rbacreview->getObjectOfRole($roleIds[0]);
 						$this->updateObjectDescription($row);
-					} else if (count($roleIds == 0)) {
+					} else if (count($roleIds) == 0) {
 						$this->evento_logger->log(ilEventoImportLogger::CREVENTO_MA_NOTICE_MISSING_IN_ILIAS, $row);
 					} else {
 						$this->evento_logger->log(ilEventoImportLogger::CREVENTO_MA_NOTICE_DUPLICATE_IN_ILIAS, $row);
