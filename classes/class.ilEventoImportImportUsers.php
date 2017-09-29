@@ -168,9 +168,9 @@ class ilEventoImportImportUsers {
 		$q="UPDATE `usr_data` SET time_limit_until=time_limit_until+7889229 WHERE DATEDIFF(FROM_UNIXTIME(time_limit_until),create_date)<90";
 		$r = $this->ilDB->manipulate($q);
 		
-		if ($this->until != 0) {
+		if ($this->until_max != 0) {
 			//no unlimited users
-			$q = "UPDATE usr_data set time_limit_unlimited=0 WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous')";
+			$q = "UPDATE usr_data set time_limit_unlimited=0, time_limit_until='".$this->until_max."' WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous')";
 			$r = $this->ilDB->manipulate($q);
 			
 			//all users are constraint to a value defined in the configuration
