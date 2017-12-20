@@ -35,6 +35,9 @@ class ilEventoImportSOAPClient extends ilSoapClient {
 	public function __construct($a_uri = '') {
 		$this->uri = $a_uri;
 		parent::__construct($a_uri);
+		
+        $this->getTimeout(60);
+        $this->getResponseTimeout(60);
 	}
 	
 	public function getError() {
@@ -74,7 +77,7 @@ class ilEventoImportSOAPClient extends ilSoapClient {
 	 */
 	public function call($a_operation, $a_params)
 	{
-		$this->setSocketTimeout(false);
+		$this->setSocketTimeout(true);
 		try {
 			$this->error_message = null;
 			$return = $this->client->__call($a_operation, $a_params);

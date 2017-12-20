@@ -237,7 +237,7 @@ class ilEventoImporter {
 				return $result;
 			}
 			
-			$this->evento_logger->logException($operation, "We didn't get an answer on the $i try. The error was: {$this->soap_client->getError()}");
+			$this->evento_logger->logException($operation, "We didn't get an answer on the $i try. The error was: {$this->soap_client->getError()}..The connect-Timeout was {$this->soap_client->getTimeout()} and the response-Timeout was {$this->soap_client->getResponseTimeout()}.");
 			$i++;
 
 		} while ($i <= $this->max_retries);
