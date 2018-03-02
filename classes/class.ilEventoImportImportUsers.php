@@ -427,6 +427,9 @@ class ilEventoImportImportUsers {
 	
 		$userObj->setActive(true);
 		
+		// Reset login attempts over night -> needed since login attempts are limited to 8
+		$userObj->setLoginAttempts(0);
+		
 		if ($this->until == 0) {
 			$userObj->setTimeLimitUnlimited(true);
 		} else {
