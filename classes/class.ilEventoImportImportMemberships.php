@@ -130,7 +130,7 @@ class ilEventoImportImportMemberships {
 						$row['subscribed_users'] = $this->importEventSubscriptions('GetAnmeldungenByAnlassID', $row['AnlassID'], $row['role_id']);
 						
 						if (count($row['subscribed_users']) > 0) {
-							$row['number_of_subs'] = count($row['subscribedUsers']);
+							$row['number_of_subs'] = count($row['subscribed_users']);
 							
 							if ($first_import) {
 								$message = ilEventoImportLogger::CREVENTO_MA_FIRST_IMPORT;
