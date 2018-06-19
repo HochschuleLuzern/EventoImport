@@ -2,33 +2,30 @@
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
- * This file is part of the NotifyOnCronFailure-Plugin for ILIAS.
+ * This file is part of the EventoImport-Plugin for ILIAS.
  
- * NotifyOnCronFailure-Plugin for ILIAS is free software: you can redistribute
+ * EventoImport-Plugin for ILIAS is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  
- * NotifyOnCronFailure-Plugin for ILIAS is distributed in the hope that
+ * EventoImport-Plugin for ILIAS is distributed in the hope that
  * it will be useful, but WITHOUT ANY WARRANTY; without even the implied
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  
  * You should have received a copy of the GNU General Public License
- * along with NotifyOnCronFailure-Plugin for ILIAS.  If not,
+ * along with EventoImport-Plugin for ILIAS.  If not,
  * see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImporter.php';
-require_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImporterIterator.php';
-require_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImportUsers.php';
-require_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportLogger.php';
-require_once 'Services/AccessControl/classes/class.ilObjRole.php';
-require_once 'Services/Mail/classes/Address/Type/class.ilMailRoleAddressType.php';
-require_once 'Services/Object/classes/class.ilObject.php';
+require_once 'class.ilEventoImporter.php';
+require_once 'class.ilEventoImporterIterator.php';
+require_once 'class.ilEventoImportImportUsers.php';
+require_once 'class.ilEventoImportLogger.php';
 
 /**
- * Class ilNotifyOnCronFailureResult
+ * Class ilEventoImportImportMemberships
  * 
  * Retrieves Events and Memberships from SOAP-Interface and imports them into ILIAS
  *

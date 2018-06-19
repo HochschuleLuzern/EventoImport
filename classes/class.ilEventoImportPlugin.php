@@ -19,8 +19,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-require_once "./Services/Cron/classes/class.ilCronHookPlugin.php";
-require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImport.php';
+require_once 'class.ilEventoImportImport.php';
 
 /**
  * Class ilEventoImportPlugin

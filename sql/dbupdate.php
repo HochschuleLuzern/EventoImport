@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with NotifyOnCronFailure-Plugin for ILIAS.  If not,
+ * along with EventoImport-Plugin for ILIAS.  If not,
  * see <http://www.gnu.org/licenses/>.
  */
 ?>
