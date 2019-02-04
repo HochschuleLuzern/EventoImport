@@ -306,7 +306,9 @@ class ilEventoImportImportMemberships {
 				$this->removeFromRole($user_id, $role_id, false);
 			
 				foreach ($parent_role_ids as $parent_role_id) {
-					$this->removeFromRole($user_id, $parent_role_id, true);
+					if ($this->isEventoSub($user_id, $parent_role_id)) {
+						$this->removeFromRole($user_id, $parent_role_id, true);
+					}
 				}
 			}		
 		} else {
@@ -336,7 +338,7 @@ class ilEventoImportImportMemberships {
 	    
 	    $deass_success = true;
 	    
-	    if ((!$check_subtree || !$ref_id || ($check_subtree && !$this->userHasEventoRoleInSubtree($user_id , $ref_id))) && ($deass_success = $this->rbacadmin->deassignUser($role_id, $user_id))) {
+	    if ((!$check_subtree || !$ref_id || ($check_subtree && !$this->getUserEventoRolesInSubtree($user_id , $ref_id))) && ($deass_success = $this->rbacadmin->deassignUser($role_id, $user_id))) {
 			switch($type = ilObject::_lookupType($obj_id)) {
 				case 'grp':
 				case 'crs':
@@ -347,6 +349,13 @@ class ilEventoImportImportMemberships {
 					break;
 				default:
 					break;
+			}
+			
+			if ($evento_roles = $this->getUserEventoRolesInSubtree($user_id , $ref_id)) {
+				foreach ($evento_roles as $evento_role) {
+					$this->removeFromRole($user_id, $evento_role);
+				}
+				
 			}
 			
 			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_SUB_REMOVED, array("usr_id" => $user_id, "role_id" => $role_id));
@@ -437,9 +446,18 @@ class ilEventoImportImportMemberships {
 		
 	}
 	
-	private function userHasEventoRoleInSubtree($user_id, $ref_id) {
-	    if (!array_key_exists($ref_id, $this->eventoRolesInSubtreeCache)) {
-	        $roles = $this->rbacreview->getAssignableRolesInSubtree($ref_id);
+	private function isEventoSub($user_id, $role_id) {
+		$r = $this->ilDB->query("SELECT * FROM crnhk_crevento_subs WHERE usr_id=%s AND role_id=%s AND update_info_code IN [%s, %s, %s]", array('integer', 'integer', 'integer', 'integer', 'integer'), array($user_id, $role_id, ilEventoImportLogger::CREVENTO_SUB_ADDED, ilEventoImportLogger::CREVENTO_SUB_CREATED, ilEventoImportLogger::CREVENTO_SUB_UPDATED));
+		if ($this->ilDB->fetchAssoc($r)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private function getUserEventoRolesInSubtree($user_id, $ref_id) {
+	    if (!array_key_exists($ref_id, $this->eventoRolesInSubtreeCache)) {	
+			$roles = $this->rbacreview->getAssignableRolesInSubtree($ref_id);
 	        
 	        $this->eventoRolesInSubtreeCache[$ref_id] = [];
 	        
@@ -454,7 +472,19 @@ class ilEventoImportImportMemberships {
 	    if (empty($this->eventoRolesInSubtreeCache[$ref_id])) {
 	        return false;
 	    } else {
-    	    return $this->rbacreview->isAssignedToAtLeastOneGivenRole($user_id, $this->eventoRolesInSubtreeCache[$ref_id]);
+	    	$evento_subs = [];
+	    	
+	    	foreach ($this->eventoRolesInSubtreeCache[$ref_id] as $role_id) {
+	    		if ($this->isEventoSub($user_id, $role_id)) {
+	    			$evento_subs[] = $role_id;
+	    		}
+	    	}
+	    	
+	    	if (empty($evento_subs)) {
+	    		return false;
+	    	} else {
+	    	    return $evento_subs;
+	    	}
 	    }
 	}
 	
