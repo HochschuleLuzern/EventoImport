@@ -223,9 +223,10 @@ class ilEventoImportImport extends ilCronJob {
 				'crevento_ws_password'
 			);
 		$ws_item->setInfo($this->cp->txt('ws_password_desc'));
+		$ws_item->setSkipSyntaxCheck(true);
 		$ws_item->setRequired(true);
 		$ws_item->setRetype(false);
-		$ws_item->setValue($settings->get('crevento_ws_password', ""));
+		$ws_item->setValue($settings->get('crevento_ws_password', '') == '' ? '' : '(__unchanged__)');
 		$a_form->addItem($ws_item);
 		
 		$ws_item = new ilTextInputGUI(
@@ -311,59 +312,58 @@ class ilEventoImportImport extends ilCronJob {
 	{
 		$settings = new ilSetting("crevento");
 		
-		if ($_POST['crevento_ilias_auth_mode'] != null) {
-			$settings->set('crevento_ilias_auth_mode', $_POST['crevento_ilias_auth_mode']);
+		if ($a_form->getInput('crevento_ilias_auth_mode') != null) {
+			$settings->set('crevento_ilias_auth_mode', $a_form->getInput('crevento_ilias_auth_mode'));
 		}
 		
-		if ($_POST['crevento_account_duration'] != null) {
-			$settings->set('crevento_account_duration', $_POST['crevento_account_duration']);
+		if ($a_form->getInput('crevento_account_duration') != null) {
+			$settings->set('crevento_account_duration', $a_form->getInput('crevento_account_duration'));
 		}
 		
-		if ($_POST['crevento_max_account_duration'] != null) {
-		    $settings->set('crevento_max_account_duration', $_POST['crevento_max_account_duration']);
+		if ($a_form->getInput('crevento_max_account_duration') != null) {
+			$settings->set('crevento_max_account_duration', $a_form->getInput('crevento_max_account_duration'));
 		}
 		
-		if ($_POST['crevento_standard_user_role_id'] != null) {
-			$settings->set('crevento_standard_user_role_id', $_POST['crevento_standard_user_role_id']);
+		if ($a_form->getInput('crevento_standard_user_role_id') != null) {
+			$settings->set('crevento_standard_user_role_id', $a_form->getInput('crevento_standard_user_role_id'));
 		}
 
-		if ($_POST['crevento_ws_user'] != null) {
-			$settings->set('crevento_ws_user', $_POST['crevento_ws_user']);
+		if ($a_form->getInput('crevento_ws_user') != null) {
+			$settings->set('crevento_ws_user', $a_form->getInput('crevento_ws_user'));
 		}
 		
-		if ($_POST['crevento_ws_password'] != null) {
-			$settings->set('crevento_ws_password', $_POST['crevento_ws_password']);
+		if ($a_form->getInput('crevento_ws_password') != null && $a_form->getInput('crevento_ws_password') != '(__unchanged__)') {
+			$settings->set('crevento_ws_password', $a_form->getInput('crevento_ws_password'));
 		}
 		
-		if ($_POST['crevento_wsdl'] != null) {
-			$settings->set('crevento_wsdl', $_POST['crevento_wsdl']);
+		if ($a_form->getInput('crevento_wsdl') != null) {
+			$settings->set('crevento_wsdl', $a_form->getInput('crevento_wsdl'));
 		}
 		
-		if ($_POST['crevento_pagesize'] != null) {
-			$settings->set('crevento_pagesize', $_POST['crevento_pagesize']);
+		if ($a_form->getInput('crevento_pagesize') != null) {
+			$settings->set('crevento_pagesize', $a_form->getInput('crevento_pagesize'));
 		}
 		
-		if ($_POST['crevento_max_pages'] != null) {
-			$settings->set('crevento_max_pages', $_POST['crevento_max_pages']);
+		if ($a_form->getInput('crevento_max_pages') != null) {
+			$settings->set('crevento_max_pages', $a_form->getInput('crevento_max_pages'));
 		}
 		
-		if ($_POST['crevento_max_retries'] != null) {
-			$settings->set('crevento_max_retries', $_POST['crevento_max_retries']);
+		if ($a_form->getInput('crevento_max_retries') != null) {
+			$settings->set('crevento_max_retries', $a_form->getInput('crevento_max_retries'));
 		}
 		
-		
-		if ($_POST['crevento_seconds_before_retry'] != null) {
-			$settings->set('crevento_seconds_before_retry', $_POST['crevento_seconds_before_retry']);
+		if ($a_form->getInput('crevento_seconds_before_retry') != null) {
+			$settings->set('crevento_seconds_before_retry', $a_form->getInput('crevento_seconds_before_retry'));
 		}
 		
-		if ($_POST['crevento_email_account_changed_subject'] != null) {
-			$settings->set('crevento_email_account_changed_subject', $_POST['crevento_email_account_changed_subject']);
+		if ($a_form->getInput('crevento_email_account_changed_subject') != null) {
+			$settings->set('crevento_email_account_changed_subject', $a_form->getInput('crevento_email_account_changed_subject'));
 		}
 		
-		if ($_POST['crevento_email_account_changed_body'] != null) {
-			$settings->set('crevento_email_account_changed_body', $_POST['crevento_email_account_changed_body']);
+		if ($a_form->getInput('crevento_email_account_changed_body') != null) {
+			$settings->set('crevento_email_account_changed_body', $a_form->getInput('crevento_email_account_changed_body'));
 		}
-	
+		
 		return true;
 	}
 }

@@ -447,7 +447,7 @@ class ilEventoImportImportMemberships {
 	}
 	
 	private function isEventoSub($user_id, $role_id) {
-		$r = $this->ilDB->query("SELECT * FROM crnhk_crevento_subs WHERE usr_id=%s AND role_id=%s AND update_info_code IN [%s, %s, %s]", array('integer', 'integer', 'integer', 'integer', 'integer'), array($user_id, $role_id, ilEventoImportLogger::CREVENTO_SUB_ADDED, ilEventoImportLogger::CREVENTO_SUB_CREATED, ilEventoImportLogger::CREVENTO_SUB_UPDATED));
+		$r = $this->ilDB->queryF("SELECT * FROM crnhk_crevento_subs WHERE usr_id=%s AND role_id=%s AND update_info_code IN (%s, %s, %s)", array('integer', 'integer', 'integer', 'integer', 'integer'), array($user_id, $role_id, ilEventoImportLogger::CREVENTO_SUB_ADDED, ilEventoImportLogger::CREVENTO_SUB_CREATED, ilEventoImportLogger::CREVENTO_SUB_UPDATED));
 		if ($this->ilDB->fetchAssoc($r)) {
 			return true;
 		} else {
