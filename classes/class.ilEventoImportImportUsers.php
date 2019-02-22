@@ -50,9 +50,9 @@ class ilEventoImportImportUsers {
         $this->evento_logger = ilEventoImportLogger::getInstance();
 		
 		global $DIC;
-		$this->ilDB = $DIC['ilDB'];
-		$this->rbacadmin = $DIC['rbacadmin'];
-		$this->rbacreview = $DIC['rbacreview'];
+		$this->ilDB = $DIC->database();
+		$this->rbacadmin = $DIC->rbac()->admin();
+		$this->rbacreview = $DIC->rbac()->review();
 		if (!ilContext::usesTemplate()) {
 			ilStyleDefinition::setCurrentStyle('Desktop');
 		}

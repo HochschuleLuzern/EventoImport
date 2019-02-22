@@ -78,9 +78,9 @@ class ilEventoImportImportMemberships {
 		$this->evento_logger = ilEventoImportLogger::getInstance();
 		
 		global $DIC;
-		$this->ilDB = $DIC['ilDB'];
-		$this->rbacreview = $DIC['rbacreview'];
-		$this->rbacadmin = $DIC['rbacadmin'];
+		$this->ilDB = $DIC->database();
+		$this->rbacreview = $DIC->rbac()->review();
+		$this->rbacadmin = $DIC->rbac()->admin();
 	}
 	
 	/**
@@ -114,7 +114,7 @@ class ilEventoImportImportMemberships {
 						
 						$r = $this->ilDB->query("SELECT * FROM crnhk_crevento_mas WHERE evento_id = '{$row['AnlassBezKurz']}'");
 						
-						if (count($mas = $this->ilDB->fetchAll($r)) == 0) {
+						if (count($this->ilDB->fetchAll($r)) == 0) {
 							$first_import = true;
 						}
 						
@@ -333,8 +333,7 @@ class ilEventoImportImportMemberships {
 	        $obj_id = $this->rbacreview->getObjectOfRole($role_id);
 	        $this->roleToObjectCache[$role_id]=$obj_id;
 	    }
-	    $ref_ids = ilObject::_getAllReferences($obj_id);
-	    $ref_id = current((array) $ref_ids);
+	    $ref_id = $this->rbacreview->getObjectReferenceOfRole($role_id);
 	    
 	    $deass_success = true;
 	    

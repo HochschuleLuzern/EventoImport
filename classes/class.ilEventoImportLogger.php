@@ -53,7 +53,7 @@ class ilEventoImportLogger {
 	
 	private function __construct() {
 		global $DIC;
-		$this->ilDB = $DIC['ilDB'];
+		$this->ilDB = $DIC->database();
 	}
 	
 	public static function getInstance() {
