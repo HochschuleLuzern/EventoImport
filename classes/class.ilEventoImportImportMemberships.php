@@ -352,7 +352,7 @@ class ilEventoImportImportMemberships {
 			
 			if ($evento_roles = $this->getUserEventoRolesInSubtree($user_id , $ref_id)) {
 				foreach ($evento_roles as $evento_role) {
-					$this->removeFromRole($user_id, $evento_role);
+					$this->removeFromRole($user_id, $evento_role, false);
 				}
 				
 			}
