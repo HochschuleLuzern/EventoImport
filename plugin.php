@@ -21,12 +21,12 @@
 
 	// Alphanumerical ID of the plugin; never change this
 	$id = 'crevento';
-	
+
 	// Version Information of Plugin & compatible versions of ILIAS
 	$version = '0.9';
 	$ilias_min_version = '5.3.0';
-	$ilias_max_version = '5.3.999';
-	
+	$ilias_max_version = '5.4.999';
+
 	// Please contact this person if you have questions
 	$responsible = 'Stephan Winiker';
 	$responsible_mail = 'stephan.winiker@hslu.ch';

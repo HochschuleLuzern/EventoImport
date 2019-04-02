@@ -48,6 +48,11 @@ class ilEventoImportImportMemberships {
 	private $evento_logger;
 	
 	/**
+	 * @var ilRoleMailboxSearch Instance of search to find Roles by mailbox names
+	 */
+	private $parser;
+	
+	/**
 	 * @var ilDB Instance of the ILIAS Database
 	 */
 	private $ilDB;
@@ -82,6 +87,8 @@ class ilEventoImportImportMemberships {
 		$this->ilDB = $DIC->database();
 		$this->rbacreview = $DIC->rbac()->review();
 		$this->rbacadmin = $DIC->rbac()->admin();
+		$mailAddressParserFactory = new ilMailRfc822AddressParserFactory();
+		$this->parser = new ilRoleMailboxSearch($mailAddressParserFactory);
 	}
 	
 	/**
@@ -108,7 +115,8 @@ class ilEventoImportImportMemberships {
 			foreach ($result['data'] as $row) {
 				if (preg_match('/^(HSLU|DK|SA|M|TA|W|I)(\\.[A-Z0-9]([A-Za-z0-9\\-+_&]*[A-Za-z0-9])?){2,}$/', $row['AnlassBezKurz'])) {
 					$searchName = '#member@['.$row['AnlassBezKurz'].']';
-					$roleIds = ilMailRoleAddressType::searchRolesByMailboxAddressList($searchName);
+					
+					$roleIds = $this->parser->searchRoleIdsByAddressString($searchName);
 					
 					if (count($roleIds) == 1) {
 						$row['role_id'] = $roleIds[0];
