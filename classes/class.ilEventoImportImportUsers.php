@@ -512,6 +512,7 @@ class ilEventoImportImportUsers {
 			$tmp_file = ilUtil::ilTempnam();
 			imagepng(imagecreatefromstring($picture_result->{GetPhotoResult}), $tmp_file, 0);
 			ilObjUser::_uploadPersonalPicture($tmp_file, $id);
+			unlink($tmp_file);
 		}
 	}
 	
