@@ -342,6 +342,7 @@ class ilEventoImportImportUsers {
 		$userObj->setLastname($data['LastName']);
 		$userObj->setGender(($data['Gender']=='F') ? 'f':'m');
 		$userObj->setEmail($data['Email']);
+		$userObj->setSecondEmail($data['Email']);
 		$userObj->setTitle($userObj->getFullname());
 		$userObj->setDescription($userObj->getEmail());
 		$userObj->setMatriculation('Evento:'.$data['EvtID']);
@@ -395,6 +396,7 @@ class ilEventoImportImportUsers {
 		if ($userObj->getFirstname() != $data['FirstName'] 
 				|| $userObj->getlastname() != $data['LastName']
 				|| $userObj->getGender() != strtolower($data['Gender'])
+		        || $userObj->getSecondEmail() != $data['Email']
 				|| $userObj->getMatriculation() != ('Evento:'.$data['EvtID'])
 				|| $userObj->getAuthMode() != $this->auth_mode
 				|| !$userObj->getActive()
@@ -404,6 +406,7 @@ class ilEventoImportImportUsers {
 			$data[old_data]['FirstName'] = $userObj->getFirstname();
 			$data[old_data]['LastName'] = $userObj->getLastname();
 			$data[old_data]['Gender'] = $userObj->getGender();
+			$data[old_data]['SecondEmail'] = $userObj->getSecondEmail();
 			$data[old_data]['Matriculation'] = $userObj->getMatriculation();
 			$data[old_data]['AuthMode'] = $userObj->getAuthMode();
 			$data[old_data]['Active'] = (string) $userObj->getActive();
@@ -412,7 +415,7 @@ class ilEventoImportImportUsers {
 		$userObj->setFirstname($data['FirstName']);	
 		$userObj->setLastname($data['LastName']);
 		$userObj->setGender(($data['Gender']=='F') ? 'f':'m');
-
+		$userObj->setSecondEmail($data['Email']);
 		
 		$userObj->setTitle($userObj->getFullname());
 		$userObj->setDescription($userObj->getEmail());
@@ -442,7 +445,7 @@ class ilEventoImportImportUsers {
 
 		$userObj->setPref('public_profile','y'); //profil standard öffentlich
 		$userObj->setPref('public_upload','y'); //profilbild öffentlich
-		$userObj->setPref('public_email','y'); //profilbild öffentlich
+		$userObj->setPref('public_email','y'); //e-mail öffentlich
 		$userObj->setPasswd('', IL_PASSWD_PLAIN);
 		$userObj->update();
 	
