@@ -139,7 +139,7 @@ class ilEventoImportImportUsers {
 					$login=$row['login'];
 					$result = $this->evento_importer->getRecord('ExistsHSLUDomainUser',array('parameters'=>array('login'=>$login,'evtid'=>$eventoid)));
 					
-					if($result->{ExistsHSLUDomainUserResult}===false){
+					if($result->{'ExistsHSLUDomainUserResult'}===false){
 						//user nicht mehr aktiv in ldap
 						if ($deactivate) {
 							$sql="UPDATE usr_data SET auth_mode='default', time_limit_until=UNIX_TIMESTAMP() WHERE matriculation LIKE '".$row['matriculation']."'";
@@ -510,15 +510,15 @@ class ilEventoImportImportUsers {
 		// Upload image
 		$has_picture_result = $this->evento_importer->getRecord('HasPhoto', array('parameters'=>array('eventoId'=>$eventoid)));
 		
-		if (isset($has_picture_result->{HasPhotoResult}) && $has_picture_result->{HasPhotoResult} === true) {
+		if (isset($has_picture_result->{'HasPhotoResult'}) && $has_picture_result->{'HasPhotoResult'} === true) {
 			$picture_result = $this->evento_importer->getRecord('GetPhoto', array('parameters'=>array('eventoId'=>$eventoid)));
 			$tmp_file = ilUtil::ilTempnam();
-			imagepng(imagecreatefromstring($picture_result->{GetPhotoResult}), $tmp_file, 0);
+			imagepng(imagecreatefromstring($picture_result->{'GetPhotoResult'}), $tmp_file, 0);
 			ilObjUser::_uploadPersonalPicture($tmp_file, $id);
 			unlink($tmp_file);
 		}
 	}
-	
+
 	/**
 	 * lookup id by matriculation
 	 */
