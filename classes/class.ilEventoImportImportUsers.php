@@ -63,9 +63,9 @@ class ilEventoImportImportUsers {
 		
 		foreach (["", "_max"] as $duration) {
     		if ($settings->get('crevento'.$duration.'_account_duration') != 0 ) {
-    		    $this->{until.$duration} = mktime(date('H'), date('i'), date('s'), date('n') + ($settings->get('crevento'.$duration.'_account_duration')% 12), date('j'), date('Y')+ (intdiv($settings->get('crevento'.$duration.'_account_duration'), 12)));
+    		    $this->{$until.$duration} = mktime(date('H'), date('i'), date('s'), date('n') + ($settings->get('crevento'.$duration.'_account_duration')% 12), date('j'), date('Y')+ (intdiv($settings->get('crevento'.$duration.'_account_duration'), 12)));
     		} else {
-    			$this->{until.$duration} = 0;
+    			$this->{$until.$duration} = 0;
     		}
 		}
 
