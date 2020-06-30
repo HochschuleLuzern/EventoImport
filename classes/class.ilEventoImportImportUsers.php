@@ -403,13 +403,13 @@ class ilEventoImportImportUsers {
 				) {
 			$user_updated = true;
 			
-			$data[old_data]['FirstName'] = $userObj->getFirstname();
-			$data[old_data]['LastName'] = $userObj->getLastname();
-			$data[old_data]['Gender'] = $userObj->getGender();
-			$data[old_data]['SecondEmail'] = $userObj->getSecondEmail();
-			$data[old_data]['Matriculation'] = $userObj->getMatriculation();
-			$data[old_data]['AuthMode'] = $userObj->getAuthMode();
-			$data[old_data]['Active'] = (string) $userObj->getActive();
+			$data['old_data']['FirstName'] = $userObj->getFirstname();
+			$data['old_data']['LastName'] = $userObj->getLastname();
+			$data['old_data']['Gender'] = $userObj->getGender();
+			$data['old_data']['SecondEmail'] = $userObj->getSecondEmail();
+			$data['old_data']['Matriculation'] = $userObj->getMatriculation();
+			$data['old_data']['AuthMode'] = $userObj->getAuthMode();
+			$data['old_data']['Active'] = (string) $userObj->getActive();
 		}
 
 		$userObj->setFirstname($data['FirstName']);	
