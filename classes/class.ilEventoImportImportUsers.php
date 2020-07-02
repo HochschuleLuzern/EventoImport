@@ -50,6 +50,7 @@ class ilEventoImportImportUsers {
         $this->evento_logger = ilEventoImportLogger::getInstance();
 		
 		global $DIC;
+		ilInitialisation::initUIFramework($DIC);
 		$this->ilDB = $DIC->database();
 		$this->rbacadmin = $DIC->rbac()->admin();
 		$this->rbacreview = $DIC->rbac()->review();
