@@ -66,6 +66,11 @@ class ilEventoImportImportMemberships {
 	 * @var rbacadmin Instance of the Access Administrator
 	 */
 	private $rbacadmin;
+
+    /**
+     * @var ilFavouritesManager
+     */
+	private $fav_manager;
 	
 	/**
 	 * Different caches to avoid to much database traffic
@@ -89,6 +94,7 @@ class ilEventoImportImportMemberships {
 		$this->rbacadmin = $DIC->rbac()->admin();
 		$mailAddressParserFactory = new ilMailRfc822AddressParserFactory();
 		$this->parser = new ilRoleMailboxSearch($mailAddressParserFactory);
+		$this->fav_manager = new ilFavouritesManager();
 	}
 	
 	/**
@@ -280,7 +286,7 @@ class ilEventoImportImportMemberships {
 					$ref_id = current((array) $ref_ids);
 					if($ref_id)
 					{
-						ilObjUser::_addDesktopItem($user_id,$ref_id,$type);
+						$this->fav_manager->add($user_id, $ref_id);
 					}
 					break;
 				default:
@@ -356,7 +362,7 @@ class ilEventoImportImportMemberships {
 				case 'crs':
 					if($ref_id)
 					{
-						ilObjUser::_dropDesktopItem($user_id, $ref_id, $type);
+						$this->fav_manager->remove($user_id, $ref_id);
 					}
 					break;
 				default:
