@@ -119,7 +119,7 @@ class ilEventoImportImportMemberships {
 		$iterator = new ilEventoImporterIterator;
 		while (!($result = &$this->evento_importer->getRecords($operation, 'Anlaesse', $iterator))['finished']) {
 			foreach ($result['data'] as $row) {
-				if (preg_match('/^(HSLU|DK|SA|M|TA|W|I)(\\.[A-Z0-9]([A-Za-z0-9\\-+_&]*[A-Za-z0-9])?){2,}$/', $row['AnlassBezKurz'])) {
+				if (preg_match('/^(HSLU|DK|SA|M|TA|W|I)(\\.[A-Z0-9ÄÖÜ]([A-Za-z0-9\\-+_&ÄÖÜäöü]*[A-Za-z0-9ÄÖÜäöü])?){2,}$/', $row['AnlassBezKurz'])) {
 					$searchName = '#member@['.$row['AnlassBezKurz'].']';
 					
 					$roleIds = $this->parser->searchRoleIdsByAddressString($searchName);
