@@ -451,7 +451,7 @@ class ilEventoImportImportUsers {
 		$userObj->update();
 	
 		// Assign user to global user role
-		if ($this->rbacreview->isAssigned($userObj->getId(), $this->usr_role_id)) {
+		if (!$this->rbacreview->isAssigned($userObj->getId(), $this->usr_role_id)) {
 			$this->rbacadmin->assignUser($this->usr_role_id, $userObj->getId());
 		}
 	
