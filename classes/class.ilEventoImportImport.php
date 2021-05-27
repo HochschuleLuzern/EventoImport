@@ -18,7 +18,6 @@
  * along with EventoImport-Plugin for ILIAS.  If not,
  * see <http://www.gnu.org/licenses/>.
  */
-require_once 'class.ilEventoImportPlugin.php';
 
 /**
  * Class ilEventoImportImport
@@ -127,11 +126,6 @@ class ilEventoImportImport extends ilCronJob {
 	}
 	
 	public function run() {
-		require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImporter.php';
-		require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportResult.php';
-		require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImportUsers.php';
-		require_once './Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImportMemberships.php';
-		
 		try {
 			ilEventoImportImportUsers::run();
 			ilEventoImportImportMemberships::run();

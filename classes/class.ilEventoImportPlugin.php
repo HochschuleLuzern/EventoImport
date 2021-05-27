@@ -19,8 +19,6 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'class.ilEventoImportImport.php';
-
 /**
  * Class ilEventoImportPlugin
  *

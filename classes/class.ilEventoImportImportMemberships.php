@@ -19,11 +19,6 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'class.ilEventoImporter.php';
-require_once 'class.ilEventoImporterIterator.php';
-require_once 'class.ilEventoImportImportUsers.php';
-require_once 'class.ilEventoImportLogger.php';
-
 /**
  * Class ilEventoImportImportMemberships
  * 

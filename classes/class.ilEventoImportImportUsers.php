@@ -19,10 +19,6 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-require_once 'class.ilEventoImporter.php';
-require_once 'class.ilEventoImporterIterator.php';
-require_once 'class.ilEventoImportLogger.php';
-
 /**
  * Class ilEventoImportImportUsers
  *
@@ -44,13 +40,20 @@ class ilEventoImportImportUsers {
 	
 	private $auth_mode;
 	private $usr_role_id;
+	private $additional_roles = [
+	    "Mitarbeiter" => '3743221',
+	    "Studierende" => '3743222'
+	];
+	private $current_additional_roles;
 	
 	private function __construct() {
 		$this->evento_importer = ilEventoImporter::getInstance();
         $this->evento_logger = ilEventoImportLogger::getInstance();
 		
 		global $DIC;
-		ilInitialisation::initUIFramework($DIC);
+		if (! array_key_exists('ui.factory', $DIC)) {
+		  ilInitialisation::initUIFramework($DIC);
+		}
 		$this->ilDB = $DIC->database();
 		$this->rbacadmin = $DIC->rbac()->admin();
 		$this->rbacreview = $DIC->rbac()->review();
@@ -95,10 +98,18 @@ class ilEventoImportImportUsers {
 	 *
 	 * Returns the number of rows.
 	 */
-	private function importUsers($operation, $dataset) {
+	private function importUsers($operation, $dataselector) {
 		$iterator = new ilEventoImporterIterator;
+		
+		$current_additional_roles_as_string = explode(',', $this->additional_roles[$dataselector]);
+		
+		$func = function($value) {
+		    return (int) trim($value);
+		};
+		
+		$this->current_additional_roles = array_map($func, $current_additional_roles_as_string);
 
-		while (!($result = &$this->evento_importer->getRecords($operation, $dataset, $iterator))['finished']) {
+		while (!($result = &$this->evento_importer->getRecords($operation, $dataselector, $iterator))['finished']) {
 			foreach ($result['data'] as $row) {
 				$this->importUserData($row);
 			}
@@ -380,7 +391,9 @@ class ilEventoImportImportUsers {
 	
 		// Assign user to global user role
 		$this->rbacadmin->assignUser($this->usr_role_id, $userObj->getId());
-	
+		
+		$this->assignUserToAdditionalRoles($userObj->getId());
+		
 		$this->addPersonalPicture($data['EvtID'], $userObj->getId());
 		
 		$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $data);
@@ -454,6 +467,8 @@ class ilEventoImportImportUsers {
 		if (!$this->rbacreview->isAssigned($userObj->getId(), $this->usr_role_id)) {
 			$this->rbacadmin->assignUser($this->usr_role_id, $userObj->getId());
 		}
+		
+		$this->assignUserToAdditionalRoles($userObj->getId());
 	
 		// Upload image
 		if (strpos(ilObjUser::_getPersonalPicturePath($userObj->getId(), "small", false),'data:image/svg+xml') !== false) {
@@ -476,6 +491,14 @@ class ilEventoImportImportUsers {
 		} else if ($user_updated) {
 			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_UPDATED, $data);
 		}
+	}
+	
+	private function assignUserToAdditionalRoles($user_id) {
+	    foreach ($this->current_additional_roles as $role_id) {
+	        if (!$this->rbacreview->isAssigned($user_id, $role_id)) {
+	            $this->rbacadmin->assignUser($role_id, $user_id);
+	        }
+	    }
 	}
 	
 	private function renameAndDeactivateUser($data) {
