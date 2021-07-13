@@ -1,4 +1,8 @@
 <?php
+use ILIAS\DI\RBACServices;
+
+include_once('./Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/trait.ilEventoImportGetUserIdsByMatriculation.php');
+
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -26,7 +30,6 @@
  */
 
 class ilEventoImportImportUsers {
-	private static $instance;
 	private $evento_importer;
 	private $evento_logger;
 	
@@ -40,57 +43,50 @@ class ilEventoImportImportUsers {
 	
 	private $auth_mode;
 	private $usr_role_id;
-	private $additional_roles = [
-	    "Mitarbeiter" => '3743221',
-	    "Studierende" => '3743222'
-	];
-	private $current_additional_roles;
+	private $user_config;
 	
-	private function __construct() {
-		$this->evento_importer = ilEventoImporter::getInstance();
-        $this->evento_logger = ilEventoImportLogger::getInstance();
-		
-		global $DIC;
-		if (! array_key_exists('ui.factory', $DIC)) {
-		  ilInitialisation::initUIFramework($DIC);
-		}
-		$this->ilDB = $DIC->database();
-		$this->rbacadmin = $DIC->rbac()->admin();
-		$this->rbacreview = $DIC->rbac()->review();
-		if (!ilContext::usesTemplate()) {
-			ilStyleDefinition::setCurrentStyle('Desktop');
-		}
-		
-		$settings = new ilSetting("crevento");
-
-		$this->now = time();
-		
-		foreach (["", "_max"] as $duration) {
-    		if ($settings->get('crevento'.$duration.'_account_duration') != 0 ) {
-    		    $this->{'until'.$duration} = mktime(date('H'), date('i'), date('s'), date('n') + ($settings->get('crevento'.$duration.'_account_duration')% 12), date('j'), date('Y')+ (intdiv($settings->get('crevento'.$duration.'_account_duration'), 12)));
-    		} else {
-    			$this->{'until'.$duration} = 0;
+	use ilEventoImportGetUserIdsByMatriculation;
+	
+	public function __construct(
+	    ilEventoImporter $importer,
+	    ilEventoImportLogger $logger,
+	    ilDBInterface $db,
+	    RBACServices $rbac,
+	    ilEventoImportImportUsersConfig $user_config
+	    ) {
+    		$this->evento_importer = $importer;
+            $this->evento_logger = $logger;
+    		
+    		$this->ilDB = $db;
+    		$this->rbacadmin = $rbac->admin();
+    		$this->rbacreview = $rbac->review();
+    		
+    		$this->user_config = $user_config;
+    
+    		$this->now = time();
+    		
+    		foreach ($user_config->setupDurations() as $var_name => $duration) {
+    		    $this->{$var_name} = $duration;
     		}
-		}
-
-		$this->auth_mode = $settings->get("crevento_ilias_auth_mode");
-		$this->usr_role_id = $settings->get("crevento_standard_user_role_id");
+    
+    		$this->auth_mode = $user_config->getIliasAuthMode();
+    		$this->usr_role_id = $user_config->getStandardUserRoleId();
 	}
 	
-	public static function run() {
-		if (! isset(self::$instance)) {
-			self::$instance = new self();
+	public function run() {
+		$this->evento_importer->trigger('UpdateEmployeeTmpTable');
+		
+		foreach ($this->user_config->getImportTypes() as $import_type) {
+    		$parameters = $this->user_config->getFunctionParametersForOperation('import', $import_type);
+    		$this->importUsers($parameters['operation']['value'], $parameters['selector']['value'], $parameters['additional_roles']['value']);
 		}
 		
-		self::$instance->evento_importer->trigger('UpdateEmployeeTmpTable');
-	
-		self::$instance->importUsers('GetStudierende', 'Studierende');
-		self::$instance->importUsers('GetMitarbeiter', 'Mitarbeiter');
+		foreach ($this->user_config->getImportTypes() as $import_type) {
+		    $parameters = $this->user_config->getFunctionParametersForOperation('convert', $import_type);
+		    $this->convertDeletedAccounts($parameters['operation']['value'], $parameters['deactivate']['value']);
+		}
 		
-		self::$instance->convertDeletedAccounts('GetGeloeschteStudenten', false);
-		self::$instance->convertDeletedAccounts('GetGeloeschteMitarbeiter', true);
-		
-		self::$instance->setUserTimeLimits();
+		$this->setUserTimeLimits();
 	}
 	
 	/**
@@ -98,20 +94,12 @@ class ilEventoImportImportUsers {
 	 *
 	 * Returns the number of rows.
 	 */
-	private function importUsers($operation, $dataselector) {
-		$iterator = new ilEventoImporterIterator;
-		
-		$current_additional_roles_as_string = explode(',', $this->additional_roles[$dataselector]);
-		
-		$func = function($value) {
-		    return (int) trim($value);
-		};
-		
-		$this->current_additional_roles = array_map($func, $current_additional_roles_as_string);
+	private function importUsers($operation, $dataselector, $additional_roles) {
+		$iterator = new ilEventoImporterIterator();
 
 		while (!($result = &$this->evento_importer->getRecords($operation, $dataselector, $iterator))['finished']) {
 			foreach ($result['data'] as $row) {
-				$this->importUserData($row);
+				$this->importUserData($row, $additional_roles);
 			}
 
 			if ($result['is_last']) {
@@ -128,7 +116,7 @@ class ilEventoImportImportUsers {
 	private function convertDeletedAccounts($operation, $deactivate = false){
 		$deletedLdapUsers=array();
 		
-		$iterator = new ilEventoImporterIterator;
+		$iterator = new ilEventoImporterIterator();
 		
 		while (!($result = &$this->evento_importer->getRecords($operation, 'GeloeschteUser', $iterator))['finished']) {		
 			foreach($result['data'] as $user){
@@ -194,18 +182,18 @@ class ilEventoImportImportUsers {
 	 * 'Password', 'Gender', 'PictureFilename', 'Email', 'Email2', 'Email3'.
 	 * @return Returns a message describing the action that was taken.
 	 */
-	private function importUserData($data) {
+	private function importUserData($data, $additional_roles) {
 		$data['id_by_login'] = ilObjUser::getUserIdByLogin($data['Login']);
-		$data['ids_by_matriculation'] = self::_getUserIdsByMatriculation('Evento:'.$data['EvtID']);
-		$data['ids_by_email'] = strlen(trim($data['Email'])) == 0 ? array() : $this->_reallyGetUserIdsByEmail($data['Email']);
+		$data['ids_by_matriculation'] = $this->getUserIdsByMatriculation('Evento:'.$data['EvtID']);
+		$data['ids_by_email'] = strlen(trim($data['Email'])) == 0 ? array() : $this->reallyGetUserIdsByEmail($data['Email']);
 		
-		foreach (strlen(trim($data['Email2'])) == 0 ? array() : $this->_reallyGetUserIdsByEmail($data['Email2']) as $id) {
+		foreach (strlen(trim($data['Email2'])) == 0 ? array() : $this->reallyGetUserIdsByEmail($data['Email2']) as $id) {
 			if (! in_array($id, $data['ids_by_email'])) {
 				$data['ids_by_email'][] = $id;
 			}
 		}
 		
-		foreach (strlen(trim($data['Email3'])) == 0 ? array() : $this->_reallyGetUserIdsByEmail($data['Email3']) as $id) {
+		foreach (strlen(trim($data['Email3'])) == 0 ? array() : $this->reallyGetUserIdsByEmail($data['Email3']) as $id) {
 			if (! in_array($id, $data['ids_by_email'])) {
 				$data['ids_by_email'][] = $id;
 			}
@@ -332,10 +320,10 @@ class ilEventoImportImportUsers {
 		// perform action
 		switch ($action) {
 			case 'new' :
-				$this->insertUser($data);
+				$this->insertUser($data, $additional_roles);
 				break;
 			case 'update' :
-				$this->updateUser($usrId, $data);
+				$this->updateUser($usrId, $data, $additional_roles);
 				break;
 			case 'conflict':
 				$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $data);
@@ -346,7 +334,7 @@ class ilEventoImportImportUsers {
 		}
 	}
 	
-	private function insertUser($data) {
+	private function insertUser($data, $additional_roles) {
 		$userObj = new ilObjUser();
 	
 		$userObj->setLogin($data['Login']);
@@ -392,14 +380,14 @@ class ilEventoImportImportUsers {
 		// Assign user to global user role
 		$this->rbacadmin->assignUser($this->usr_role_id, $userObj->getId());
 		
-		$this->assignUserToAdditionalRoles($userObj->getId());
+		$this->assignUserToAdditionalRoles($userObj->getId(), $additional_roles);
 		
 		$this->addPersonalPicture($data['EvtID'], $userObj->getId());
 		
 		$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $data);
 	}
 	
-	private function updateUser($usrId, $data) {
+	private function updateUser($usrId, $data, $additional_roles) {
 		$user_updated = false;
 		$userObj = new ilObjUser($usrId);
 		$userObj->read();
@@ -468,7 +456,7 @@ class ilEventoImportImportUsers {
 			$this->rbacadmin->assignUser($this->usr_role_id, $userObj->getId());
 		}
 		
-		$this->assignUserToAdditionalRoles($userObj->getId());
+		$this->assignUserToAdditionalRoles($userObj->getId(), $additional_roles);
 	
 		// Upload image
 		if (strpos(ilObjUser::_getPersonalPicturePath($userObj->getId(), "small", false),'data:image/svg+xml') !== false) {
@@ -493,8 +481,8 @@ class ilEventoImportImportUsers {
 		}
 	}
 	
-	private function assignUserToAdditionalRoles($user_id) {
-	    foreach ($this->current_additional_roles as $role_id) {
+	private function assignUserToAdditionalRoles($user_id, $additional_roles) {
+	    foreach ($additional_roles as $role_id) {
 	        if (!$this->rbacreview->isAssigned($user_id, $role_id)) {
 	            $this->rbacadmin->assignUser($role_id, $user_id);
 	        }
@@ -542,28 +530,11 @@ class ilEventoImportImportUsers {
 			unlink($tmp_file);
 		}
 	}
-
-	/**
-	 * lookup id by matriculation
-	 */
-	public static function _getUserIdsByMatriculation($matriculation) {
-		if (! isset(self::$instance)) {
-			self::$instance = new self();
-		}
-		
-		$res = self::$instance->ilDB->queryF("SELECT usr_id FROM usr_data WHERE matriculation = %s",
-				array("text"), array($matriculation));
-		$ids=array();
-		while($user_rec = self::$instance->ilDB->fetchAssoc($res)){
-			$ids[]=$user_rec["usr_id"];
-		}
-		return $ids;
-	}
 	
 	/**
 	 * lookup id by email
 	 */
-	private function _reallyGetUserIdsByEmail($a_email) {
+	private function reallyGetUserIdsByEmail($a_email) {
 		$res = $this->ilDB->queryF("SELECT usr_id FROM usr_data WHERE email = %s AND active=1",
 				array("text"), array($a_email));
 		$ids=array();

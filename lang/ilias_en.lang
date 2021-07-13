@@ -32,3 +32,19 @@ max_account_duration#:#Maximal Account Validity
 max_account_duration_desc#:#Max validity of accounts in months. If accounts with unlimited or longer validity are created, they are reduced to this duration. 0 means unlimited duration.
 standard_user_role_id#:#Default User Role
 standard_user_role_id_desc#:#ID of the default user role assigned to all users.
+user_type_specific_settings_header#:#Settings for the user group '%s'
+settings_for_operation_header#:#Settings for the '%s' operation
+import_operation_subject#:#Operation to fetch the members of the group '%s'
+import_operation_desc#:#This string will be sent to the service in order to fetch all members of the group '%s'.
+import_selector_subject#:#Operation to select the members of the group '%s'
+import_selector_desc#:#This string will be used to select the members of the group '%s' in the answer array.
+import_additional_roles_subject#:#Additional Roles
+import_additional_roles_desc#:#All members of the group '%s' will be added to this group.
+convert_operation_subject#:#Operation to convert the members '%s'
+convert_operation_desc#:#This string will be sent to the service in order to fethc the members of the '%s', that are not active anymore.
+convert_deactivate_subject#:#Deactivate user accounts of member of '%s'?
+convert_deactivate_desc#:#Should the user accounts of the members of group '%s' be deactivated instead of converted them once the account is not current anymore?
+
+additional_roles_header#:#Additional global roles for '%s'
+additional_roles_info#:#Additional global roles
+additional_roles_desc#:#Users imported through the operation '%s' will additionally be added to the chosen global roles.

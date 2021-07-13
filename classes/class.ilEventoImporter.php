@@ -26,7 +26,6 @@
  */
 
 class ilEventoImporter {
-	protected static $instance;
 	private $evento_logger;
 
 	private $which;
@@ -39,21 +38,12 @@ class ilEventoImporter {
 	private $max_pages;
 	private $max_retries;
 	private $seconds_before_retry;
-	private $soap_client;
+	private $data_source;
 	private $token;
 	
 	private $page;
 	
-	/**
-	 * constructor
-	 * @param	string	Webservice User
-	 * @param	string	Webservice Password
-	 * @param	string	Which data to import: All|Students|Staff|Bachelor|Master|Further|TimeLimit|TutorFurther
-	 * @access	public
-	 */
-	private function __construct() {
-		$settings = new ilSetting("crevento");
-		
+	public function __construct(ilSetting $settings, ilEventoImportLogger $logger, ilEventoImportSOAPClient $data_source) {
 		//Get Settings from dbase
 		$this->client = CLIENT_ID;
 		$this->ws_user = $settings->get('crevento_ws_user');
@@ -65,31 +55,17 @@ class ilEventoImporter {
 		$this->max_retries = (int) $settings->get('crevento_max_retries');
 		$this->seconds_before_retry = (int) $settings->get('crevento_seconds_before_retry');
 		
-		$this->evento_logger = ilEventoImportLogger::getInstance();
+		$this->evento_logger = $logger;
 		
-		// Connect to Evento SOAP
-		include_once 'Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportSOAPClient.php';
-		$this->soap_client = new ilEventoImportSOAPClient($this->wsdl);
-		$this->soap_client->setTimeout($this->seconds_before_retry);
-		$answer = $this->soap_client->init();
+		$this->data_source = $data_source;
+		$this->data_source->setTimeout($this->seconds_before_retry);
+		$answer = $this->data_source->init();
 		if ($answer) {
 			$this->login();
 		} else {
-			throw new Exception ('Error while trying to initialize SOAP-Server. '.$this->soap_client->getError());
+			throw new Exception ('Error while trying to initialize SOAP-Server. '.$this->data_source->getError());
 		}
 	
-	}
-	
-	/**
-	 * Provides an instance of the importer
-	 * @return ilEventoImporter
-	 */
-	public static function getInstance() {
-		if (! isset(self::$instance)) {
-			self::$instance = new self();
-		}
-		
-		return self::$instance;
 	}
 	
 	/**
@@ -97,15 +73,12 @@ class ilEventoImporter {
 	 * @throws Exception
 	 */
 	private function login() {
+	    $errors = 0;
 		do {
-			$result = $this->soap_client->call('Login', array('parameters' => array('username'=>$this -> ws_user, 'password' => $this->ws_password)));
+			$result = $this->data_source->call('Login', array('parameters' => array('username'=>$this -> ws_user, 'password' => $this->ws_password)));
 
-			if ($this->soap_client->getError()) {
-				if (isset($i)) {
-					$i++;
-				} else {
-					$i=1;
-				}
+			if ($this->data_source->getError()) {
+					$errors++;
 			} else if ($result->LoginResult == 'wrong credentials') {
 				throw new Exception('The credentials for the SOAP-Server you provided are not correct.');
 			} else if ($result->LoginResult == null) {
@@ -113,10 +86,10 @@ class ilEventoImporter {
 			} else {
 				$this->token = $result->LoginResult;
 			}
-		} while ($this->token == null && $i < $this->max_retries);
+		} while ($this->token == null && $errors < $this->max_retries);
 		
 		if ($this->token == null) {
-			throw new Exception('Error while trying to log into SOAP-Server. '.$this->soap_client->getError());
+			throw new Exception('Error while trying to log into SOAP-Server. '.$this->data_source->getError());
 		}
 	}
 	
@@ -146,6 +119,7 @@ class ilEventoImporter {
 	 * @return array with the records containing if no further records can be retrieved $return['is_last'] is set to true, if no records could be retrieved $return['finished'] is set to true.
 	 */
 	public function getRecords($operation, $dataset, &$iterator, $params = array()) {
+	    $return = false;
 		try {
 			if ($this->max_pages == -1 || $iterator->getPage() <= $this->max_pages) {
 				$params['parameters']['pagesize'] = $this->pagesize;
@@ -215,10 +189,10 @@ class ilEventoImporter {
 		do {
 			$params['parameters']['token'] = $this->token;
 
-			$result = &$this->soap_client->call($operation, $params);
+			$result = &$this->data_source->call($operation, $params);
 
-			if ($this->soap_client->getError()) {
-			    if (strpos($this->soap_client->getError(),'Token') !== false) {
+			if ($this->data_source->getError()) {
+			    if (strpos($this->data_source->getError(),'Token') !== false) {
 					// Session timed out. Clear token, wait and then retry
 					$this->token = null;
 					sleep($this->seconds_before_retry);
@@ -235,7 +209,7 @@ class ilEventoImporter {
 				return $result;
 			}
 			
-			$this->evento_logger->logException($operation, "We didn't get an answer on the $i try. The error was: {$this->soap_client->getError()}..The connect-Timeout was {$this->soap_client->getTimeout()} and the response-Timeout was {$this->soap_client->getResponseTimeout()}.");
+			$this->evento_logger->logException($operation, "We didn't get an answer on the $i try. The error was: {$this->data_source->getError()}..The connect-Timeout was {$this->data_source->getTimeout()} and the response-Timeout was {$this->data_source->getResponseTimeout()}.");
 			$i++;
 
 		} while ($i <= $this->max_retries);

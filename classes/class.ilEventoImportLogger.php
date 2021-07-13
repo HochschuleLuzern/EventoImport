@@ -26,8 +26,6 @@
  */
 
 class ilEventoImportLogger {
-	private static $instance;
-	
 	private $ilDB;
 	
 	const CREVENTO_SUB_CREATED = 101;
@@ -51,17 +49,8 @@ class ilEventoImportLogger {
 	const CREVENTO_USR_ERROR_ERROR = 324;
 	
 	
-	private function __construct() {
-		global $DIC;
-		$this->ilDB = $DIC->database();
-	}
-	
-	public static function getInstance() {
-		if (! isset(self::$instance)) {
-			self::$instance = new self();
-		}
-		
-		return self::$instance;
+	public function __construct(ilDBInterface $db) {
+		$this->ilDB = $db;
 	}
 	
 	public function log($result, $data) {

@@ -1,4 +1,8 @@
 <?php
+use ILIAS\DI\RBACServices;
+
+include_once('./Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/trait.ilEventoImportGetUserIdsByMatriculation.php');
+
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -28,80 +32,46 @@
  */
 
 class ilEventoImportImportMemberships {
-	/**
-	 * @var ilEventoImportImportMembership Instance of itself
-	 */
-	private static $instance;
-	
-	/**
-	 * @var ilEventoImporter Instance of the Importer
-	 */
 	private $evento_importer;
-	/**
-	 * @var ilEventoImportLogger Instance of the Logger
-	 */
 	private $evento_logger;
-	
-	/**
-	 * @var ilRoleMailboxSearch Instance of search to find Roles by mailbox names
-	 */
 	private $parser;
-	
-	/**
-	 * @var ilDB Instance of the ILIAS Database
-	 */
 	private $ilDB;
-	
-	/**
-	 * @var rbacreview Instance of the Access Controller
-	 */
 	private $rbacreview;
-	
-	/**
-	 * @var rbacadmin Instance of the Access Administrator
-	 */
 	private $rbacadmin;
-
-    /**
-     * @var ilFavouritesManager
-     */
 	private $fav_manager;
-	
-	/**
-	 * Different caches to avoid to much database traffic
-	 */
 	private $roleToObjectCache = array();
 	private $roleToObjectReferenceCache = array();
 	private $parentRolesCache = array();
 	private $localRoleCache = array();
 	private $eventoRolesInSubtreeCache = array();
 	
-	/**
-	 * Constructor
-	 */
-	private function __construct() {
-		$this->evento_importer = ilEventoImporter::getInstance();
-		$this->evento_logger = ilEventoImportLogger::getInstance();
+	use ilEventoImportGetUserIdsByMatriculation;
+	
+	public function __construct(
+	    ilEventoImporter $importer, 
+	    ilEventoImportLogger $logger, 
+	    ilDBInterface $db, 
+	    RBACServices $rbac, 
+	    ilRoleMailboxSearch $mailbox_search, 
+	    ilFavouritesManager $favourites_manager) {
 		
-		global $DIC;
-		$this->ilDB = $DIC->database();
-		$this->rbacreview = $DIC->rbac()->review();
-		$this->rbacadmin = $DIC->rbac()->admin();
-		$mailAddressParserFactory = new ilMailRfc822AddressParserFactory();
-		$this->parser = new ilRoleMailboxSearch($mailAddressParserFactory);
-		$this->fav_manager = new ilFavouritesManager();
+            $this->evento_importer = $importer;
+    	    $this->evento_logger = $logger;
+    	
+    		global $DIC;
+           	$this->ilDB = $db;
+    	    $this->rbacreview = $rbac->review();
+    		$this->rbacadmin = $rbac->admin();
+    		$this->parser = $mailbox_search; 
+    		$this->fav_manager = $favourites_manager;
 	}
 	
 	/**
 	 * Runs the cron job
 	 */
-	static function run() {
-		if (! isset(self::$instance)) {
-			self::$instance = new self();
-		}
-		
-		self::$instance->updateEvents('GetModulanlaesse');
-		self::$instance->updateEvents('GetHauptAnlaesse');
+	public function run() {
+		$this->updateEvents('GetModulanlaesse');
+		$this->updateEvents('GetHauptAnlaesse');
 	}
 	
 	/**
@@ -111,7 +81,7 @@ class ilEventoImportImportMemberships {
 	 * @param string Type of event to retrieve, GetModulAnlaesse for Bachelor, GetHauptAnlasse for Master Events
 	 */
 	private function updateEvents($operation) {
-		$iterator = new ilEventoImporterIterator;
+		$iterator = new ilEventoImporterIterator();
 		while (!($result = &$this->evento_importer->getRecords($operation, 'Anlaesse', $iterator))['finished']) {
 			foreach ($result['data'] as $row) {
 				if (preg_match('/^(HSLU|DK|SA|M|TA|W|I)(\\.[A-Z0-9ÄÖÜ]([A-Za-z0-9\\-+_&ÄÖÜäöü]*[A-Za-z0-9ÄÖÜäöü])?){2,}$/', $row['AnlassBezKurz'])) {
@@ -189,13 +159,13 @@ class ilEventoImportImportMemberships {
 	private function importEventSubscriptions($operation, $object_id, $role_id) {
 		$subscribedUsers = [];
 		
-		$iterator = new ilEventoImporterIterator;
+		$iterator = new ilEventoImporterIterator();
 		
 		while (!($result = &$this->evento_importer->getRecords($operation, 'Anmeldungen', $iterator, array('parameters'=>array('anlassid'=>$object_id))))['finished']) {			
 			foreach ($result['data'] as $row) {
 				if ($role_id != null) {
 					$idsByMatriculation = array(0);
-					$idsByMatriculation = ilEventoImportImportUsers::_getUserIdsByMatriculation('Evento:'.$row['EvtID']);
+					$idsByMatriculation = $this->getUserIdsByMatriculation('Evento:'.$row['EvtID']);
 					if (count($idsByMatriculation) != 0) {
 						$this->assignToRoleWithParents($idsByMatriculation[0], $role_id);
 						$subscribedUsers[] = $idsByMatriculation[0];
@@ -273,7 +243,7 @@ class ilEventoImportImportMemberships {
 			} else {
 				$obj_id = $this->roleToObjectCache[$role_id] = $this->rbacreview->getObjectOfRole($role_id);
 			}
-			switch($type = ilObject::_lookupType($obj_id))
+			switch(ilObject::_lookupType($obj_id))
 			{
 				case 'grp':
 				case 'crs':

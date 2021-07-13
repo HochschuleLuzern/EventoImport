@@ -1,4 +1,10 @@
 <?php
+use ILIAS\DI\RBACServices;
+use ILIAS\Refinery;
+
+include_once('./Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImportUsersConfig.php');
+
+
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -32,13 +38,29 @@ class ilEventoImportImport extends ilCronJob {
 	 */
 	const ID = "crevento_import";
 	
+	private $rbac;
+	private $db;
+	private $refinery;
 	private $cp;
+	private $settings;
+	private $importUsersConfig;
 	
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+	    global $DIC;
+	    $this->rbac = $DIC->rbac();
+	    $this->db = $DIC->database();
+	    $this->refinery = $DIC->refinery();
+	    //This is a workaround to avoid problems with missing templates
+	    if (!method_exists($DIC, 'ui') || !method_exists($DIC->ui(), 'factory') || !isset($DIC['ui.factory'])) {
+	        ilInitialisation::initUIFramework($DIC);
+	        ilStyleDefinition::setCurrentStyle('Desktop');
+	    }	    
 		$this->cp = new ilEventoImportPlugin();
+		$this->settings = new ilSetting("crevento");
+		$this->importUsersConfig = new ilEventoImportImportUsersConfig($this->settings, $this->rbac);
 	}
 	
 	/**
@@ -127,8 +149,23 @@ class ilEventoImportImport extends ilCronJob {
 	
 	public function run() {
 		try {
-			ilEventoImportImportUsers::run();
-			ilEventoImportImportMemberships::run();
+		    $logger = new ilEventoImportLogger($this->db);
+		    
+		    $data_source = new ilEventoImportSOAPClient($this->settings->get('crevento_wsdl'));
+		    $data_source->setTimeout($this->seconds_before_retry);
+		    $importer = new ilEventoImporter($this->settings, $logger, $data_source);
+		    
+		    $mailbox_search = new ilRoleMailboxSearch(
+		        new ilMailRfc822AddressParserFactory()
+		        );
+		    $favourites_manager = new ilFavouritesManager();
+		    
+		    $importUsers = new ilEventoImportImportUsers(
+		        $importer, $logger, $this->db, $this->rbac, $this->importUsersConfig);
+			$importUsers->run();
+			$importMemberships = new ilEventoImportImportMemberships(
+			    $importer, $logger, $this->db, $this->rbac, $mailbox_search, $favourites_manager);
+			$importMemberships->run();
 			
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
 		} catch (Exception $e) {
@@ -143,10 +180,6 @@ class ilEventoImportImport extends ilCronJob {
 	 */
 	public function addCustomSettingsToForm(ilPropertyFormGUI $a_form)
 	{
-		$settings = new ilSetting("crevento");
-		
-		include_once 'Services/Form/classes/class.ilSelectInputGUI.php';
-		include_once 'Services/LDAP/classes/class.ilLDAPServer.php';
 		$ws_item = new ilSelectInputGUI(
 				$this->cp->txt('ilias_auth_mode'),
 				'crevento_ilias_auth_mode'
@@ -158,15 +191,14 @@ class ilEventoImportImport extends ilCronJob {
 			if(ilLDAPServer::isAuthModeLDAP($auth_mode)) {
 				$server = ilLDAPServer::getInstanceByServerId(ilLDAPServer::getServerIdByAuthMode($auth_mode));
 				if ($server->isActive()) $options[$auth_name] = $auth_name;
-			} else if ($settings->get($auth_name.'_active') || $auth_mode == AUTH_LOCAL) {
+			} else if ($this->settings->get($auth_name.'_active') || $auth_mode == AUTH_LOCAL) {
 				$options[$auth_name] = $auth_name;
 			}
 		}
 		$ws_item->setOptions($options);
-		$ws_item->setValue($settings->get('crevento_ilias_auth_mode'));
+		$ws_item->setValue($this->settings->get('crevento_ilias_auth_mode'));
 		$a_form->addItem($ws_item);
 		
-		include_once 'Services/Form/classes/class.ilNumberInputGUI.php';
 		$ws_item = new ilNumberInputGUI(
 				$this->cp->txt('account_duration'),
 				'crevento_account_duration'
@@ -175,10 +207,9 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->allowDecimals(false);
 		$ws_item->setMinValue(0);
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_account_duration', '0'));
+		$ws_item->setValue($this->settings->get('crevento_account_duration', '0'));
 		$a_form->addItem($ws_item);
 		
-		include_once 'Services/Form/classes/class.ilNumberInputGUI.php';
 		$ws_item = new ilNumberInputGUI(
 		    $this->cp->txt('max_account_duration'),
 		    'crevento_max_account_duration'
@@ -187,7 +218,7 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->allowDecimals(false);
 		$ws_item->setMinValue(0);
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_max_account_duration', '0'));
+		$ws_item->setValue($this->settings->get('crevento_max_account_duration', '0'));
 		$a_form->addItem($ws_item);
 		
 		$ws_item = new ilNumberInputGUI(
@@ -198,20 +229,18 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->allowDecimals(false);
 		$ws_item->setMinValue(0);
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_standard_user_role_id', '109'));
+		$ws_item->setValue($this->settings->get('crevento_standard_user_role_id', '109'));
 		$a_form->addItem($ws_item);
 		
-		include_once 'Services/Form/classes/class.ilTextInputGUI.php';
 		$ws_item = new ilTextInputGUI(
 				$this->cp->txt('ws_user'),
 				'crevento_ws_user'
 			);
 		$ws_item->setInfo($this->cp->txt('ws_user_desc'));
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_ws_user', ""));
+		$ws_item->setValue($this->settings->get('crevento_ws_user', ""));
 		$a_form->addItem($ws_item);
 		
-		include_once 'Services/Form/classes/class.ilPasswordInputGUI.php';
 		$ws_item = new ilPasswordInputGUI(
 				$this->cp->txt('ws_password'),
 				'crevento_ws_password'
@@ -220,7 +249,7 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->setSkipSyntaxCheck(true);
 		$ws_item->setRequired(true);
 		$ws_item->setRetype(false);
-		$ws_item->setValue($settings->get('crevento_ws_password', '') == '' ? '' : '(__unchanged__)');
+		$ws_item->setValue($this->settings->get('crevento_ws_password', '') == '' ? '' : '(__unchanged__)');
 		$a_form->addItem($ws_item);
 		
 		$ws_item = new ilTextInputGUI(
@@ -229,7 +258,7 @@ class ilEventoImportImport extends ilCronJob {
 				);
 		$ws_item->setInfo($this->cp->txt('wsdl_desc'));
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_wsdl', ""));
+		$ws_item->setValue($this->settings->get('crevento_wsdl', ""));
 		$a_form->addItem($ws_item);
 		
 		$ws_item = new ilNumberInputGUI(
@@ -240,7 +269,7 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->allowDecimals(false);
 		$ws_item->setMinValue(0);
 		$ws_item->setRequired(true);		
-		$ws_item->setValue($settings->get('crevento_pagesize', '1200'));
+		$ws_item->setValue($this->settings->get('crevento_pagesize', '1200'));
 		$a_form->addItem($ws_item);
 		
 		$ws_item = new ilNumberInputGUI(
@@ -250,7 +279,7 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->setInfo($this->cp->txt('max_pages_desc'));
 		$ws_item->allowDecimals(false);
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_max_pages', '-1'));
+		$ws_item->setValue($this->settings->get('crevento_max_pages', '-1'));
 		$a_form->addItem($ws_item);
 		
 		$ws_item = new ilNumberInputGUI(
@@ -261,7 +290,7 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->allowDecimals(false);
 		$ws_item->setMinValue(0);
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_max_retries', '2'));
+		$ws_item->setValue($this->settings->get('crevento_max_retries', '2'));
 		$a_form->addItem($ws_item);
 		
 		$ws_item = new ilNumberInputGUI(
@@ -272,7 +301,7 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->allowDecimals(false);
 		$ws_item->setMinValue(0);
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_seconds_before_retry', '60'));
+		$ws_item->setValue($this->settings->get('crevento_seconds_before_retry', '60'));
 		$a_form->addItem($ws_item);
 		
 		$ws_item = new ilTextInputGUI(
@@ -281,10 +310,9 @@ class ilEventoImportImport extends ilCronJob {
 				);
 		$ws_item->setInfo($this->cp->txt('email_account_changed_subject_desc'));
 		$ws_item->setRequired(true);
-		$ws_item->setValue($settings->get('crevento_email_account_changed_subject', ''));
+		$ws_item->setValue($this->settings->get('crevento_email_account_changed_subject', ''));
 		$a_form->addItem($ws_item);
 		
-		include_once 'Services/Form/classes/class.ilTextAreaInputGUI.php';
 		$ws_item = new ilTextAreaInputGUI(
 				$this->cp->txt('email_account_changed_body'),
 				'crevento_email_account_changed_body'
@@ -292,8 +320,52 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->setInfo($this->cp->txt('email_account_changed_body_desc'));
 		$ws_item->setRequired(true);
 		$ws_item->usePurifier(true);
-		$ws_item->setValue($settings->get('crevento_email_account_changed_body', ''));
+		$ws_item->setValue($this->settings->get('crevento_email_account_changed_body', ''));
 		$a_form->addItem($ws_item);
+		
+		foreach($this->importUsersConfig->getImportTypes() as $import_type) {
+		    $section = new ilFormSectionHeaderGUI();
+		    $section->setTitle(sprintf($this->cp->txt('user_type_specific_settings_header'), $import_type));
+		    $a_form->addItem($section);
+		    
+		    foreach($this->importUsersConfig->getOperations() as $operation) {
+		        $section = new ilFormSectionHeaderGUI();
+		        $section->setTitle(sprintf($this->cp->txt('settings_for_operation_header'), $operation));
+		        $a_form->addItem($section);
+		        
+		        foreach($this->importUsersConfig->getFunctionParametersForOperation($operation, $import_type) as $parameter_name => $parameter_structure) {
+		            switch($parameter_structure['type']) {
+		                case 'Bool':
+		                    $ws_item = new ilCheckboxInputGUI(
+		                    sprintf($this->cp->txt($operation.'_'.$parameter_name.'_subject'), $import_type),
+		                    $this->importUsersConfig->getSettingsName($import_type, $operation, $parameter_name)
+		                    );
+		                    $ws_item->setChecked($parameter_structure['value']);
+		                    break;
+		                case 'Text':
+		                    $ws_item = new ilTextInputGUI(
+		                    sprintf($this->cp->txt($operation.'_'.$parameter_name.'_subject'), $import_type),
+		                    $this->importUsersConfig->getSettingsName($import_type, $operation, $parameter_name)
+		                    );
+		                    $ws_item->setRequired(true);
+		                    $ws_item->setValue($parameter_structure['value']);
+		                    break;
+		                case 'Select':
+		                    $ws_item = new ilMultiSelectInputGUI(
+		                    sprintf($this->cp->txt($operation.'_'.$parameter_name.'_subject'), $import_type),
+		                    $this->importUsersConfig->getSettingsName($import_type, $operation, $parameter_name)
+		                    );
+		                    $ws_item->setOptions($parameter_structure['options']);
+		                    $ws_item->setValue($parameter_structure['value']);
+		                    break;
+		                    
+		            }
+		            
+		            $ws_item->setInfo(sprintf($this->cp->txt($operation.'_'.$parameter_name.'_desc'), $import_type));
+		            $a_form->addItem($ws_item);
+		        }
+		    }
+		}
 	}
 	
 	/**
@@ -304,58 +376,93 @@ class ilEventoImportImport extends ilCronJob {
 	 */
 	public function saveCustomSettings(ilPropertyFormGUI $a_form)
 	{
-		$settings = new ilSetting("crevento");
-		
 		if ($a_form->getInput('crevento_ilias_auth_mode') != null) {
-			$settings->set('crevento_ilias_auth_mode', $a_form->getInput('crevento_ilias_auth_mode'));
+			$this->settings->set('crevento_ilias_auth_mode', $a_form->getInput('crevento_ilias_auth_mode'));
 		}
 		
 		if ($a_form->getInput('crevento_account_duration') != null) {
-			$settings->set('crevento_account_duration', $a_form->getInput('crevento_account_duration'));
+			$this->settings->set('crevento_account_duration', $a_form->getInput('crevento_account_duration'));
 		}
 		
 		if ($a_form->getInput('crevento_max_account_duration') != null) {
-			$settings->set('crevento_max_account_duration', $a_form->getInput('crevento_max_account_duration'));
+			$this->settings->set('crevento_max_account_duration', $a_form->getInput('crevento_max_account_duration'));
 		}
 		
 		if ($a_form->getInput('crevento_standard_user_role_id') != null) {
-			$settings->set('crevento_standard_user_role_id', $a_form->getInput('crevento_standard_user_role_id'));
+			$this->settings->set('crevento_standard_user_role_id', $a_form->getInput('crevento_standard_user_role_id'));
 		}
 
 		if ($a_form->getInput('crevento_ws_user') != null) {
-			$settings->set('crevento_ws_user', $a_form->getInput('crevento_ws_user'));
+			$this->settings->set('crevento_ws_user', $a_form->getInput('crevento_ws_user'));
 		}
 		
 		if ($a_form->getInput('crevento_ws_password') != null && $a_form->getInput('crevento_ws_password') != '(__unchanged__)') {
-			$settings->set('crevento_ws_password', $a_form->getInput('crevento_ws_password'));
+			$this->settings->set('crevento_ws_password', $a_form->getInput('crevento_ws_password'));
 		}
 		
 		if ($a_form->getInput('crevento_wsdl') != null) {
-			$settings->set('crevento_wsdl', $a_form->getInput('crevento_wsdl'));
+			$this->settings->set('crevento_wsdl', $a_form->getInput('crevento_wsdl'));
 		}
 		
 		if ($a_form->getInput('crevento_pagesize') != null) {
-			$settings->set('crevento_pagesize', $a_form->getInput('crevento_pagesize'));
+			$this->settings->set('crevento_pagesize', $a_form->getInput('crevento_pagesize'));
 		}
 		
 		if ($a_form->getInput('crevento_max_pages') != null) {
-			$settings->set('crevento_max_pages', $a_form->getInput('crevento_max_pages'));
+			$this->settings->set('crevento_max_pages', $a_form->getInput('crevento_max_pages'));
 		}
 		
 		if ($a_form->getInput('crevento_max_retries') != null) {
-			$settings->set('crevento_max_retries', $a_form->getInput('crevento_max_retries'));
+			$this->settings->set('crevento_max_retries', $a_form->getInput('crevento_max_retries'));
 		}
 		
 		if ($a_form->getInput('crevento_seconds_before_retry') != null) {
-			$settings->set('crevento_seconds_before_retry', $a_form->getInput('crevento_seconds_before_retry'));
+			$this->settings->set('crevento_seconds_before_retry', $a_form->getInput('crevento_seconds_before_retry'));
 		}
 		
 		if ($a_form->getInput('crevento_email_account_changed_subject') != null) {
-			$settings->set('crevento_email_account_changed_subject', $a_form->getInput('crevento_email_account_changed_subject'));
+			$this->settings->set('crevento_email_account_changed_subject', $a_form->getInput('crevento_email_account_changed_subject'));
 		}
 		
 		if ($a_form->getInput('crevento_email_account_changed_body') != null) {
-			$settings->set('crevento_email_account_changed_body', $a_form->getInput('crevento_email_account_changed_body'));
+			$this->settings->set('crevento_email_account_changed_body', $a_form->getInput('crevento_email_account_changed_body'));
+		}
+		
+		foreach($this->importUsersConfig->getImportTypes() as $import_type) {
+		    foreach($this->importUsersConfig->getOperations() as $operation) {
+    		    foreach($this->importUsersConfig->getFunctionParametersForOperation($operation, $import_type) as $parameter_name => $parameter_structure) {
+    		        if (($value = $a_form->getInput($this->importUsersConfig->getSettingsName($import_type, $operation, $parameter_name))) == null) {
+    		            continue;
+    		        }
+    		        switch($parameter_structure['type']) {
+    		            case 'Bool':
+    		                try
+    		                {
+    		                    $value = $this->refinery->kindlyTo()->int()->transform($value);
+    		                }
+    		                catch (Exception $e)
+    		                {
+    		                    $value = 0;
+    		                }
+    		                break;
+    		            case 'Select':
+    		                foreach ($value as $selected) {
+    		                    try
+    		                    {
+    		                        $this->refinery->kindlyTo()->int()->transform($selected);
+    		                    }
+    		                    catch (Exception $e)
+    		                    {
+    		                        $value = [];
+    		                    }
+    		                }
+    		                $value = implode(',', $value);
+    		                break;
+    		        }
+    		        
+    		        $this->settings->set($this->importUsersConfig->getSettingsName($import_type, $operation, $parameter_name), $value);
+    		    }
+		    }
 		}
 		
 		return true;
