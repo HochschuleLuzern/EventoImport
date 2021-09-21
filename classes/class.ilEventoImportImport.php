@@ -151,22 +151,32 @@ class ilEventoImportImport extends ilCronJob {
 		try {
 		    $logger = new ilEventoImportLogger($this->db);
 		    
-		    $data_source = new ilEventoImportSOAPClient($this->settings->get('crevento_wsdl'));
+		    //$data_source = new ilEventoImportSOAPClient($this->settings->get('crevento_wsdl'));
+            $base_url = '';
+            $port = 1337;
+            $base_path = '';
+            $data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
 		    $data_source->setTimeout($this->seconds_before_retry);
-		    $importer = new ilEventoImporter($this->settings, $logger, $data_source);
-		    
+		    $importer = new \EventoImport\communication\EventoUserImporter(new ilEventoImporterIterator(), $this->settings, $logger, $data_source);
+
+		    /*
 		    $mailbox_search = new ilRoleMailboxSearch(
 		        new ilMailRfc822AddressParserFactory()
 		        );
 		    $favourites_manager = new ilFavouritesManager();
-		    
+		    */
+
 		    $importUsers = new ilEventoImportImportUsers(
 		        $importer, $logger, $this->db, $this->rbac, $this->importUsersConfig);
 			$importUsers->run();
+
+			/*
+			 * Intentionally left out. First phase of the evento importer is to import users
+			 *
 			$importMemberships = new ilEventoImportImportMemberships(
 			    $importer, $logger, $this->db, $this->rbac, $mailbox_search, $favourites_manager);
 			$importMemberships->run();
-			
+			*/
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
 		} catch (Exception $e) {
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_CRASHED, 'Cron job crashed: ' . $e->getMessage());

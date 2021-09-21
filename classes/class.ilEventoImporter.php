@@ -25,7 +25,7 @@
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
  */
 
-class ilEventoImporter {
+abstract class ilEventoImporter {
 	private $evento_logger;
 
 	private $which;
@@ -42,9 +42,14 @@ class ilEventoImporter {
 	private $token;
 	
 	private $page;
+
+    protected $iterator;
+	protected $fetch_data_set_method;
+    protected $fetch_data_record_method;
 	
-	public function __construct(ilSetting $settings, ilEventoImportLogger $logger, ilEventoImportSOAPClient $data_source) {
+	public function __construct(ilEventoImporterIterator $iterator, ilSetting $settings, ilEventoImportLogger $logger, \EventoImport\communication\request_services\RestClientService $data_source) {
 		//Get Settings from dbase
+        $this->iterator = $iterator;
 		$this->client = CLIENT_ID;
 		$this->ws_user = $settings->get('crevento_ws_user');
 		$this->ws_password = $settings->get('crevento_ws_password');
@@ -59,38 +64,17 @@ class ilEventoImporter {
 		
 		$this->data_source = $data_source;
 		$this->data_source->setTimeout($this->seconds_before_retry);
+
+		$this->has_more_data = true;
+
+		/* TODO: Check if init and login are needed
 		$answer = $this->data_source->init();
 		if ($answer) {
 			$this->login();
 		} else {
 			throw new Exception ('Error while trying to initialize SOAP-Server. '.$this->data_source->getError());
 		}
-	
-	}
-	
-	/**
-	 * Retrieves a login token from the SOAP-Interface
-	 * @throws Exception
-	 */
-	private function login() {
-	    $errors = 0;
-		do {
-			$result = $this->data_source->call('Login', array('parameters' => array('username'=>$this -> ws_user, 'password' => $this->ws_password)));
-
-			if ($this->data_source->getError()) {
-					$errors++;
-			} else if ($result->LoginResult == 'wrong credentials') {
-				throw new Exception('The credentials for the SOAP-Server you provided are not correct.');
-			} else if ($result->LoginResult == null) {
-				throw new Exception('The SOAP-Server did not provided us with a token.');
-			} else {
-				$this->token = $result->LoginResult;
-			}
-		} while ($this->token == null && $errors < $this->max_retries);
-		
-		if ($this->token == null) {
-			throw new Exception('Error while trying to log into SOAP-Server. '.$this->data_source->getError());
-		}
+	    */
 	}
 	
 	/**
@@ -109,6 +93,78 @@ class ilEventoImporter {
 			return $return;
 		}
 	}
+
+	public function hasMoreData() : bool
+    {
+        return $this->has_more_data;
+    }
+
+	public function fetchNextDataRecord($id)
+    {
+        $params = array(
+            "id" => (int)$id
+        );
+
+        $json_response = $this->data_source->sendRequest($this->rest_method_path, $params);
+
+        if(strlen($json_response) > 0) {
+            $json_response_decoded = json_decode($json_response, true);
+            return is_array($json_response_decoded) ? $json_response_decoded : '';
+        } else {
+            return '';
+        }
+    }
+
+	public function fetchNextDataSet()
+    {
+        $params = array(
+            "skip" => $this->iterator->getPage() * $this->pagesize,
+            "take" => $this->pagesize
+        );
+
+        $json_response = $this->data_source->sendRequest($this->rest_method_path, $params);
+
+        $json_response_decoded = $this->validateResponseAndGetAsJsonStructure($json_response);
+
+        if(count($json_response_decoded['data']) < 1) {
+            $this->has_more_data = false;
+            return [];
+        } else if(!$json_response_decoded['hasMoreData']) {
+            $this->has_more_data = false;
+        }
+
+        return $json_response_decoded['data'];
+    }
+
+    private function validateResponseAndGetAsJsonStructure(string $json_response)
+    {
+        $json_response_decoded = json_decode($json_response, true);
+
+        $missing_fields = array();
+
+        if(!isset($json_response_decoded['success'])) {
+            $missing_fields[] = '"success"';
+        }
+
+        if(!isset($json_response_decoded['hasMoreData'])) {
+            $missing_fields[] = '"hasMoreData"';
+        }
+
+        if(!isset($json_response_decoded['message'])) {
+            $missing_fields[] = '"message"';
+        }
+
+        // Data must be set an be an array. If the evento import does not have any data left, the array MUST be empty
+        if(!isset($json_response_decoded['data']) || !is_array($json_response_decoded['data'])) {
+            $missing_fields[] = '"data"';
+        }
+
+        if(count($missing_fields) > 0 ) {
+            throw new \Exception('Following fields are missing a correct value: ' . implode(', ', $missing_fields));
+        }
+
+        return $json_response_decoded;
+    }
 	
 	/**
 	 * Retrieves multiple records from the SOAP-Interface

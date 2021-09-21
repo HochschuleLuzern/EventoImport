@@ -48,14 +48,14 @@ class ilEventoImportImportMemberships {
 	use ilEventoImportGetUserIdsByMatriculation;
 	
 	public function __construct(
-	    ilEventoImporter $importer, 
+	    \EventoImport\communication\EventoEventImporter $event_importer,
 	    ilEventoImportLogger $logger, 
 	    ilDBInterface $db, 
 	    RBACServices $rbac, 
 	    ilRoleMailboxSearch $mailbox_search, 
 	    ilFavouritesManager $favourites_manager) {
 		
-            $this->evento_importer = $importer;
+            $this->evento_importer = $event_importer;
     	    $this->evento_logger = $logger;
     	
     		global $DIC;
