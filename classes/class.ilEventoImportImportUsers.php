@@ -74,11 +74,9 @@ class ilEventoImportImportUsers {
 	}
 	
 	public function run() {
-		$this->evento_importer->trigger('UpdateEmployeeTmpTable');
 
-
-		$this->importUsers('GetMitarbeiter','Mitarbeiter', 'RoleIdOfMitarbeitende usw.');
-		$this->convertDeletedAccounts();
+		$this->importUsers();
+		//$this->convertDeletedAccounts();
 
 
 /*
@@ -98,7 +96,7 @@ class ilEventoImportImportUsers {
  *
  *
  */
-
+/*
 		foreach ($this->user_config->getImportTypes() as $import_type) {
     		$parameters = $this->user_config->getFunctionParametersForOperation('import', $import_type);
     		$this->importUsers($parameters['operation']['value'], $parameters['selector']['value'], $parameters['additional_roles']['value']);
@@ -108,6 +106,7 @@ class ilEventoImportImportUsers {
 		    $parameters = $this->user_config->getFunctionParametersForOperation('convert', $import_type);
 		    $this->convertDeletedAccounts($parameters['operation']['value'], $parameters['deactivate']['value']);
 		}
+*/
 		
 		$this->setUserTimeLimits();
 	}
@@ -155,85 +154,80 @@ class ilEventoImportImportUsers {
 	 *
 	 * Returns the number of rows.
 	 */
-	private function importUsers($operation, $dataselector, $additional_roles) {
+	private function importUsers() {
 	    // $operation = 'GetMitarbeiter', $dataselector = 'Mitarbeiter', $additional_roles = 'RoleIdOfMitarbeitende usw.'
 		$iterator = new ilEventoImporterIterator();
         $user_matcher = new EventoUserToIliasUserMatcher($this->ilDB);
 
-		while($this->evento_importer->hasMoreData()) {
+		do {
+            try {
+                foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
 
-		    foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
+                    try {
+                        $evento_user = new \EventoImport\import\data_models\EventoUser($data_set);
+                        $result = $this->determineActionForGivenEventoUser($evento_user);
 
-		        try {
-		            $evento_user = new \EventoImport\import\data_models\EventoUser($data_set);
+                    } catch(Exception $e) {
+                        $result = 'error';
+                    }
 
-                } catch(Exception $e) {
+                    switch($result['action']) {
+                        case 'new':
+                            $this->insertUser($evento_user);
+                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $data_set);
+                            break;
 
-                }
+                        case 'update':
+                            $this->updateUser($result['user_id'], $evento_user);
+                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_UPDATED, $data_set);
+                            break;
 
-                $result = $this->determineActionForGivenEventoUser($evento_user);
-                switch($result['action']) {
-                    case 'new':
-                        $this->insertUser($evento_user);
-                        break;
+                        /*case EventoIliasUserMatchingResult::RESULT_CONVERT_EXISTING_CREATE_NEW:
+                            $this->renameAndDeactivateUser($user_match_result->getMatchedUserId());
+                            $this->insertUser($evento_user);
+                            break;*/
 
-                    case 'update':
-                        $this->updateUser($result['user_id'], $evento_user);
-                        break;
+                        case 'conflict':
+                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $data_set);
+                            break;
 
-                    //case EventoIliasUserMatchingResult::RESULT_CONVERT_EXISTING_CREATE_NEW:
-                    //    $this->renameAndDeactivateUser($user_match_result->getMatchedUserId());
-                    //    $this->insertUser($evento_user);
-                    //    break;
-
-                    case 'conflict':
-                        $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $data_set);
-                        break;
-
-                    case 'error':
-                    default:
-                        $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
-                        break;
-                }
+                        case 'error':
+                        default:
+                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
+                            break;
+                    }
 /*
-                $user_match_result = $user_matcher->matchGivenEventoUserToIliasUsers($evento_user);
+                    $user_match_result = $user_matcher->matchGivenEventoUserToIliasUsers($evento_user);
 
-                switch($user_match_result) {
-                    case EventoIliasUserMatchingResult::RESULT_NO_MATCHING_USER:
-                        $this->insertUser($evento_user);
-                        break;
+                    switch($user_match_result) {
+                        case EventoIliasUserMatchingResult::RESULT_NO_MATCHING_USER:
+                            $this->insertUser($evento_user);
+                            break;
 
-                    case EventoIliasUserMatchingResult::RESULT_EXACTLY_ONE_MATCHING_USER:
-                        $this->updateUser($user_match_result->getMatchedUserId(), $evento_user);
-                        break;
+                        case EventoIliasUserMatchingResult::RESULT_EXACTLY_ONE_MATCHING_USER:
+                            $this->updateUser($user_match_result->getMatchedUserId(), $evento_user);
+                            break;
 
-                    case EventoIliasUserMatchingResult::RESULT_CONVERT_EXISTING_CREATE_NEW:
-                        $this->renameAndDeactivateUser($user_match_result->getMatchedUserId());
-                        $this->insertUser($evento_user);
-                        break;
+                        case EventoIliasUserMatchingResult::RESULT_CONVERT_EXISTING_CREATE_NEW:
+                            $this->renameAndDeactivateUser($user_match_result->getMatchedUserId());
+                            $this->insertUser($evento_user);
+                            break;
 
-                    case EventoIliasUserMatchingResult::RESULT_CONFLICT_OF_ACCOUNTS:
-                        $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $data_set);
-                        break;
+                        case EventoIliasUserMatchingResult::RESULT_CONFLICT_OF_ACCOUNTS:
+                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $data_set);
+                            break;
 
-                    case EventoIliasUserMatchingResult::RESULT_ERROR:
-                    default:
-                        $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
-                        break;
-                }
+                        case EventoIliasUserMatchingResult::RESULT_ERROR:
+                        default:
+                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
+                            break;
+                    }
 */
-            }
-        }
+                }
+            } catch(Exception $e) {}
 
-		while (!($result = &$this->evento_importer->getRecords($operation, $dataselector, $iterator))['finished']) {
-			foreach ($result['data'] as $row) {
-				$this->importUserData($row, $additional_roles);
-			}
+        } while($this->evento_importer->hasMoreData());
 
-			if ($result['is_last']) {
-				break;
-			}
-		}
 	}
 
 	private function determineActionForGivenEventoUser(\EventoImport\import\data_models\EventoUser $evento_user)
@@ -383,7 +377,7 @@ class ilEventoImportImportUsers {
             $action = 'error';
         }
 
-        if(isset($usrId)) {
+        if(isset($usrId) && $usrId > 0) {
             return ['action' => $action, 'user_id' => $usrId];
         } else {
             return ['action' => $action];
@@ -617,7 +611,8 @@ class ilEventoImportImportUsers {
 	}
 	
 	private function insertUser(\EventoImport\import\data_models\EventoUser $evento_user) {
-
+        //echo "Created User: " . $evento_user->getLoginName() . "\n";
+        //return;
         $userObj = new ilObjUser();
 
         $userObj->setLogin($evento_user->getLoginName());
@@ -670,9 +665,9 @@ class ilEventoImportImportUsers {
 		
 		$this->assignUserToAdditionalRoles($userObj->getId(), $evento_user->getRoles());
 		
-		$this->addPersonalPicture($evento_user['EvtID'], $userObj->getId());
+		$this->addPersonalPicture($evento_user->getEventoId(), $userObj->getId());
 		
-		$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $evento_user);
+		//$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $evento_user);
 	}
 	
 	private function updateUser($usrId, \EventoImport\import\data_models\EventoUser $evento_user) {
@@ -687,19 +682,20 @@ class ilEventoImportImportUsers {
 				|| $userObj->getlastname() != $evento_user->getLastName()
 				|| $userObj->getGender() != strtolower($evento_user->getGender())
 		        //|| $userObj->getSecondEmail() != $evento_user->getEmailList()[0]
-				|| $userObj->getMatriculation() != ('Evento:'. $evento_user['EvtID'])
+				|| $userObj->getMatriculation() != ('Evento:'. $evento_user->getEventoId())
 				|| $userObj->getAuthMode() != $this->auth_mode
 				|| !$userObj->getActive()
 				) {
 			$user_updated = true;
 
-            $evento_user['old_data']['FirstName']     = $userObj->getFirstname();
-            $evento_user['old_data']['LastName']      = $userObj->getLastname();
-            $evento_user['old_data']['Gender']        = $userObj->getGender();
-            $evento_user['old_data']['SecondEmail']   = $userObj->getSecondEmail();
-            $evento_user['old_data']['Matriculation'] = $userObj->getMatriculation();
-            $evento_user['old_data']['AuthMode']      = $userObj->getAuthMode();
-            $evento_user['old_data']['Active']        = (string) $userObj->getActive();
+            $old_user_data = array();
+            $old_user_data['old_data']['FirstName']     = $userObj->getFirstname();
+            $old_user_data['old_data']['LastName']      = $userObj->getLastname();
+            $old_user_data['old_data']['Gender']        = $userObj->getGender();
+            $old_user_data['old_data']['SecondEmail']   = $userObj->getSecondEmail();
+            $old_user_data['old_data']['Matriculation'] = $userObj->getMatriculation();
+            $old_user_data['old_data']['AuthMode']      = $userObj->getAuthMode();
+            $old_user_data['old_data']['Active']        = (string) $userObj->getActive();
 		}
 
 		$userObj->setFirstname($evento_user->getFirstName());
@@ -713,7 +709,7 @@ class ilEventoImportImportUsers {
 		$userObj->setExternalAccount($evento_user->getEventoId().'@hslu.ch');
 		$userObj->setAuthMode($this->auth_mode);
 		
-		if(ilLDAPServer::isAuthModeLDAP($this->auth_mode)) $userObj->setPasswd('');
+		//if(ilLDAPServer::isAuthModeLDAP($this->auth_mode)) $userObj->setPasswd('');
 	
 		$userObj->setActive(true);
 		
@@ -755,7 +751,7 @@ class ilEventoImportImportUsers {
 		
 		if ($oldLogin != $evento_user->getLoginName()) {
             //$evento_user['oldLogin'] = $oldLogin;
-			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_RENAMED, $evento_user);
+			//$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_RENAMED, $evento_user);
 								
 			$this->changeLoginName($userObj->getId(), $evento_user->getLoginName());
 								
@@ -765,7 +761,7 @@ class ilEventoImportImportUsers {
 			$mail->setUserInformation($userObj->id, $oldLogin, $evento_user->getLoginName(), $userObj->getEmail());
 			$mail->send();											
 		} else if ($user_updated) {
-			$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_UPDATED, $evento_user);
+			//$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_UPDATED, $evento_user);
 		}
 	}
 	

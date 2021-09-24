@@ -155,8 +155,8 @@ class ilEventoImportImport extends ilCronJob {
             $base_url = '';
             $port = 1337;
             $base_path = '';
-            $data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
-		    $data_source->setTimeout($this->seconds_before_retry);
+            //$data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
+            $data_source = new \EventoImport\communication\request_services\FakeRestClientService('', 0, '');
 		    $importer = new \EventoImport\communication\EventoUserImporter(new ilEventoImporterIterator(), $this->settings, $logger, $data_source);
 
 		    /*
@@ -208,7 +208,7 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->setOptions($options);
 		$ws_item->setValue($this->settings->get('crevento_ilias_auth_mode'));
 		$a_form->addItem($ws_item);
-		
+
 		$ws_item = new ilNumberInputGUI(
 				$this->cp->txt('account_duration'),
 				'crevento_account_duration'
@@ -332,7 +332,18 @@ class ilEventoImportImport extends ilCronJob {
 		$ws_item->usePurifier(true);
 		$ws_item->setValue($this->settings->get('crevento_email_account_changed_body', ''));
 		$a_form->addItem($ws_item);
-		
+
+        $section = new ilFormSectionHeaderGUI();
+        $section->setTitle('Role to Import Code Mapping');
+        $a_form->addItem($section);
+
+        $global_roles = $this->rbac->review()->getGlobalRoles();
+        foreach($global_roles as $role_id) {
+            $ws_item = new ilCheckboxInputGUI(ilObject::_lookupTitle($role_id), "global_role_$role_id");
+            $ws_item->addSubItem(new ilNumberInputGUI('... maps to code:', "map_from_$role_id"));
+            $a_form->addItem($ws_item);
+        }
+
 		foreach($this->importUsersConfig->getImportTypes() as $import_type) {
 		    $section = new ilFormSectionHeaderGUI();
 		    $section->setTitle(sprintf($this->cp->txt('user_type_specific_settings_header'), $import_type));

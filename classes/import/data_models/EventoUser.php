@@ -6,15 +6,15 @@ class EventoUser
 {
     use JSONDataValidator;
 
-    const JSON_ID = 'Id';
-    const JSON_LAST_NAME = 'LastName';
-    const JSON_FIRST_NAME = 'FirstName';
-    const JSON_GENDER = 'Gender';
-    const JSON_LOGIN_NAME = 'LoginName';
-    const JSON_EMAIL = 'Email';
-    const JSON_EMAIL_2 = 'Email2';
-    const JSON_EMAIL_3 = 'Email3';
-    const JSON_ROLES = 'Roles';
+    const JSON_ID = 'id';
+    const JSON_LAST_NAME = 'lastName';
+    const JSON_FIRST_NAME = 'firstName';
+    const JSON_GENDER = 'gender';
+    const JSON_LOGIN_NAME = 'loginName';
+    const JSON_EMAIL = 'email';
+    const JSON_EMAIL_2 = 'email2';
+    const JSON_EMAIL_3 = 'email3';
+    const JSON_ROLES = 'roles';
 
     private $evento_id;
     private $last_name;

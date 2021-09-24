@@ -105,7 +105,7 @@ abstract class ilEventoImporter {
             "id" => (int)$id
         );
 
-        $json_response = $this->data_source->sendRequest($this->rest_method_path, $params);
+        $json_response = $this->data_source->sendRequest('getUser', $params);
 
         if(strlen($json_response) > 0) {
             $json_response_decoded = json_decode($json_response, true);
@@ -122,7 +122,7 @@ abstract class ilEventoImporter {
             "take" => $this->pagesize
         );
 
-        $json_response = $this->data_source->sendRequest($this->rest_method_path, $params);
+        $json_response = $this->data_source->sendRequest('getUsers', $params);
 
         $json_response_decoded = $this->validateResponseAndGetAsJsonStructure($json_response);
 

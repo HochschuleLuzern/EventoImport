@@ -44,7 +44,7 @@ trait JSONDataValidator
         $list_of_values = array();
 
         foreach($key_list as $key) {
-            if(isset($data_array[$key])) {
+            if(isset($data_array[$key]) && !in_array($data_array[$key], $list_of_values)) {
                 $list_of_values[] = $data_array[$key];
             }
         }

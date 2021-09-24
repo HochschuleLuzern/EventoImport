@@ -79,12 +79,12 @@ class ilEventoImportLogger {
 				$q = "UPDATE crnhk_crevento_mas SET ref_id = '{$data['ref_id']}', role_id = '{$data['role_id']}', end_date = '{$data['EndDatum']}', number_of_subs = '{$data['number_of_subs']}', last_import_data = ".$this->ilDB->quote(serialize($data), 'text')." ,last_import_date = '".date("Y-m-d H:i:s")."', update_info_code = '$result' WHERE evento_id = '{$data['AnlassBezKurz']}'";
 			}
 		} else {
-			$r = $this->ilDB->query("SELECT * FROM crnhk_crevento_usrs WHERE evento_id = '{$data['EvtID']}'");
+			$r = $this->ilDB->query("SELECT * FROM crnhk_crevento_usrs WHERE evento_id = '{$data['id']}'");
 
 			if (count($this->ilDB->fetchAll($r)) == 0) {
-				$q = "INSERT INTO crnhk_crevento_usrs (evento_id, usrname, last_import_data, last_import_date, update_info_code) VALUES ('{$data['EvtID']}', '{$data['Login']}', ".$this->ilDB->quote(serialize($data), 'text').", '".date("Y-m-d H:i:s")."', '$result')";
+				$q = "INSERT INTO crnhk_crevento_usrs (evento_id, usrname, last_import_data, last_import_date, update_info_code) VALUES ('{$data['id']}', '{$data['loginName']}', ".$this->ilDB->quote(serialize($data), 'text').", '".date("Y-m-d H:i:s")."', '$result')";
 			} else {
-				$q = "UPDATE crnhk_crevento_usrs SET usrname = '{$data['Login']}', last_import_data = ".$this->ilDB->quote(serialize($data), 'text')." ,last_import_date = '".date("Y-m-d H:i:s")."', update_info_code = '$result' WHERE evento_id = '{$data['EvtID']}'";
+				$q = "UPDATE crnhk_crevento_usrs SET usrname = '{$data['loginName']}', last_import_data = ".$this->ilDB->quote(serialize($data), 'text')." ,last_import_date = '".date("Y-m-d H:i:s")."', update_info_code = '$result' WHERE evento_id = '{$data['id']}'";
 			}
 		}
 		
