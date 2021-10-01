@@ -56,7 +56,8 @@ class ilEventoImportImportUsers {
 	    ) {
     		$this->evento_importer = $importer;
             $this->evento_logger = $logger;
-    		
+    		$this->evento_user_repo = new \EventoImport\import\db_repository\EventoUserRepository($db);
+
     		$this->ilDB = $db;
     		$this->rbacadmin = $rbac->admin();
     		$this->rbacreview = $rbac->review();
@@ -157,7 +158,7 @@ class ilEventoImportImportUsers {
 	private function importUsers() {
 	    // $operation = 'GetMitarbeiter', $dataselector = 'Mitarbeiter', $additional_roles = 'RoleIdOfMitarbeitende usw.'
 		$iterator = new ilEventoImporterIterator();
-        $user_matcher = new EventoUserToIliasUserMatcher($this->ilDB);
+        $user_matcher = new EventoUserToIliasUserMatcher(new IliasUserQuerying($this->ilDB));
 
 		do {
             try {
@@ -165,64 +166,37 @@ class ilEventoImportImportUsers {
 
                     try {
                         $evento_user = new \EventoImport\import\data_models\EventoUser($data_set);
-                        $result = $this->determineActionForGivenEventoUser($evento_user);
+                        $result = $user_matcher->matchEventoUserTheOldWay($evento_user);//$this->determineActionForGivenEventoUser($evento_user);
+
+                        switch($result->getResultType()) {
+                            case EventoIliasUserMatchingResult::RESULT_NO_MATCHING_USER:
+                                $this->insertUser($evento_user);
+                                $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $data_set);
+                                break;
+
+                            case EventoIliasUserMatchingResult::RESULT_EXACTLY_ONE_MATCHING_USER:
+                                $this->updateUser($result->getMatchedUserId(), $evento_user);
+                                $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_UPDATED, $data_set);
+                                break;
+
+                            case EventoIliasUserMatchingResult::RESULT_ONE_CONFLICTING_USER:
+                                //$this->renameAndDeactivateUser($user_match_result->getMatchedUserId());
+                                $this->insertUser($evento_user);
+                                break;
+
+                            case EventoIliasUserMatchingResult::RESULT_CONFLICT_OF_ACCOUNTS:
+                                $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $data_set);
+                                break;
+
+                            case EventoIliasUserMatchingResult::RESULT_ERROR:
+                            default:
+                                $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
+                                break;
+                        }
 
                     } catch(Exception $e) {
-                        $result = 'error';
+                        $result = EventoIliasUserMatchingResult::Error();
                     }
-
-                    switch($result['action']) {
-                        case 'new':
-                            $this->insertUser($evento_user);
-                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $data_set);
-                            break;
-
-                        case 'update':
-                            $this->updateUser($result['user_id'], $evento_user);
-                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_UPDATED, $data_set);
-                            break;
-
-                        /*case EventoIliasUserMatchingResult::RESULT_CONVERT_EXISTING_CREATE_NEW:
-                            $this->renameAndDeactivateUser($user_match_result->getMatchedUserId());
-                            $this->insertUser($evento_user);
-                            break;*/
-
-                        case 'conflict':
-                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $data_set);
-                            break;
-
-                        case 'error':
-                        default:
-                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
-                            break;
-                    }
-/*
-                    $user_match_result = $user_matcher->matchGivenEventoUserToIliasUsers($evento_user);
-
-                    switch($user_match_result) {
-                        case EventoIliasUserMatchingResult::RESULT_NO_MATCHING_USER:
-                            $this->insertUser($evento_user);
-                            break;
-
-                        case EventoIliasUserMatchingResult::RESULT_EXACTLY_ONE_MATCHING_USER:
-                            $this->updateUser($user_match_result->getMatchedUserId(), $evento_user);
-                            break;
-
-                        case EventoIliasUserMatchingResult::RESULT_CONVERT_EXISTING_CREATE_NEW:
-                            $this->renameAndDeactivateUser($user_match_result->getMatchedUserId());
-                            $this->insertUser($evento_user);
-                            break;
-
-                        case EventoIliasUserMatchingResult::RESULT_CONFLICT_OF_ACCOUNTS:
-                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $data_set);
-                            break;
-
-                        case EventoIliasUserMatchingResult::RESULT_ERROR:
-                        default:
-                            $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
-                            break;
-                    }
-*/
                 }
             } catch(Exception $e) {}
 
@@ -234,20 +208,7 @@ class ilEventoImportImportUsers {
     {
         $data['id_by_login'] = ilObjUser::getUserIdByLogin($evento_user->getLoginName());
         $data['ids_by_matriculation'] = $this->getUserIdsByMatriculation('Evento:'.$evento_user->getEventoId());
-        $data['ids_by_email'] = strlen(trim($data['Email'])) == 0 ? array() : $this->reallyGetUserIdsByEmail($evento_user->getEmailList()[0]);
-/*
-        foreach (strlen(trim($data['Email2'])) == 0 ? array() : $this->reallyGetUserIdsByEmail($data['Email2']) as $id) {
-            if (! in_array($id, $data['ids_by_email'])) {
-                $data['ids_by_email'][] = $id;
-            }
-        }
-
-        foreach (strlen(trim($data['Email3'])) == 0 ? array() : $this->reallyGetUserIdsByEmail($data['Email3']) as $id) {
-            if (! in_array($id, $data['ids_by_email'])) {
-                $data['ids_by_email'][] = $id;
-            }
-        }
-*/
+        $data['ids_by_email'] = [];
 
         // For each mail given from the evento import...
         foreach($evento_user->getEmailList() as $mail_given_from_evento) {
