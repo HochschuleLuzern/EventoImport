@@ -79,10 +79,10 @@ class EventoUserToIliasUserMatcher
             && $number_of_matches_by_email == 1
             && $this->matches_by_evento_id[0] == $this->matches_by_email[0]
         ) {
-            return new EventoIliasUserMatchingResult($this->matches_by_evento_id[0], EventoIliasUserMatchingResult::RESULT_EXACTLY_ONE_MATCHING_USER);
+            return EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($this->matches_by_evento_id[0]);
         } else if($number_of_matches_by_evento_id == 1) {
             if(in_array($this->matches_by_evento_id[0], $this->matches_by_email)) {
-                return new EventoIliasUserMatchingResult($this->matches_by_evento_id[0], EventoIliasUserMatchingResult::RESULT_EXACTLY_ONE_MATCHING_USER);
+                return EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($this->matches_by_evento_id[0]);
             } else {
                 throw new Exception("");
             }
@@ -103,8 +103,7 @@ class EventoUserToIliasUserMatcher
         if($has_match_by_login
             && $number_of_matches_by_evento_id == 0
             && $number_of_matches_by_email == 0) {
-
-            return new EventoIliasUserMatchingResult(null, EventoIliasUserMatchingResult::RESULT_NO_MATCHING_USER);
+            return EventoIliasUserMatchingResult::NoMatchingUserResult();
 
         } else if(!is_null($this->match_by_login)) {
             $this->compareMatchByLoginWithOthers();

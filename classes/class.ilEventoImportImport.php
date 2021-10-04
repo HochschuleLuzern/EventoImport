@@ -166,8 +166,17 @@ class ilEventoImportImport extends ilCronJob {
 		    $favourites_manager = new ilFavouritesManager();
 		    */
 
+            $evento_user_repo = new \EventoImport\import\db_repository\EventoUserRepository($this->db);
+            $user_query = new IliasUserQuerying($this->db);
+            $evento_ilias_user_matcher = new EventoUserToIliasUserMatcher($user_query, $evento_user_repo);
 		    $importUsers = new ilEventoImportImportUsers(
-		        $importer, $logger, $this->db, $this->rbac, $this->importUsersConfig);
+		        $importer,
+                $evento_user_repo,
+                $evento_ilias_user_matcher,
+                $logger,
+                $this->db,
+                $this->rbac,
+                $this->importUsersConfig);
 			$importUsers->run();
 
 			/*

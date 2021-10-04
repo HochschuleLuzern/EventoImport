@@ -8,6 +8,10 @@ class EventoIliasUserMatchingResult
     public const RESULT_CONFLICT_OF_ACCOUNTS = 4;
     public const RESULT_ERROR = 5;
 
+    public const CONFLICTING_USER_REQUIRED_DATA_FIELDS = array(
+        'user_id', 'EvtID', 'new_user_info', 'found_by'
+    );
+
     private $matched_user_id;
     private $result_code;
     private $additional_params;
@@ -18,7 +22,7 @@ class EventoIliasUserMatchingResult
 
     private $should_create_new_user;
 
-    public function __construct(int $result_code, ?int $matched_user_id = null, array $additional_params = array()) {
+    private function __construct(int $result_code, ?int $matched_user_id = null, array $additional_params = array()) {
         $this->matched_user_id = $matched_user_id;
         $this->result_code = $result_code;
         $this->additional_params = $additional_params;
@@ -51,6 +55,14 @@ class EventoIliasUserMatchingResult
 
     public static function ConflictingUserToConvertResult(array $conflicting_user_data) : EventoIliasUserMatchingResult
     {
+        $missing_fields = array();
+
+        foreach(self::CONFLICTING_USER_REQUIRED_DATA_FIELDS as $key) {
+            if(!isset($conflicting_user_data[$key])) {
+                $missing_fields[] = $key;
+            }
+        }
+
         return new EventoIliasUserMatchingResult(self::RESULT_ONE_CONFLICTING_USER, 0, $conflicting_user_data);
     }
 
