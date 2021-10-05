@@ -9,10 +9,10 @@ use ilSetting;
 
 class EventoUserImporter extends \ilEventoImporter implements DataRecordImporter, DataSetImporter
 {
-    public function __construct(ilEventoImporterIterator $iterator, ilSetting $settings, ilEventoImportLogger $logger, \EventoImport\communication\request_services\RestClientService $data_source)
+    public function __construct(ilEventoImporterIterator $iterator, ilSetting $settings, ilEventoImportLogger $logger, \EventoImport\communication\request_services\RequestClientService $data_source)
     {
-        $this->fetch_data_set_method = '';
-        $this->fetch_data_record_method = '';
+        $this->fetch_data_set_method = 'GetAccounts';
+        $this->fetch_data_record_method = 'GetAccountById';
 
         parent::__construct($iterator, $settings, $logger, $data_source);
     }
