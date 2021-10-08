@@ -2,90 +2,179 @@
 
 namespace EventoImport\import\data_models;
 
-class IliasEventoEvent
+class EventoEvent
 {
+    use JSONDataValidator;
+
+    public const JSON_ID = 'Id';
+    public const JSON_NAME = 'Name';
+    public const JSON_DESCRIPTION = 'Description';
+    public const JSON_TYPE = 'Type';
+    public const JSON_KIND = 'Kind';
+    public const JSON_DEPARTMENT = 'Department';
+    public const JSON_START_DATE = 'StartDate';
+    public const JSON_END_DATE = 'EndDate';
+    public const JSON_IS_CREATE_COURSE_FLAG = 'IsCreateCourse';
+    public const JSON_IS_GROUP_MEMBER_FLAG = 'IsGroupMember';
+    public const JSON_GROUP_NAME = 'GroupName';
+    public const JSON_GROUP_MEMBER_COUNT = 'GroupMemberCount';
+    public const JSON_EMPLOYEES = 'Employees';
+    public const JSON_STUDENTS = 'Students';
+
     public const EVENTO_TYPE_MODULANLASS = 'Modulanlass';
     public const EVENTO_TYPE_KURS = 'Kurs';
 
-    private $evento_event_id;
-    private $parent_event_ref_id;
-    private $ref_id;
-    private $obj_id;
-    private $admin_role_id;
-    private $student_role_id;
-    private $evento_event_type;
-    private $was_automatically_created;
+    private $evento_id;
+    private $name;
+    private $description;
+    private $type;
+    private $kind;
+    private $department;
     private $start_date;
     private $end_date;
-    private $ilias_type;
+    private $is_create_course_flag;
+    private $is_group_member_flag;
+    private $group_name;
+    private $group_member_count;
+    private $employees;
+    private $students;
 
-    public function __construct(int $evento_event_id, int $parent_event_ref_id, int $ref_id, int $obj_id, int $admin_role_id, int $student_role_id, string $evento_event_type, bool $was_automatically_created, $start_date, $end_date, string $ilias_type)
+    public function __construct(array $data_set)
     {
-        $this->evento_event_id     = $evento_event_id;
-        $this->parent_event_ref_id = $parent_event_ref_id;
-        $this->ref_id                    = $ref_id;
-        $this->obj_id                    = $obj_id;
-        $this->admin_role_id             = $admin_role_id;
-        $this->student_role_id           = $student_role_id;
-        $this->evento_event_type         = $evento_event_type;
-        $this->was_automatically_created = $was_automatically_created;
-        $this->start_date                = $start_date;
-        $this->end_date                  = $end_date;
-        $this->ilias_type                = $ilias_type;
+        $this->evento_id             = $this->validateAndReturnNumber($data_set, self::JSON_ID);
+        $this->name                  = $this->validateAndReturnString($data_set, self::JSON_NAME);
+        $this->description           = $this->validateAndReturnString($data_set, self::JSON_DESCRIPTION);
+        $this->type                  = $this->validateAndReturnString($data_set, self::JSON_TYPE);
+        $this->kind                  = $this->validateAndReturnString($data_set, self::JSON_KIND);
+        $this->department            = $this->validateAndReturnString($data_set, self::JSON_DEPARTMENT);
+        $this->start_date            = $this->validateAndReturnDateTime($data_set, self::JSON_START_DATE);
+        $this->end_date              = $this->validateAndReturnDateTime($data_set, self::JSON_END_DATE);
+        $this->is_create_course_flag = $this->validateAndReturnBoolean($data_set, self::JSON_IS_CREATE_COURSE_FLAG);
+        $this->is_group_member_flag  = $this->validateAndReturnBoolean($data_set, self::JSON_IS_GROUP_MEMBER_FLAG);
+        $this->group_name            = $this->validateAndReturnString($data_set, self::JSON_GROUP_NAME);
+        $this->group_member_count    = $this->validateAndReturnNumber($data_set, self::JSON_GROUP_MEMBER_COUNT);
+        $this->employees             = $this->validateAndReturnArray($data_set, self::JSON_EMPLOYEES);
+        $this->students              = $this->validateAndReturnArray($data_set, self::JSON_STUDENTS);
+
+        if(count($this->key_errors) > 0) {
+            $error_message = 'One or more fields in the given array were invalid: ';
+            foreach($this->key_errors as $field => $error) {
+                $error_message .= "Field $field - $error; ";
+            }
+
+            throw new \InvalidArgumentException($error_message);
+        }
     }
 
-    public function getEventoEventId() : int
+    /**
+     * @return int
+     */
+    public function getEventoId() : int
     {
-        return $this->evento_event_id;
+        return $this->evento_id;
     }
 
-    public function getParentEventRefId() : int
+    /**
+     * @return string
+     */
+    public function getName() : string
     {
-        return $this->parent_event_ref_id;
+        return $this->name;
     }
 
-    public function getRefId() : int
+    /**
+     * @return string
+     */
+    public function getDescription() : string
     {
-        return $this->ref_id;
+        return $this->description;
     }
 
-    public function getObjId() : int
+    /**
+     * @return string
+     */
+    public function getType() : string
     {
-        return $this->obj_id;
+        return $this->type;
     }
 
-    public function getAdminRoleId() : int
+    /**
+     * @return string
+     */
+    public function getKind() : string
     {
-        return $this->admin_role_id;
+        return $this->kind;
     }
 
-    public function getStudentRoleId() : int
+    /**
+     * @return string
+     */
+    public function getDepartment() : string
     {
-        return $this->student_role_id;
+        return $this->department;
     }
 
-    public function getEventoType() : string
-    {
-        return $this->evento_event_type;
-    }
-
-    public function wasAutomaticallyCreated() : bool
-    {
-        return $this->was_automatically_created;
-    }
-
-    public function getStartDate()
+    /**
+     * @return \DateTime
+     */
+    public function getStartDate() : \DateTime
     {
         return $this->start_date;
     }
 
-    public function getEndDate()
+    /**
+     * @return \DateTime
+     */
+    public function getEndDate() : \DateTime
     {
         return $this->end_date;
     }
 
-    public function iliasType() : string
+    /**
+     * @return bool
+     */
+    public function hasCreateCourseFlag() : bool
     {
-        return $this->ilias_type;
+        return $this->is_create_course_flag;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasGroupMemberFlag() : bool
+    {
+        return $this->is_group_member_flag;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroupName() : string
+    {
+        return $this->group_name;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGroupMemberCount() : int
+    {
+        return $this->group_member_count;
+    }
+
+    /**
+     * @return array
+     */
+    public function getEmployees() : array
+    {
+        return $this->employees;
+    }
+
+    /**
+     * @return array
+     */
+    public function getStudents() : array
+    {
+        return $this->students;
     }
 }

@@ -27,16 +27,25 @@
 
 class ilEventoImporterIterator {
 	private $page;
+	private $page_size;
 	
-	public function __construct() {
+	public function __construct(int $page_size) {
 		$this->page = 1;
+		$this->page_size = $page_size;
 	}
 	
-	public function nextPage() {
+	public function nextPage() : int
+    {
 		$this->page++;
 	}
 	
-	public function getPage() {
+	public function getPage() : int
+    {
 		return $this->page;
 	}
+
+	public function getPageSize() : int
+    {
+        return $this->page_size;
+    }
 }

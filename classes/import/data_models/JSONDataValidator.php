@@ -26,6 +26,30 @@ trait JSONDataValidator
         return $data_array[$key];
     }
 
+    protected function validateAndReturnBoolean(array $data_array, string $key, bool $as_string_possible = false) : ?bool
+    {
+        if(!isset($data_array[$key])) {
+            $this->key_errors[$key] = 'Value not set';
+            return null;
+        }
+
+        if(is_bool($data_array[$key])) {
+            return $data_array[$key];
+        } else if($as_string_possible && is_string($data_array[$key])) {
+            if($data_array[$key] == 'true') {
+                return true;
+            } else if($data_array[$key] == 'false') {
+                return false;
+            } else {
+                $this->key_errors[$key] = 'Invalid string given as boolean';
+                return null;
+            }
+        } else {
+            $this->key_errors[$key] = 'Value ist not a boolean';
+            return null;
+        }
+    }
+
     protected function validateAndReturnArray(array $data_array, string $key) : ?array
     {
         if(!isset($data_array[$key])) {
@@ -56,4 +80,14 @@ trait JSONDataValidator
 
         return $list_of_values;
     }
+
+        protected function validateAndReturnDateTime(array $data_array, string $key) : ?\DateTime
+        {
+            if(!isset($data_array[$key])) {
+                $this->key_errors[$key] = 'Value not set';
+                return null;
+            }
+
+            return new \DateTime($data_array[$key]);
+        }
 }

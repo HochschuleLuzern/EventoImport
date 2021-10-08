@@ -28,12 +28,6 @@
 abstract class ilEventoImporter {
 	private $evento_logger;
 
-	private $which;
-	private $client;
-	private $ws_user;
-	private $ws_password;
-	private $auth_mode;
-	private $wsdl;
 	private $pagesize;
 	private $max_pages;
 	private $max_retries;
@@ -47,14 +41,9 @@ abstract class ilEventoImporter {
 	protected $fetch_data_set_method;
     protected $fetch_data_record_method;
 	
-	public function __construct(ilEventoImporterIterator $iterator, ilSetting $settings, ilEventoImportLogger $logger, \EventoImport\communication\request_services\RestClientService $data_source) {
+	public function __construct(ilEventoImporterIterator $iterator, ilSetting $settings, ilEventoImportLogger $logger, \EventoImport\communication\request_services\RequestClientService $data_source) {
 		//Get Settings from dbase
         $this->iterator = $iterator;
-		$this->client = CLIENT_ID;
-		$this->ws_user = $settings->get('crevento_ws_user');
-		$this->ws_password = $settings->get('crevento_ws_password');
-		$this->auth_mode = $settings->get('crevento_ilias_auth_mode');
-		$this->wsdl = $settings->get('crevento_wsdl');
 		$this->pagesize = (int) $settings->get('crevento_pagesize');
 		$this->max_pages = (int) $settings->get('crevento_max_pages');
 		$this->max_retries = (int) $settings->get('crevento_max_retries');
@@ -105,7 +94,7 @@ abstract class ilEventoImporter {
             "id" => (int)$id
         );
 
-        $json_response = $this->data_source->sendRequest('getUser', $params);
+        $json_response = $this->data_source->sendRequest($this->fetch_data_record_method, $params);
 
         if(strlen($json_response) > 0) {
             $json_response_decoded = json_decode($json_response, true);
@@ -118,11 +107,11 @@ abstract class ilEventoImporter {
 	public function fetchNextDataSet()
     {
         $params = array(
-            "skip" => $this->iterator->getPage() * $this->pagesize,
-            "take" => $this->pagesize
+            "skip" => ($this->iterator->getPage() - 1) * $this->iterator->getPageSize(),
+            "take" => $this->iterator->getPageSize()
         );
 
-        $json_response = $this->data_source->sendRequest('getUsers', $params);
+        $json_response = $this->data_source->sendRequest($this->fetch_data_set_method, $params);
 
         $json_response_decoded = $this->validateResponseAndGetAsJsonStructure($json_response);
 

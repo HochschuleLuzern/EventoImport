@@ -18,6 +18,12 @@ class FakeRestClientService extends RestClientService
 
     public function sendRequest(string $path, array $request_params)
     {
+        if($path == 'getUsers') {
+
+        } else if($path == 'getEvents') {
+
+        }
+
         $file_content = file_get_contents($this->file_path . "users.json");
         $file_content = '{"success":true,"hasMoreData":'.$this->has_more.',"message":"OK","data":' . $file_content . '}';
         $this->has_more = 'false';

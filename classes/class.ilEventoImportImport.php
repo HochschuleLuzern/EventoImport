@@ -157,7 +157,7 @@ class ilEventoImportImport extends ilCronJob {
             $base_path = '';
             //$data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
             $data_source = new \EventoImport\communication\request_services\FakeRestClientService('', 0, '');
-		    $importer = new \EventoImport\communication\EventoUserImporter(new ilEventoImporterIterator(), $this->settings, $logger, $data_source);
+		    $user_importer = new \EventoImport\communication\EventoUserImporter(new ilEventoImporterIterator(), $this->settings, $logger, $data_source);
 
 		    /*
 		    $mailbox_search = new ilRoleMailboxSearch(
@@ -170,7 +170,7 @@ class ilEventoImportImport extends ilCronJob {
             $user_query = new IliasUserQuerying($this->db);
             $evento_ilias_user_matcher = new EventoUserToIliasUserMatcher($user_query, $evento_user_repo);
 		    $importUsers = new ilEventoImportImportUsers(
-		        $importer,
+		        $user_importer,
                 $evento_user_repo,
                 $evento_ilias_user_matcher,
                 $logger,
@@ -179,11 +179,33 @@ class ilEventoImportImport extends ilCronJob {
                 $this->importUsersConfig);
 			$importUsers->run();
 
+			$evento_event_importer = new \EventoImport\communication\EventoEventImporter(
+			    new ilEventoImporterIterator(),
+                $this->settings,
+                $logger,
+                $data_source
+            );
+
+			$event_repo = new \EventoImport\import\db_repository\IliasEventoEventsRepository(
+			    $this->db
+            );
+
+			$ilias_event_query = new \EventoImport\import\IliasEventObjectQuery($this->db);
+			$evento_event_matcher = new \EventoImport\import\EventoEventToIliasObjectMatcher($ilias_event_query, $event_repo);
+
+			$import_events = new ilEventoImportImportEventsAndMemberships(
+			    $evento_event_importer,
+                $event_repo,
+                $evento_event_matcher,
+                $logger,
+                $rbac
+            )
+
 			/*
-			 * Intentionally left out. First phase of the evento importer is to import users
+			 * Intentionally left out. First phase of the evento user_importer is to import users
 			 *
 			$importMemberships = new ilEventoImportImportMemberships(
-			    $importer, $logger, $this->db, $this->rbac, $mailbox_search, $favourites_manager);
+			    $user_importer, $logger, $this->db, $this->rbac, $mailbox_search, $favourites_manager);
 			$importMemberships->run();
 			*/
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
