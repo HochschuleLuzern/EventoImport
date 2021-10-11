@@ -20,4 +20,21 @@ class RepositoryFacade
         $this->event_object_query = $event_objects_query ?? new IliasEventObjectQuery($DIC->database());
         $this->event_repo = $event_repo ?? new IliasEventoEventsRepository($DIC->database());
     }
+
+    public function fetchAllEventableObjectsForGivenTitle(string $name)
+    {
+        $this->event_object_query->fetchAllEventableObjectsForGivenTitle($name);
+    }
+
+    public function getEventCourseOfEvent()
+    {
+        global $DIC;
+    }
+
+    public function iliasEventoEventRepository() : IliasEventoEventsRepository
+    {
+        return $this->event_repo;
+    }
+
+
 }

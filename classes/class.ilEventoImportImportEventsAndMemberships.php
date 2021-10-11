@@ -3,6 +3,7 @@
 class ilEventoImportImportEventsAndMemberships
 {
     private $evento_importer;
+    private \EventoImport\import\db\RepositoryFacade $repository_facade;
     private $ilias_evento_event_repo;
     private $evento_event_matcher;
     private $logger;
@@ -11,7 +12,7 @@ class ilEventoImportImportEventsAndMemberships
 
     public function __construct(
         \EventoImport\communication\EventoEventImporter $evento_importer,
-        \EventoImport\import\db\repository\IliasEventoEventsRepository $ilias_evento_event_repo,
+        \EventoImport\import\db\RepositoryFacade $repository_facade,
         \EventoImport\import\data_matching\EventoEventToIliasObjectMatcher $evento_event_matcher,
         \EventoImport\import\IliasEventObjectFactory $ilias_event_object_factory,
         ilEventoImportLogger $logger,
@@ -19,7 +20,7 @@ class ilEventoImportImportEventsAndMemberships
     )
     {
         $this->evento_importer         = $evento_importer;
-        $this->ilias_evento_event_repo = $ilias_evento_event_repo;
+        $this->repository_facade       = $repository_facade;
         $this->evento_event_matcher = $evento_event_matcher;
         $this->ilias_event_object_factory = $ilias_event_object_factory;
         $this->logger = $logger;
@@ -73,7 +74,7 @@ class ilEventoImportImportEventsAndMemberships
                 foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
                     try {
                         $evento_event = new \EventoImport\communication\api_models\EventoEvent($data_set);
-                        $ilias_evento_event = $this->ilias_evento_event_repo->getEventByEventoId($evento_event->getEventoId());
+                        $ilias_evento_event = $this->repository_facade-> ilias_evento_event_repo->getEventByEventoId($evento_event->getEventoId());
 
                         if(is_null($ilias_evento_event)) {
                             $this->handleNotExistingEvent($evento_event);

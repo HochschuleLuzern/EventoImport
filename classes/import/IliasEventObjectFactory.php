@@ -4,15 +4,16 @@ namespace EventoImport\import;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\query\IliasEventObjectQuery;
+use EventoImport\import\db\RepositoryFacade;
 
 class IliasEventObjectFactory
 {
     private $owner_user_id = 6;
     private $sort_mode;
-    private $event_object_query;
+    private $repository_facade;
 
-    public function __construct(IliasEventObjectQuery $event_object_query) {
-        $this->event_object_query = $event_object_query;
+    public function __construct(RepositoryFacade $repository_facade) {
+        $this->repository_facade = $repository_facade;
     }
 
     private function buildCourseObject(string $title, string $description, int $owner_id, int $destination_ref_id, $sort_type) : \ilObjCourse
@@ -75,7 +76,7 @@ class IliasEventObjectFactory
 
     private function createAsMultiGroupEvent(EventoEvent $evento_event, $destiniation)
     {
-        if($event_course = $this->event_object_query->getEventCourseOfEvent($evento_event)) {
+        if($event_course = $this->repository_facade->getEventCourseOfEvent($evento_event)) {
 
         } else {
             $crs_object = $this->buildCourseObject($evento_event->getGroupName(), $evento_event->getDescription(), $this->owner_user_id, $destiniation, $this->sort_mode);

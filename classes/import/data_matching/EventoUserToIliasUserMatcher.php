@@ -2,6 +2,7 @@
 
 namespace EventoImport\import\data_matching;
 
+use EventoImport\import\db\UserFacade;
 use Exception;
 use EventoImport\import\db\query\IliasUserQuerying;
 use ilObjUser;
@@ -18,15 +19,16 @@ class EventoUserToIliasUserMatcher
     /** @var \EventoImport\import\db\repository\EventoUserRepository */
     public $evento_user_repo;
 
-    public function __construct(IliasUserQuerying $user_query, \EventoImport\import\db\repository\EventoUserRepository $evento_user_repo)
+    private $user_facade;
+
+    public function __construct(UserFacade $user_facade)
     {
-        $this->user_query       = $user_query;
-        $this->evento_user_repo = $evento_user_repo;
+        $this->user_facade = $user_facade;
     }
 
     private function searchMatchInDB(\EventoImport\communication\api_models\EventoUser $evento_user)
     {
-        return $this->evento_user_repo->getIliasUserIdByEventoId();
+        return $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
     }
 
     private function getUserIdsByEmailAdresses(array $evento_mail_list)
@@ -103,9 +105,9 @@ class EventoUserToIliasUserMatcher
     private function searchMatchInExistingUsers(\EventoImport\communication\api_models\EventoUser $evento_user)
     {
         throw new \ILIAS\UI\NotImplementedException('');
-        $this->match_by_login       = ilObjUser::getUserIdByLogin($evento_user->getLoginName());
-        $this->matches_by_evento_id = $this->user_query->fetchUserIdsByEventoId($evento_user->getEventoId());
-        $this->matches_by_email     = $this->getUserIdsByEmailAdresses($evento_user->getEmailList());
+        $this->match_by_login       = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName()); ilObjUser::getUserIdByLogin($evento_user->getLoginName());
+        $this->matches_by_evento_id = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());
+        $this->matches_by_email     = $this->user_facade->fetchUserIdsByEmail($evento_user->getEmailList());
 
         $has_match_by_login             = is_null($this->match_by_login);
         $number_of_matches_by_evento_id = count($this->matches_by_evento_id);
@@ -145,7 +147,7 @@ class EventoUserToIliasUserMatcher
 
     public function matchGivenEventoUserToIliasUsers(\EventoImport\communication\api_models\EventoUser $evento_user)
     {
-        $user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
+        $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
 
         if (!is_null($user_id)) {
             return EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($user_id);
@@ -158,9 +160,9 @@ class EventoUserToIliasUserMatcher
 
     public function matchEventoUserTheOldWay(\EventoImport\communication\api_models\EventoUser $evento_user) : EventoIliasUserMatchingResult
     {
-        $data['id_by_login']          = $this->user_query->fetchUserIdByLogin($evento_user->getLoginName());
-        $data['ids_by_matriculation'] = $this->user_query->fetchUserIdsByEventoId($evento_user->getEventoId());
-        $data['ids_by_email']         = $this->user_query->fetchUserIdsByEmailAdresses($evento_user->getEmailList());
+        $data['id_by_login']          = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
+        $data['ids_by_matriculation'] = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());
+        $data['ids_by_email']         = $this->user_facade->fetchUserIdsByEmail($evento_user->getEmailList());
 
         $usrId = 0;
 

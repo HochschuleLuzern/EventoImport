@@ -36,8 +36,7 @@ class ilEventoImportImportUsers {
     /** @var \EventoImport\communication\EventoUserImporter */
 	private $evento_importer;
 
-	/** @var \EventoImport\import\db\repository\EventoUserRepository */
-	private $evento_user_repo;
+	private $user_facade;
 
 	/** @var EventoUserToIliasUserMatcher */
 	private $evento_user_matcher;
@@ -61,7 +60,7 @@ class ilEventoImportImportUsers {
 	
 	public function __construct(
 	    \EventoImport\communication\EventoUserImporter $importer,
-	    \EventoImport\import\db\repository\EventoUserRepository $evento_user_repo,
+	    \EventoImport\import\db\UserFacade $user_facade,
 	    EventoUserToIliasUserMatcher $evento_user_matcher,
 	    ilEventoImportLogger $logger,
 	    ilDBInterface $db,
@@ -70,7 +69,7 @@ class ilEventoImportImportUsers {
 	    )
     {
         $this->evento_importer = $importer;
-        $this->evento_user_repo = $evento_user_repo;
+        $this->user_facade = $user_facade;
         $this->evento_user_matcher = $evento_user_matcher;
         $this->evento_logger = $logger;
 
@@ -90,12 +89,14 @@ class ilEventoImportImportUsers {
         $this->usr_role_id = $user_config->getStandardUserRoleId();
 	}
 	
-	public function run() {
+	public function run()
+    {
 
-		$this->importUsers();
-		//$this->convertDeletedAccounts();
+        $this->importUsers();
+        //$this->convertDeletedAccounts();
 
-
+        $this->setUserTimeLimits();
+    }
 /*
  *
 | crevento | crevento_account_duration                      | 12                                                          |
@@ -124,9 +125,7 @@ class ilEventoImportImportUsers {
 		    $this->convertDeletedAccounts($parameters['operation']['value'], $parameters['deactivate']['value']);
 		}
 */
-		
-		$this->setUserTimeLimits();
-	}
+
 
 
 	/**
@@ -141,7 +140,7 @@ class ilEventoImportImportUsers {
 
                     try {
                         $evento_user = new \EventoImport\communication\api_models\EventoUser($data_set);
-                        $result = $this->evento_user_matcher->matchEventoUserTheOldWay($evento_user);//$this->determineActionForGivenEventoUser($evento_user);
+                        $result = $this->evento_user_matcher->matchEventoUserTheOldWay($evento_user);
 
                         switch($result->getResultType()) {
                             case EventoIliasUserMatchingResult::RESULT_NO_MATCHING_USER:
@@ -155,8 +154,8 @@ class ilEventoImportImportUsers {
                                 break;
 
                             case EventoIliasUserMatchingResult::RESULT_ONE_CONFLICTING_USER:
-                                $this->renameAndDeactivateUser($evento_user, $user_match_result);
-                                $this->insertUser($evento_user);
+                                /*$this->renameAndDeactivateUser($evento_user, $user_match_result);
+                                $this->insertUser($evento_user);*/
                                 break;
 
                             case EventoIliasUserMatchingResult::RESULT_CONFLICT_OF_ACCOUNTS:
