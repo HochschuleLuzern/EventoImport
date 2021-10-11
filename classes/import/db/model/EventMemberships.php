@@ -1,6 +1,6 @@
 <?php
 
-namespace EventoImport\import\data_models;
+namespace EventoImport\import\db\model;
 
 class EventMemberships
 {

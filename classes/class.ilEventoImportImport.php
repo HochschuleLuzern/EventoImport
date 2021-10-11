@@ -1,4 +1,7 @@
 <?php
+
+use EventoImport\import\data_matching\EventoUserToIliasUserMatcher;
+use EventoImport\import\db\query\IliasUserQuerying;
 use ILIAS\DI\RBACServices;
 use ILIAS\Refinery;
 
@@ -166,7 +169,7 @@ class ilEventoImportImport extends ilCronJob {
 		    $favourites_manager = new ilFavouritesManager();
 		    */
 
-            $evento_user_repo = new \EventoImport\import\db_repository\EventoUserRepository($this->db);
+            $evento_user_repo = new \EventoImport\import\db\repository\EventoUserRepository($this->db);
             $user_query = new IliasUserQuerying($this->db);
             $evento_ilias_user_matcher = new EventoUserToIliasUserMatcher($user_query, $evento_user_repo);
 		    $importUsers = new ilEventoImportImportUsers(
@@ -186,12 +189,12 @@ class ilEventoImportImport extends ilCronJob {
                 $data_source
             );
 
-			$event_repo = new \EventoImport\import\db_repository\IliasEventoEventsRepository(
+			$event_repo = new \EventoImport\import\db\repository\IliasEventoEventsRepository(
 			    $this->db
             );
 
-			$ilias_event_query = new \EventoImport\import\IliasEventObjectQuery($this->db);
-			$evento_event_matcher = new \EventoImport\import\EventoEventToIliasObjectMatcher($ilias_event_query, $event_repo);
+			$ilias_event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);
+			$evento_event_matcher = new \EventoImport\import\data_matching\EventoEventToIliasObjectMatcher($ilias_event_query, $event_repo);
 
 			$import_events = new ilEventoImportImportEventsAndMemberships(
 			    $evento_event_importer,

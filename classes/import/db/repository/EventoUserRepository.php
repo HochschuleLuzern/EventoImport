@@ -1,8 +1,8 @@
 <?php
 
-namespace EventoImport\import\db_repository;
+namespace EventoImport\import\db\repository;
 
-use EventoImport\import\data_models\EventoUser;
+use EventoImport\communication\api_models\EventoUser;
 
 class EventoUserRepository
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace EventoImport\import\data_models;
+namespace EventoImport\communication\api_models;
 
 class EventoUser
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace EventoImport\import;
+namespace EventoImport\import\db\query;
 
 class IliasEventObjectQuery
 {

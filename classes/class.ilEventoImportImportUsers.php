@@ -1,4 +1,7 @@
 <?php
+
+use EventoImport\import\data_matching\EventoIliasUserMatchingResult;
+use EventoImport\import\data_matching\EventoUserToIliasUserMatcher;
 use ILIAS\DI\RBACServices;
 
 include_once('./Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/trait.ilEventoImportGetUserIdsByMatriculation.php');
@@ -33,7 +36,7 @@ class ilEventoImportImportUsers {
     /** @var \EventoImport\communication\EventoUserImporter */
 	private $evento_importer;
 
-	/** @var \EventoImport\import\db_repository\EventoUserRepository */
+	/** @var \EventoImport\import\db\repository\EventoUserRepository */
 	private $evento_user_repo;
 
 	/** @var EventoUserToIliasUserMatcher */
@@ -58,7 +61,7 @@ class ilEventoImportImportUsers {
 	
 	public function __construct(
 	    \EventoImport\communication\EventoUserImporter $importer,
-	    \EventoImport\import\db_repository\EventoUserRepository $evento_user_repo,
+	    \EventoImport\import\db\repository\EventoUserRepository $evento_user_repo,
 	    EventoUserToIliasUserMatcher $evento_user_matcher,
 	    ilEventoImportLogger $logger,
 	    ilDBInterface $db,
@@ -137,7 +140,7 @@ class ilEventoImportImportUsers {
                 foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
 
                     try {
-                        $evento_user = new \EventoImport\import\data_models\EventoUser($data_set);
+                        $evento_user = new \EventoImport\communication\api_models\EventoUser($data_set);
                         $result = $this->evento_user_matcher->matchEventoUserTheOldWay($evento_user);//$this->determineActionForGivenEventoUser($evento_user);
 
                         switch($result->getResultType()) {
@@ -176,7 +179,7 @@ class ilEventoImportImportUsers {
 
 	}
 
-	private function determineActionForGivenEventoUser(\EventoImport\import\data_models\EventoUser $evento_user)
+	private function determineActionForGivenEventoUser(\EventoImport\communication\api_models\EventoUser $evento_user)
     {
         $data['id_by_login'] = ilObjUser::getUserIdByLogin($evento_user->getLoginName());
         $data['ids_by_matriculation'] = $this->getUserIdsByMatriculation('Evento:'.$evento_user->getEventoId());
@@ -543,7 +546,7 @@ class ilEventoImportImportUsers {
 		}
 	}
 	
-	private function insertUser(\EventoImport\import\data_models\EventoUser $evento_user) {
+	private function insertUser(\EventoImport\communication\api_models\EventoUser $evento_user) {
         //echo "Created User: " . $evento_user->getLoginName() . "\n";
         //return;
         $userObj = new ilObjUser();
@@ -603,7 +606,7 @@ class ilEventoImportImportUsers {
 		//$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $evento_user);
 	}
 	
-	private function updateUser($usrId, \EventoImport\import\data_models\EventoUser $evento_user) {
+	private function updateUser($usrId, \EventoImport\communication\api_models\EventoUser $evento_user) {
 		$user_updated = false;
 		$userObj = new ilObjUser($usrId);
 		$userObj->read();

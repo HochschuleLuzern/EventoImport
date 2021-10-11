@@ -2,7 +2,8 @@
 
 namespace EventoImport\import;
 
-use EventoImport\import\data_models\EventoEvent;
+use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\db\query\IliasEventObjectQuery;
 
 class IliasEventObjectFactory
 {

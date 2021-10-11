@@ -11,8 +11,8 @@ class ilEventoImportImportEventsAndMemberships
 
     public function __construct(
         \EventoImport\communication\EventoEventImporter $evento_importer,
-        \EventoImport\import\db_repository\IliasEventoEventsRepository $ilias_evento_event_repo,
-        \EventoImport\import\EventoEventToIliasObjectMatcher $evento_event_matcher,
+        \EventoImport\import\db\repository\IliasEventoEventsRepository $ilias_evento_event_repo,
+        \EventoImport\import\data_matching\EventoEventToIliasObjectMatcher $evento_event_matcher,
         \EventoImport\import\IliasEventObjectFactory $ilias_event_object_factory,
         ilEventoImportLogger $logger,
         \ILIAS\DI\RBACServices $rbac
@@ -26,12 +26,12 @@ class ilEventoImportImportEventsAndMemberships
         $this->rbac = $rbac;
     }
 
-    private function handleChangedCreateCourseFlagAfterImport(\EventoImport\import\data_models\IliasEventoEventCombination $ilias_evento_event, \EventoImport\import\data_models\EventoEvent $evento_event)
+    private function handleChangedCreateCourseFlagAfterImport(\EventoImport\import\db\model\IliasEventoEventCombination $ilias_evento_event, \EventoImport\communication\api_models\EventoEvent $evento_event)
     {
 
     }
 
-    private function handleNotExistingEvent(\EventoImport\import\data_models\EventoEvent $evento_event)
+    private function handleNotExistingEvent(\EventoImport\communication\api_models\EventoEvent $evento_event)
     {
         if ($evento_event->hasCreateCourseFlag()) {
             $this->createNewCourse($evento_event);
@@ -44,17 +44,17 @@ class ilEventoImportImportEventsAndMemberships
         }
     }
 
-    private function createNewCourse(\EventoImport\import\data_models\EventoEvent $evento_event)
+    private function createNewCourse(\EventoImport\communication\api_models\EventoEvent $evento_event)
     {
         $this->ilias_event_object_factory->buildNewIliasEventObject($evento_event, $destination);
     }
 
-    private function addExistingIliasObjectAsEventoEvent(\EventoImport\import\data_models\EventoEvent $evento_event, ilContainer $matched_course)
+    private function addExistingIliasObjectAsEventoEvent(\EventoImport\communication\api_models\EventoEvent $evento_event, ilContainer $matched_course)
     {
 
     }
 
-    private function updateEvent(\EventoImport\import\data_models\IliasEventoEventCombination $ilias_evento_event, \EventoImport\import\data_models\EventoEvent $evento_event)
+    private function updateEvent(\EventoImport\import\db\model\IliasEventoEventCombination $ilias_evento_event, \EventoImport\communication\api_models\EventoEvent $evento_event)
     {
         // Edge-case
         if(!$ilias_evento_event->wasAutomaticallyCreated() && $evento_event->hasCreateCourseFlag()) {
@@ -72,7 +72,7 @@ class ilEventoImportImportEventsAndMemberships
             try {
                 foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
                     try {
-                        $evento_event = new \EventoImport\import\data_models\EventoEvent($data_set);
+                        $evento_event = new \EventoImport\communication\api_models\EventoEvent($data_set);
                         $ilias_evento_event = $this->ilias_evento_event_repo->getEventByEventoId($evento_event->getEventoId());
 
                         if(is_null($ilias_evento_event)) {

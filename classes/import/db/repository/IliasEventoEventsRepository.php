@@ -1,9 +1,9 @@
 <?php
 
-namespace EventoImport\import\db_repository;
+namespace EventoImport\import\db\repository;
 
-use EventoImport\import\data_models\EventoEvent;
-use EventoImport\import\data_models\IliasEventoEventCombination;
+use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\db\model\IliasEventoEventCombination;
 
 class IliasEventoEventsRepository
 {

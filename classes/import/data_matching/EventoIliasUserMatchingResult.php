@@ -1,5 +1,7 @@
 <?php
 
+namespace EventoImport\import\data_matching;
+
 class EventoIliasUserMatchingResult
 {
     public const RESULT_NO_MATCHING_USER = 1;
@@ -9,7 +11,10 @@ class EventoIliasUserMatchingResult
     public const RESULT_ERROR = 5;
 
     public const CONFLICTING_USER_REQUIRED_DATA_FIELDS = array(
-        'user_id', 'EvtID', 'new_user_info', 'found_by'
+        'user_id',
+        'EvtID',
+        'new_user_info',
+        'found_by'
     );
 
     private $matched_user_id;
@@ -22,9 +27,10 @@ class EventoIliasUserMatchingResult
 
     private $should_create_new_user;
 
-    private function __construct(int $result_code, ?int $matched_user_id = null, array $additional_params = array()) {
-        $this->matched_user_id = $matched_user_id;
-        $this->result_code = $result_code;
+    private function __construct(int $result_code, ?int $matched_user_id = null, array $additional_params = array())
+    {
+        $this->matched_user_id   = $matched_user_id;
+        $this->result_code       = $result_code;
         $this->additional_params = $additional_params;
     }
 
@@ -57,8 +63,8 @@ class EventoIliasUserMatchingResult
     {
         $missing_fields = array();
 
-        foreach(self::CONFLICTING_USER_REQUIRED_DATA_FIELDS as $key) {
-            if(!isset($conflicting_user_data[$key])) {
+        foreach (self::CONFLICTING_USER_REQUIRED_DATA_FIELDS as $key) {
+            if (!isset($conflicting_user_data[$key])) {
                 $missing_fields[] = $key;
             }
         }
