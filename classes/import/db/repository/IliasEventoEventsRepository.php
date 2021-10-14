@@ -64,6 +64,7 @@ class IliasEventoEventsRepository
 
     public function getEventByEventoId(int $evento_id) : ?IliasEventoEventCombination
     {
+        return null;
         $query = "SELECT * FROM " . self::TABLE_NAME . " WHERE " . self::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
         $result = $this->db->query($query);
         if($row = $this->db->fetchAssoc($result)) {

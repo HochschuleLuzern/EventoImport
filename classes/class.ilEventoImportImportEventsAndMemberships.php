@@ -47,6 +47,12 @@ class ilEventoImportImportEventsAndMemberships
 
     private function createNewCourse(\EventoImport\communication\api_models\EventoEvent $evento_event)
     {
+        $destination = $this->repository_facade->departmentLocationRepository()->fetchRefIdForEventoObject($evento_event);
+
+        if($destination === null) {
+            throw new Exception('Location for Event not found');
+        }
+
         $this->ilias_event_object_factory->buildNewIliasEventObject($evento_event, $destination);
     }
 
@@ -74,7 +80,7 @@ class ilEventoImportImportEventsAndMemberships
                 foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
                     try {
                         $evento_event = new \EventoImport\communication\api_models\EventoEvent($data_set);
-                        $ilias_evento_event = $this->repository_facade-> ilias_evento_event_repo->getEventByEventoId($evento_event->getEventoId());
+                        $ilias_evento_event = $this->repository_facade->iliasEventoEventRepository()->getEventByEventoId($evento_event->getEventoId());
 
                         if(is_null($ilias_evento_event)) {
                             $this->handleNotExistingEvent($evento_event);

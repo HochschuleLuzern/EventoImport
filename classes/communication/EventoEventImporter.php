@@ -8,8 +8,8 @@ class EventoEventImporter extends \ilEventoImporter implements DataRecordImporte
 {
     public function __construct(\ilEventoImporterIterator $iterator, \ilSetting $settings, \ilEventoImportLogger $logger, \EventoImport\communication\request_services\RestClientService $data_source)
     {
-        $this->fetch_data_set_method = '';
-        $this->fetch_data_record_method = '';
+        $this->fetch_data_set_method = 'GetEvents';
+        $this->fetch_data_record_method = 'GetEventById';
 
         parent::__construct($iterator, $settings, $logger, $data_source);
     }

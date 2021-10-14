@@ -24,19 +24,46 @@ class EventoEvent
     public const EVENTO_TYPE_MODULANLASS = 'Modulanlass';
     public const EVENTO_TYPE_KURS = 'Kurs';
 
+    /** @var int */
     private $evento_id;
+
+    /** @var string */
     private $name;
+
+    /** @var string*/
     private $description;
+
+    /** @var string */
     private $type;
+
+    /** @var string */
     private $kind;
+
+    /** @var string */
     private $department;
+
+    /** @var \DateTime */
     private $start_date;
+
+    /** @var \DateTime */
     private $end_date;
+
+    /** @var bool */
     private $is_create_course_flag;
+
+    /** @var bool */
     private $is_group_member_flag;
+
+    /** @var string */
     private $group_name;
+
+    /** @var int */
     private $group_member_count;
+
+    /** @var array */
     private $employees;
+
+    /** @var array */
     private $students;
 
     public function __construct(array $data_set)

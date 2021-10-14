@@ -189,7 +189,7 @@ class ilEventoImportImport extends ilCronJob {
                 $this->importUsersConfig);
 			$importUsers->run();
 
-			/*
+
 			$evento_event_importer = new \EventoImport\communication\EventoEventImporter(
 			    new ilEventoImporterIterator($this->page_size),
                 $this->settings,
@@ -198,13 +198,15 @@ class ilEventoImportImport extends ilCronJob {
             );
 
 
-			$event_repo = new \EventoImport\import\db\repository\IliasEventoEventsRepository(
-			    $this->db
-            );
+
+			$event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);
+			$event_repo = new \EventoImport\import\db\repository\IliasEventoEventsRepository($this->db);
+            $location_repo = new \EventoImport\import\db\repository\DepartmentLocationRepository($this->db);
 
 			$repository_facade = new \EventoImport\import\db\RepositoryFacade(
-			    new \EventoImport\import\db\query\IliasEventObjectQuery($this->db),
-                new \EventoImport\import\db\repository\IliasEventoEventsRepository($this->db)
+			    $event_query,
+                $event_repo,
+                $location_repo
             );
 
 			$ilias_event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);
@@ -219,6 +221,8 @@ class ilEventoImportImport extends ilCronJob {
                 $logger,
                 $this->rbac
             );
+
+			$import_events->run();
 
 			/*
 			 * Intentionally left out. First phase of the evento user_importer is to import users

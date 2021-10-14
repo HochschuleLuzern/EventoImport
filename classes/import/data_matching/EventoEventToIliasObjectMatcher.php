@@ -2,6 +2,7 @@
 
 namespace EventoImport\import\data_matching;
 
+use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\import\db\query\IliasEventObjectQuery;
 
@@ -16,7 +17,7 @@ class EventoEventToIliasObjectMatcher
         $this->event_repo = $event_repo;
     }
 
-    public function searchExactlyOneMatchingCourseByTitle(EventoImport\communication\api_models\EventoEvent $evento_event) : ?\ilContainer
+    public function searchExactlyOneMatchingCourseByTitle(EventoEvent $evento_event) : ?\ilContainer
     {
         $object_list = $this->ilias_event_query->fetchAllEventableObjectsForGivenTitle($evento_event->getName());
 

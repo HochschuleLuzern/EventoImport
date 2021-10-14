@@ -4,6 +4,7 @@ namespace EventoImport\import\db\query;
 
 class IliasEventObjectQuery
 {
+    /** @var \ilDBInterface */
     private $db;
 
     public function __construct(\ilDBInterface $db)
@@ -13,6 +14,7 @@ class IliasEventObjectQuery
 
     public function fetchAllEventableObjectsForGivenTitle(string $getName)
     {
-        $query = "SELECT obj_id";
+        return [];
+        $query = "SELECT obj_id " . $this->db->quote($getName, \ilDBConstants::T_TEXT);
     }
 }
