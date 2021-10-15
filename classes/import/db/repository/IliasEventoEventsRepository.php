@@ -11,7 +11,7 @@ class IliasEventoEventsRepository
     public const TABLE_NAME = 'crevento_mapped_evnto_events';
 
     public const COL_EVENTO_ID = 'evento_id';
-    public const COL_PARENT_REF_ID = 'parent_ref_id';
+    public const COL_PARENT_EVENT_REF_ID = 'parent_event_ref_id';
     public const COL_REF_ID = 'ref_id';
     public const COL_OBJ_ID = 'obj_id';
     public const COL_ADMIN_ROLE_ID = 'admin_role_id';
@@ -35,7 +35,7 @@ class IliasEventoEventsRepository
     {
         return new IliasEventoEventCombination(
             $row[self::COL_EVENTO_ID],
-            $row[self::COL_PARENT_REF_ID],
+            $row[self::COL_PARENT_EVENT_REF_ID],
             $row[self::COL_REF_ID],
             $row[self::COL_OBJ_ID],
             $row[self::COL_ADMIN_ROLE_ID],

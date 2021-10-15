@@ -10,6 +10,7 @@ class DepartmentLocationRepository
     const COL_DEPARTMENT_NAME = 'department';
     const COL_EVENT_KIND = 'kind';
     const COL_YEAR = 'year';
+    const COL_REF_ID = 'ref_id';
 
     private $db;
     private $cache;
