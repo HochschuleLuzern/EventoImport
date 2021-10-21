@@ -44,26 +44,13 @@ abstract class ilEventoImporter {
 	public function __construct(ilEventoImporterIterator $iterator, ilSetting $settings, ilEventoImportLogger $logger, \EventoImport\communication\request_services\RequestClientService $data_source) {
 		//Get Settings from dbase
         $this->iterator = $iterator;
-		$this->pagesize = (int) $settings->get('crevento_pagesize');
 		$this->max_pages = (int) $settings->get('crevento_max_pages');
-		$this->max_retries = (int) $settings->get('crevento_max_retries');
-		$this->seconds_before_retry = (int) $settings->get('crevento_seconds_before_retry');
+		$this->max_retries = (int) $settings->get('crevento_max_retries', 3);
+		$this->seconds_before_retry = (int) $settings->get('crevento_seconds_before_retry', 60);
 		
 		$this->evento_logger = $logger;
-		
 		$this->data_source = $data_source;
-		$this->data_source->setTimeout($this->seconds_before_retry);
-
 		$this->has_more_data = true;
-
-		/* TODO: Check if init and login are needed
-		$answer = $this->data_source->init();
-		if ($answer) {
-			$this->login();
-		} else {
-			throw new Exception ('Error while trying to initialize SOAP-Server. '.$this->data_source->getError());
-		}
-	    */
 	}
 	
 	/**

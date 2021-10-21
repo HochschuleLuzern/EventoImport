@@ -27,7 +27,7 @@ class ilEventoImportImportEventsAndMemberships
         $this->rbac = $rbac;
     }
 
-    private function handleChangedCreateCourseFlagAfterImport(\EventoImport\import\db\model\IliasEventoEventCombination $ilias_evento_event, \EventoImport\communication\api_models\EventoEvent $evento_event)
+    private function handleChangedCreateCourseFlagAfterImport(\EventoImport\import\db\model\IliasEventoEvent $ilias_evento_event, \EventoImport\communication\api_models\EventoEvent $evento_event)
     {
 
     }
@@ -35,7 +35,12 @@ class ilEventoImportImportEventsAndMemberships
     private function handleNotExistingEvent(\EventoImport\communication\api_models\EventoEvent $evento_event)
     {
         if ($evento_event->hasCreateCourseFlag()) {
-            $this->createNewCourse($evento_event);
+            $destination = $this->repository_facade->departmentLocationRepository()->fetchRefIdForEventoObject($evento_event);
+
+            if($destination === null) {
+                throw new Exception('Location for Event not found');
+            }
+            $this->ilias_event_object_factory->buildNewIliasEventObject($evento_event, $destination);
         } else {
             $matched_course = $this->evento_event_matcher->searchExactlyOneMatchingCourseByTitle($evento_event);
 
@@ -45,23 +50,12 @@ class ilEventoImportImportEventsAndMemberships
         }
     }
 
-    private function createNewCourse(\EventoImport\communication\api_models\EventoEvent $evento_event)
-    {
-        $destination = $this->repository_facade->departmentLocationRepository()->fetchRefIdForEventoObject($evento_event);
-
-        if($destination === null) {
-            throw new Exception('Location for Event not found');
-        }
-
-        $this->ilias_event_object_factory->buildNewIliasEventObject($evento_event, $destination);
-    }
-
     private function addExistingIliasObjectAsEventoEvent(\EventoImport\communication\api_models\EventoEvent $evento_event, ilContainer $matched_course)
     {
 
     }
 
-    private function updateEvent(\EventoImport\import\db\model\IliasEventoEventCombination $ilias_evento_event, \EventoImport\communication\api_models\EventoEvent $evento_event)
+    private function updateEvent(\EventoImport\import\db\model\IliasEventoEvent $ilias_evento_event, \EventoImport\communication\api_models\EventoEvent $evento_event)
     {
         // Edge-case
         if(!$ilias_evento_event->wasAutomaticallyCreated() && $evento_event->hasCreateCourseFlag()) {

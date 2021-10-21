@@ -6,7 +6,7 @@ use EventoImport\communication\api_models\EventoUser;
 
 class EventoUserRepository
 {
-    public const TABLE_NAME = 'crevento_mapped_evnto_usrs';
+    public const TABLE_NAME = 'crevento_evnto_usrs';
 
     public const COL_EVENTO_ID = 'evento_id';
     public const COL_ILIAS_USER_ID = 'ilias_user_id';

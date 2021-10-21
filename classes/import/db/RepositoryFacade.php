@@ -2,9 +2,13 @@
 
 namespace EventoImport\import\db;
 
+use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\db\model\IliasEventoEvent;
+use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\query\IliasEventObjectQuery;
-use EventoImport\import\db\repository\DepartmentLocationRepository;
+use EventoImport\import\db\repository\EventLocationsRepository;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
+use EventoImport\import\db\repository\ParentEventRepository;
 
 class RepositoryFacade
 {
@@ -14,6 +18,7 @@ class RepositoryFacade
     private $event_object_query;
     private $event_repo;
     private $location_repo;
+    private $parent_event_repo;
 
     public function __construct($event_objects_query = null, $event_repo = null, $location_repo = null)
     {
@@ -21,7 +26,8 @@ class RepositoryFacade
 
         $this->event_object_query = $event_objects_query ?? new IliasEventObjectQuery($DIC->database());
         $this->event_repo = $event_repo ?? new IliasEventoEventsRepository($DIC->database());
-        $this->location_repo = $location_repo ?? new DepartmentLocationRepository($DIC->database());
+        $this->location_repo = $location_repo ?? new EventLocationsRepository($DIC->database());
+        $this->parent_event_repo = new ParentEventRepository($DIC->database());
     }
 
     public function fetchAllEventableObjectsForGivenTitle(string $name)
@@ -29,9 +35,21 @@ class RepositoryFacade
         $this->event_object_query->fetchAllEventableObjectsForGivenTitle($name);
     }
 
-    public function getEventCourseOfEvent()
+    public function searchPossibleParentEventForEvent(EventoEvent $evento_event)
     {
         global $DIC;
+
+        $parent_event = $this->parent_event_repo->fetchParentEventForName($evento_event->getGroupName());
+        if(!is_null($parent_event)) {
+            return new \ilObjCourse($parent_event->getRefId(), true);
+        }
+
+        $obj_id = $this->event_object_query->searchPossibleParentEventForEvent($evento_event);
+        if(!is_null($obj_id)) {
+            return new \ilObjCourse($obj_id, false);
+        }
+
+        return null;
     }
 
     public function iliasEventoEventRepository() : IliasEventoEventsRepository
@@ -39,10 +57,79 @@ class RepositoryFacade
         return $this->event_repo;
     }
 
-    public function departmentLocationRepository() : DepartmentLocationRepository
+    public function departmentLocationRepository() : EventLocationsRepository
     {
         return $this->location_repo;
     }
 
+    public function addNewSingleEventCourse(EventoEvent $evento_event, \ilObjCourse $crs_object)
+    {
+        $this->event_repo->addNewEventoIliasEvent(
+            new IliasEventoEvent(
+                $evento_event->getEventoId(),
+                $evento_event->getName(),
+                $evento_event->getDescription(),
+                $evento_event->getType(),
+                $evento_event->hasCreateCourseFlag(),
+                $evento_event->getStartDate(),
+                $evento_event->getEndDate(),
+                $crs_object->getType(),
+                $crs_object->getRefId(),
+                $crs_object->getId(),
+                $crs_object->getDefaultAdminRole(),
+                $crs_object->getDefaultMemberRole()
+            )
+        );
+    }
 
+    public function addNewMultiEventCourseAndGroup(EventoEvent $evento_event, \ilObjCourse $crs_object, \ilObjGroup $sub_group)
+    {
+        $this->parent_event_repo->addNewParentEvent(
+            new IliasEventoParentEvent(
+                $crs_object->getTitle(),
+                $crs_object->getRefId(),
+                $crs_object->getDefaultAdminRole(),
+                $crs_object->getDefaultMemberRole()
+            )
+        );
+
+        $this->event_repo->addNewEventoIliasEvent(
+            new IliasEventoEvent(
+                $evento_event->getEventoId(),
+                $evento_event->getName(),
+                $evento_event->getDescription(),
+                $evento_event->getType(),
+                $evento_event->hasCreateCourseFlag(),
+                $evento_event->getStartDate(),
+                $evento_event->getEndDate(),
+                $sub_group->getType(),
+                $sub_group->getRefId(),
+                $sub_group->getId(),
+                $sub_group->getDefaultAdminRole(),
+                $sub_group->getDefaultMemberRole(),
+                $crs_object->getId()
+            )
+        );
+    }
+
+    public function addNewEventToExistingMultiGroupEvent(EventoEvent $evento_event,\ilObjCourse $crs_object, \ilObjGroup $sub_group)
+    {
+        $this->event_repo->addNewEventoIliasEvent(
+            new IliasEventoEvent(
+                $evento_event->getEventoId(),
+                $evento_event->getName(),
+                $evento_event->getDescription(),
+                $evento_event->getType(),
+                $evento_event->hasCreateCourseFlag(),
+                $evento_event->getStartDate(),
+                $evento_event->getEndDate(),
+                $sub_group->getType(),
+                $sub_group->getRefId(),
+                $sub_group->getId(),
+                $sub_group->getDefaultAdminRole(),
+                $sub_group->getDefaultMemberRole(),
+                $crs_object->getId()
+            )
+        );
+    }
 }

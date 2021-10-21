@@ -160,6 +160,7 @@ class EventoUserToIliasUserMatcher
 
     public function matchEventoUserTheOldWay(\EventoImport\communication\api_models\EventoUser $evento_user) : EventoIliasUserMatchingResult
     {
+
         $data['id_by_login']          = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
         $data['ids_by_matriculation'] = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());
         $data['ids_by_email']         = $this->user_facade->fetchUserIdsByEmail($evento_user->getEmailList());

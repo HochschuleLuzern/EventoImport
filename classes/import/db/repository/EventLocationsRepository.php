@@ -4,9 +4,9 @@ namespace EventoImport\import\db\repository;
 
 use EventoImport\communication\api_models\EventoEvent;
 
-class DepartmentLocationRepository
+class EventLocationsRepository
 {
-    public const TABLE_NAME = 'crnhk_crevento_event_locations';
+    public const TABLE_NAME = 'crevento_locations';
     const COL_DEPARTMENT_NAME = 'department';
     const COL_EVENT_KIND = 'kind';
     const COL_YEAR = 'year';

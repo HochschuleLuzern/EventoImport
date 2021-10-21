@@ -201,7 +201,7 @@ class ilEventoImportImport extends ilCronJob {
 
 			$event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);
 			$event_repo = new \EventoImport\import\db\repository\IliasEventoEventsRepository($this->db);
-            $location_repo = new \EventoImport\import\db\repository\DepartmentLocationRepository($this->db);
+            $location_repo = new \EventoImport\import\db\repository\EventLocationsRepository($this->db);
 
 			$repository_facade = new \EventoImport\import\db\RepositoryFacade(
 			    $event_query,
@@ -236,6 +236,24 @@ class ilEventoImportImport extends ilCronJob {
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_CRASHED, 'Cron job crashed: ' . $e->getMessage());
 		}	
 	}
+
+	private function testFormInputs(ilPropertyFormGUI $form)
+    {
+        $departments = new ilTextInputGUI('Departments', 'postvar');
+        $departments->setMulti(true, false, true);
+        $form->addItem($departments);
+
+        $kinds = new ilTextInputGUI('Kinds', 'postvars');
+        $kinds->setMulti(true, false, true);
+        $form->addItem($kinds);
+
+        $years = new ilTextInputGUI('Years', 'postvars');
+        $years->setMulti(true, false, true);
+        $form->addItem($years);
+
+        $path = new ilTextInputGUI('Repository Path Schema');
+        $form->addItem($path);
+    }
 	
 	/**
 	 * Defines the custom settings form and returns it to plugin slot
@@ -244,6 +262,8 @@ class ilEventoImportImport extends ilCronJob {
 	 */
 	public function addCustomSettingsToForm(ilPropertyFormGUI $a_form)
 	{
+	    $this->testFormInputs($a_form);
+
 		$ws_item = new ilSelectInputGUI(
 				$this->cp->txt('ilias_auth_mode'),
 				'crevento_ilias_auth_mode'

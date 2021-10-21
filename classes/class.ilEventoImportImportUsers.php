@@ -140,7 +140,7 @@ class ilEventoImportImportUsers {
 
                     try {
                         $evento_user = new \EventoImport\communication\api_models\EventoUser($data_set);
-                        $result = $this->evento_user_matcher->matchEventoUserTheOldWay($evento_user);
+                        $result = $this->evento_user_matcher->matchGivenEventoUserToIliasUsers($evento_user);
 
                         switch($result->getResultType()) {
                             case EventoIliasUserMatchingResult::RESULT_NO_MATCHING_USER:
@@ -577,8 +577,6 @@ class ilEventoImportImportUsers {
 
         $userObj->create();
 
-
-
 		//insert user data in table user_data
 		$userObj->saveAsNew(false);
 	
@@ -603,6 +601,7 @@ class ilEventoImportImportUsers {
 		$this->addPersonalPicture($evento_user->getEventoId(), $userObj->getId());
 		
 		//$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $evento_user);
+		$this->user_facade->eventoUserRepository()->addNewEventoIliasUser($evento_user, $userObj);
 	}
 	
 	private function updateUser($usrId, \EventoImport\communication\api_models\EventoUser $evento_user) {
