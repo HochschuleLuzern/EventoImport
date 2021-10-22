@@ -237,24 +237,6 @@ class ilEventoImportImport extends ilCronJob {
 		}	
 	}
 
-	private function testFormInputs(ilPropertyFormGUI $form)
-    {
-        $departments = new ilTextInputGUI('Departments', 'postvar');
-        $departments->setMulti(true, false, true);
-        $form->addItem($departments);
-
-        $kinds = new ilTextInputGUI('Kinds', 'postvars');
-        $kinds->setMulti(true, false, true);
-        $form->addItem($kinds);
-
-        $years = new ilTextInputGUI('Years', 'postvars');
-        $years->setMulti(true, false, true);
-        $form->addItem($years);
-
-        $path = new ilTextInputGUI('Repository Path Schema');
-        $form->addItem($path);
-    }
-	
 	/**
 	 * Defines the custom settings form and returns it to plugin slot
 	 * 
@@ -462,6 +444,63 @@ class ilEventoImportImport extends ilCronJob {
 		    }
 		}
 	}
+
+    private function testFormInputs(ilPropertyFormGUI $form)
+    {
+        $json_settings = $this->settings->get('crevento_location_settings');
+        $locations_settings = json_decode($json_settings, true);
+
+        $departments = new ilTextInputGUI('Departments', 'crevento_departments');
+        $departments->setMulti(true, false, true);
+        if(isset($locations_settings['departments']) && is_array($locations_settings['departments'])) {
+            $departments->setValue($locations_settings['departments']);
+        }
+        $form->addItem($departments);
+
+        $kinds = new ilTextInputGUI('Kinds', 'crevento_kinds');
+        $kinds->setMulti(true, false, true);
+        if(isset($locations_settings['kinds']) && is_array($locations_settings['kinds'])) {
+            $kinds->setValue($locations_settings['kinds']);
+        }
+        $form->addItem($kinds);
+
+        $years = new ilTextInputGUI('Years', 'crevento_years');
+        $years->setMulti(true, false, true);
+        if(isset($locations_settings['years']) && is_array($locations_settings['years'])) {
+            $years->setValue($locations_settings['years']);
+        }
+        $form->addItem($years);
+
+        $path = new ilTextInputGUI('Repository Path Schema', 'crevento_path_schema');
+        if(isset($locations_settings['path_schema']) && is_string($locations_settings['path_schema'])) {
+            $path->setValue($locations_settings['path_schema']);
+        }
+        $form->addItem($path);
+    }
+
+    private function purifyLocationSettingsList(array $given_list) {
+	    $list_to_save = [];
+
+	    foreach($given_list as $item_string) {
+	        if($item_string != '') {
+	            $list_to_save[] = trim($item_string);
+            }
+        }
+
+	    return $list_to_save;
+    }
+
+    private function locationSettingsToJSON(ilPropertyFormGUI $a_form)
+    {
+        $settings_list = array('departments' => [], 'kinds'=> [],'years'=> [],'path_schema'=> '');
+
+        $settings_list['departments'] = $this->purifyLocationSettingsList($a_form->getInput('crevento_departments'));
+        $settings_list['kinds'] =  $this->purifyLocationSettingsList($a_form->getInput('crevento_kinds'));
+        $settings_list['years'] =  $this->purifyLocationSettingsList($a_form->getInput('crevento_years'));
+        $settings_list['path_schema'] =  $a_form->getInput('crevento_path_schema');
+
+        return json_encode($settings_list);
+    }
 	
 	/**
 	 * Saves the custom settings values
@@ -471,6 +510,9 @@ class ilEventoImportImport extends ilCronJob {
 	 */
 	public function saveCustomSettings(ilPropertyFormGUI $a_form)
 	{
+        $location_settings = $this->locationSettingsToJSON($a_form);
+        $this->settings->set('crevento_location_settings', $location_settings);
+
 		if ($a_form->getInput('crevento_ilias_auth_mode') != null) {
 			$this->settings->set('crevento_ilias_auth_mode', $a_form->getInput('crevento_ilias_auth_mode'));
 		}

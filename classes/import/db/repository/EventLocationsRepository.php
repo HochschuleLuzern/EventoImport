@@ -21,6 +21,24 @@ class EventLocationsRepository
         $cache = array();
     }
 
+    public function addNewLocation(string $department, string $kind, int $year, int $ref_id)
+    {
+        $this->db->insert(self::TABLE_NAME,
+            [
+                self::COL_DEPARTMENT_NAME => [\ilDBConstants::T_TEXT, $department],
+                self::COL_EVENT_KIND => [\ilDBConstants::T_TEXT, $kind],
+                self::COL_YEAR => [\ilDBConstants::T_INTEGER, $year],
+                self::COL_REF_ID => [\ilDBConstants::T_INTEGER, $ref_id],
+            ]
+        );
+    }
+
+    public function purgeLocationTable()
+    {
+        $query = "DELETE FROM " . self::TABLE_NAME;
+        $this->db->manipulate($query);
+    }
+
     private function addToCache(int $ref_id, string $department, string $kind, int $year)
     {
         if(!isset($this->cache[$department])) {
@@ -45,8 +63,6 @@ class EventLocationsRepository
 
     public function fetchRefIdForEventoObject(EventoEvent $evento_event)
     {
-        return 1286;
-
         $department = $evento_event->getDepartment();
         $kind = $evento_event->getKind();
         $year = (int)$evento_event->getStartDate()->format('Y');
@@ -57,7 +73,7 @@ class EventLocationsRepository
             return $cached_value;
         }
 
-/*
+
         $query = 'SELECT ref_id FROM ' . self::TABLE_NAME . ' WHERE '
             . self::COL_DEPARTMENT_NAME . ' = ' . $this->db->quote($department, \ilDBConstants::T_TEXT)
             . ' AND '
@@ -73,7 +89,7 @@ class EventLocationsRepository
 
             return $ref_id;
         }
-*/
+
         return null;
     }
 
