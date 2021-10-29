@@ -3,6 +3,7 @@
 namespace EventoImport\import;
 
 use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\query\IliasEventObjectQuery;
 use EventoImport\import\db\RepositoryFacade;
 
@@ -66,14 +67,14 @@ class IliasEventObjectFactory
         return $group_object;
     }
 
-    private function createAsSingleGroupEvent(EventoEvent $evento_event, $destiniation)
+    private function createAsSingleGroupEvent(EventoEvent $evento_event, $destiniation) : IliasEventWrapper
     {
         $crs_object = $this->buildCourseObject($evento_event->getName(), $evento_event->getDescription(), $this->owner_user_id, $destiniation, $this->sort_mode);
 
-        $this->repository_facade->addNewSingleEventCourse($evento_event, $crs_object);
+        return $this->repository_facade->addNewSingleEventCourse($evento_event, $crs_object);
     }
 
-    private function createAsMultiGroupEvent(EventoEvent $evento_event, $destiniation)
+    private function createAsMultiGroupEvent(EventoEvent $evento_event, $destiniation) : IliasEventWrapper
     {
         $parent_event_crs_obj = $this->repository_facade->searchPossibleParentEventForEvent($evento_event);
         $obj_for_parent_already_existed = false;
@@ -87,18 +88,20 @@ class IliasEventObjectFactory
         $event_sub_group = $this->buildGroupObject($evento_event->getName(), $evento_event->getDescription(), $this->owner_user_id, $parent_event_crs_obj->getRefId(), $this->sort_mode);
 
         if($obj_for_parent_already_existed) {
-            $this->repository_facade->addNewEventToExistingMultiGroupEvent($evento_event, $parent_event_crs_obj, $event_sub_group);
+            $event_wrapper = $this->repository_facade->addNewEventToExistingMultiGroupEvent($evento_event, $parent_event_crs_obj, $event_sub_group);
         } else {
-            $this->repository_facade->addNewMultiEventCourseAndGroup($evento_event, $parent_event_crs_obj, $event_sub_group);
+            $event_wrapper = $this->repository_facade->addNewMultiEventCourseAndGroup($evento_event, $parent_event_crs_obj, $event_sub_group);
         }
+
+        return $event_wrapper;
     }
 
-    public function buildNewIliasEventObject(EventoEvent $evento_event, $destiniation)
+    public function buildNewIliasEventObject(EventoEvent $evento_event, $destiniation) : IliasEventWrapper
     {
         if($evento_event->hasGroupMemberFlag()) {
-            $this->createAsMultiGroupEvent($evento_event, $destiniation);
+            return $this->createAsMultiGroupEvent($evento_event, $destiniation);
         } else {
-            $this->createAsSingleGroupEvent($evento_event, $destiniation);
+            return $this->createAsSingleGroupEvent($evento_event, $destiniation);
         }
     }
 }

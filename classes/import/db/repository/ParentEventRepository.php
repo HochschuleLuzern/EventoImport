@@ -61,4 +61,16 @@ class ParentEventRepository
 
         return null;
     }
+
+    public function fetchParentEventForRefId(int $ref_id)
+    {
+        $query = 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE ' . self::COL_REF_ID . ' = ' . $this->db->quote($ref_id, \ilDBConstants::T_INTEGER);
+        $result = $this->db->query($query);
+
+        if($row = $this->db->fetchAssoc($result)) {
+            return $this->buildParentEventObjectFromRow($row);
+        }
+
+        return null;
+    }
 }

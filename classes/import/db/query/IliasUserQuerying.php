@@ -28,6 +28,11 @@ class IliasUserQuerying
         return $list;
     }
 
+    public function fetchUserIdsByEmailAdress(string $mail_adress)
+    {
+        return ilObjUser::getUserIdsByEmail($mail_adress);
+    }
+
     public function fetchUserIdsByEmailAdresses(array $evento_mail_list)
     {
         $user_lists = array();
@@ -36,7 +41,7 @@ class IliasUserQuerying
         foreach ($evento_mail_list as $mail_given_from_evento) {
 
             // ... get all user ids in which a user has this email
-            foreach (ilObjUser::getUserIdsByEmail($mail_given_from_evento) as $ilias_id_by_mail) {
+            foreach ($this->fetchUserIdsByEmailAdress($mail_given_from_evento) as $ilias_id_by_mail) {
 
                 if (!in_array($ilias_id_by_mail, $user_lists)) {
                     $user_lists[] = $ilias_id_by_mail;
