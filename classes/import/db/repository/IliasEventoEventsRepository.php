@@ -36,17 +36,17 @@ class IliasEventoEventsRepository
     {
         return new IliasEventoEvent(
             $row[self::COL_EVENTO_ID],
-            $row[self::COL_REF_ID],
-            $row[self::COL_OBJ_ID],
-            $row[self::COL_ADMIN_ROLE_ID],
-            $row[self::COL_STUDENT_ROLE_ID],
             $row[self::COL_EVENTO_TITLE],
             $row[self::COL_EVENTO_DESCRIPTION],
             $row[self::COL_EVENTO_TYPE],
             $row[self::COL_WAS_AUTOMATICALLY_CREATED],
             $row[self::COL_START_DATE],
             $row[self::COL_END_DATE],
-            $row[self::COL_ILIAS_TYPE]
+            $row[self::COL_ILIAS_TYPE],
+            $row[self::COL_REF_ID],
+            $row[self::COL_OBJ_ID],
+            $row[self::COL_ADMIN_ROLE_ID],
+            $row[self::COL_STUDENT_ROLE_ID],
         );
     }
 

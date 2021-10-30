@@ -6,20 +6,20 @@ class EventoEvent
 {
     use JSONDataValidator;
 
-    public const JSON_ID = 'Id';
-    public const JSON_NAME = 'Name';
-    public const JSON_DESCRIPTION = 'Description';
-    public const JSON_TYPE = 'Type';
-    public const JSON_KIND = 'Kind';
-    public const JSON_DEPARTMENT = 'Department';
-    public const JSON_START_DATE = 'StartDate';
-    public const JSON_END_DATE = 'EndDate';
-    public const JSON_IS_CREATE_COURSE_FLAG = 'IsCreateCourse';
-    public const JSON_IS_GROUP_MEMBER_FLAG = 'IsGroupMember';
-    public const JSON_GROUP_NAME = 'GroupName';
-    public const JSON_GROUP_MEMBER_COUNT = 'GroupMemberCount';
-    public const JSON_EMPLOYEES = 'Employees';
-    public const JSON_STUDENTS = 'Students';
+    public const JSON_ID = 'id';
+    public const JSON_NAME = 'name';
+    public const JSON_DESCRIPTION = 'description';
+    public const JSON_TYPE = 'type';
+    public const JSON_KIND = 'kind';
+    public const JSON_DEPARTMENT = 'department';
+    public const JSON_START_DATE = 'startDate';
+    public const JSON_END_DATE = 'endDate';
+    public const JSON_IS_CREATE_COURSE_FLAG = 'isCreateCourse';
+    public const JSON_IS_GROUP_MEMBER_FLAG = 'isGroupMember';
+    public const JSON_GROUP_NAME = 'groupName';
+    public const JSON_GROUP_MEMBER_COUNT = 'groupMemberCount';
+    public const JSON_EMPLOYEES = 'employees';
+    public const JSON_STUDENTS = 'students';
 
     public const EVENTO_TYPE_MODULANLASS = 'Modulanlass';
     public const EVENTO_TYPE_KURS = 'Kurs';
@@ -65,7 +65,8 @@ class EventoEvent
 
     /** @var array */
     private $students;
-
+private static $CREATE_COURSES = 0;
+    private static $MAX_CREATE_COURSE = 50;
     public function __construct(array $data_set)
     {
         $this->evento_id             = $this->validateAndReturnNumber($data_set, self::JSON_ID);
@@ -82,6 +83,13 @@ class EventoEvent
         $this->group_member_count    = $this->validateAndReturnNumber($data_set, self::JSON_GROUP_MEMBER_COUNT);
         $this->employees             = $this->validateAndReturnArray($data_set, self::JSON_EMPLOYEES);
         $this->students              = $this->validateAndReturnArray($data_set, self::JSON_STUDENTS);
+
+        // TODO: Remove after testing!!!
+        if(self::$CREATE_COURSES  < self::$MAX_CREATE_COURSE && is_array($this->students))
+        {
+            $this->is_create_course_flag = (count($this->students) % 2) == 1;
+            if($this->is_create_course_flag) self::$CREATE_COURSES++;
+        }
 
         if(count($this->key_errors) > 0) {
             $error_message = 'One or more fields in the given array were invalid: ';

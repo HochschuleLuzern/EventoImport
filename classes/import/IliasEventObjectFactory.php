@@ -9,15 +9,17 @@ use EventoImport\import\db\RepositoryFacade;
 
 class IliasEventObjectFactory
 {
-    private $owner_user_id = 6;
+    private $owner_user_id;
     private $sort_mode;
     private $repository_facade;
 
     public function __construct(RepositoryFacade $repository_facade) {
         $this->repository_facade = $repository_facade;
+        $this->owner_user_id = 6;
+        $this->sort_mode = \ilContainer::SORT_TITLE;
     }
 
-    private function buildCourseObject(string $title, string $description, int $owner_id, int $destination_ref_id, $sort_type) : \ilObjCourse
+    public function buildNewCourseObject(string $title, string $description, int $owner_id, int $destination_ref_id, $sort_type) : \ilObjCourse
     {
         $course_object = new \ilObjCourse();
 
@@ -42,7 +44,7 @@ class IliasEventObjectFactory
         return $course_object;
     }
 
-    private function buildGroupObject(string $title, string $description, int $owner_id, int $destination_ref_id, $sort_type)
+    public function buildNewGroupObject(string $title, string $description, int $owner_id, int $destination_ref_id, $sort_type)
     {
         $group_object = new \ilObjGroup();
 
@@ -69,7 +71,7 @@ class IliasEventObjectFactory
 
     private function createAsSingleGroupEvent(EventoEvent $evento_event, $destiniation) : IliasEventWrapper
     {
-        $crs_object = $this->buildCourseObject($evento_event->getName(), $evento_event->getDescription(), $this->owner_user_id, $destiniation, $this->sort_mode);
+        $crs_object = $this->buildNewCourseObject($evento_event->getName(), $evento_event->getDescription(), $this->owner_user_id, $destiniation, $this->sort_mode);
 
         return $this->repository_facade->addNewSingleEventCourse($evento_event, $crs_object);
     }
@@ -80,12 +82,12 @@ class IliasEventObjectFactory
         $obj_for_parent_already_existed = false;
 
         if(is_null($parent_event_crs_obj)) {
-            $parent_event_crs_obj = $this->buildCourseObject($evento_event->getGroupName(), $evento_event->getDescription(), $this->owner_user_id, $destiniation, $this->sort_mode);
+            $parent_event_crs_obj = $this->buildNewCourseObject($evento_event->getGroupName(), $evento_event->getDescription(), $this->owner_user_id, $destiniation, $this->sort_mode);
         } else {
             $obj_for_parent_already_existed = true;
         }
 
-        $event_sub_group = $this->buildGroupObject($evento_event->getName(), $evento_event->getDescription(), $this->owner_user_id, $parent_event_crs_obj->getRefId(), $this->sort_mode);
+        $event_sub_group = $this->buildNewGroupObject($evento_event->getName(), $evento_event->getDescription(), $this->owner_user_id, $parent_event_crs_obj->getRefId(), $this->sort_mode);
 
         if($obj_for_parent_already_existed) {
             $event_wrapper = $this->repository_facade->addNewEventToExistingMultiGroupEvent($evento_event, $parent_event_crs_obj, $event_sub_group);

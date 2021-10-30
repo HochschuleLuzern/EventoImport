@@ -36,7 +36,7 @@ class ilEventoImporterIterator {
 	
 	public function nextPage() : int
     {
-		$this->page++;
+		return $this->page++;
 	}
 	
 	public function getPage() : int

@@ -40,13 +40,13 @@ class UserFacade
 
     public function fetchUserIdByMembership($evento_event_id, $employee)
     {
-        $user_id = $this->evento_user_repo->getIliasUserIdByEventoId($employee['Id']);
+        $user_id = $this->evento_user_repo->getIliasUserIdByEventoId($employee['id']);
 
         if(!is_null($user_id) && $user_id > 0) {
             return $user_id;
         }
 
-        $user_ids = $this->user_query->fetchUserIdsByEmailAdress($employee['Email']);
+        $user_ids = $this->user_query->fetchUserIdsByEmailAdress($employee['email']);
         if(count($user_ids) == 1) {
             return $user_ids[1];
         }

@@ -66,7 +66,7 @@ class ilEventoImportImport extends ilCronJob {
 		$this->settings = new ilSetting("crevento");
 		$this->importUsersConfig = new ilEventoImportImportUsersConfig($this->settings, $this->rbac);
 
-		$this->page_size = 100;
+		$this->page_size = 500;
 	}
 	
 	/**
@@ -187,7 +187,7 @@ class ilEventoImportImport extends ilCronJob {
                 $this->db,
                 $this->rbac,
                 $this->importUsersConfig);
-			$importUsers->run();
+			//$importUsers->run();
 
 
 			$evento_event_importer = new \EventoImport\communication\EventoEventImporter(
@@ -216,6 +216,7 @@ class ilEventoImportImport extends ilCronJob {
 			$import_events = new ilEventoImportImportEventsAndMemberships(
                 $event_importer,
                 $repository_facade,
+                $user_facade,
                 $evento_event_matcher,
                 $ilias_event_object_factory,
                 $logger,

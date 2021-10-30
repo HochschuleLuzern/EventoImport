@@ -99,6 +99,7 @@ abstract class ilEventoImporter {
         );
 
         $json_response = $this->data_source->sendRequest($this->fetch_data_set_method, $params);
+        $this->iterator->nextPage();
 
         $json_response_decoded = $this->validateResponseAndGetAsJsonStructure($json_response);
 
@@ -108,6 +109,7 @@ abstract class ilEventoImporter {
         } else if(!$json_response_decoded['hasMoreData']) {
             $this->has_more_data = false;
         }
+
 
         return $json_response_decoded['data'];
     }
