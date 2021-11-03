@@ -144,3 +144,202 @@
 		$ilDB->addPrimaryKey("crnhk_crevento_mas", array("evento_id"));
 	}
 ?>
+<#2>
+<?php
+
+$table_name = \EventoImport\import\db\repository\EventoUserRepository::TABLE_NAME;
+if(!$ilDB->tableExists($table_name)) {
+    $fields = array(
+        \EventoImport\import\db\repository\EventoUserRepository::COL_EVENTO_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\EventoUserRepository::COL_ILIAS_USER_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        )
+	);
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, [\EventoImport\import\db\repository\EventoUserRepository::COL_EVENTO_ID]);
+    $ilDB->addUniqueConstraint($table_name, [\EventoImport\import\db\repository\EventoUserRepository::COL_ILIAS_USER_ID], 'usr');
+}
+
+?>
+<#3>
+<?php
+
+$table_name = \EventoImport\import\db\repository\IliasEventoEventsRepository::TABLE_NAME;
+if(!$ilDB->tableExists($table_name)) {
+
+    $fields = array(
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_EVENTO_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_EVENTO_TITLE => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 255,
+            'notnull' => true,
+            'fixed' => false
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_EVENTO_DESCRIPTION => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 128,
+            'notnull' => true,
+			'fixed' => false
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_EVENTO_TYPE => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 25,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_WAS_AUTOMATICALLY_CREATED => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 1,
+            'notnull' => true
+        ),
+		\EventoImport\import\db\repository\IliasEventoEventsRepository::COL_START_DATE => array(
+            'type' => ilDBConstants::T_TIMESTAMP,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_END_DATE => array(
+            'type' => ilDBConstants::T_TIMESTAMP,
+            'notnull' => false
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_ILIAS_TYPE => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 4,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_REF_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_OBJ_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_ADMIN_ROLE_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_STUDENT_ROLE_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_PARENT_EVENT_REF_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => false
+        )
+    );
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, array(\EventoImport\import\db\repository\IliasEventoEventsRepository::COL_EVENTO_ID));
+}
+
+?>
+<#4>
+<?php
+
+$table_name = \EventoImport\import\db\repository\EventLocationsRepository::TABLE_NAME;
+if(!$ilDB->tableExists($table_name)) {
+    $fields = array(
+        \EventoImport\import\db\repository\EventLocationsRepository::COL_DEPARTMENT_NAME => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 30,
+            'notnull' => true,
+            'fixed' => false
+        ),
+        \EventoImport\import\db\repository\EventLocationsRepository::COL_EVENT_KIND      => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 30,
+            'notnull' => true,
+			'fixed' => false
+        ),
+        \EventoImport\import\db\repository\EventLocationsRepository::COL_YEAR            => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 2,
+            'notnull' => true,
+        ),
+        \EventoImport\import\db\repository\EventLocationsRepository::COL_REF_ID          => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        )
+    );
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, array(\EventoImport\import\db\repository\EventLocationsRepository::COL_DEPARTMENT_NAME, \EventoImport\import\db\repository\EventLocationsRepository::COL_EVENT_KIND, \EventoImport\import\db\repository\EventLocationsRepository::COL_YEAR));
+}
+
+?>
+<#5>
+<?php
+
+$table_name = \EventoImport\import\db\repository\EventMembershipRepository::TABLE_NAME;
+if(!$ilDB->tableExists($table_name)) {
+    $fields = array(
+        \EventoImport\import\db\repository\EventMembershipRepository::COL_EVENTO_EVENT_ID => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\EventMembershipRepository::COL_EVENTO_USER_ID => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\EventMembershipRepository::COL_ROLE_TYPE => array(
+            'type' => 'integer',
+            'length' => 1,
+            'notnull' => true
+        )
+    );
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, array(\EventoImport\import\db\repository\EventMembershipRepository::COL_EVENTO_EVENT_ID,\EventoImport\import\db\repository\EventMembershipRepository::COL_EVENTO_USER_ID));
+}
+
+?>
+<#6>
+<?php
+
+$table_name = \EventoImport\import\db\repository\ParentEventRepository::TABLE_NAME;
+if(!$ilDB->tableExists($table_name)) {
+
+    $fields = array(
+        \EventoImport\import\db\repository\ParentEventRepository::COL_TITLE => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 100,
+            'notnull' => false
+        ),
+        \EventoImport\import\db\repository\ParentEventRepository::COL_REF_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\ParentEventRepository::COL_ADMIN_ROLE_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\ParentEventRepository::COL_STUDENT_ROLE_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        )
+    );
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, array(\EventoImport\import\db\repository\ParentEventRepository::COL_TITLE));
+}
+?>
