@@ -134,12 +134,17 @@ class ilEventoImportImportUsers {
 	 * Returns the number of rows.
 	 */
 	private function importUsers() {
+        $imported = 0;
 		do {
             try {
                 foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
 
                     try {
                         $evento_user = new \EventoImport\communication\api_models\EventoUser($data_set);
+                        $action = $this->evento_user_matcher->matchGivenEventoUserToIliasUsers($evento_user);
+                        $action->executeAction();
+
+                        /*
                         $result = $this->evento_user_matcher->matchGivenEventoUserToIliasUsers($evento_user);
 
                         switch($result->getResultType()) {
@@ -155,7 +160,7 @@ class ilEventoImportImportUsers {
 
                             case EventoIliasUserMatchingResult::RESULT_ONE_CONFLICTING_USER:
                                 /*$this->renameAndDeactivateUser($evento_user, $user_match_result);
-                                $this->insertUser($evento_user);*/
+                                $this->insertUser($evento_user);*
                                 break;
 
                             case EventoIliasUserMatchingResult::RESULT_CONFLICT_OF_ACCOUNTS:
@@ -167,14 +172,18 @@ class ilEventoImportImportUsers {
                                 $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
                                 break;
                         }
+                        */
 
                     } catch(Exception $e) {
-                        $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
+                        $this->evento_logger->logException('User Import', $e->getMessage());
+                        //$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $data_set);
                     }
                 }
-            } catch(Exception $e) {}
-
-        } while($this->evento_importer->hasMoreData());
+            } catch(Exception $e) {
+                $this->evento_logger->logException('User Import', $e->getMessage());
+            }
+            $imported++;
+        } while($this->evento_importer->hasMoreData() && $imported < 100);
 
 	}
 

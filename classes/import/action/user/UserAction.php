@@ -9,10 +9,12 @@ abstract class UserAction implements \EventoImport\import\action\EventoImportAct
 {
     protected $evento_user;
     protected $user_facade;
+    protected $logger;
 
-    public function __construct(EventoUser $evento_user, UserFacade $user_facade)
+    public function __construct(EventoUser $evento_user, UserFacade $user_facade, \ilEventoImportLogger $logger)
     {
         $this->evento_user = $evento_user;
         $this->user_facade = $user_facade;
+        $this->logger = $logger;
     }
 }

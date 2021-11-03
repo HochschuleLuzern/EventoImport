@@ -66,7 +66,7 @@ class EventoEvent
     /** @var array */
     private $students;
 private static $CREATE_COURSES = 0;
-    private static $MAX_CREATE_COURSE = 50;
+    private static $MAX_CREATE_COURSE = 4000;
     public function __construct(array $data_set)
     {
         $this->evento_id             = $this->validateAndReturnNumber($data_set, self::JSON_ID);

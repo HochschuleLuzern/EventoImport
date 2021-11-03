@@ -11,9 +11,9 @@ class Create extends UserAction
 {
     protected $default_user_settings;
 
-    public function __construct(EventoUser $evento_user, UserFacade $user_facade, DefaultUserSettings $default_user_settings)
+    public function __construct(EventoUser $evento_user, UserFacade $user_facade, DefaultUserSettings $default_user_settings, \ilEventoImportLogger $logger)
     {
-        parent::__construct($evento_user, $user_facade);
+        parent::__construct($evento_user, $user_facade, $logger);
 
         $this->default_user_settings = $default_user_settings;
     }

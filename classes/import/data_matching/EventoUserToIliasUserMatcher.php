@@ -2,6 +2,9 @@
 
 namespace EventoImport\import\data_matching;
 
+use EventoImport\import\action\EventoImportActionFactory;
+use EventoImport\import\action\user\UserAction;
+use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\db\UserFacade;
 use Exception;
 use EventoImport\import\db\query\IliasUserQuerying;
@@ -21,9 +24,12 @@ class EventoUserToIliasUserMatcher
 
     private $user_facade;
 
-    public function __construct(UserFacade $user_facade)
+    private $action_factory;
+
+    public function __construct(UserFacade $user_facade, UserActionFactory $action_factory)
     {
         $this->user_facade = $user_facade;
+        $this->action_factory = $action_factory;
     }
 
     private function searchMatchInDB(\EventoImport\communication\api_models\EventoUser $evento_user)
@@ -145,12 +151,13 @@ class EventoUserToIliasUserMatcher
         }
     }
 
-    public function matchGivenEventoUserToIliasUsers(\EventoImport\communication\api_models\EventoUser $evento_user)
+    public function matchGivenEventoUserToIliasUsers(\EventoImport\communication\api_models\EventoUser $evento_user) : UserAction
     {
         $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
 
         if (!is_null($user_id)) {
-            return EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($user_id);
+            return $this->action_factory->buildUpdateAction($evento_user, $user_id);
+            //return EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($user_id);
         }
 
         return $this->matchEventoUserTheOldWay($evento_user);
@@ -158,7 +165,7 @@ class EventoUserToIliasUserMatcher
         //return $this->searchMatchInExistingUsers($evento_user);
     }
 
-    public function matchEventoUserTheOldWay(\EventoImport\communication\api_models\EventoUser $evento_user) : EventoIliasUserMatchingResult
+    public function matchEventoUserTheOldWay(\EventoImport\communication\api_models\EventoUser $evento_user) : UserAction
     {
 
         $data['id_by_login']          = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
@@ -174,7 +181,8 @@ class EventoUserToIliasUserMatcher
             // We couldn't find a user account neither by
             // matriculation, login nor e-mail
             // --> Insert new user account.
-            $result = EventoIliasUserMatchingResult::NoMatchingUserResult();
+            return $this->action_factory->buildCreateAction($evento_user);
+            //EventoIliasUserMatchingResult::NoMatchingUserResult();
 
         } else {
             if (count($data['ids_by_matriculation']) == 0 &&
@@ -194,24 +202,24 @@ class EventoUserToIliasUserMatcher
                     $changed_user_data['EvtID']         = trim(substr($objByLogin->getMatriculation(), 8));
                     $changed_user_data['new_user_info'] = 'EventoID: ' . $data['EvtID'];
                     $changed_user_data['found_by']      = 'Login';
-                    $result                             = EventoIliasUserMatchingResult::ConflictingUserToConvertResult($changed_user_data);
+                    $result                             = $this->action_factory->buildRenameExistingAndCreateNewAction($evento_user, $changed_user_data);//EventoIliasUserMatchingResult::ConflictingUserToConvertResult($changed_user_data);
 
                 } else {
                     if ($objByLogin->getMatriculation() == $objByLogin->getLogin()) {
                         // The user account by login has a matriculation from ldap
                         // --> Update user account.
-                        $result = EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['id_by_login']);
+                        $result = $this->action_factory->buildUpdateAction($evento_user, $data['id_by_login']);// EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['id_by_login']);
 
                     } else {
                         if (strlen($objByLogin->getMatriculation()) != 0) {
                             // The user account by login has a matriculation of some kind
                             // --> Bail
-                            $result = EventoIliasUserMatchingResult::MultiUserConflict();
+                            $result = $this->action_factory->buildReportConflict($evento_user);// EventoIliasUserMatchingResult::MultiUserConflict();
 
                         } else {
                             // The user account by login has no matriculation
                             // --> Update user account.
-                            $result = EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['id_by_login']);
+                            $result = $this->action_factory->buildUpdateAction($evento_user, $data['id_by_login']); //EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['id_by_login']);
                         }
                     }
                 }
@@ -234,16 +242,16 @@ class EventoUserToIliasUserMatcher
                         $changed_user_data['EvtID']         = trim(substr($objByEmail->getMatriculation(), 8));
                         $changed_user_data['new_user_info'] = 'EventoID: ' . $data['EvtID'];
                         $changed_user_data['found_by']      = 'E-Mail';
-                        $result                             = EventoIliasUserMatchingResult::NoMatchingUserResult();
+                        $result                             = $this->action_factory->buildRenameExistingAndCreateNewAction($evento_user, $changed_user_data);// EventoIliasUserMatchingResult::NoMatchingUserResult();
                     } else {
                         if (strlen($objByEmail->getMatriculation()) != 0) {
                             // The user account by login has a matriculation of some kind
                             // --> Bail
-                            $result = EventoIliasUserMatchingResult::MultiUserConflict();
+                            $result = $this->action_factory->buildReportConflict($evento_user); // EventoIliasUserMatchingResult::MultiUserConflict();
                         } else {
                             // The user account by login has no matriculation
                             // --> Update user account.
-                            $result = EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['ids_by_email'][0]);
+                            $result = $this->action_factory->buildUpdateAction($evento_user, $data['ids_by_email'][0]); // EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['ids_by_email'][0]);
                         }
                     }
 
@@ -254,7 +262,7 @@ class EventoUserToIliasUserMatcher
 
                         // We found a user account by matriculation and by login.
                         // --> Update user account.
-                        $result = EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['ids_by_matriculation'][0]);
+                        $result = $this->action_factory->buildUpdateAction($evento_user, $data['ids_by_matriculation'][0]); // EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['ids_by_matriculation'][0]);
                     } else {
                         if (count($data['ids_by_matriculation']) == 1 &&
                             $data['id_by_login'] == 0) {
@@ -262,7 +270,7 @@ class EventoUserToIliasUserMatcher
                             // We found a user account by matriculation but with the wrong login.
                             // The correct login is not taken by another user account.
                             // --> Update user account.
-                            $result = EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['ids_by_matriculation'][0]);
+                            $result = $this->action_factory->buildUpdateAction($evento_user, $data['ids_by_matriculation'][0]); // EventoIliasUserMatchingResult::ExactlyOneMatchingUserResult($data['ids_by_matriculation'][0]);
                         } else {
                             if (count($data['ids_by_matriculation']) == 1 &&
                                 $data['id_by_login'] != 0 &&
@@ -278,9 +286,9 @@ class EventoUserToIliasUserMatcher
                                 $changed_user_data['EvtID']         = trim(substr($objByLogin->getMatriculation(), 8));
                                 $changed_user_data['new_user_info'] = 'EventoID: ' . $data['EvtID'];
                                 $changed_user_data['found_by']      = 'Login';
-                                $result                             = EventoIliasUserMatchingResult::ConflictingUserToConvertResult($changed_user_data);
+                                $result                             = $this->action_factory->buildRenameExistingAndCreateNewAction($evento_user, $changed_user_data); // EventoIliasUserMatchingResult::ConflictingUserToConvertResult($changed_user_data);
                             } else {
-                                $result = EventoIliasUserMatchingResult::Error();
+                                $result = $this->action_factory->buildReportError($evento_user); //EventoIliasUserMatchingResult::Error();
                             }
                         }
                     }

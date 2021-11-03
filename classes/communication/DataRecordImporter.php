@@ -4,5 +4,5 @@ namespace EventoImport\communication;
 
 interface DataRecordImporter
 {
-    public function fetchNextDataRecord($id);
+    public function fetchDataRecord($id);
 }

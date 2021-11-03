@@ -75,7 +75,7 @@ abstract class ilEventoImporter {
         return $this->has_more_data;
     }
 
-	public function fetchNextDataRecord($id)
+	public function fetchDataRecord($id)
     {
         $params = array(
             "id" => (int)$id

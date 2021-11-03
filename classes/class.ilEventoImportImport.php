@@ -168,7 +168,9 @@ class ilEventoImportImport extends ilCronJob {
 
 		    $user_facade = new \EventoImport\import\db\UserFacade(
 		        new \EventoImport\import\db\query\IliasUserQuerying($this->db),
-                new \EventoImport\import\db\repository\EventoUserRepository($this->db)
+                new \EventoImport\import\db\repository\EventoUserRepository($this->db),
+                new \EventoImport\import\db\repository\EventMembershipRepository($this->db),
+                $this->rbac
             );
 
 		    /*
@@ -178,7 +180,9 @@ class ilEventoImportImport extends ilCronJob {
 		    $favourites_manager = new ilFavouritesManager();
 		    */
 
-            $evento_ilias_user_matcher = new EventoUserToIliasUserMatcher($user_facade);
+            $default_user_settings = new \EventoImport\import\settings\DefaultUserSettings($this->settings);
+            $user_action_factory = new \EventoImport\import\action\user\UserActionFactory($user_facade, $default_user_settings, $logger);
+            $evento_ilias_user_matcher = new EventoUserToIliasUserMatcher($user_facade, $user_action_factory);
 		    $importUsers = new ilEventoImportImportUsers(
 		        $user_importer,
                 $user_facade,
@@ -187,7 +191,7 @@ class ilEventoImportImport extends ilCronJob {
                 $this->db,
                 $this->rbac,
                 $this->importUsersConfig);
-			//$importUsers->run();
+			$importUsers->run();
 
 
 			$evento_event_importer = new \EventoImport\communication\EventoEventImporter(
@@ -223,7 +227,7 @@ class ilEventoImportImport extends ilCronJob {
                 $this->rbac
             );
 
-			$import_events->run();
+			//$import_events->run();
 
 			/*
 			 * Intentionally left out. First phase of the evento user_importer is to import users

@@ -9,9 +9,9 @@ class RenameExistingCreateNew extends UserAction
 {
     private $create_action;
 
-    public function __construct(Create $create_action, EventoUser $existing_user, UserFacade $user_facade)
+    public function __construct(Create $create_action, EventoUser $existing_user, UserFacade $user_facade, \ilEventoImportLogger $logger)
     {
-        parent::__construct($existing_user, $user_facade);
+        parent::__construct($existing_user, $user_facade, $logger);
 
         $this->create_action = $create_action;
     }
