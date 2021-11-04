@@ -191,7 +191,7 @@ class ilEventoImportImport extends ilCronJob {
                 $this->db,
                 $this->rbac,
                 $this->importUsersConfig);
-			$importUsers->run();
+			//$importUsers->run();
 
 
 			$evento_event_importer = new \EventoImport\communication\EventoEventImporter(
@@ -224,10 +224,17 @@ class ilEventoImportImport extends ilCronJob {
                 $evento_event_matcher,
                 $ilias_event_object_factory,
                 $logger,
-                $this->rbac
+                $this->rbac,
+                new \EventoImport\import\action\event\EventActionFactory(
+                    $ilias_event_object_factory,
+                    $repository_facade,
+                    $user_facade,
+                    new \EventoImport\import\settings\DefaultEventSettings($this->settings),
+                    $logger
+                )
             );
 
-			//$import_events->run();
+			$import_events->run();
 
 			/*
 			 * Intentionally left out. First phase of the evento user_importer is to import users

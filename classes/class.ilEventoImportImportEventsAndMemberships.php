@@ -10,6 +10,7 @@ class ilEventoImportImportEventsAndMemberships
     private $logger;
     private $rbac;
     private $ilias_event_object_factory;
+    private $event_action_factory;
 
     public function __construct(
         \EventoImport\communication\EventoEventImporter $evento_importer,
@@ -18,7 +19,8 @@ class ilEventoImportImportEventsAndMemberships
         \EventoImport\import\data_matching\EventoEventToIliasObjectMatcher $evento_event_matcher,
         \EventoImport\import\IliasEventObjectFactory $ilias_event_object_factory,
         ilEventoImportLogger $logger,
-        \ILIAS\DI\RBACServices $rbac
+        \ILIAS\DI\RBACServices $rbac,
+        \EventoImport\import\action\event\EventActionFactory $action_factory
     )
     {
         $this->evento_importer         = $evento_importer;
@@ -28,6 +30,7 @@ class ilEventoImportImportEventsAndMemberships
         $this->ilias_event_object_factory = $ilias_event_object_factory;
         $this->logger = $logger;
         $this->rbac = $rbac;
+        $this->event_action_factory = $action_factory;
     }
 
     private function updateMembershipsOfCourse(\EventoImport\communication\api_models\EventoEvent $evento_event, \EventoImport\import\IliasEventWrapper $event_wrapper)
@@ -145,27 +148,72 @@ class ilEventoImportImportEventsAndMemberships
         $this->importEvents();
     }
 
+    private function determineEventAction(\EventoImport\communication\api_models\EventoEvent $evento_event) : \EventoImport\import\action\EventoImportAction
+    {
+        $ilias_event = $this->repository_facade->getIliasEventByEventoIdOrReturnNull($evento_event->getEventoId());
+        if(!is_null($ilias_event) && $ilias_event->getIliasEventoEventObj()->wasAutomaticallyCreated() == $evento_event->hasCreateCourseFlag()) {
+
+            return $this->event_action_factory->updateExistingEvent($evento_event, $ilias_event);
+        }
+
+        // Has create flag
+        if ($evento_event->hasCreateCourseFlag()) {
+            $destination_ref_id = $this->repository_facade->departmentLocationRepository()->fetchRefIdForEventoObject($evento_event);
+
+            if($destination_ref_id === null) {
+                throw new Exception('Location for Event not found');
+            }
+
+            if(!$evento_event->hasGroupMemberFlag()) {
+                // Is single Group
+                return $this->event_action_factory->createSingleEvent($evento_event, $destination_ref_id);
+
+            }
+
+            // Is MultiGroup
+            $parent_event_crs_obj = $this->repository_facade->searchPossibleParentEventForEvent($evento_event);
+            if(!is_null($parent_event_crs_obj)) {
+                // Parent event in multi group exists
+                return $this->event_action_factory->createEventInParentEvent($evento_event, $parent_event_crs_obj);
+            }
+
+            // Parent event in multi group has also to be created
+            return $this->event_action_factory->createEventWithParent($evento_event, $destination_ref_id);
+        }
+        // Has no create flag
+        else {
+            $matched_course = $this->evento_event_matcher->searchExactlyOneMatchingCourseByTitle($evento_event);
+
+            if (!is_null($matched_course)) {
+                return $this->event_action_factory->convertExistingIliasObjToEvent($evento_event, $matched_course);
+            } else {
+                return $this->event_action_factory->reportNonIliasEvent($evento_event);
+            }
+
+        }
+    }
+
+    private function importNextEventPage()
+    {
+        foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
+            try {
+                $evento_event = new \EventoImport\communication\api_models\EventoEvent($data_set);
+
+                $action = $this->determineEventAction($evento_event);
+                $action->executeAction();
+            } catch(\Exception $e) {
+                $this->logger->logException('Importing Event', $e->getMessage());
+            }
+        }
+    }
+
     private function importEvents()
     {
         do {
             try {
-                foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
-                    try {
-                        $evento_event = new \EventoImport\communication\api_models\EventoEvent($data_set);
-                        $ilias_evento_event = $this->repository_facade->iliasEventoEventRepository()->getEventByEventoId($evento_event->getEventoId());
-
-                        if(is_null($ilias_evento_event)) {
-                            $this->handleNotMatchedEvent($evento_event);
-                        } else {
-                            $this->updateEvent($ilias_evento_event, $evento_event);
-                        }
-
-                    } catch(\Exception $e) {
-
-                    }
-                }
+                $this->importNextEventPage();
             } catch(\Exception $e) {
-
+                $this->logger->logException('Importing Event Page', $e->getMessage());
             }
         } while ($this->evento_importer->hasMoreData());
     }

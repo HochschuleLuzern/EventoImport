@@ -21,6 +21,8 @@ abstract class IliasEventWrapper
         $this->rbac_review = $rbac_services->review();
     }
 
+    abstract public function getIliasEventoEventObj() : IliasEventoEvent;
+
     protected function addUserToGivenRole(int $user_id, int $role_id)
     {
         if(!$this->rbac_review->isAssigned($user_id, $role_id)) {

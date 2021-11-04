@@ -146,4 +146,41 @@ class RepositoryFacade
 
         return new IliasEventWrapperEventWithParent($ilias_parent_event, $crs_object, $ilias_evento_event, $sub_group);
     }
+
+    public function getIliasEventByEventoIdOrReturnNull(int $evento_id) : ?IliasEventWrapper
+    {
+        $ilias_evento_event = $this->event_repo->getEventByEventoId($evento_id);
+
+        if(is_null($ilias_evento_event)) {
+            return null;
+        }
+
+        if($ilias_evento_event->getParentEventRefId() != null) {
+            $parent_event = $this->parent_event_repo->fetchParentEventForRefId($ilias_evento_event->getParentEventRefId());
+
+            $parent_obj_type = \ilObject::_lookupType($parent_event->getRefId(), true);
+            if($parent_obj_type == 'crs') {
+                $parent_event_obj = new \ilObjCourse($parent_event->getRefId());
+            } else if($parent_obj_type == 'grp') {
+                $parent_event_obj = new \ilObjGroup($parent_event->getRefId());
+            } else {
+                throw new \InvalidArgumentException('Type of parent obj ist not an event type');
+            }
+
+            $sub_event = new \ilObjGroup($ilias_evento_event->getRefId(), true);
+
+            return new IliasEventWrapperEventWithParent($parent_event, $parent_event_obj, $ilias_evento_event, $sub_event);
+        } else {
+            $parent_obj_type = \ilObject::_lookupType($ilias_evento_event->getRefId(), true);
+            if($parent_obj_type == 'crs') {
+                $ilias_event_obj = new \ilObjCourse($ilias_evento_event->getRefId());
+            } else if($parent_obj_type == 'grp') {
+                $ilias_event_obj = new \ilObjGroup($ilias_evento_event->getRefId());
+            } else {
+                throw new \InvalidArgumentException('Type of given ilias obj is not an event type');
+            }
+
+            return new IliasEventWrapperSingleEvent($ilias_evento_event, $ilias_event_obj);
+        }
+    }
 }

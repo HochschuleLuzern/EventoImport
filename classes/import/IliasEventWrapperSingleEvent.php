@@ -28,4 +28,9 @@ class IliasEventWrapperSingleEvent extends IliasEventWrapper
     {
         $this->addUserToGivenRole($user_id, $this->evento_event->getStudentRoleId());
     }
+
+    public function getIliasEventoEventObj() : IliasEventoEvent
+    {
+        return $this->evento_event;
+    }
 }
