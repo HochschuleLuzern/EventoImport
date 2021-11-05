@@ -30,7 +30,7 @@ class CreateEventInParentEvent extends EventAction
             $this->event_settings->getDefaultSortMode()
         );
 
-        $parent_event_ilias_obj = new \ilObjCourse($this->parent_event->getRefId(), false);
+        $parent_event_ilias_obj = new \ilObjCourse($this->parent_event->getRefId(), true);
 
         $event_wrapper = $this->repository_facade->addNewEventToExistingMultiGroupEvent($this->evento_event, $parent_event_ilias_obj, $event_sub_group);
         $this->synchronizeUsersInRole($event_wrapper);

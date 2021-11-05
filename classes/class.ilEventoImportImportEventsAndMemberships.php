@@ -167,14 +167,13 @@ class ilEventoImportImportEventsAndMemberships
             if(!$evento_event->hasGroupMemberFlag()) {
                 // Is single Group
                 return $this->event_action_factory->createSingleEvent($evento_event, $destination_ref_id);
-
             }
 
             // Is MultiGroup
-            $parent_event_crs_obj = $this->repository_facade->searchPossibleParentEventForEvent($evento_event);
-            if(!is_null($parent_event_crs_obj)) {
+            $parent_event = $this->repository_facade->searchPossibleParentEventForEvent($evento_event);
+            if(!is_null($parent_event)) {
                 // Parent event in multi group exists
-                return $this->event_action_factory->createEventInParentEvent($evento_event, $parent_event_crs_obj);
+                return $this->event_action_factory->createEventInParentEvent($evento_event, $parent_event);
             }
 
             // Parent event in multi group has also to be created

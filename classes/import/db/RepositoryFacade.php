@@ -38,18 +38,18 @@ class RepositoryFacade
         $this->event_object_query->fetchAllEventableObjectsForGivenTitle($name);
     }
 
-    public function searchPossibleParentEventForEvent(EventoEvent $evento_event)
+    public function searchPossibleParentEventForEvent(EventoEvent $evento_event) : ?IliasEventoParentEvent
     {
         global $DIC;
 
         $parent_event = $this->parent_event_repo->fetchParentEventForName($evento_event->getGroupName());
         if (!is_null($parent_event)) {
-            return new \ilObjCourse($parent_event->getRefId(), true);
+            return $parent_event;
         }
 
         $obj_id = $this->event_object_query->searchPossibleParentEventForEvent($evento_event);
         if (!is_null($obj_id)) {
-            return new \ilObjCourse($obj_id, false);
+            return $parent_event;
         }
 
         return null;
@@ -111,7 +111,7 @@ class RepositoryFacade
             $sub_group->getId(),
             $sub_group->getDefaultAdminRole(),
             $sub_group->getDefaultMemberRole(),
-            $crs_object->getId()
+            $crs_object->getRefId()
         );
 
         $this->parent_event_repo->addNewParentEvent($parent_event);
@@ -171,10 +171,10 @@ class RepositoryFacade
 
             return new IliasEventWrapperEventWithParent($parent_event, $parent_event_obj, $ilias_evento_event, $sub_event);
         } else {
-            $parent_obj_type = \ilObject::_lookupType($ilias_evento_event->getRefId(), true);
-            if($parent_obj_type == 'crs') {
+            $obj_type = \ilObject::_lookupType($ilias_evento_event->getRefId(), true);
+            if($obj_type == 'crs') {
                 $ilias_event_obj = new \ilObjCourse($ilias_evento_event->getRefId());
-            } else if($parent_obj_type == 'grp') {
+            } else if($obj_type == 'grp') {
                 $ilias_event_obj = new \ilObjGroup($ilias_evento_event->getRefId());
             } else {
                 throw new \InvalidArgumentException('Type of given ilias obj is not an event type');

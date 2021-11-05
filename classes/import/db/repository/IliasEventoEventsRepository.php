@@ -47,6 +47,7 @@ class IliasEventoEventsRepository
             $row[self::COL_OBJ_ID],
             $row[self::COL_ADMIN_ROLE_ID],
             $row[self::COL_STUDENT_ROLE_ID],
+            isset($row[self::COL_PARENT_EVENT_REF_ID]) ? $row[self::COL_PARENT_EVENT_REF_ID] : null
         );
     }
 
