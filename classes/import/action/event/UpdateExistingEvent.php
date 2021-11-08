@@ -3,6 +3,7 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
@@ -22,6 +23,26 @@ class UpdateExistingEvent extends EventAction
 
     public function executeAction()
     {
+        $ilias_event_obj = $this->ilias_event->getIliasEventoEventObj();
+        if(is_null($ilias_event_obj->getStartDate())) {
+               $updated_obj = new IliasEventoEvent(
+                   $ilias_event_obj->getEventoEventId(),
+                   $ilias_event_obj->getEventoTitle(),
+                   $ilias_event_obj->getEventoDescription(),
+                   $ilias_event_obj->getEventoType(),
+                   $ilias_event_obj->wasAutomaticallyCreated(),
+                   $this->evento_event->getStartDate(),
+                   $this->evento_event->getEndDate(),
+                   $ilias_event_obj->getIliasType(),
+                   $ilias_event_obj->getRefId(),
+                   $ilias_event_obj->getObjId(),
+                   $ilias_event_obj->getAdminRoleId(),
+                   $ilias_event_obj->getStudentRoleId(),
+                   $ilias_event_obj->getParentEventRefId()
+               );
+
+               $this->repository_facade->iliasEventoEventRepository()->updateIliasEventoEvent($updated_obj);
+        }
         $this->synchronizeUsersInRole($this->ilias_event);
     }
 }

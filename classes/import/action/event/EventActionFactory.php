@@ -3,6 +3,7 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\action\ReportError;
 use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
@@ -54,5 +55,10 @@ class EventActionFactory
     public function reportNonIliasEvent(EventoEvent $evento_event) : ReportNonIliasEvent
     {
         return new ReportNonIliasEvent($evento_event, $this->logger);
+    }
+
+    public function reportUnknownLocationForEvent(EventoEvent $evento_event)
+    {
+        return new ReportError(\ilEventoImportLogger::CREVENTO_MA_NOTICE_MISSING_IN_ILIAS, [], $this->logger);
     }
 }

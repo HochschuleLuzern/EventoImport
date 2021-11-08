@@ -161,6 +161,7 @@ class ilEventoImportImportEventsAndMemberships
             $destination_ref_id = $this->repository_facade->departmentLocationRepository()->fetchRefIdForEventoObject($evento_event);
 
             if($destination_ref_id === null) {
+                return $this->event_action_factory->reportUnknownLocationForEvent($evento_event);
                 throw new Exception('Location for Event not found');
             }
 

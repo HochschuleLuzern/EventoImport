@@ -29,8 +29,8 @@ class IliasEventoEvent
         string $evento_description,
         string $evento_event_type,
         bool $was_automatically_created,
-        $start_date,
-        $end_date,
+        ?\DateTime $start_date,
+        ?\DateTime $end_date,
         string $ilias_type,
         int $ref_id,
         int $obj_id,
@@ -44,7 +44,7 @@ class IliasEventoEvent
 
         // evento event values
         $this->evento_title              = $evento_title;
-        $this->evento_description           = $evento_description;
+        $this->evento_description        = $evento_description;
         $this->evento_event_type         = $evento_event_type;
         $this->was_automatically_created = $was_automatically_created;
         $this->start_date                = $start_date;
@@ -101,15 +101,15 @@ class IliasEventoEvent
 
     public function getStartDate()
     {
-        return $this->start_date ? $this->start_date->getTimestamp() : null;
+        return $this->start_date;// ? $this->start_date->getTimestamp() : null;
     }
 
     public function getEndDate()
     {
-        return $this->end_date ? $this->start_date->getTimestamp() : null;
+        return $this->end_date;// ? $this->start_date->getTimestamp() : null;
     }
 
-    public function iliasType() : string
+    public function getIliasType() : string
     {
         return $this->ilias_type;
     }

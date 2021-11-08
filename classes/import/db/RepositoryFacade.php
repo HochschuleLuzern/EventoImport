@@ -155,8 +155,12 @@ class RepositoryFacade
             return null;
         }
 
-        if($ilias_evento_event->getParentEventRefId() != null) {
+        if(!is_null($ilias_evento_event->getParentEventRefId())) {
             $parent_event = $this->parent_event_repo->fetchParentEventForRefId($ilias_evento_event->getParentEventRefId());
+
+            if(is_null($parent_event)) {
+                throw new \InvalidArgumentException('Parent Event for ref_id ' . $ilias_evento_event->getParentEventRefId() . ' does not exist.');
+            }
 
             $parent_obj_type = \ilObject::_lookupType($parent_event->getRefId(), true);
             if($parent_obj_type == 'crs') {
