@@ -16,5 +16,4 @@ class EventoUserImporter extends \ilEventoImporter implements DataRecordImporter
 
         parent::__construct($iterator, $settings, $logger, $data_source);
     }
-
 }

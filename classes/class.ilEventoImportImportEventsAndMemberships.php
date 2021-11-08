@@ -21,11 +21,10 @@ class ilEventoImportImportEventsAndMemberships
         ilEventoImportLogger $logger,
         \ILIAS\DI\RBACServices $rbac,
         \EventoImport\import\action\event\EventActionFactory $action_factory
-    )
-    {
-        $this->evento_importer         = $evento_importer;
-        $this->repository_facade       = $repository_facade;
-        $this->user_facade             = $user_facade;
+    ) {
+        $this->evento_importer = $evento_importer;
+        $this->repository_facade = $repository_facade;
+        $this->user_facade = $user_facade;
         $this->evento_event_matcher = $evento_event_matcher;
         $this->ilias_event_object_factory = $ilias_event_object_factory;
         $this->logger = $logger;
@@ -35,45 +34,39 @@ class ilEventoImportImportEventsAndMemberships
 
     private function updateMembershipsOfCourse(\EventoImport\communication\api_models\EventoEvent $evento_event, \EventoImport\import\IliasEventWrapper $event_wrapper)
     {
-        foreach($evento_event->getEmployees() as $employee) {
-
-            if(isset($employee["id"]) && isset($employee["email"])) {
+        foreach ($evento_event->getEmployees() as $employee) {
+            if (isset($employee["id"]) && isset($employee["email"])) {
                 $user_id = $this->user_facade->fetchUserIdByMembership($evento_event->getEventoId(), $employee);
 
-                if(!is_null($user_id)) {
+                if (!is_null($user_id)) {
                     $event_wrapper->addUserAsAdminToEvent($user_id);
                 } else {
                     $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($employee["id"]);
-                    if(!is_null($user_id)) {
+                    if (!is_null($user_id)) {
                         $event_wrapper->addUserAsAdminToEvent($user_id);
                     }
                 }
-
             }
         }
 
-        foreach($evento_event->getStudents() as $student) {
-
-            if(isset($student["id"]) && isset($student["email"])) {
+        foreach ($evento_event->getStudents() as $student) {
+            if (isset($student["id"]) && isset($student["email"])) {
                 $user_id = $this->user_facade->fetchUserIdByMembership($evento_event->getEventoId(), $student);
 
-                if(!is_null($user_id)) {
+                if (!is_null($user_id)) {
                     $event_wrapper->addUserAsStudentToEvent($user_id);
                 } else {
-
                     $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($student["id"]);
-                    if(!is_null($user_id)) {
+                    if (!is_null($user_id)) {
                         $event_wrapper->addUserAsStudentToEvent($user_id);
                     }
                 }
-
             }
         }
     }
 
     private function handleChangedCreateCourseFlagAfterImport(\EventoImport\import\db\model\IliasEventoEvent $ilias_evento_event, \EventoImport\communication\api_models\EventoEvent $evento_event)
     {
-
     }
 
     private function handleNotMatchedEvent(\EventoImport\communication\api_models\EventoEvent $evento_event)
@@ -84,16 +77,16 @@ class ilEventoImportImportEventsAndMemberships
         if ($evento_event->hasCreateCourseFlag()) {
             $destination = $this->repository_facade->departmentLocationRepository()->fetchRefIdForEventoObject($evento_event);
 
-            if($destination === null) {
+            if ($destination === null) {
                 throw new Exception('Location for Event not found');
             }
 
             // Is MultiGroup
-            if($evento_event->hasGroupMemberFlag()) {
+            if ($evento_event->hasGroupMemberFlag()) {
                 $parent_event_crs_obj = $this->repository_facade->searchPossibleParentEventForEvent($evento_event);
                 $obj_for_parent_already_existed = false;
 
-                if(is_null($parent_event_crs_obj)) {
+                if (is_null($parent_event_crs_obj)) {
                     $parent_event_crs_obj = $this->ilias_event_object_factory->buildNewCourseObject($evento_event->getGroupName(), $evento_event->getDescription(), $owner_user_id, $destination, $sort_mode);
                 } else {
                     $obj_for_parent_already_existed = true;
@@ -101,7 +94,7 @@ class ilEventoImportImportEventsAndMemberships
 
                 $event_sub_group = $this->ilias_event_object_factory->buildNewGroupObject($evento_event->getName(), $evento_event->getDescription(), $owner_user_id, $parent_event_crs_obj->getRefId(), $sort_mode);
 
-                if($obj_for_parent_already_existed) {
+                if ($obj_for_parent_already_existed) {
                     $event_wrapper = $this->repository_facade->addNewEventToExistingMultiGroupEvent($evento_event, $parent_event_crs_obj, $event_sub_group);
                 } else {
                     $event_wrapper = $this->repository_facade->addNewMultiEventCourseAndGroup($evento_event, $parent_event_crs_obj, $event_sub_group);
@@ -117,7 +110,6 @@ class ilEventoImportImportEventsAndMemberships
             //$event_wrapper = $this->ilias_event_object_factory->buildNewIliasEventObject($evento_event, $destination);
 
             $this->updateMembershipsOfCourse($evento_event, $event_wrapper);
-
         }
         // Has no create flag
         else {
@@ -133,26 +125,25 @@ class ilEventoImportImportEventsAndMemberships
 
     private function addExistingIliasObjectAsEventoEvent(\EventoImport\communication\api_models\EventoEvent $evento_event, ilContainer $matched_course)
     {
-
     }
 
     private function updateEvent(\EventoImport\import\db\model\IliasEventoEvent $ilias_evento_event, \EventoImport\communication\api_models\EventoEvent $evento_event)
     {
         // Edge-case
-        if(!$ilias_evento_event->wasAutomaticallyCreated() && $evento_event->hasCreateCourseFlag()) {
+        if (!$ilias_evento_event->wasAutomaticallyCreated() && $evento_event->hasCreateCourseFlag()) {
             $this->handleChangedCreateCourseFlagAfterImport($ilias_evento_event, $evento_event);
         }
     }
 
-    public function run() {
+    public function run()
+    {
         $this->importEvents();
     }
 
     private function determineEventAction(\EventoImport\communication\api_models\EventoEvent $evento_event) : \EventoImport\import\action\EventoImportAction
     {
         $ilias_event = $this->repository_facade->getIliasEventByEventoIdOrReturnNull($evento_event->getEventoId());
-        if(!is_null($ilias_event) && $ilias_event->getIliasEventoEventObj()->wasAutomaticallyCreated() == $evento_event->hasCreateCourseFlag()) {
-
+        if (!is_null($ilias_event) && $ilias_event->getIliasEventoEventObj()->wasAutomaticallyCreated() == $evento_event->hasCreateCourseFlag()) {
             return $this->event_action_factory->updateExistingEvent($evento_event, $ilias_event);
         }
 
@@ -160,19 +151,19 @@ class ilEventoImportImportEventsAndMemberships
         if ($evento_event->hasCreateCourseFlag()) {
             $destination_ref_id = $this->repository_facade->departmentLocationRepository()->fetchRefIdForEventoObject($evento_event);
 
-            if($destination_ref_id === null) {
+            if ($destination_ref_id === null) {
                 return $this->event_action_factory->reportUnknownLocationForEvent($evento_event);
                 throw new Exception('Location for Event not found');
             }
 
-            if(!$evento_event->hasGroupMemberFlag()) {
+            if (!$evento_event->hasGroupMemberFlag()) {
                 // Is single Group
                 return $this->event_action_factory->createSingleEvent($evento_event, $destination_ref_id);
             }
 
             // Is MultiGroup
             $parent_event = $this->repository_facade->searchPossibleParentEventForEvent($evento_event);
-            if(!is_null($parent_event)) {
+            if (!is_null($parent_event)) {
                 // Parent event in multi group exists
                 return $this->event_action_factory->createEventInParentEvent($evento_event, $parent_event);
             }
@@ -189,19 +180,18 @@ class ilEventoImportImportEventsAndMemberships
             } else {
                 return $this->event_action_factory->reportNonIliasEvent($evento_event);
             }
-
         }
     }
 
     private function importNextEventPage()
     {
-        foreach($this->evento_importer->fetchNextDataSet() as $data_set) {
+        foreach ($this->evento_importer->fetchNextDataSet() as $data_set) {
             try {
                 $evento_event = new \EventoImport\communication\api_models\EventoEvent($data_set);
 
                 $action = $this->determineEventAction($evento_event);
                 $action->executeAction();
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->logException('Importing Event', $e->getMessage());
             }
         }
@@ -212,7 +202,7 @@ class ilEventoImportImportEventsAndMemberships
         do {
             try {
                 $this->importNextEventPage();
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->logException('Importing Event Page', $e->getMessage());
             }
         } while ($this->evento_importer->hasMoreData());

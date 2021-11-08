@@ -29,17 +29,17 @@ class EventActionFactory
 
     public function createSingleEvent(EventoEvent $evento_event, int $destination_ref_id) : CreateSingleEvent
     {
-        return new CreateSingleEvent($evento_event, $destination_ref_id, $this->event_object_factory, $this->default_event_settings,  $this->repository_facade, $this->user_facade, $this->logger, $this->user_facade->rbacServices());
+        return new CreateSingleEvent($evento_event, $destination_ref_id, $this->event_object_factory, $this->default_event_settings, $this->repository_facade, $this->user_facade, $this->logger, $this->user_facade->rbacServices());
     }
 
     public function createEventWithParent(EventoEvent $evento_event, $destination_ref_id) : CreateEventWithParent
     {
-        return new CreateEventWithParent($evento_event, $destination_ref_id, $this->event_object_factory, $this->default_event_settings,  $this->repository_facade, $this->user_facade, $this->logger, $this->user_facade->rbacServices());
+        return new CreateEventWithParent($evento_event, $destination_ref_id, $this->event_object_factory, $this->default_event_settings, $this->repository_facade, $this->user_facade, $this->logger, $this->user_facade->rbacServices());
     }
 
     public function createEventInParentEvent(EventoEvent $evento_event, $parent_event) : CreateEventInParentEvent
     {
-        return new CreateEventInParentEvent($evento_event, $parent_event, $this->event_object_factory, $this->default_event_settings,  $this->repository_facade, $this->user_facade, $this->logger, $this->user_facade->rbacServices());
+        return new CreateEventInParentEvent($evento_event, $parent_event, $this->event_object_factory, $this->default_event_settings, $this->repository_facade, $this->user_facade, $this->logger, $this->user_facade->rbacServices());
     }
 
     public function updateExistingEvent(EventoEvent $evento_event, $ilias_event) : UpdateExistingEvent
@@ -57,7 +57,7 @@ class EventActionFactory
         return new ReportNonIliasEvent($evento_event, $this->logger);
     }
 
-    public function reportUnknownLocationForEvent(EventoEvent $evento_event)
+    public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportError
     {
         return new ReportError(\ilEventoImportLogger::CREVENTO_MA_NOTICE_MISSING_IN_ILIAS, [], $this->logger);
     }
