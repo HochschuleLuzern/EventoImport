@@ -65,35 +65,36 @@ class EventoEvent
 
     /** @var array */
     private $students;
-private static $CREATE_COURSES = 0;
+    private static $CREATE_COURSES = 0;
     private static $MAX_CREATE_COURSE = 4000;
     public function __construct(array $data_set)
     {
-        $this->evento_id             = $this->validateAndReturnNumber($data_set, self::JSON_ID);
-        $this->name                  = $this->validateAndReturnString($data_set, self::JSON_NAME);
-        $this->description           = $this->validateAndReturnString($data_set, self::JSON_DESCRIPTION);
-        $this->type                  = $this->validateAndReturnString($data_set, self::JSON_TYPE);
-        $this->kind                  = $this->validateAndReturnString($data_set, self::JSON_KIND);
-        $this->department            = $this->validateAndReturnString($data_set, self::JSON_DEPARTMENT);
-        $this->start_date            = $this->validateAndReturnDateTime($data_set, self::JSON_START_DATE);
-        $this->end_date              = $this->validateAndReturnDateTime($data_set, self::JSON_END_DATE);
+        $this->evento_id = $this->validateAndReturnNumber($data_set, self::JSON_ID);
+        $this->name = $this->validateAndReturnString($data_set, self::JSON_NAME);
+        $this->description = $this->validateAndReturnString($data_set, self::JSON_DESCRIPTION);
+        $this->type = $this->validateAndReturnString($data_set, self::JSON_TYPE);
+        $this->kind = $this->validateAndReturnString($data_set, self::JSON_KIND);
+        $this->department = $this->validateAndReturnString($data_set, self::JSON_DEPARTMENT);
+        $this->start_date = $this->validateAndReturnDateTime($data_set, self::JSON_START_DATE);
+        $this->end_date = $this->validateAndReturnDateTime($data_set, self::JSON_END_DATE);
         $this->is_create_course_flag = $this->validateAndReturnBoolean($data_set, self::JSON_IS_CREATE_COURSE_FLAG);
-        $this->is_group_member_flag  = $this->validateAndReturnBoolean($data_set, self::JSON_IS_GROUP_MEMBER_FLAG);
-        $this->group_name            = $this->validateAndReturnString($data_set, self::JSON_GROUP_NAME);
-        $this->group_member_count    = $this->validateAndReturnNumber($data_set, self::JSON_GROUP_MEMBER_COUNT);
-        $this->employees             = $this->validateAndReturnArray($data_set, self::JSON_EMPLOYEES);
-        $this->students              = $this->validateAndReturnArray($data_set, self::JSON_STUDENTS);
+        $this->is_group_member_flag = $this->validateAndReturnBoolean($data_set, self::JSON_IS_GROUP_MEMBER_FLAG);
+        $this->group_name = $this->validateAndReturnString($data_set, self::JSON_GROUP_NAME);
+        $this->group_member_count = $this->validateAndReturnNumber($data_set, self::JSON_GROUP_MEMBER_COUNT);
+        $this->employees = $this->validateAndReturnArray($data_set, self::JSON_EMPLOYEES);
+        $this->students = $this->validateAndReturnArray($data_set, self::JSON_STUDENTS);
 
         // TODO: Remove after testing!!!
-        if(self::$CREATE_COURSES  < self::$MAX_CREATE_COURSE && is_array($this->students))
-        {
+        if (self::$CREATE_COURSES < self::$MAX_CREATE_COURSE && is_array($this->students)) {
             $this->is_create_course_flag = (count($this->students) % 2) == 1;
-            if($this->is_create_course_flag) self::$CREATE_COURSES++;
+            if ($this->is_create_course_flag) {
+                self::$CREATE_COURSES++;
+            }
         }
 
-        if(count($this->key_errors) > 0) {
+        if (count($this->key_errors) > 0) {
             $error_message = 'One or more fields in the given array were invalid: ';
-            foreach($this->key_errors as $field => $error) {
+            foreach ($this->key_errors as $field => $error) {
                 $error_message .= "Field $field - $error; ";
             }
 

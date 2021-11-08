@@ -21,7 +21,6 @@ class CreateEventInParentEvent extends EventAction
 
     public function executeAction()
     {
-
         $event_sub_group = $this->event_object_factory->buildNewGroupObject(
             $this->evento_event->getName(),
             $this->evento_event->getDescription(),

@@ -34,9 +34,9 @@ class EventoUser
         $this->email_list = $this->validateCombineAndReturnListOfValues($data_set, [self::JSON_EMAIL, self::JSON_EMAIL_2, self::JSON_EMAIL_3], false);
         $this->roles = $this->validateAndReturnArray($data_set, self::JSON_ROLES);
 
-        if(count($this->key_errors) > 0) {
+        if (count($this->key_errors) > 0) {
             $error_message = 'One or more fields in the given array were invalid: ';
-            foreach($this->key_errors as $field => $error) {
+            foreach ($this->key_errors as $field => $error) {
                 $error_message .= "Field $field - $error; ";
             }
 

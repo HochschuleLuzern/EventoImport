@@ -35,38 +35,33 @@ abstract class EventAction implements EventoImportAction
 
     protected function synchronizeUsersInRole(IliasEventWrapper $ilias_event)
     {
-        foreach($this->evento_event->getEmployees() as $employee) {
-
-            if(isset($employee["id"]) && isset($employee["email"])) {
+        foreach ($this->evento_event->getEmployees() as $employee) {
+            if (isset($employee["id"]) && isset($employee["email"])) {
                 $user_id = $this->user_facade->fetchUserIdByMembership($this->evento_event->getEventoId(), $employee);
 
-                if(!is_null($user_id)) {
+                if (!is_null($user_id)) {
                     $ilias_event->addUserAsAdminToEvent($user_id);
                 } else {
                     $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($employee["id"]);
-                    if(!is_null($user_id)) {
+                    if (!is_null($user_id)) {
                         $ilias_event->addUserAsAdminToEvent($user_id);
                     }
                 }
-
             }
         }
 
-        foreach($this->evento_event->getStudents() as $student) {
-
-            if(isset($student["id"]) && isset($student["email"])) {
+        foreach ($this->evento_event->getStudents() as $student) {
+            if (isset($student["id"]) && isset($student["email"])) {
                 $user_id = $this->user_facade->fetchUserIdByMembership($this->evento_event->getEventoId(), $student);
 
-                if(!is_null($user_id)) {
+                if (!is_null($user_id)) {
                     $ilias_event->addUserAsStudentToEvent($user_id);
                 } else {
-
                     $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($student["id"]);
-                    if(!is_null($user_id)) {
+                    if (!is_null($user_id)) {
                         $ilias_event->addUserAsStudentToEvent($user_id);
                     }
                 }
-
             }
         }
     }

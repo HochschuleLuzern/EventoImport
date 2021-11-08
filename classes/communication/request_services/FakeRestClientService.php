@@ -20,10 +20,10 @@ class FakeRestClientService extends RestClientService
     {
         $take = $request_params["take"];
         $skip = $request_params["skip"];
-        if($path == 'GetAccounts') {
-            $file = $this->file_path . 'users/users_s'.$skip.'_t'.$take.'.json';
-        } else if($path == 'GetEvents') {
-            $file = $this->file_path . 'events/events_s'.$skip.'_t'.$take.'.json';
+        if ($path == 'GetAccounts') {
+            $file = $this->file_path . 'users/users_s' . $skip . '_t' . $take . '.json';
+        } elseif ($path == 'GetEvents') {
+            $file = $this->file_path . 'events/events_s' . $skip . '_t' . $take . '.json';
         }
 
         $file_content = file_get_contents($file);

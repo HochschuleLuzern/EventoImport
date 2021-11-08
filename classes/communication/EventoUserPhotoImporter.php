@@ -11,6 +11,5 @@ class EventoUserPhotoImporter implements DataRecordImporter
 
     public function fetchDataRecord($id)
     {
-
     }
 }

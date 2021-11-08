@@ -20,7 +20,8 @@ class DefaultUserSettings
         $this->settings = $settings;
 
         $this->now_timestamp = time();
-        $this->valid_until_timestamp = $this->convertDateTimeSetting('crevento_account_duration');;
+        $this->valid_until_timestamp = $this->convertDateTimeSetting('crevento_account_duration');
+        ;
         $this->valid_until_max_timestamp = $this->convertDateTimeSetting('crevento_account_max_duration');
         $this->auth_mode = $settings->get('crevento_ilias_auth_mode');
         $this->is_profile_public = true;
@@ -32,7 +33,7 @@ class DefaultUserSettings
     private function convertDateTimeSetting(string $key) : int
     {
         $setting = $this->settings->get($key);
-        if($setting != 0) {
+        if ($setting != 0) {
             $value = mktime(
                 date('H'),
                 date('i'),

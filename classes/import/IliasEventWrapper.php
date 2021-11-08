@@ -25,11 +25,11 @@ abstract class IliasEventWrapper
 
     protected function addUserToGivenRole(int $user_id, int $role_id)
     {
-        if(!$this->rbac_review->isAssigned($user_id, $role_id)) {
+        if (!$this->rbac_review->isAssigned($user_id, $role_id)) {
             $this->rbac_admin->assignUser($role_id, $user_id);
         }
     }
 
-    abstract function addUserAsAdminToEvent(int $user_id);
-    abstract function addUserAsStudentToEvent(int $user_id);
+    abstract public function addUserAsAdminToEvent(int $user_id);
+    abstract public function addUserAsStudentToEvent(int $user_id);
 }

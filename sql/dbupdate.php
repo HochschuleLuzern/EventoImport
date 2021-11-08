@@ -25,130 +25,128 @@
 <?php
 /**
  * We need three tables to track the imports:
- 
+
  * In crnhk_crevento_usrs we track all users we import from evento.
- 
+
  * In crnhk_crevento_mas we track all courses and groups (mas = Modulanlässe,
  * no better name found) that exist in evento.
- 
+
  * In crnhk_crevento_subs we track all subscriptions to courses and groups
  * imported from evento. Only subscriptions in this table will also be deleted
  * through evento.
- 
+
  * The update_info_code is defined in hte class ilEventoImportLogger
  */
-	if(!$ilDB->tableExists('crnhk_crevento_usrs')) {
-		$fields = array(
-			'evento_id' => array(
-				'type' => 'integer',
-				'length' => 8,
-				'notnull' => true
-			),
-			'usrname' => array(
-				'type' => 'text',
-				'length' => 50,
-				'notnull' => true
-			),
-			'last_import_data' => array(
-				'type' => 'text',
-				'length' => 4000,
-				'notnull' => false
-			),
-			'last_import_date' => array(
-				'type' => 'timestamp',
-				'notnull' => true
-			),
-			'update_info_code' => array(
-				'type' => 'integer',
-				'length' => 2,
-				'notnull' => true
-			)
-		);
-		
-		$ilDB->createTable("crnhk_crevento_usrs", $fields);
-		$ilDB->addPrimaryKey("crnhk_crevento_usrs", array("evento_id"));
-	}
+    if (!$ilDB->tableExists('crnhk_crevento_usrs')) {
+        $fields = array(
+            'evento_id' => array(
+                'type' => 'integer',
+                'length' => 8,
+                'notnull' => true
+            ),
+            'usrname' => array(
+                'type' => 'text',
+                'length' => 50,
+                'notnull' => true
+            ),
+            'last_import_data' => array(
+                'type' => 'text',
+                'length' => 4000,
+                'notnull' => false
+            ),
+            'last_import_date' => array(
+                'type' => 'timestamp',
+                'notnull' => true
+            ),
+            'update_info_code' => array(
+                'type' => 'integer',
+                'length' => 2,
+                'notnull' => true
+            )
+        );
+        
+        $ilDB->createTable("crnhk_crevento_usrs", $fields);
+        $ilDB->addPrimaryKey("crnhk_crevento_usrs", array("evento_id"));
+    }
 
-	if(!$ilDB->tableExists('crnhk_crevento_subs'))
-	{
-		$fields = array(
-			'usr_id' => array(
-				'type' => 'integer',
-				'length' => 8,
-				'notnull' => true
-			),
-			'role_id' => array(
-				'type' => 'integer',
-				'length' => 8,
-				'notnull' => true
-			),
-			'last_import_date' => array(
-				'type' => 'timestamp',
-				'notnull' => true
-			),
-			'update_info_code' => array(
-				'type' => 'integer',
-				'length' => 2,
-				'notnull' => true
-			)
-		);
+    if (!$ilDB->tableExists('crnhk_crevento_subs')) {
+        $fields = array(
+            'usr_id' => array(
+                'type' => 'integer',
+                'length' => 8,
+                'notnull' => true
+            ),
+            'role_id' => array(
+                'type' => 'integer',
+                'length' => 8,
+                'notnull' => true
+            ),
+            'last_import_date' => array(
+                'type' => 'timestamp',
+                'notnull' => true
+            ),
+            'update_info_code' => array(
+                'type' => 'integer',
+                'length' => 2,
+                'notnull' => true
+            )
+        );
 
-		$ilDB->createTable("crnhk_crevento_subs", $fields);
-		$ilDB->addPrimaryKey('crnhk_crevento_subs', array('usr_id', 'role_id'));
-	}
+        $ilDB->createTable("crnhk_crevento_subs", $fields);
+        $ilDB->addPrimaryKey('crnhk_crevento_subs', array('usr_id', 'role_id'));
+    }
 
-	if(!$ilDB->tableExists('crnhk_crevento_mas'))
-	{
-		$fields = array(
-			'evento_id' => array(
-				'type' => 'text',
-				'length' => 50,
-				'notnull' => true
-			),
-			'ref_id' => array(
-				'type' => 'integer',
-				'length' => 8,
-				'notnull' => false
-			),
-			'role_id' => array(
-				'type' => 'integer',
-				'length' => 8,
-				'notnull' => false
-			),
-			'end_date' => array(
-				'type' => 'timestamp',
-				'notnull' => false
-			),
-			'number_of_subs' => array(
-				'type' => 'integer',
-				'length' => 8,
-				'notnull' => false
-			),
-			'last_import_data' => array(
-				'type' => 'text',
-				'length' => 4000,
-				'notnull' => false
-			),
-			'last_import_date' => array(
-				'type' => 'timestamp',
-				'notnull' => true
-			),
-			'update_info_code' => array(
-				'type' => 'integer',
-				'length' => 2,
-				'notnull' => true
-			)
-		);
-	
-		$ilDB->createTable("crnhk_crevento_mas", $fields);
-		$ilDB->addPrimaryKey("crnhk_crevento_mas", array("evento_id"));
-	}
+    if (!$ilDB->tableExists('crnhk_crevento_mas')) {
+        $fields = array(
+            'evento_id' => array(
+                'type' => 'text',
+                'length' => 50,
+                'notnull' => true
+            ),
+            'ref_id' => array(
+                'type' => 'integer',
+                'length' => 8,
+                'notnull' => false
+            ),
+            'role_id' => array(
+                'type' => 'integer',
+                'length' => 8,
+                'notnull' => false
+            ),
+            'end_date' => array(
+                'type' => 'timestamp',
+                'notnull' => false
+            ),
+            'number_of_subs' => array(
+                'type' => 'integer',
+                'length' => 8,
+                'notnull' => false
+            ),
+            'last_import_data' => array(
+                'type' => 'text',
+                'length' => 4000,
+                'notnull' => false
+            ),
+            'last_import_date' => array(
+                'type' => 'timestamp',
+                'notnull' => true
+            ),
+            'update_info_code' => array(
+                'type' => 'integer',
+                'length' => 2,
+                'notnull' => true
+            )
+        );
+    
+        $ilDB->createTable("crnhk_crevento_mas", $fields);
+        $ilDB->addPrimaryKey("crnhk_crevento_mas", array("evento_id"));
+    }
 ?>
 <#2>
 <?php
 
 $table_name = \EventoImport\import\db\repository\EventoUserRepository::TABLE_NAME;
-if(!$ilDB->tableExists($table_name)) {
+if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         \EventoImport\import\db\repository\EventoUserRepository::COL_EVENTO_ID => array(
             'type' => ilDBConstants::T_INTEGER,
@@ -160,7 +158,7 @@ if(!$ilDB->tableExists($table_name)) {
             'length' => 8,
             'notnull' => true
         )
-	);
+    );
 
     $ilDB->createTable($table_name, $fields);
     $ilDB->addPrimaryKey($table_name, [\EventoImport\import\db\repository\EventoUserRepository::COL_EVENTO_ID]);
@@ -172,8 +170,7 @@ if(!$ilDB->tableExists($table_name)) {
 <?php
 
 $table_name = \EventoImport\import\db\repository\IliasEventoEventsRepository::TABLE_NAME;
-if(!$ilDB->tableExists($table_name)) {
-
+if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_EVENTO_ID => array(
             'type' => ilDBConstants::T_INTEGER,
@@ -190,7 +187,7 @@ if(!$ilDB->tableExists($table_name)) {
             'type' => ilDBConstants::T_TEXT,
             'length' => 128,
             'notnull' => true,
-			'fixed' => false
+            'fixed' => false
         ),
         \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_EVENTO_TYPE => array(
             'type' => ilDBConstants::T_TEXT,
@@ -202,7 +199,7 @@ if(!$ilDB->tableExists($table_name)) {
             'length' => 1,
             'notnull' => true
         ),
-		\EventoImport\import\db\repository\IliasEventoEventsRepository::COL_START_DATE => array(
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_START_DATE => array(
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
         ),
@@ -251,7 +248,7 @@ if(!$ilDB->tableExists($table_name)) {
 <?php
 
 $table_name = \EventoImport\import\db\repository\EventLocationsRepository::TABLE_NAME;
-if(!$ilDB->tableExists($table_name)) {
+if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         \EventoImport\import\db\repository\EventLocationsRepository::COL_DEPARTMENT_NAME => array(
             'type' => ilDBConstants::T_TEXT,
@@ -259,18 +256,18 @@ if(!$ilDB->tableExists($table_name)) {
             'notnull' => true,
             'fixed' => false
         ),
-        \EventoImport\import\db\repository\EventLocationsRepository::COL_EVENT_KIND      => array(
+        \EventoImport\import\db\repository\EventLocationsRepository::COL_EVENT_KIND => array(
             'type' => ilDBConstants::T_TEXT,
             'length' => 30,
             'notnull' => true,
-			'fixed' => false
+            'fixed' => false
         ),
-        \EventoImport\import\db\repository\EventLocationsRepository::COL_YEAR            => array(
+        \EventoImport\import\db\repository\EventLocationsRepository::COL_YEAR => array(
             'type' => ilDBConstants::T_INTEGER,
             'length' => 2,
             'notnull' => true,
         ),
-        \EventoImport\import\db\repository\EventLocationsRepository::COL_REF_ID          => array(
+        \EventoImport\import\db\repository\EventLocationsRepository::COL_REF_ID => array(
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
@@ -286,7 +283,7 @@ if(!$ilDB->tableExists($table_name)) {
 <?php
 
 $table_name = \EventoImport\import\db\repository\EventMembershipRepository::TABLE_NAME;
-if(!$ilDB->tableExists($table_name)) {
+if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         \EventoImport\import\db\repository\EventMembershipRepository::COL_EVENTO_EVENT_ID => array(
             'type' => 'integer',
@@ -314,8 +311,7 @@ if(!$ilDB->tableExists($table_name)) {
 <?php
 
 $table_name = \EventoImport\import\db\repository\ParentEventRepository::TABLE_NAME;
-if(!$ilDB->tableExists($table_name)) {
-
+if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         \EventoImport\import\db\repository\ParentEventRepository::COL_TITLE => array(
             'type' => ilDBConstants::T_TEXT,
