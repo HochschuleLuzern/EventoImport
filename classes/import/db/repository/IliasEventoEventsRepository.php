@@ -79,8 +79,8 @@ class IliasEventoEventsRepository
                 self::COL_EVENTO_DESCRIPTION        => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getEventoDescription()),
                 self::COL_EVENTO_TYPE               => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getEventoType()),
                 self::COL_WAS_AUTOMATICALLY_CREATED => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->wasAutomaticallyCreated()),
-                self::COL_START_DATE                => array(\ilDBConstants::T_TIMESTAMP, $ilias_evento_event->getStartDate()),
-                self::COL_END_DATE                  => array(\ilDBConstants::T_TIMESTAMP, $ilias_evento_event->getEndDate()),
+                self::COL_START_DATE                => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($ilias_evento_event->getStartDate())),
+                self::COL_END_DATE                  => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($ilias_evento_event->getEndDate())),
                 self::COL_ILIAS_TYPE                => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getIliasType()),
 
                 // foreign keys

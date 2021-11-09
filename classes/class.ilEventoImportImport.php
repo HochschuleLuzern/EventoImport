@@ -157,52 +157,41 @@ class ilEventoImportImport extends ilCronJob {
 		try {
 		    $logger = new ilEventoImportLogger($this->db);
 		    
-		    //$data_source = new ilEventoImportSOAPClient($this->settings->get('crevento_wsdl'));
+            /*
             $base_url = '';
             $port = 1337;
             $base_path = '';
-            //$data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
+            $data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
+            */
             $data_source = new \EventoImport\communication\request_services\FakeRestClientService('', 0, '');
+
 		    $user_importer = new \EventoImport\communication\EventoUserImporter(new ilEventoImporterIterator($this->page_size), $this->settings, $logger, $data_source);
             $event_importer = new \EventoImport\communication\EventoEventImporter(new ilEventoImporterIterator($this->page_size), $this->settings, $logger, $data_source);
 
+
+            /*
+            $mailbox_search = new ilRoleMailboxSearch(
+                new ilMailRfc822AddressParserFactory()
+                );
+            $favourites_manager = new ilFavouritesManager();
+            */
+
+            /* User import */
 		    $user_facade = new \EventoImport\import\db\UserFacade(
 		        new \EventoImport\import\db\query\IliasUserQuerying($this->db),
                 new \EventoImport\import\db\repository\EventoUserRepository($this->db),
                 new \EventoImport\import\db\repository\EventMembershipRepository($this->db),
                 $this->rbac
             );
-
-		    /*
-		    $mailbox_search = new ilRoleMailboxSearch(
-		        new ilMailRfc822AddressParserFactory()
-		        );
-		    $favourites_manager = new ilFavouritesManager();
-		    */
-
             $default_user_settings = new \EventoImport\import\settings\DefaultUserSettings($this->settings);
             $user_action_factory = new \EventoImport\import\action\user\UserActionFactory($user_facade, $default_user_settings, $logger);
-            $evento_ilias_user_matcher = new EventoUserToIliasUserMatcher($user_facade, $user_action_factory);
-		    $importUsers = new ilEventoImportImportUsers(
-		        $user_importer,
-                $user_facade,
-                $evento_ilias_user_matcher,
-                $logger,
-                $this->db,
-                $this->rbac,
-                $this->importUsersConfig);
+
+            $user_import_action_decider = new \EventoImport\import\data_matching\UserImportActionDecider($user_facade, $user_action_factory);
+
+		    $importUsers = new ilEventoImportImportUsers($user_importer, $user_import_action_decider, $logger);
 			//$importUsers->run();
 
-
-			$evento_event_importer = new \EventoImport\communication\EventoEventImporter(
-			    new ilEventoImporterIterator($this->page_size),
-                $this->settings,
-                $logger,
-                $data_source
-            );
-
-
-
+			/* Event import */
 			$event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);
 			$event_repo = new \EventoImport\import\db\repository\IliasEventoEventsRepository($this->db);
             $location_repo = new \EventoImport\import\db\repository\EventLocationsRepository($this->db);
@@ -213,36 +202,14 @@ class ilEventoImportImport extends ilCronJob {
                 $location_repo
             );
 
-			$ilias_event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);
-			$evento_event_matcher = new \EventoImport\import\data_matching\EventoEventToIliasObjectMatcher($ilias_event_query, $event_repo);
-            $ilias_event_object_factory = new \EventoImport\import\IliasEventObjectFactory($repository_facade);
+			$ilias_event_object_factory = new \EventoImport\import\IliasEventObjectFactory($repository_facade);
+            $default_event_settings = new \EventoImport\import\settings\DefaultEventSettings($this->settings);
+			$event_action_factory = new \EventoImport\import\action\event\EventActionFactory($ilias_event_object_factory, $repository_facade, $user_facade, $default_event_settings, $logger);
+            $event_action_decider = new \EventoImport\import\data_matching\EventImportActionDecider($repository_facade, $event_action_factory);
 
-			$import_events = new ilEventoImportImportEventsAndMemberships(
-                $event_importer,
-                $repository_facade,
-                $user_facade,
-                $evento_event_matcher,
-                $ilias_event_object_factory,
-                $logger,
-                $this->rbac,
-                new \EventoImport\import\action\event\EventActionFactory(
-                    $ilias_event_object_factory,
-                    $repository_facade,
-                    $user_facade,
-                    new \EventoImport\import\settings\DefaultEventSettings($this->settings),
-                    $logger
-                )
-            );
-
+			$import_events = new ilEventoImportImportEventsAndMemberships($event_importer, $event_action_decider, $logger);
 			$import_events->run();
 
-			/*
-			 * Intentionally left out. First phase of the evento user_importer is to import users
-			 *
-			$importMemberships = new ilEventoImportImportMemberships(
-			    $user_importer, $logger, $this->db, $this->rbac, $mailbox_search, $favourites_manager);
-			$importMemberships->run();
-			*/
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
 		} catch (Exception $e) {
 			return new ilEventoImportResult(ilEventoImportResult::STATUS_CRASHED, 'Cron job crashed: ' . $e->getMessage());

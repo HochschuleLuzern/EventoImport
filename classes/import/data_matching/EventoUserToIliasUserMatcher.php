@@ -161,8 +161,6 @@ class EventoUserToIliasUserMatcher
         }
 
         return $this->matchEventoUserTheOldWay($evento_user);
-
-        //return $this->searchMatchInExistingUsers($evento_user);
     }
 
     public function matchEventoUserTheOldWay(\EventoImport\communication\api_models\EventoUser $evento_user) : UserAction

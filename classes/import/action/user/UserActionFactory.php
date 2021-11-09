@@ -30,11 +30,13 @@ class UserActionFactory
         return new Update($evento_user, $ilias_user_id, $this->user_facade, $this->default_user_settings, $this->logger);
     }
 
-    public function buildRenameExistingAndCreateNewAction(EventoUser $evento_user, $old_ilias_user) : RenameExistingCreateNew
+    public function buildRenameExistingAndCreateNewAction(EventoUser $evento_user, \ilObjUser $old_ilias_user, string $found_by) : RenameExistingCreateNew
     {
         return new RenameExistingCreateNew(
             $this->buildCreateAction($evento_user),
+            $evento_user,
             $old_ilias_user,
+            $found_by,
             $this->user_facade,
             $this->logger
         );

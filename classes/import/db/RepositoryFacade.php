@@ -187,4 +187,16 @@ class RepositoryFacade
             return new IliasEventWrapperSingleEvent($ilias_evento_event, $ilias_event_obj);
         }
     }
+
+    public function searchExactlyOneMatchingCourseByTitle(EventoEvent $evento_event) : ?\ilContainer
+    {
+        $object_list = $this->event_object_query->fetchAllEventableObjectsForGivenTitle($evento_event->getName());
+
+        if(count($object_list) == 1) {
+            return $object_list[0];
+        }
+        else {
+            return null;
+        }
+    }
 }

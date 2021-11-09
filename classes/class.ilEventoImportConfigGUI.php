@@ -92,4 +92,6 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 break;
         }
     }
+
+
 }
