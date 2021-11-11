@@ -25,15 +25,15 @@ class RenameExistingCreateNew extends UserAction
 
         $changed_user_data['user_id'] = $data['ids_by_email'][0];
         $changed_user_data['EvtID'] = trim(substr($objByEmail->getMatriculation(), 8));
-        $changed_user_data['new_user_info'] = 'EventoID: '.$data['EvtID'];
+        $changed_user_data['new_user_info'] = 'EventoID: ' . $data['EvtID'];
         $changed_user_data['found_by'] = 'E-Mail';
 
         $changed_user_data['user_id'] = $data['id_by_login'];
         $changed_user_data['EvtID'] = trim(substr($objByLogin->getMatriculation(), 8));
-        $changed_user_data['new_user_info'] = 'EventoID: '.$data['EvtID'];
+        $changed_user_data['new_user_info'] = 'EventoID: ' . $data['EvtID'];
         $changed_user_data['found_by'] = 'Login';
 
-        $data['Login'] = date('Ymd').'_'.$userObj->getLogin();
+        $data['Login'] = date('Ymd') . '_' . $userObj->getLogin();
         $data['FirstName'] = $userObj->getFirstname();
         $data['LastName'] = $userObj->getLastname();
         $data['Gender'] = $userObj->getGender();

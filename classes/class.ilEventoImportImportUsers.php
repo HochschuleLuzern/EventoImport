@@ -49,7 +49,6 @@ class ilEventoImportImportUsers
 
     public function run()
     {
-
         $this->importUsers();
         //$this->convertDeletedAccounts();
         //$this->setUserTimeLimits();
@@ -109,14 +108,18 @@ class ilEventoImportImportUsers
         if (count($deletedLdapUsers) > 0) {
             for ($i = 0; $i <= count($deletedLdapUsers); $i += 100) {
                 //hole immer max 100 user aus der ilias db mit bedingung dass diese noch ldap aktiv sind
-                $r = $this->ilDB->query("SELECT login,matriculation FROM `usr_data` WHERE auth_mode='" . $this->auth_mode . "' AND matriculation IN ('" . implode("','",
-                        array_slice($deletedLdapUsers, $i, 100)) . "')");
+                $r = $this->ilDB->query("SELECT login,matriculation FROM `usr_data` WHERE auth_mode='" . $this->auth_mode . "' AND matriculation IN ('" . implode(
+                    "','",
+                    array_slice($deletedLdapUsers, $i, 100)
+                ) . "')");
                 while ($row = $this->ilDB->fetchAssoc($r)) {
                     //nochmals nachfragen, wenn user wiederhergestellt wurde
                     $eventoid = substr($row['matriculation'], 7);
                     $login = $row['login'];
-                    $result = $this->evento_importer->getRecord('ExistsHSLUDomainUser',
-                        array('parameters' => array('login' => $login, 'evtid' => $eventoid)));
+                    $result = $this->evento_importer->getRecord(
+                        'ExistsHSLUDomainUser',
+                        array('parameters' => array('login' => $login, 'evtid' => $eventoid))
+                    );
 
                     if ($result->{'ExistsHSLUDomainUserResult'} === false) {
                         //user nicht mehr aktiv in ldap
@@ -158,8 +161,11 @@ class ilEventoImportImportUsers
 
     private function setMailPreferences($usrId)
     {
-        $this->ilDB->manipulateF("UPDATE mail_options SET incoming_type = '2' WHERE user_id = %s", array("integer"),
-            array($usrId)); //mail nur intern nach export
+        $this->ilDB->manipulateF(
+            "UPDATE mail_options SET incoming_type = '2' WHERE user_id = %s",
+            array("integer"),
+            array($usrId)
+        ); //mail nur intern nach export
     }
 
     /**
@@ -178,12 +184,16 @@ class ilEventoImportImportUsers
         // Early return till the new method is implemented
         return;
         // Upload image
-        $has_picture_result = $this->evento_importer->getRecord('HasPhoto',
-            array('parameters' => array('eventoId' => $eventoid)));
+        $has_picture_result = $this->evento_importer->getRecord(
+            'HasPhoto',
+            array('parameters' => array('eventoId' => $eventoid))
+        );
 
         if (isset($has_picture_result->{'HasPhotoResult'}) && $has_picture_result->{'HasPhotoResult'} === true) {
-            $picture_result = $this->evento_importer->getRecord('GetPhoto',
-                array('parameters' => array('eventoId' => $eventoid)));
+            $picture_result = $this->evento_importer->getRecord(
+                'GetPhoto',
+                array('parameters' => array('eventoId' => $eventoid))
+            );
             $tmp_file = ilUtil::ilTempnam();
             imagepng(imagecreatefromstring($picture_result->{'GetPhotoResult'}), $tmp_file, 0);
             ilObjUser::_uploadPersonalPicture($tmp_file, $id);

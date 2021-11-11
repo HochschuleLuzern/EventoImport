@@ -25,9 +25,9 @@ class UserImportActionDecider
         return $this->matchEventoUserTheOldWay($evento_user);
     }
 
-    private function matchEventoUserTheOldWay(\EventoImport\communication\api_models\EventoUser $evento_user
+    private function matchEventoUserTheOldWay(
+        \EventoImport\communication\api_models\EventoUser $evento_user
     ) : UserAction {
-
         $data['id_by_login'] = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
         $data['ids_by_matriculation'] = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());
         $data['ids_by_email'] = $this->user_facade->fetchUserIdsByEmail($evento_user->getEmailList());
@@ -42,8 +42,7 @@ class UserImportActionDecider
             // matriculation, login nor e-mail
             // --> Insert new user account.
             return $this->action_factory->buildCreateAction($evento_user);
-            //EventoIliasUserMatchingResult::NoMatchingUserResult();
-
+        //EventoIliasUserMatchingResult::NoMatchingUserResult();
         } else {
             if (count($data['ids_by_matriculation']) == 0 &&
                 $data['id_by_login'] != 0) {
@@ -57,31 +56,34 @@ class UserImportActionDecider
                     // The user account by login has a different evento number.
                     // --> Rename and deactivate conflicting account
                     //     and then insert new user account.
-                    $result = $this->action_factory->buildRenameExistingAndCreateNewAction($evento_user,
-                        $user_obj_by_login, 'login');
-
+                    $result = $this->action_factory->buildRenameExistingAndCreateNewAction(
+                        $evento_user,
+                        $user_obj_by_login,
+                        'login'
+                    );
                 } else {
                     if ($user_obj_by_login->getMatriculation() == $user_obj_by_login->getLogin()) {
                         // The user account by login has a matriculation from ldap
                         // --> Update user account.
-                        $result = $this->action_factory->buildUpdateAction($evento_user,
-                            $data['id_by_login']);
-
+                        $result = $this->action_factory->buildUpdateAction(
+                            $evento_user,
+                            $data['id_by_login']
+                        );
                     } else {
                         if (strlen($user_obj_by_login->getMatriculation()) != 0) {
                             // The user account by login has a matriculation of some kind
                             // --> Bail
                             $result = $this->action_factory->buildReportConflict($evento_user);
-
                         } else {
                             // The user account by login has no matriculation
                             // --> Update user account.
-                            $result = $this->action_factory->buildUpdateAction($evento_user,
-                                $data['id_by_login']);
+                            $result = $this->action_factory->buildUpdateAction(
+                                $evento_user,
+                                $data['id_by_login']
+                            );
                         }
                     }
                 }
-
             } else {
                 if (count($data['ids_by_matriculation']) == 0 &&
                     $data['id_by_login'] == 0 &&
@@ -95,8 +97,11 @@ class UserImportActionDecider
                         // The user account by e-mail has a different evento number.
                         // --> Rename and deactivate conflicting account
                         //     and then insert new user account.
-                        $result = $this->action_factory->buildRenameExistingAndCreateNewAction($evento_user,
-                            $user_obj_by_mail, 'mail');
+                        $result = $this->action_factory->buildRenameExistingAndCreateNewAction(
+                            $evento_user,
+                            $user_obj_by_mail,
+                            'mail'
+                        );
                     } else {
                         if (strlen($user_obj_by_mail->getMatriculation()) != 0) {
                             // The user account by login has a matriculation of some kind
@@ -105,11 +110,12 @@ class UserImportActionDecider
                         } else {
                             // The user account by login has no matriculation
                             // --> Update user account.
-                            $result = $this->action_factory->buildUpdateAction($evento_user,
-                                $data['ids_by_email'][0]);
+                            $result = $this->action_factory->buildUpdateAction(
+                                $evento_user,
+                                $data['ids_by_email'][0]
+                            );
                         }
                     }
-
                 } else {
                     if (count($data['ids_by_matriculation']) == 1 &&
                         $data['id_by_login'] != 0 &&
@@ -117,8 +123,10 @@ class UserImportActionDecider
 
                         // We found a user account by matriculation and by login.
                         // --> Update user account.
-                        $result = $this->action_factory->buildUpdateAction($evento_user,
-                            $data['ids_by_matriculation'][0]);
+                        $result = $this->action_factory->buildUpdateAction(
+                            $evento_user,
+                            $data['ids_by_matriculation'][0]
+                        );
                     } else {
                         if (count($data['ids_by_matriculation']) == 1 &&
                             $data['id_by_login'] == 0) {
@@ -126,8 +134,10 @@ class UserImportActionDecider
                             // We found a user account by matriculation but with the wrong login.
                             // The correct login is not taken by another user account.
                             // --> Update user account.
-                            $result = $this->action_factory->buildUpdateAction($evento_user,
-                                $data['ids_by_matriculation'][0]);
+                            $result = $this->action_factory->buildUpdateAction(
+                                $evento_user,
+                                $data['ids_by_matriculation'][0]
+                            );
                         } else {
                             if (count($data['ids_by_matriculation']) == 1 &&
                                 $data['id_by_login'] != 0 &&
@@ -137,8 +147,11 @@ class UserImportActionDecider
                                 // login. The login is taken by another user account.
                                 // --> Rename and deactivate conflicting account, then update user account.
                                 $user_obj_by_login = $this->user_facade->getExistingIliasUserObject($data['id_by_login']);
-                                $result = $this->action_factory->buildRenameExistingAndCreateNewAction($evento_user,
-                                    $user_obj_by_login, 'login');
+                                $result = $this->action_factory->buildRenameExistingAndCreateNewAction(
+                                    $evento_user,
+                                    $user_obj_by_login,
+                                    'login'
+                                );
                             } else {
                                 $result = $this->action_factory->buildReportError($evento_user);
                             }

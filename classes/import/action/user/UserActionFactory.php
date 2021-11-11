@@ -13,7 +13,7 @@ class UserActionFactory
     private $user_facade;
     private $default_user_settings;
 
-    function __construct(UserFacade $user_facade, DefaultUserSettings $default_user_settings, \ilEventoImportLogger $logger)
+    public function __construct(UserFacade $user_facade, DefaultUserSettings $default_user_settings, \ilEventoImportLogger $logger)
     {
         $this->logger = $logger;
         $this->user_facade = $user_facade;

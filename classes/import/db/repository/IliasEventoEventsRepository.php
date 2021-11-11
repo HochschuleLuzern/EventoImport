@@ -7,7 +7,6 @@ use EventoImport\import\db\model\IliasEventoEvent;
 
 class IliasEventoEventsRepository
 {
-
     public const TABLE_NAME = 'crevento_evnto_events';
 
     public const COL_EVENTO_ID = 'evento_id';
@@ -32,12 +31,13 @@ class IliasEventoEventsRepository
         $this->db = $db;
     }
 
-    private function toDateTimeOrNull(?string $db_value) {
-        if(is_null($db_value)) {
+    private function toDateTimeOrNull(?string $db_value)
+    {
+        if (is_null($db_value)) {
             return null;
         } else {
             $date_time = new \DateTime($db_value);
-            if($date_time->format('Y') < 1) {
+            if ($date_time->format('Y') < 1) {
                 return null;
             }
             return $date_time;
@@ -72,30 +72,30 @@ class IliasEventoEventsRepository
             // VALUES
             array(
                 // id
-                self::COL_EVENTO_ID                 => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getEventoEventId()),
+                self::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getEventoEventId()),
 
                 // evento values
-                self::COL_EVENTO_TITLE              => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getEventoTitle()),
-                self::COL_EVENTO_DESCRIPTION        => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getEventoDescription()),
-                self::COL_EVENTO_TYPE               => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getEventoType()),
+                self::COL_EVENTO_TITLE => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getEventoTitle()),
+                self::COL_EVENTO_DESCRIPTION => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getEventoDescription()),
+                self::COL_EVENTO_TYPE => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getEventoType()),
                 self::COL_WAS_AUTOMATICALLY_CREATED => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->wasAutomaticallyCreated()),
-                self::COL_START_DATE                => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($ilias_evento_event->getStartDate())),
-                self::COL_END_DATE                  => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($ilias_evento_event->getEndDate())),
-                self::COL_ILIAS_TYPE                => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getIliasType()),
+                self::COL_START_DATE => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($ilias_evento_event->getStartDate())),
+                self::COL_END_DATE => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($ilias_evento_event->getEndDate())),
+                self::COL_ILIAS_TYPE => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getIliasType()),
 
                 // foreign keys
-                self::COL_REF_ID                    => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getRefId()),
-                self::COL_OBJ_ID                    => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getObjId()),
-                self::COL_ADMIN_ROLE_ID             => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getAdminRoleId()),
-                self::COL_STUDENT_ROLE_ID           => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getStudentRoleId()),
-                self::COL_PARENT_EVENT_REF_ID       => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getParentEventRefId())
+                self::COL_REF_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getRefId()),
+                self::COL_OBJ_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getObjId()),
+                self::COL_ADMIN_ROLE_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getAdminRoleId()),
+                self::COL_STUDENT_ROLE_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getStudentRoleId()),
+                self::COL_PARENT_EVENT_REF_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getParentEventRefId())
             )
         );
     }
 
     public function getEventByEventoId(int $evento_id) : ?IliasEventoEvent
     {
-        $query  = "SELECT * FROM " . self::TABLE_NAME . " WHERE " . self::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
+        $query = "SELECT * FROM " . self::TABLE_NAME . " WHERE " . self::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
 
         $result = $this->db->query($query);
         if ($row = $this->db->fetchAssoc($result)) {
@@ -105,8 +105,9 @@ class IliasEventoEventsRepository
         return null;
     }
 
-    private function dateTimeToDBFormatOrNull(?\DateTime $date_time) {
-        if(is_null($date_time)) {
+    private function dateTimeToDBFormatOrNull(?\DateTime $date_time)
+    {
+        if (is_null($date_time)) {
             return null;
         }
 
@@ -122,26 +123,24 @@ class IliasEventoEventsRepository
             // VALUES
             array(
                 // evento values
-                self::COL_EVENTO_TITLE              => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoTitle()),
-                self::COL_EVENTO_DESCRIPTION        => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoDescription()),
-                self::COL_EVENTO_TYPE               => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoType()),
+                self::COL_EVENTO_TITLE => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoTitle()),
+                self::COL_EVENTO_DESCRIPTION => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoDescription()),
+                self::COL_EVENTO_TYPE => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoType()),
                 self::COL_WAS_AUTOMATICALLY_CREATED => array(\ilDBConstants::T_INTEGER, $updated_obj->wasAutomaticallyCreated()),
-                self::COL_START_DATE                => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($updated_obj->getStartDate())),
-                self::COL_END_DATE                  => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($updated_obj->getEndDate())),
-                self::COL_ILIAS_TYPE                => array(\ilDBConstants::T_TEXT, $updated_obj->getIliasType()),
+                self::COL_START_DATE => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($updated_obj->getStartDate())),
+                self::COL_END_DATE => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($updated_obj->getEndDate())),
+                self::COL_ILIAS_TYPE => array(\ilDBConstants::T_TEXT, $updated_obj->getIliasType()),
 
                 // foreign keys
-                self::COL_REF_ID                    => array(\ilDBConstants::T_INTEGER, $updated_obj->getRefId()),
-                self::COL_OBJ_ID                    => array(\ilDBConstants::T_INTEGER, $updated_obj->getObjId()),
-                self::COL_ADMIN_ROLE_ID             => array(\ilDBConstants::T_INTEGER, $updated_obj->getAdminRoleId()),
-                self::COL_STUDENT_ROLE_ID           => array(\ilDBConstants::T_INTEGER, $updated_obj->getStudentRoleId()),
-                self::COL_PARENT_EVENT_REF_ID       => array(\ilDBConstants::T_INTEGER, $updated_obj->getParentEventRefId())
+                self::COL_REF_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getRefId()),
+                self::COL_OBJ_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getObjId()),
+                self::COL_ADMIN_ROLE_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getAdminRoleId()),
+                self::COL_STUDENT_ROLE_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getStudentRoleId()),
+                self::COL_PARENT_EVENT_REF_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getParentEventRefId())
             ),
-
             array(
-                self::COL_EVENTO_ID                 => array(\ilDBConstants::T_INTEGER, $updated_obj->getEventoEventId())
+                self::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getEventoEventId())
             )
-
         );
     }
 }

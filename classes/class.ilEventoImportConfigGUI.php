@@ -22,9 +22,9 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
     private function pathSchemaToPathElements(string $path_schema)
     {
         $path_elements = [];
-        foreach(explode('/', $path_schema) as $schema_part) {
+        foreach (explode('/', $path_schema) as $schema_part) {
             $without_braces = trim($schema_part, '{}');
-            if(in_array($without_braces, self::ALLOWED_PATH_SCHEMA_ELEMENTS)) {
+            if (in_array($without_braces, self::ALLOWED_PATH_SCHEMA_ELEMENTS)) {
                 $path_schema[] = $without_braces;
             }
         }
@@ -32,10 +32,10 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 
     private function fetchRefIdForObjTitle(int $root_ref_id, string $searched_obj_title) : ?int
     {
-        foreach($this->tree->getChildsByType($root_ref_id, 'cat') as $child_node) {
+        foreach ($this->tree->getChildsByType($root_ref_id, 'cat') as $child_node) {
             $child_ref = $child_node['child'];
             $obj_id = ilObject::_lookupObjectId($child_ref);
-            if(ilObject::_lookupTitle($obj_id) == $searched_obj_title) {
+            if (ilObject::_lookupTitle($obj_id) == $searched_obj_title) {
                 return $child_ref;
             }
         }
@@ -56,18 +56,15 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $location_repository = new \EventoImport\import\db\repository\EventLocationsRepository($DIC->database());
         $location_repository->purgeLocationTable();
         $repository_root_ref_id = 1;
-        foreach($locations_settings['departments'] as $department) {
-
+        foreach ($locations_settings['departments'] as $department) {
             $department_ref_id = $this->fetchRefIdForObjTitle($repository_root_ref_id, $department);
-            if($department_ref_id) {
+            if ($department_ref_id) {
                 foreach ($locations_settings['kinds'] as $kind) {
-
                     $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
-                    if($kind_ref_id) {
+                    if ($kind_ref_id) {
                         foreach ($locations_settings['years'] as $year) {
-
                             $destination_ref_id = $this->fetchRefIdForObjTitle($kind_ref_id, $year);
-                            if($destination_ref_id) {
+                            if ($destination_ref_id) {
                                 $location_repository->addNewLocation($department, $kind, $year, $destination_ref_id);
                             }
                         }
@@ -79,7 +76,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 
     public function performCommand($cmd)
     {
-        switch($cmd) {
+        switch ($cmd) {
             case 'configure':
                 global $DIC;
                 $link = $DIC->ctrl()->getLinkTarget($this, 'reload_repo_locations');
@@ -92,6 +89,4 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 break;
         }
     }
-
-
 }

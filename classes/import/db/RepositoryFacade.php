@@ -28,9 +28,9 @@ class RepositoryFacade
         global $DIC;
 
         $this->event_object_query = $event_objects_query ?? new IliasEventObjectQuery($DIC->database());
-        $this->event_repo         = $event_repo ?? new IliasEventoEventsRepository($DIC->database());
-        $this->location_repo      = $location_repo ?? new EventLocationsRepository($DIC->database());
-        $this->parent_event_repo  = new ParentEventRepository($DIC->database());
+        $this->event_repo = $event_repo ?? new IliasEventoEventsRepository($DIC->database());
+        $this->location_repo = $location_repo ?? new EventLocationsRepository($DIC->database());
+        $this->parent_event_repo = new ParentEventRepository($DIC->database());
     }
 
     public function fetchAllEventableObjectsForGivenTitle(string $name)
@@ -151,21 +151,21 @@ class RepositoryFacade
     {
         $ilias_evento_event = $this->event_repo->getEventByEventoId($evento_id);
 
-        if(is_null($ilias_evento_event)) {
+        if (is_null($ilias_evento_event)) {
             return null;
         }
 
-        if(!is_null($ilias_evento_event->getParentEventRefId())) {
+        if (!is_null($ilias_evento_event->getParentEventRefId())) {
             $parent_event = $this->parent_event_repo->fetchParentEventForRefId($ilias_evento_event->getParentEventRefId());
 
-            if(is_null($parent_event)) {
+            if (is_null($parent_event)) {
                 throw new \InvalidArgumentException('Parent Event for ref_id ' . $ilias_evento_event->getParentEventRefId() . ' does not exist.');
             }
 
             $parent_obj_type = \ilObject::_lookupType($parent_event->getRefId(), true);
-            if($parent_obj_type == 'crs') {
+            if ($parent_obj_type == 'crs') {
                 $parent_event_obj = new \ilObjCourse($parent_event->getRefId());
-            } else if($parent_obj_type == 'grp') {
+            } elseif ($parent_obj_type == 'grp') {
                 $parent_event_obj = new \ilObjGroup($parent_event->getRefId());
             } else {
                 throw new \InvalidArgumentException('Type of parent obj ist not an event type');
@@ -176,9 +176,9 @@ class RepositoryFacade
             return new IliasEventWrapperEventWithParent($parent_event, $parent_event_obj, $ilias_evento_event, $sub_event);
         } else {
             $obj_type = \ilObject::_lookupType($ilias_evento_event->getRefId(), true);
-            if($obj_type == 'crs') {
+            if ($obj_type == 'crs') {
                 $ilias_event_obj = new \ilObjCourse($ilias_evento_event->getRefId());
-            } else if($obj_type == 'grp') {
+            } elseif ($obj_type == 'grp') {
                 $ilias_event_obj = new \ilObjGroup($ilias_evento_event->getRefId());
             } else {
                 throw new \InvalidArgumentException('Type of given ilias obj is not an event type');
@@ -192,10 +192,9 @@ class RepositoryFacade
     {
         $object_list = $this->event_object_query->fetchAllEventableObjectsForGivenTitle($evento_event->getName());
 
-        if(count($object_list) == 1) {
+        if (count($object_list) == 1) {
             return $object_list[0];
-        }
-        else {
+        } else {
             return null;
         }
     }
