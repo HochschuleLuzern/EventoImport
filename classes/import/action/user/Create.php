@@ -20,13 +20,22 @@ class Create extends UserAction
 
     private function assignUserToAdditionalRoles(int $getId, array $getRoles)
     {
-
     }
 
     private function setMailPreferences(int $usrId)
     {
         global $DIC;
-        $DIC->database()->manipulateF("UPDATE mail_options SET incoming_type = '2' WHERE user_id = %s", array("integer"), array($usrId)); //mail nur intern nach export
+
+        //mail only intern to export
+        $DIC->database()->update(
+            'mail_options',
+            [
+                'incoming_type' => [\ilDBConstants::T_INTEGER, 2]
+            ],
+            [
+                'user_id' => [\ilDBConstants::T_INTEGER, $usrId]
+            ]
+        );
     }
 
     public function executeAction()
@@ -36,21 +45,21 @@ class Create extends UserAction
         $ilias_user_object->setLogin($this->evento_user->getLoginName());
         $ilias_user_object->setFirstname($this->evento_user->getFirstName());
         $ilias_user_object->setLastname($this->evento_user->getLastName());
-        $ilias_user_object->setGender(($this->evento_user->getGender() =='F') ? 'f':'m');
+        $ilias_user_object->setGender(($this->evento_user->getGender() == 'F') ? 'f':'m');
         $ilias_user_object->setEmail($this->evento_user->getEmailList()[0]);
-        if(isset($this->evento_user->getEmailList()[1])){
+        if (isset($this->evento_user->getEmailList()[1])) {
             $ilias_user_object->setSecondEmail($this->evento_user->getEmailList()[1]);
         };
         $ilias_user_object->setTitle($ilias_user_object->getFullname());
         $ilias_user_object->setDescription($ilias_user_object->getEmail());
-        $ilias_user_object->setMatriculation('Evento:'. $this->evento_user->getEventoId());
-        $ilias_user_object->setExternalAccount($this->evento_user->getEventoId().'@hslu.ch');
+        $ilias_user_object->setMatriculation('Evento:' . $this->evento_user->getEventoId());
+        $ilias_user_object->setExternalAccount($this->evento_user->getEventoId() . '@hslu.ch');
         $ilias_user_object->setAuthMode($this->default_user_settings->getAuthMode());
 
 //        if(!(ilLDAPServer::isAuthModeLDAP($this->auth_mode))){ $userObj->setPasswd(strtolower($evento_user['Password'])) ; }
 
         $ilias_user_object->setActive(true);
-        $ilias_user_object->setTimeLimitFrom($this->default_user_settings->getNowTimestamp());
+        $ilias_user_object->setTimeLimitFrom($this->default_user_settings->getNow());
         if ($this->default_user_settings->getValidUntilTimestamp() == 0) {
             $ilias_user_object->setTimeLimitUnlimited(true);
         } else {
@@ -64,12 +73,12 @@ class Create extends UserAction
         $ilias_user_object->saveAsNew(false);
 
         // Set default prefs
-        $ilias_user_object->setPref('hits_per_page','100'); //100 hits per page
-        $ilias_user_object->setPref('show_users_online','associated'); //nur Leute aus meinen Kursen zeigen
+        $ilias_user_object->setPref('hits_per_page', (string) $this->default_user_settings->getDefaultHitsPerPage()); //100 hits per page
+        $ilias_user_object->setPref('show_users_online', $this->default_user_settings->getDefaultShowUsersOnline()); //nur Leute aus meinen Kursen zeigen
 
-        $ilias_user_object->setPref('public_profile','y'); //profil standard öffentlich
-        $ilias_user_object->setPref('public_upload','y'); //profilbild öffentlich
-        $ilias_user_object->setPref('public_email','y'); //profilbild öffentlich
+        $ilias_user_object->setPref('public_profile', $this->default_user_settings->isProfilePublic()); //profil standard öffentlich
+        $ilias_user_object->setPref('public_upload', $this->default_user_settings->isProfilePicturePublic()); //profilbild öffentlich
+        $ilias_user_object->setPref('public_email', $this->default_user_settings->isMailPublic()); //profilbild öffentlich
 
         $ilias_user_object->writePrefs();
 

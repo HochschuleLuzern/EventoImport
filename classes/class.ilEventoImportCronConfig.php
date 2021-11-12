@@ -18,10 +18,16 @@ class ilEventoImportCronConfig
     const LANG_API_MAX_RETRIES = 'api_max_retries';
     const LANG_API_MAX_RETRIES_DESC = 'api_max_retries_desc';
     const LANG_HEADER_USER_SETTINGS = 'user_import_settings';
+    const LANG_USER_AUTH_MODE = 'user_auth_mode';
+    const LANG_USER_AUTH_MODE_DESC = 'user_auth_mode_desc';
     const LANG_USER_IMPORT_ACC_DURATION = 'user_import_account_duration';
     const LANG_USER_IMPORT_ACC_DURATION_DESC = 'user_import_account_duration_desc';
     const LANG_USER_MAX_ACC_DURATION = 'user_max_account_duration';
     const LANG_USER_MAX_ACC_DURATION_DESC = 'user_max_account_duration_desc';
+    const LANG_USER_CHANGED_MAIL_SUBJECT = 'user_changed_mail_subject';
+    const LANG_USER_CHANGED_MAIL_SUBJECT_DESC = 'user_changed_mail_subject_desc';
+    const LANG_USER_CHANGED_MAIL_BODY = 'user_changed_mail_body';
+    const LANG_USER_CHANGED_MAIL_BODY_DESC = 'user_changed_mail_body_desc';
     const LANG_DEFAULT_USER_ROLE = 'default_user_role';
     const LANG_DEFAULT_USER_ROLE_DESC = 'default_user_role_desc';
     const LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING = 'additional_user_roles_mapping';
@@ -44,8 +50,11 @@ class ilEventoImportCronConfig
     const FORM_API_TIMEOUT_AFTER_REQUEST = 'crevento_api_timeout_after_request';
     const FORM_API_TIMEOUT_FAILED_REQUEST = 'crevento_api_timeout_failed_request';
     const FORM_API_MAX_RETRIES = 'crevento_api_max_retries';
+    const FORM_USER_AUTH_MODE = 'crevento_user_auth_mode';
     const FORM_USER_IMPORT_ACC_DURATION = 'crevento_user_import_acc_duration';
     const FORM_USER_MAX_ACC_DURATION = 'crevento_user_max_acc_duration';
+    const FORM_USER_CHANGED_MAIL_SUBJECT = 'crevento_user_changed_mail_subject';
+    const FORM_USER_CHANGED_MAIL_BODY = 'crevento_user_changed_mail_body';
     const FORM_DEFAULT_USER_ROLE = 'crevento_default_user_role';
     const FORM_USER_GLOBAL_ROLE_ = 'crevento_global_role_';
     const FORM_USER_EVENTO_ROLE_MAPPED_TO_ = 'crevento_map_from_';
@@ -65,15 +74,18 @@ class ilEventoImportCronConfig
     const CONF_API_TIMEOUT_AFTER_REQUEST = 'crevento_api_timeout_after_request';
     const CONF_API_TIMEOUT_FAILED_REQUEST = 'crevento_api_timeout_failed_request';
     const CONF_API_MAX_RETRIES = 'crevento_api_max_retries';
+    const CONF_USER_AUTH_MODE = 'crevento_ilias_auth_mode';
     const CONF_USER_IMPORT_ACC_DURATION = 'crevento_user_import_acc_duration';
     const CONF_USER_MAX_ACC_DURATION = 'crevento_user_max_acc_duration';
+    const CONF_USER_CHANGED_MAIL_SUBJECT = 'crevento_email_account_changed_subject';
+    const CONF_USER_CHANGED_MAIL_BODY = 'crevento_email_account_changed_body';
     const CONF_DEFAULT_USER_ROLE = 'crevento_default_user_role';
     const CONF_ROLES_ILIAS_EVENTO_MAPPING = 'crevento_roles_ilias_evento_mapping';
     const CONF_LOCATIONS = 'crevento_location_settings';
     const CONF_KEY_DEPARTMENTS = 'departments';
     const CONF_KEY_KINDS = 'kinds';
     const CONF_KEY_YEARS = 'years';
-    const CONF_EVENT_OPT_OWNER_CUSTOM_ID = 'crevento_object_owner_id';
+    const CONF_EVENT_OWNER_ID = 'crevento_object_owner_id';
     const CONF_EVENT_OBJECT_OWNER = 'crevento_object_owner';
 
     private $settings;
@@ -100,7 +112,7 @@ class ilEventoImportCronConfig
 
         $ws_item = new ilUriInputGUI(
             $this->cp->txt(self::LANG_API_URI),
-            self::FORM_API_URI //'crevento_api_uri'
+            self::FORM_API_URI
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_URI_DESC));
         $ws_item->setRequired(true);
@@ -109,7 +121,7 @@ class ilEventoImportCronConfig
 
         $ws_item = new ilTextInputGUI(
             $this->cp->txt(self::LANG_API_AUTH_TOKEN),
-            self::FORM_API_AUTH_TOKEN //'crevento_api_auth_toke'
+            self::FORM_API_AUTH_TOKEN
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_AUTH_TOKEN_DESC));
         $ws_item->setRequired(false);
@@ -118,7 +130,7 @@ class ilEventoImportCronConfig
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_PAGE_SIZE),
-            self::FORM_API_PAGE_SIZE //'crevento_api_page_size'
+            self::FORM_API_PAGE_SIZE
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_PAGE_SIZE_DESC));
         $ws_item->setRequired(true);
@@ -128,7 +140,7 @@ class ilEventoImportCronConfig
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_MAX_PAGES),
-            self::FORM_API_MAX_PAGES //'crevento_api_max_pages'
+            self::FORM_API_MAX_PAGES
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_MAX_PAGES_DESC));
         $ws_item->setRequired(true);
@@ -138,7 +150,7 @@ class ilEventoImportCronConfig
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_TIMEOUT_AFTER_REQUEST),
-            self::FORM_API_TIMEOUT_AFTER_REQUEST //'crevento_api_timeout'
+            self::FORM_API_TIMEOUT_AFTER_REQUEST
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_TIMEOUT_AFTER_REQUEST_DESC));
         $ws_item->setRequired(true);
@@ -148,7 +160,7 @@ class ilEventoImportCronConfig
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_TIMEOUT_FAILED_REQUEST),
-            self::FORM_API_TIMEOUT_FAILED_REQUEST //'crevento_api_timeout'
+            self::FORM_API_TIMEOUT_FAILED_REQUEST
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_TIMEOUT_FAILED_REQUEST_DESC));
         $ws_item->setRequired(true);
@@ -158,7 +170,7 @@ class ilEventoImportCronConfig
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_MAX_RETRIES),
-            self::FORM_API_MAX_RETRIES //'crevento_api_max_retries'
+            self::FORM_API_MAX_RETRIES
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_API_MAX_RETRIES_DESC));
         $ws_item->setRequired(true);
@@ -172,6 +184,29 @@ class ilEventoImportCronConfig
         $header = new ilFormSectionHeaderGUI();
         $header->setTitle($this->cp->txt(self::LANG_HEADER_USER_SETTINGS));
         $a_form->addItem($header);
+
+        $ws_item = new ilSelectInputGUI(
+            $this->cp->txt(self::LANG_USER_AUTH_MODE),
+            self::FORM_USER_AUTH_MODE
+        );
+        $ws_item->setInfo($this->cp->txt(self::LANG_USER_AUTH_MODE_DESC));
+        $auth_modes = ilAuthUtils::_getAllAuthModes();
+        $options = [];
+        foreach ($auth_modes as $auth_mode => $auth_name) {
+            if (ilLDAPServer::isAuthModeLDAP($auth_mode)) {
+                $server = ilLDAPServer::getInstanceByServerId(ilLDAPServer::getServerIdByAuthMode($auth_mode));
+                if ($server->isActive()) {
+                    $options[$auth_name] = $auth_name;
+                }
+            } else {
+                if ($this->settings->get($auth_name . '_active') || $auth_mode == AUTH_LOCAL) {
+                    $options[$auth_name] = $auth_name;
+                }
+            }
+        }
+        $ws_item->setOptions($options);
+        $ws_item->setValue($this->settings->get(self::CONF_USER_AUTH_MODE));
+        $a_form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_USER_IMPORT_ACC_DURATION),
@@ -191,6 +226,25 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_USER_MAX_ACC_DURATION));
+        $a_form->addItem($ws_item);
+
+        $ws_item = new ilTextInputGUI(
+            $this->cp->txt(self::LANG_USER_CHANGED_MAIL_SUBJECT),
+            self::FORM_USER_CHANGED_MAIL_SUBJECT
+        );
+        $ws_item->setInfo($this->cp->txt(self::LANG_USER_CHANGED_MAIL_SUBJECT_DESC));
+        $ws_item->setRequired(true);
+        $ws_item->setValue($this->settings->get(self::CONF_USER_CHANGED_MAIL_SUBJECT, ''));
+        $a_form->addItem($ws_item);
+
+        $ws_item = new ilTextAreaInputGUI(
+            $this->cp->txt(self::LANG_USER_CHANGED_MAIL_BODY),
+            self::FORM_USER_CHANGED_MAIL_BODY
+        );
+        $ws_item->setInfo($this->cp->txt(self::LANG_USER_CHANGED_MAIL_BODY_DESC));
+        $ws_item->setRequired(true);
+        $ws_item->usePurifier(true);
+        $ws_item->setValue($this->settings->get(self::CONF_USER_CHANGED_MAIL_BODY, ''));
         $a_form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
@@ -228,9 +282,14 @@ class ilEventoImportCronConfig
             $mapping_input->setRequired(true);
 
             if (isset($role_mapping[$role_id])) {
-                $ws_item->setValue('1');
+                $ws_item->setValue(1);
+                $ws_item->setChecked(true);
                 $mapping_input->setValue($role_mapping[$role_id]);
+            } else {
+                $ws_item->setValue(0);
+                $ws_item->setChecked(false);
             }
+
             $ws_item->addSubItem($mapping_input);
             $a_form->addItem($ws_item);
         }
@@ -299,7 +358,7 @@ class ilEventoImportCronConfig
             self::FORM_EVENT_OPT_OWNER_CUSTOM_ID// 'crevento_object_owner_id'
         );
         $custom_user_id->allowDecimals(false);
-        $custom_user_id->setValue($this->settings->get(self::CONF_EVENT_OPT_OWNER_CUSTOM_ID), '');
+        $custom_user_id->setValue($this->settings->get(self::CONF_EVENT_OWNER_ID), '');
         $option->addSubItem($custom_user_id);
 
         $radio->addOption($option);
@@ -376,6 +435,10 @@ class ilEventoImportCronConfig
         /***************************
          * User Import Settings
          ***************************/
+        if ($a_form->getInput(self::FORM_USER_AUTH_MODE) != null) {
+            $this->settings->set(self::CONF_USER_AUTH_MODE, $a_form->getInput(self::FORM_USER_AUTH_MODE));
+        }
+
         $this->getIntegerInputAndSaveIfNotNull(
             $a_form,
             self::FORM_USER_IMPORT_ACC_DURATION,
@@ -386,6 +449,17 @@ class ilEventoImportCronConfig
             self::FORM_USER_MAX_ACC_DURATION,
             self::CONF_USER_MAX_ACC_DURATION
         );
+        $this->getTextInputAndSaveIfNotNull(
+            $a_form,
+            self::FORM_USER_CHANGED_MAIL_SUBJECT,
+            self::CONF_USER_CHANGED_MAIL_SUBJECT
+        );
+        $this->getTextInputAndSaveIfNotNull(
+            $a_form,
+            self::FORM_USER_CHANGED_MAIL_BODY,
+            self::CONF_USER_CHANGED_MAIL_BODY
+        );
+
         $this->getIntegerInputAndSaveIfNotNull($a_form, self::FORM_DEFAULT_USER_ROLE, self::CONF_DEFAULT_USER_ROLE);
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
@@ -415,7 +489,7 @@ class ilEventoImportCronConfig
         switch ($input_object_owner) {
             case self::FORM_EVENT_OPT_OWNER_ROOT:
                 $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
-                $this->settings->set(self::CONF_EVENT_OPT_OWNER_CUSTOM_ID, 6);
+                $this->settings->set(self::CONF_EVENT_OWNER_ID, 6);
                 break;
             case self::FORM_EVENT_OPT_OWNER_FIRST_ADMIN:
                 $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_FIRST_ADMIN);
@@ -424,7 +498,7 @@ class ilEventoImportCronConfig
             case self::FORM_EVENT_OPT_OWNER_CUSTOM_USER:
                 $input_user_id = (int) $a_form->getInput(self::FORM_EVENT_OPT_OWNER_CUSTOM_ID);
                 $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
-                $this->settings->set(self::CONF_EVENT_OPT_OWNER_CUSTOM_ID, $input_user_id);
+                $this->settings->set(self::CONF_EVENT_OWNER_ID, $input_user_id);
                 break;
         }
     }

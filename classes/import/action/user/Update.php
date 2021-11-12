@@ -32,31 +32,31 @@ class Update extends UserAction
             || $userObj->getlastname() != $this->evento_user->getLastName()
             || $userObj->getGender() != strtolower($this->evento_user->getGender())
             //|| $userObj->getSecondEmail() != $evento_user->getEmailList()[0]
-            || $userObj->getMatriculation() != ('Evento:'. $this->evento_user->getEventoId())
+            || $userObj->getMatriculation() != ('Evento:' . $this->evento_user->getEventoId())
             || $userObj->getAuthMode() != $this->default_user_settings->getAuthMode()
             || !$userObj->getActive()
         ) {
             $user_updated = true;
 
             $old_user_data = array();
-            $old_user_data['old_data']['FirstName']     = $userObj->getFirstname();
-            $old_user_data['old_data']['LastName']      = $userObj->getLastname();
-            $old_user_data['old_data']['Gender']        = $userObj->getGender();
-            $old_user_data['old_data']['SecondEmail']   = $userObj->getSecondEmail();
+            $old_user_data['old_data']['FirstName'] = $userObj->getFirstname();
+            $old_user_data['old_data']['LastName'] = $userObj->getLastname();
+            $old_user_data['old_data']['Gender'] = $userObj->getGender();
+            $old_user_data['old_data']['SecondEmail'] = $userObj->getSecondEmail();
             $old_user_data['old_data']['Matriculation'] = $userObj->getMatriculation();
-            $old_user_data['old_data']['AuthMode']      = $userObj->getAuthMode();
-            $old_user_data['old_data']['Active']        = (string) $userObj->getActive();
+            $old_user_data['old_data']['AuthMode'] = $userObj->getAuthMode();
+            $old_user_data['old_data']['Active'] = (string) $userObj->getActive();
         }
 
         $userObj->setFirstname($this->evento_user->getFirstName());
         $userObj->setLastname($this->evento_user->getLastName());
-        $userObj->setGender(($this->evento_user->getGender()=='F') ? 'f':'m');
+        $userObj->setGender(($this->evento_user->getGender() == 'F') ? 'f':'m');
         //$userObj->setSecondEmail($evento_user['Email']);
 
         $userObj->setTitle($userObj->getFullname());
         $userObj->setDescription($userObj->getEmail());
-        $userObj->setMatriculation('Evento:'. $this->evento_user->getEventoId());
-        $userObj->setExternalAccount($this->evento_user->getEventoId().'@hslu.ch');
+        $userObj->setMatriculation('Evento:' . $this->evento_user->getEventoId());
+        $userObj->setExternalAccount($this->evento_user->getEventoId() . '@hslu.ch');
         $userObj->setAuthMode($this->default_user_settings->getAuthMode());
 
         //if(ilLDAPServer::isAuthModeLDAP($this->auth_mode)) $userObj->setPasswd('');
@@ -72,16 +72,16 @@ class Update extends UserAction
             $userObj->setTimeLimitUnlimited(false);
 
             if ($userObj->getTimeLimitFrom() == 0 ||
-                $userObj->getTimeLimitFrom() > $this->default_user_settings->getNowTimestamp()) {
-                $userObj->setTimeLimitFrom($this->default_user_settings->getNowTimestamp());
+                $userObj->getTimeLimitFrom() > $this->default_user_settings->getNow()) {
+                $userObj->setTimeLimitFrom($this->default_user_settings->getNow());
             }
 
             $userObj->setTimeLimitUntil($this->default_user_settings->getValidUntilTimestamp());
         }
 
-        $userObj->setPref('public_profile','y'); //profil standard öffentlich
-        $userObj->setPref('public_upload','y'); //profilbild öffentlich
-        $userObj->setPref('public_email','y'); //e-mail öffentlich
+        $userObj->setPref('public_profile', $this->default_user_settings->isProfilePublic()); //profil standard öffentlich
+        $userObj->setPref('public_upload', $this->default_user_settings->isProfilePicturePublic()); //profilbild öffentlich
+        $userObj->setPref('public_email', $this->default_user_settings->isMailPublic()); //e-mail öffentlich
         $userObj->setPasswd('', IL_PASSWD_PLAIN);
         $userObj->update();
 
@@ -93,7 +93,7 @@ class Update extends UserAction
         //$this->assignUserToAdditionalRoles($userObj->getId(), $this->evento_user->getRoles());
 
         // Upload image
-        if (strpos(\ilObjUser::_getPersonalPicturePath($userObj->getId(), "small", false),'data:image/svg+xml') !== false) {
+        if (strpos(\ilObjUser::_getPersonalPicturePath($userObj->getId(), "small", false), 'data:image/svg+xml') !== false) {
             //$this->addPersonalPicture($this->evento_user->getEventoId(), $userObj->getId());
         }
 
@@ -111,7 +111,7 @@ class Update extends UserAction
             $mail->setUserInformation($userObj->id, $oldLogin, $evento_user->getLoginName(), $userObj->getEmail());
             $mail->send();
 */
-        } else if ($user_updated) {
+        } elseif ($user_updated) {
             //$this->logger->log(\ilEventoImportLogger::CREVENTO_USR_UPDATED, $this->evento_user);
         }
     }
