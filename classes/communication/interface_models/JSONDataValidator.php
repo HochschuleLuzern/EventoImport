@@ -62,7 +62,7 @@ trait JSONDataValidator
 
         return $data_array[$key];
     }
-
+    
     protected function validateCombineAndReturnListOfValues(array $data_array, array $key_list, bool $is_empty_list_allowed = false) : ?array
     {
         $list_of_values = array();

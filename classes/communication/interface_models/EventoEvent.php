@@ -2,10 +2,8 @@
 
 namespace EventoImport\communication\api_models;
 
-class EventoEvent
+class EventoEvent extends ApiDataModelBase
 {
-    use JSONDataValidator;
-
     public const JSON_ID = 'idEvent';
     public const JSON_NAME = 'name';
     public const JSON_DESCRIPTION = 'description';
@@ -81,8 +79,14 @@ class EventoEvent
         $this->is_group_member_flag = $this->validateAndReturnBoolean($data_set, self::JSON_IS_GROUP_MEMBER_FLAG);
         $this->group_name = $this->validateAndReturnString($data_set, self::JSON_GROUP_NAME);
         $this->group_member_count = $this->validateAndReturnNumber($data_set, self::JSON_GROUP_MEMBER_COUNT);
-        $this->employees = $this->validateAndReturnArray($data_set, self::JSON_EMPLOYEES);
-        $this->students = $this->validateAndReturnArray($data_set, self::JSON_STUDENTS);
+
+        $list_employees = $this->validateAndReturnArray($data_set, self::JSON_EMPLOYEES);
+        $list_students = $this->validateAndReturnArray($data_set, self::JSON_STUDENTS);
+
+        if (!is_null($list_employees) && !is_null($list_students)) {
+            $this->employees = $this->buildMembershipList($list_employees);
+            $this->students = $this->buildMembershipList($list_students);
+        }
 
         // TODO: Remove after testing!!!
         if (self::$CREATE_COURSES < self::$MAX_CREATE_COURSE && is_array($this->students)) {
@@ -92,14 +96,16 @@ class EventoEvent
             }
         }
 
-        if (count($this->key_errors) > 0) {
-            $error_message = 'One or more fields in the given array were invalid: ';
-            foreach ($this->key_errors as $field => $error) {
-                $error_message .= "Field $field - $error; ";
-            }
+        $this->checkErrorsAndMaybeThrowException();
+    }
 
-            throw new \InvalidArgumentException($error_message);
+    private function buildMembershipList(array $account_list)
+    {
+        $typed_list = [];
+        foreach ($account_list as $account_data) {
+            $typed_list = new EventoUserShort($account_data);
         }
+        return $typed_list;
     }
 
     /**

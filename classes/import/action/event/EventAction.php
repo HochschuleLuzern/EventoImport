@@ -8,6 +8,7 @@ use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\IliasEventWrapper;
+use EventoImport\communication\api_models\EventoUserShort;
 
 abstract class EventAction implements EventoImportAction
 {
@@ -35,32 +36,30 @@ abstract class EventAction implements EventoImportAction
 
     protected function synchronizeUsersInRole(IliasEventWrapper $ilias_event)
     {
+        /** @var EventoUserShort $employee */
         foreach ($this->evento_event->getEmployees() as $employee) {
-            if (isset($employee["id"]) && isset($employee["email"])) {
-                $user_id = $this->user_facade->fetchUserIdByMembership($this->evento_event->getEventoId(), $employee);
+            $user_id = $this->user_facade->fetchUserIdByMembership($this->evento_event->getEventoId(), $employee);
 
+            if (!is_null($user_id)) {
+                $ilias_event->addUserAsAdminToEvent($user_id);
+            } else {
+                $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($employee->getEventoId());
                 if (!is_null($user_id)) {
                     $ilias_event->addUserAsAdminToEvent($user_id);
-                } else {
-                    $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($employee["id"]);
-                    if (!is_null($user_id)) {
-                        $ilias_event->addUserAsAdminToEvent($user_id);
-                    }
                 }
             }
         }
 
+        /** @var EventoUserShort $student */
         foreach ($this->evento_event->getStudents() as $student) {
-            if (isset($student["id"]) && isset($student["email"])) {
-                $user_id = $this->user_facade->fetchUserIdByMembership($this->evento_event->getEventoId(), $student);
+            $user_id = $this->user_facade->fetchUserIdByMembership($this->evento_event->getEventoId(), $student);
 
+            if (!is_null($user_id)) {
+                $ilias_event->addUserAsStudentToEvent($user_id);
+            } else {
+                $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($student->getEventoId());
                 if (!is_null($user_id)) {
                     $ilias_event->addUserAsStudentToEvent($user_id);
-                } else {
-                    $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($student["id"]);
-                    if (!is_null($user_id)) {
-                        $ilias_event->addUserAsStudentToEvent($user_id);
-                    }
                 }
             }
         }

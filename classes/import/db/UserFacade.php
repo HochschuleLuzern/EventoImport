@@ -6,6 +6,7 @@ use EventoImport\import\db\query\IliasUserQuerying;
 use EventoImport\import\db\repository\EventMembershipRepository;
 use EventoImport\import\db\repository\EventoUserRepository;
 use ILIAS\DI\RBACServices;
+use EventoImport\communication\api_models\EventoUserShort;
 
 class UserFacade
 {
@@ -24,15 +25,18 @@ class UserFacade
         $this->rbac_services = $rbac_services ?? $DIC->rbac();
     }
 
-    public function fetchUserIdsByEmail($email) {
+    public function fetchUserIdsByEmail($email)
+    {
         return $this->user_query->fetchUserIdsByEmailAdresses($email);
     }
 
-    public function fetchUserIdsByEventoId($evento_id) {
+    public function fetchUserIdsByEventoId($evento_id)
+    {
         return $this->user_query->fetchUserIdsByEventoId($evento_id);
     }
 
-    public function fetchUserIdByLogin(string $login_name) {
+    public function fetchUserIdByLogin(string $login_name)
+    {
         return \ilObjUser::getUserIdByLogin($login_name);
     }
 
@@ -56,16 +60,16 @@ class UserFacade
         return $this->rbac_services;
     }
 
-    public function fetchUserIdByMembership($evento_event_id, $employee)
+    public function fetchUserIdByMembership($evento_event_id, EventoUserShort $evento_user)
     {
-        $user_id = $this->evento_user_repo->getIliasUserIdByEventoId($employee['id']);
+        $user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
 
-        if(!is_null($user_id) && $user_id > 0) {
+        if (!is_null($user_id) && $user_id > 0) {
             return $user_id;
         }
 
-        $user_ids = $this->user_query->fetchUserIdsByEmailAdress($employee['email']);
-        if(count($user_ids) == 1) {
+        $user_ids = $this->user_query->fetchUserIdsByEmailAdress($evento_user->getEmailAddress());
+        if (count($user_ids) == 1) {
             return $user_ids[1];
         }
     }
