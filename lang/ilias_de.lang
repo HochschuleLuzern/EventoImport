@@ -14,22 +14,12 @@ ilias_auth_mode#:#Authmode neuer Benutzer
 ilias_auth_mode_desc#:#Neu abgelegte ILIAS-Benutzer erhalten diesen Authentifizierungsmechanismus zugewiesen
 ws_send_emails_to_users#:#E-Mails an Benutzer senden
 ws_send_emails_to_users_desc#:#Sollen Benutzer über Änderungen per E-Mail benachrichtigt werden?
-pagesize#:#Seitengrösse
-pagesize_desc#:#Anzahl er Datensätze die in einem Rutsch ausgelesen werden sollen. Eine grössere Anzahl beschläunigt den Prozess, braucht aber auch mehr Arbeitsspeicher.
-max_pages#:#Maximale Seitenanzahl
-max_pages_desc#:#Wieviele Seiten sollen maximal geholt werden? -1 bedeutet unbeschränkt.
-max_retries#:#Anzahl Versuche
-max_retries_desc#:#Wie häufig soll bei Problemen versucht werden, die Daten auszulesen.
 seconds_before_retry#:#Wartezeit
 seconds_before_retry_desc#:#Wartezeit zwischen den Versuchen in Sekunden
 email_account_changed_subject#:#Betreff
 email_account_changed_subject_desc#:#Bitte hier den Betreff für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wird.
 email_account_changed_body#:#Text
 email_account_changed_body_desc#:#Bitte hier den Text für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wir (ohne Anrede). Die Platzhalter [oldlogin], [newlogin] und [email] werden durch die entsprechenden Angaben des Benutzers ersetzt.
-account_duration#:#Gültigkeit von importierten Account
-account_duration_desc#:#Vom Importer erstellte Accounts erhalten diese Gültigkeitsdauer (in Monaten).
-max_account_duration#:#Maximale gültigkeit von Accounts
-max_account_duration_desc#:#Maximale Gültigkeitsdauer für einen Account in Monaten. Werden unlimitierte Accounts oder Accounts mit längerer Gültigkeit erstellt, werden sie auf diese Dauer beschränkt. 0 bedeutet, dass es keine Einschränkungen gibt.
 standard_user_role_id#:#Standard Benutzerrolle
 standard_user_role_id_desc#:#ID der standard Benutzerrolle, die allen Nutzern zugeteilt werden soll.
 user_type_specific_settings_header#:#Einstellungen für Benutzergruppe '%s'
@@ -45,4 +35,47 @@ convert_operation_subject#:#Operation zum Umwandeln der Mitglieder der Benutzerg
 convert_operation_desc#:#Diese Operation wird an den Dienst weitergereicht, damit dieser die Benutzer der Gruppe '%s' zurückgibt, die nicht mehr aktiv sind und umgewandelt oder deaktiviert werden müssen.
 convert_deactivate_subject#:#Benutzerzugänge der Gruppe '%s' deaktivieren?
 convert_deactivate_desc#:#Sollen die Benutzerzugänge der Gruppe '%s' deaktiviert werden anstatt sie umzuwandeln?
+
+
+location_settings#:#Einstellungen zu Magazinorten
+location_departments#:#Departemente
+location_kinds#:#Arten
+location_years#:#Jahre
+api_settings#:#API Einstellungen
+api_uri#:#URI
+api_uri_desc#:#URI der API. Beispiel: https://evento.hslu.ch:443/services/evento_import
+auth_token#:#Authentifizierungs Token
+auth_token_desc#:#Wird verwendet um sich bei der API zu authentifizieren
+api_page_size#:#Seitengrösse
+api_page_size_desc#:#Anzahl der Datensätze die in einem Rutsch ausgelesen werden sollen. Eine grössere Anzahl beschläunigt den Prozess, braucht aber auch mehr Arbeitsspeicher.
+api_max_pages#:#Maximale Seitenanzahl
+api_max_pages_desc#:#Wieviele Seiten sollen maximal geholt werden? -1 bedeutet unbeschränkt.
+api_max_retries#:#Anzahl Versuche
+api_max_retries_desc#:#Wie häufig soll bei Problemen versucht werden, die Daten auszulesen.
+api_timeout_after_request#:#Wartezeit für Anfrage
+api_timeout_after_request_desc#:#Maximale Wartezeit für eine Anfrage, bis diese als fehlgeschlagen erklärt wird
+api_timeout_failed_request#:#Wartezeit fehlgeschlagene Anfrage
+api_timeout_failed_request_desc#:#Wartezeit zwischen fehlgeschlagenen Anfragen
+user_import_settings#:#Benutzerimport Einstellungen
+user_import_account_duration#:#Gültigkeit von importierten Account
+user_import_account_duration_desc#:#Vom Importer erstellte Accounts erhalten diese Gültigkeitsdauer (in Monaten).
+user_max_account_duration#:#Maximale gültigkeit von Accounts
+user_max_account_duration_desc#:#Maximale Gültigkeitsdauer für einen Account in Monaten. Werden unlimitierte Accounts oder Accounts mit längerer Gültigkeit erstellt, werden sie auf diese Dauer beschränkt. 0 bedeutet, dass es keine Einschränkungen gibt.
+default_user_role#:#Standard Benutzerrolle
+default_user_role_desc#:#ID der standard Benutzerrolle, die allen importierten Accounts zugeteilt werden soll.
+additional_user_roles_mapping#:#Zuordnung zusätzlicher ILIAS-Rollen zu erhaltenen Evento-Rollen
+maps_to#:#zugeordnet zu...
+event_import_settings#:#Anlassimport Einstellungen
+object_owner#:#Objekt Besitzer
+owner_root_user#:#Root Benutzer
+owner_first_admin_in_event#:#Erster Admin eines Anlasses
+owner_custom_user#:#Selber einen Account definieren
+object_owner_id#:#Objekt ID des ILIAS Accounts
+
+
+
+
+
+
+
 

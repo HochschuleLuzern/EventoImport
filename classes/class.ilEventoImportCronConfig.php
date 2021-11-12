@@ -18,10 +18,10 @@ class ilEventoImportCronConfig
     const LANG_API_MAX_RETRIES = 'api_max_retries';
     const LANG_API_MAX_RETRIES_DESC = 'api_max_retries_desc';
     const LANG_HEADER_USER_SETTINGS = 'user_import_settings';
-    const LANG_USER_IMPORT_ACC_DURATION = 'account_duration';
-    const LANG_USER_IMPORT_ACC_DURATION_DESC = 'account_duration_desc';
-    const LANG_USER_MAX_ACC_DURATION = 'max_account_duration';
-    const LANG_USER_MAX_ACC_DURATION_DESC = 'max_account_duration_desc';
+    const LANG_USER_IMPORT_ACC_DURATION = 'user_import_account_duration';
+    const LANG_USER_IMPORT_ACC_DURATION_DESC = 'user_import_account_duration_desc';
+    const LANG_USER_MAX_ACC_DURATION = 'user_max_account_duration';
+    const LANG_USER_MAX_ACC_DURATION_DESC = 'user_max_account_duration_desc';
     const LANG_DEFAULT_USER_ROLE = 'default_user_role';
     const LANG_DEFAULT_USER_ROLE_DESC = 'default_user_role_desc';
     const LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING = 'additional_user_roles_mapping';
