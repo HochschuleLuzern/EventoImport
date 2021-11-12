@@ -6,7 +6,7 @@ class EventoEvent
 {
     use JSONDataValidator;
 
-    public const JSON_ID = 'id';
+    public const JSON_ID = 'idEvent';
     public const JSON_NAME = 'name';
     public const JSON_DESCRIPTION = 'description';
     public const JSON_TYPE = 'type';
@@ -18,8 +18,8 @@ class EventoEvent
     public const JSON_IS_GROUP_MEMBER_FLAG = 'isGroupMember';
     public const JSON_GROUP_NAME = 'groupName';
     public const JSON_GROUP_MEMBER_COUNT = 'groupMemberCount';
-    public const JSON_EMPLOYEES = 'employees';
-    public const JSON_STUDENTS = 'students';
+    public const JSON_EMPLOYEES = 'employeeAccounts';
+    public const JSON_STUDENTS = 'studentAccounts';
 
     public const EVENTO_TYPE_MODULANLASS = 'Modulanlass';
     public const EVENTO_TYPE_KURS = 'Kurs';

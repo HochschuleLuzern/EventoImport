@@ -6,7 +6,7 @@ class EventoUser
 {
     use JSONDataValidator;
 
-    const JSON_ID = 'id';
+    const JSON_ID = 'idAccount';
     const JSON_LAST_NAME = 'lastName';
     const JSON_FIRST_NAME = 'firstName';
     const JSON_GENDER = 'gender';
