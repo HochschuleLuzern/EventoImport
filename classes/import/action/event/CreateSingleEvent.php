@@ -24,9 +24,7 @@ class CreateSingleEvent extends EventAction
         $course_object = $this->event_object_factory->buildNewCourseObject(
             $this->evento_event->getName(),
             $this->evento_event->getDescription(),
-            $this->event_settings->getDefaultObjectOwnerId(), // owner_user_id,
             $this->destination_ref_id,
-            $this->event_settings->getDefaultSortMode()
         ); // sort_mode);
 
         $ilias_event = $this->repository_facade->addNewSingleEventCourse($this->evento_event, $course_object);

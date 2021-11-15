@@ -90,7 +90,7 @@ class EventoEvent extends ApiDataModelBase
 
         // TODO: Remove after testing!!!
         if (self::$CREATE_COURSES < self::$MAX_CREATE_COURSE && is_array($this->students)) {
-            $this->is_create_course_flag = (count($this->students) % 2) == 1;
+            $this->is_create_course_flag = (count($this->students) % 2) == 0;
             if ($this->is_create_course_flag) {
                 self::$CREATE_COURSES++;
             }
@@ -99,11 +99,11 @@ class EventoEvent extends ApiDataModelBase
         $this->checkErrorsAndMaybeThrowException();
     }
 
-    private function buildMembershipList(array $account_list)
+    private function buildMembershipList(array $account_list) : array
     {
         $typed_list = [];
         foreach ($account_list as $account_data) {
-            $typed_list = new EventoUserShort($account_data);
+            $typed_list[] = new EventoUserShort($account_data);
         }
         return $typed_list;
     }

@@ -17,11 +17,11 @@ abstract class EventAction implements EventoImportAction
     protected $event_object_factory;
     protected $logger;
     protected $rbac_services;
-    protected \EventoImport\import\settings\DefaultEventSettings $event_settings;
+    protected $event_settings;
     /**
      * @var UserFacade
      */
-    protected UserFacade $user_facade;
+    protected $user_facade;
 
     public function __construct(EventoEvent $evento_event, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, \EventoImport\import\db\UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {

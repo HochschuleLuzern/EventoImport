@@ -24,9 +24,7 @@ class CreateEventInParentEvent extends EventAction
         $event_sub_group = $this->event_object_factory->buildNewGroupObject(
             $this->evento_event->getName(),
             $this->evento_event->getDescription(),
-            $this->event_settings->getDefaultObjectOwnerId(),
             $this->parent_event->getRefId(),
-            $this->event_settings->getDefaultSortMode()
         );
 
         $parent_event_ilias_obj = new \ilObjCourse($this->parent_event->getRefId(), true);

@@ -22,17 +22,13 @@ class CreateEventWithParent extends EventAction
         $parent_event_crs_obj = $this->event_object_factory->buildNewCourseObject(
             $this->evento_event->getGroupName(),
             $this->evento_event->getDescription(),
-            $this->event_settings->getDefaultObjectOwnerId(),
             $this->destination_ref_id,
-            $this->event_settings->getDefaultSortMode()
         );
 
         $event_sub_group = $this->event_object_factory->buildNewGroupObject(
             $this->evento_event->getName(),
             $this->evento_event->getDescription(),
-            $this->event_settings->getDefaultObjectOwnerId(),
             $parent_event_crs_obj->getRefId(),
-            $this->event_settings->getDefaultSortMode()
         );
 
         $event_wrapper = $this->repository_facade->addNewMultiEventCourseAndGroup($this->evento_event, $parent_event_crs_obj, $event_sub_group);
