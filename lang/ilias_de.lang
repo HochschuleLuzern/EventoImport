@@ -64,10 +64,10 @@ default_user_role#:#Standard Benutzerrolle
 default_user_role_desc#:#ID der standard Benutzerrolle, die allen importierten Accounts zugeteilt werden soll.
 additional_user_roles_mapping#:#Zuordnung zusätzlicher ILIAS-Rollen zu erhaltenen Evento-Rollen
 maps_to#:#zugeordnet zu...
+maps_to_desc#:#Erhaltener Rollen-Code von Evento für die Rolle %s hier eingeben. Das Mapping von Evento-Rollen zu ILIAS-Rollen ist 1 zu 1. Die hier eingegebene Zahl kann also bei keiner anderen ILIAS Rolle eingefügt werden.
 event_import_settings#:#Anlassimport Einstellungen
 object_owner#:#Objekt Besitzer
 owner_root_user#:#Root Benutzer
-owner_first_admin_in_event#:#Erster Admin eines Anlasses
 owner_custom_user#:#Selber einen Account definieren
 object_owner_id#:#Objekt ID des ILIAS Accounts
 

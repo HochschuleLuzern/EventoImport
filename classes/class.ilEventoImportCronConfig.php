@@ -32,6 +32,7 @@ class ilEventoImportCronConfig
     const LANG_DEFAULT_USER_ROLE_DESC = 'default_user_role_desc';
     const LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING = 'additional_user_roles_mapping';
     const LANG_ROLE_MAPPING_TO = 'maps_to';
+    const LANG_ROLE_MAPPING_TO_DESC = 'maps_to_desc';
     const LANG_HEADER_EVENT_LOCATIONS = 'location_settings';
     const LANG_DEPARTMENTS = 'location_departments';
     const LANG_KINDS = 'location_kinds';
@@ -39,7 +40,6 @@ class ilEventoImportCronConfig
     const LANG_HEADER_EVENT_SETTINGS = 'event_import_settings';
     const LANG_EVENT_OBJECT_OWNER = 'object_owner';
     const LANG_EVENT_OPT_OWNER_ROOT = 'owner_root_user';
-    const LANG_EVENT_OPT_OWNER_FIRST_ADMIN = 'owner_first_admin_in_event';
     const LANG_EVENT_OPT_OWNER_CUSTOM_USER = 'owner_custom_user';
     const LANG_EVENT_OPT_OWNER_CUSTOM_ID = 'object_owner_id';
 
@@ -63,7 +63,6 @@ class ilEventoImportCronConfig
     const FORM_YEARS = 'crevento_years';
     const FORM_EVENT_OBJECT_OWNER = 'crevento_object_owner';
     const FORM_EVENT_OPT_OWNER_ROOT = 'crevento_object_owner_root';
-    const FORM_EVENT_OPT_OWNER_FIRST_ADMIN = 'crevento_object_owner_first_admin';
     const FORM_EVENT_OPT_OWNER_CUSTOM_USER = 'crevento_object_owner_custom';
     const FORM_EVENT_OPT_OWNER_CUSTOM_ID = 'crevento_object_owner_custom_id';
 
@@ -269,10 +268,13 @@ class ilEventoImportCronConfig
         }
 
         foreach ($global_roles as $role_id) {
+            $role_title = ilObject::_lookupTitle($role_id);
             $ws_item = new ilCheckboxInputGUI(
-                ilObject::_lookupTitle($role_id),
+                $role_title,
                 self::FORM_USER_GLOBAL_ROLE_ . "$role_id"
             );
+            $ws_item->setValue('1');
+
 
             $mapping_input = new ilNumberInputGUI(
                 $this->cp->txt(self::LANG_ROLE_MAPPING_TO),
@@ -280,13 +282,13 @@ class ilEventoImportCronConfig
             );
             $mapping_input->allowDecimals(false);
             $mapping_input->setRequired(true);
+            $mapping_desc = sprintf($this->cp->txt(self::LANG_ROLE_MAPPING_TO_DESC), $role_title);
+            $mapping_input->setInfo($mapping_desc);
 
             if (isset($role_mapping[$role_id])) {
-                $ws_item->setValue(1);
                 $ws_item->setChecked(true);
                 $mapping_input->setValue($role_mapping[$role_id]);
             } else {
-                $ws_item->setValue(0);
                 $ws_item->setChecked(false);
             }
 
@@ -340,12 +342,6 @@ class ilEventoImportCronConfig
         $option = new ilRadioOption(
             $this->cp->txt(self::LANG_EVENT_OPT_OWNER_ROOT),
             self::FORM_EVENT_OPT_OWNER_ROOT
-        );
-        $radio->addOption($option);
-
-        $option = new ilRadioOption(
-            $this->cp->txt(self::LANG_EVENT_OPT_OWNER_FIRST_ADMIN),
-            self::FORM_EVENT_OPT_OWNER_FIRST_ADMIN //'first_admin'
         );
         $radio->addOption($option);
 
@@ -411,8 +407,10 @@ class ilEventoImportCronConfig
         return json_encode($settings_list);
     }
 
-    public function saveCustomCronJobSettings(ilPropertyFormGUI $a_form)
+    public function saveCustomCronJobSettings(ilPropertyFormGUI $a_form) : bool
     {
+        $form_input_correct = true;
+
         /***************************
          * API Settings
          ***************************/
@@ -464,17 +462,23 @@ class ilEventoImportCronConfig
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
         $role_mapping = [];
+        $save_global_role_mapping = true;
 
         foreach ($global_roles as $role_id) {
             $check_box = $a_form->getInput(self::FORM_USER_GLOBAL_ROLE_ . $role_id);
             if ($check_box == '1') {
                 $mapped_role_input = (int) $a_form->getInput(self::FORM_USER_EVENTO_ROLE_MAPPED_TO_ . $role_id);
-                if (!is_null($mapped_role_input)) {
+                if (!is_null($mapped_role_input) && !in_array($mapped_role_input, $role_mapping)) {
                     $role_mapping[$role_id] = $mapped_role_input;
+                } elseif (in_array($mapped_role_input, $role_mapping)) {
+                    $form_input_correct = false;
+                    $save_global_role_mapping = false;
                 }
             }
         }
-        $this->settings->set(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, serialize($role_mapping));
+        if ($save_global_role_mapping) {
+            $this->settings->set(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, serialize($role_mapping));
+        }
 
         /***************************
          * Event Location Settings
@@ -491,9 +495,6 @@ class ilEventoImportCronConfig
                 $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
                 $this->settings->set(self::CONF_EVENT_OWNER_ID, 6);
                 break;
-            case self::FORM_EVENT_OPT_OWNER_FIRST_ADMIN:
-                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_FIRST_ADMIN);
-                break;
 
             case self::FORM_EVENT_OPT_OWNER_CUSTOM_USER:
                 $input_user_id = (int) $a_form->getInput(self::FORM_EVENT_OPT_OWNER_CUSTOM_ID);
@@ -501,5 +502,7 @@ class ilEventoImportCronConfig
                 $this->settings->set(self::CONF_EVENT_OWNER_ID, $input_user_id);
                 break;
         }
+
+        return $form_input_correct;
     }
 }

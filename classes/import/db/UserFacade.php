@@ -78,4 +78,11 @@ class UserFacade
     {
         $this->rbac_services->admin()->assignUser($role_id, $user_id);
     }
+
+    public function setMailPreferences(int $user_id, int $incoming_type)
+    {
+        $mail_options = new \ilMailOptions($user_id);
+        $mail_options->setIncomingType($incoming_type);
+        $mail_options->updateOptions();
+    }
 }

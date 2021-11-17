@@ -11,31 +11,39 @@ class Create extends UserAction
 {
     protected $default_user_settings;
 
-    public function __construct(EventoUser $evento_user, UserFacade $user_facade, DefaultUserSettings $default_user_settings, \ilEventoImportLogger $logger)
-    {
+    public function __construct(
+        EventoUser $evento_user,
+        UserFacade $user_facade,
+        DefaultUserSettings $default_user_settings,
+        \ilEventoImportLogger $logger
+    ) {
         parent::__construct($evento_user, $user_facade, $logger);
 
         $this->default_user_settings = $default_user_settings;
     }
 
-    private function assignUserToAdditionalRoles(int $getId, array $getRoles)
+    private function assignUserToAdditionalRoles(int $user_id, array $role_list)
     {
+        $rbac = $this->user_facade->rbacServices();
+        foreach ($role_list as $role_id) {
+            if ($rbac->review()->isAssigned($user_id, $role_list)) {
+                $rbac->admin()->assignUser($role_id, $user_id);
+            }
+        }
     }
 
-    private function setMailPreferences(int $usrId)
+    private function assignUserToIliasRoles(int $user_id, array $imported_evento_roles)
     {
-        global $DIC;
+        $rbac_admin = $this->user_facade->rbacServices()->admin();
 
-        //mail only intern to export
-        $DIC->database()->update(
-            'mail_options',
-            [
-                'incoming_type' => [\ilDBConstants::T_INTEGER, 2]
-            ],
-            [
-                'user_id' => [\ilDBConstants::T_INTEGER, $usrId]
-            ]
-        );
+        // Add user to default ilias user role
+        $rbac_admin->assignUser($this->default_user_settings->getDefaultUserRoleId(), $user_id);
+
+        foreach ($this->default_user_settings->getEventoCodeToIliasRoleMapping() as $evento_code => $ilias_role_id) {
+            if (in_array($evento_code, $imported_evento_roles)) {
+                $rbac_admin->assignUser($ilias_role_id, $user_id);
+            }
+        }
     }
 
     public function executeAction()
@@ -45,7 +53,18 @@ class Create extends UserAction
         $ilias_user_object->setLogin($this->evento_user->getLoginName());
         $ilias_user_object->setFirstname($this->evento_user->getFirstName());
         $ilias_user_object->setLastname($this->evento_user->getLastName());
-        $ilias_user_object->setGender(($this->evento_user->getGender() == 'F') ? 'f':'m');
+        switch (strtolower($this->evento_user->getGender())) {
+            case 'f':
+                $ilias_user_object->setGender('f');
+                break;
+            case 'm':
+                $ilias_user_object->setGender('m');
+                break;
+            case 'x':
+            default:
+                $ilias_user_object->setGender('n');
+                break;
+        }
         $ilias_user_object->setEmail($this->evento_user->getEmailList()[0]);
         if (isset($this->evento_user->getEmailList()[1])) {
             $ilias_user_object->setSecondEmail($this->evento_user->getEmailList()[1]);
@@ -56,15 +75,13 @@ class Create extends UserAction
         $ilias_user_object->setExternalAccount($this->evento_user->getEventoId() . '@hslu.ch');
         $ilias_user_object->setAuthMode($this->default_user_settings->getAuthMode());
 
-//        if(!(ilLDAPServer::isAuthModeLDAP($this->auth_mode))){ $userObj->setPasswd(strtolower($evento_user['Password'])) ; }
-
         $ilias_user_object->setActive(true);
-        $ilias_user_object->setTimeLimitFrom($this->default_user_settings->getNow());
-        if ($this->default_user_settings->getValidUntilTimestamp() == 0) {
+        $ilias_user_object->setTimeLimitFrom($this->default_user_settings->getNow()->getTimestamp());
+        if ($this->default_user_settings->getAccDurationAfterImport() == 0) {
             $ilias_user_object->setTimeLimitUnlimited(true);
         } else {
             $ilias_user_object->setTimeLimitUnlimited(false);
-            $ilias_user_object->setTimeLimitUntil($this->default_user_settings->getValidUntilTimestamp());
+            $ilias_user_object->setTimeLimitUntil($this->default_user_settings->getAccDurationAfterImport()->getTimestamp());
         }
 
         $ilias_user_object->create();
@@ -73,22 +90,38 @@ class Create extends UserAction
         $ilias_user_object->saveAsNew(false);
 
         // Set default prefs
-        $ilias_user_object->setPref('hits_per_page', (string) $this->default_user_settings->getDefaultHitsPerPage()); //100 hits per page
-        $ilias_user_object->setPref('show_users_online', $this->default_user_settings->getDefaultShowUsersOnline()); //nur Leute aus meinen Kursen zeigen
+        $ilias_user_object->setPref(
+            'hits_per_page',
+            (string) $this->default_user_settings->getDefaultHitsPerPage()
+        ); //100 hits per page
+        $ilias_user_object->setPref(
+            'show_users_online',
+            $this->default_user_settings->getDefaultShowUsersOnline()
+        ); //nur Leute aus meinen Kursen zeigen
 
-        $ilias_user_object->setPref('public_profile', $this->default_user_settings->isProfilePublic()); //profil standard öffentlich
-        $ilias_user_object->setPref('public_upload', $this->default_user_settings->isProfilePicturePublic()); //profilbild öffentlich
-        $ilias_user_object->setPref('public_email', $this->default_user_settings->isMailPublic()); //profilbild öffentlich
+        $ilias_user_object->setPref(
+            'public_profile',
+            $this->default_user_settings->isProfilePublic()
+        ); //profil standard öffentlich
+        $ilias_user_object->setPref(
+            'public_upload',
+            $this->default_user_settings->isProfilePicturePublic()
+        ); //profilbild öffentlich
+        $ilias_user_object->setPref(
+            'public_email',
+            $this->default_user_settings->isMailPublic()
+        ); //profilbild öffentlich
 
         $ilias_user_object->writePrefs();
 
         // update mail preferences
-        $this->setMailPreferences($ilias_user_object->getId());
+        $this->user_facade->setMailPreferences(
+            $ilias_user_object->getId(),
+            $this->default_user_settings->getMailIncomingType()
+        );
 
         // Assign user to global user role
-        $this->user_facade->assignUserToRole($this->default_user_settings->getDefaultUserRoleId(), $ilias_user_object->getId());
-
-        $this->assignUserToAdditionalRoles($ilias_user_object->getId(), $this->evento_user->getRoles());
+        $this->assignUserToIliasRoles($ilias_user_object->getId(), $this->evento_user->getRoles());
 
         //$this->addPersonalPicture($this->evento_user->getEventoId(), $ilias_user_object->getId());
 
