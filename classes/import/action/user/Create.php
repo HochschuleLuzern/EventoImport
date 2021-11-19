@@ -125,7 +125,12 @@ class Create extends UserAction
 
         //$this->addPersonalPicture($this->evento_user->getEventoId(), $ilias_user_object->getId());
 
-        //$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CREATED, $evento_user);
+        $this->logger->logUserImport(
+            \ilEventoImportLogger::CREVENTO_USR_CREATED,
+            $this->evento_user->getEventoId(),
+            $this->evento_user->getLoginName(),
+            ['api_data' => $this->evento_user->getDecodedApiData()]
+        );
         $this->user_facade->eventoUserRepository()->addNewEventoIliasUser($this->evento_user, $ilias_user_object);
     }
 }

@@ -61,6 +61,47 @@ class Update extends UserAction
         $userObj->read();
         $userObj->readPrefs();
 
+        $changed_user_data = [];
+        if ($userObj->getFirstname() != $this->evento_user->getFirstName()) {
+            $userObj->setFirstname($this->evento_user->getFirstName());
+            $changed_user_data['first_name'] = [
+                'old' => $userObj->getFirstname(),
+                'new' => $this->evento_user->getFirstName()
+            ];
+        }
+
+        if ($userObj->getlastname() != $this->evento_user->getLastName()) {
+            $userObj->setLastname($this->evento_user->getLastName());
+            $changed_user_data['last_name'] = [
+                'old' => $userObj->getFirstname(),
+                'new' => $this->evento_user->getFirstName()
+            ];
+        }
+
+        if ($userObj->getMatriculation() != ('Evento:' . $this->evento_user->getEventoId())) {
+            $userObj->setMatriculation('Evento:' . $this->evento_user->getEventoId());
+            $changed_user_data['matriculation'] = [
+                'old' => $userObj->getMatriculation(),
+                'new' => 'Evento:' . $this->evento_user->getEventoId()
+            ];
+        }
+
+        if ($userObj->getAuthMode() != $this->default_user_settings->getAuthMode()) {
+            $userObj->setAuthMode($this->default_user_settings->getAuthMode());
+            $changed_user_data['auth_mode'] = [
+                'old' => $userObj->getAuthMode,
+                'new' => $this->default_user_settings->getAuthMode()
+            ];
+        }
+
+        if (!$userObj->getActive()) {
+            $userObj->setActive(true);
+            $changed_user_data['active'] = [
+                'old' => false,
+                'new' => true
+            ];
+        }
+
         if ($userObj->getFirstname() != $this->evento_user->getFirstName()
             || $userObj->getlastname() != $this->evento_user->getLastName()
             //|| $userObj->getGender() != strtolower($this->evento_user->getGender())
@@ -150,20 +191,34 @@ class Update extends UserAction
 
         if ($oldLogin != $this->evento_user->getLoginName()) {
             //$evento_user['oldLogin'] = $oldLogin;
-            //$this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_RENAMED, $evento_user);
-/*
-            $this->changeLoginName($userObj->getId(), $this->evento_user->getLoginName());
-            $userObj->setLogin('');
-/*
-            $mail = new \ilEventoimportMailNotification();
-            $mail->setType($mail::MAIL_TYPE_USER_NAME_CHANGED);
-            $mail->setUserInformation($userObj->id, $oldLogin, $this->evento_user->getLoginName(),
-                $userObj->getEmail());
-            $mail->send();
-*/
+            $this->logger->logUserImport(
+                \ilEventoImportLogger::CREVENTO_USR_RENAMED,
+                $this->evento_user->getEventoId(),
+                $this->evento_user->getLoginName(),
+                [
+                    'api_data' => $this->evento_user->getDecodedApiData(),
+                    'old_login' => $oldLogin,
+
+                ]
+            );
+        /*
+                    $this->changeLoginName($userObj->getId(), $this->evento_user->getLoginName());
+                    $userObj->setLogin('');
+        /*
+                    $mail = new \ilEventoimportMailNotification();
+                    $mail->setType($mail::MAIL_TYPE_USER_NAME_CHANGED);
+                    $mail->setUserInformation($userObj->id, $oldLogin, $this->evento_user->getLoginName(),
+                        $userObj->getEmail());
+                    $mail->send();
+        */
         } else {
             if ($user_updated) {
-                //$this->logger->log(\ilEventoImportLogger::CREVENTO_USR_UPDATED, $this->evento_user);
+                $this->logger->logUserImport(
+                    \ilEventoImportLogger::CREVENTO_USR_UPDATED,
+                    $this->evento_user->getEventoId(),
+                    $this->evento_user->getLoginName(),
+                    serialize($this->evento_user)
+                );
             }
         }
     }

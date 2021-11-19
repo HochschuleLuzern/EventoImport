@@ -3,21 +3,17 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\action\EventoImportAction;
+use EventoImport\import\action\ReportError;
 
-class ReportNonIliasEvent implements EventoImportAction
+class ReportNonIliasEvent extends ReportError
 {
-    private $evento_event;
-    private $logger;
-
-    public function __construct(EventoEvent $evento_event, \ilEventoImportLogger $logger)
+    public function __construct(int $error_code, array $error_data, \ilEventoImportLogger $logger)
     {
-        $this->evento_event;
-        $this->logger;
+        parent::__construct($error_code, $error_data, $logger);
     }
 
     public function executeAction()
     {
-        // TODO: Implement executeAction() method.
+        throw new \Error('Method not implemented yet');
     }
 }

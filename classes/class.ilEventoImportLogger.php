@@ -58,6 +58,42 @@ class ilEventoImportLogger
     {
         $this->ilDB = $db;
     }
+
+    public function logUserImport($log_info_code, $evento_id, $username, $import_data)
+    {
+        if ($log_info_code < 300 || $log_info_code >= 400) {
+            $this->logException("log", "Tried to log user import, info code of other import given instead: " . $log_info_code);
+            return;
+        }
+
+        $r = $this->ilDB->query("SELECT 1 FROM crnhk_crevento_usrs WHERE evento_id = " . $this->ilDB->quote($evento_id, \ilDBConstants::T_INTEGER) . ' LIMIT 1');
+
+        if (count($this->ilDB->fetchAll($r)) == 0) {
+            $this->ilDB->insert(
+                'crnhk_crevento_usrs',
+                [
+                    'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id],
+                    'usrname' => [\ilDBConstants::T_TEXT, $username],
+                    'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
+                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                ]
+            );
+        } else {
+            $this->ilDB->update(
+                'crnhk_crevento_usrs',
+                [
+                    'usrname' => [\ilDBConstants::T_TEXT, $username],
+                    'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
+                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                ],
+                [
+                    'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
+                ]
+            );
+        }
+    }
     
     public function log($result, $data)
     {

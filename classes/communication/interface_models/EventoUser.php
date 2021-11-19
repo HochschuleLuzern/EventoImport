@@ -21,6 +21,7 @@ class EventoUser extends ApiDataModelBase
     private $login_name;
     private $email_list;
     private $roles;
+    private $decoded_api_data;
 
     public function __construct(array $data_set)
     {
@@ -33,6 +34,7 @@ class EventoUser extends ApiDataModelBase
         $this->roles = $this->validateAndReturnArray($data_set, self::JSON_ROLES);
 
         $this->checkErrorsAndMaybeThrowException();
+        $this->decoded_api_data = $data_set;
     }
 
     /**
@@ -89,5 +91,13 @@ class EventoUser extends ApiDataModelBase
     public function getRoles() : array
     {
         return $this->roles;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDecodedApiData() : array
+    {
+        return $this->decoded_api_data;
     }
 }

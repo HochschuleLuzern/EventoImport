@@ -60,12 +60,23 @@ class UserActionFactory
     public function buildReportConflict(EventoUser $evento_user)
     {
         $log_data = $this->convertEventoUserToBasicLogData($evento_user);
-        return new ReportError(\ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT, $log_data, $this->logger);
+        return new ReportUserImportError(
+            \ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT,
+            $evento_user->getEventoId(),
+            $evento_user->getLoginName(),
+            $evento_user->getDecodedApiData(),
+            $this->logger
+        );
     }
 
     public function buildReportError(EventoUser $evento_user)
     {
-        $log_data = $this->convertEventoUserToBasicLogData($evento_user);
-        return new ReportError(\ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR, $log_data, $this->logger);
+        return new ReportUserImportError(
+            \ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR,
+            $evento_user->getEventoId(),
+            $evento_user->getLoginName(),
+            $evento_user->getDecodedApiData(),
+            $this->logger
+        );
     }
 }
