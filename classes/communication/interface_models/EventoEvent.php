@@ -13,9 +13,13 @@ class EventoEvent extends ApiDataModelBase
     public const JSON_START_DATE = 'startDate';
     public const JSON_END_DATE = 'endDate';
     public const JSON_IS_CREATE_COURSE_FLAG = 'isCreateCourse';
+
     public const JSON_IS_GROUP_MEMBER_FLAG = 'isGroupMember';
+    public const JSON_GROUP_UNIQUE_KEY = 'groupgroupUniqueKey';
+    public const JSON_GROUP_ID = 'groupId';
     public const JSON_GROUP_NAME = 'groupName';
     public const JSON_GROUP_MEMBER_COUNT = 'groupMemberCount';
+
     public const JSON_EMPLOYEES = 'employeeAccounts';
     public const JSON_STUDENTS = 'studentAccounts';
 
@@ -53,6 +57,12 @@ class EventoEvent extends ApiDataModelBase
     private $is_group_member_flag;
 
     /** @var string */
+    private $group_unique_key;
+
+    /** @var int */
+    private $group_id;
+
+    /** @var string */
     private $group_name;
 
     /** @var int */
@@ -65,6 +75,7 @@ class EventoEvent extends ApiDataModelBase
     private $students;
     private static $CREATE_COURSES = 0;
     private static $MAX_CREATE_COURSE = 4000;
+
     public function __construct(array $data_set)
     {
         $this->evento_id = $this->validateAndReturnNumber($data_set, self::JSON_ID);
@@ -76,7 +87,10 @@ class EventoEvent extends ApiDataModelBase
         $this->start_date = $this->validateAndReturnDateTime($data_set, self::JSON_START_DATE);
         $this->end_date = $this->validateAndReturnDateTime($data_set, self::JSON_END_DATE);
         $this->is_create_course_flag = $this->validateAndReturnBoolean($data_set, self::JSON_IS_CREATE_COURSE_FLAG);
+
         $this->is_group_member_flag = $this->validateAndReturnBoolean($data_set, self::JSON_IS_GROUP_MEMBER_FLAG);
+        $this->group_id = $this->validateAndReturnNumber($data_set, self::JSON_GROUP_ID);
+        $this->group_unique_key = $this->validateAndReturnString($data_set, self::JSON_GROUP_UNIQUE_KEY);
         $this->group_name = $this->validateAndReturnString($data_set, self::JSON_GROUP_NAME);
         $this->group_member_count = $this->validateAndReturnNumber($data_set, self::JSON_GROUP_MEMBER_COUNT);
 

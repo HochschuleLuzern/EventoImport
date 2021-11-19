@@ -313,10 +313,20 @@ if (!$ilDB->tableExists($table_name)) {
 $table_name = \EventoImport\import\db\repository\ParentEventRepository::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
     $fields = array(
+        \EventoImport\import\db\repository\ParentEventRepository::COL_GROUP_UNIQUE_KEY => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 100,
+            'notnull' => true
+        ),
+        \EventoImport\import\db\repository\ParentEventRepository::COL_GROUP_EVENTO_ID => array(
+            'type' => ilDBConstants::T_INTEGER,
+            'length' => 8,
+            'notnull' => true
+        ),
         \EventoImport\import\db\repository\ParentEventRepository::COL_TITLE => array(
             'type' => ilDBConstants::T_TEXT,
             'length' => 100,
-            'notnull' => false
+            'notnull' => true
         ),
         \EventoImport\import\db\repository\ParentEventRepository::COL_REF_ID => array(
             'type' => ilDBConstants::T_INTEGER,
@@ -336,6 +346,6 @@ if (!$ilDB->tableExists($table_name)) {
     );
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImport\import\db\repository\ParentEventRepository::COL_TITLE));
+    $ilDB->addPrimaryKey($table_name, array(\EventoImport\import\db\repository\ParentEventRepository::COL_GROUP_UNIQUE_KEY));
 }
 ?>
