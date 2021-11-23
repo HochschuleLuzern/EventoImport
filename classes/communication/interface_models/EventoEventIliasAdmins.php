@@ -21,6 +21,7 @@ class EventoEventIliasAdmins extends ApiDataModelBase
         }
 
         $this->checkErrorsAndMaybeThrowException();
+        $this->decoded_api_data = $data_set;
     }
 
     /**
@@ -37,5 +38,10 @@ class EventoEventIliasAdmins extends ApiDataModelBase
     public function getAccountList() : array
     {
         return $this->account_list;
+    }
+
+    public function getDecodedApiData() : array
+    {
+        return $this->decoded_api_data;
     }
 }

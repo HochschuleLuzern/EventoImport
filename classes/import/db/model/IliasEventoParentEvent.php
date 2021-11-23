@@ -27,8 +27,12 @@ class IliasEventoParentEvent
         $this->student_role_id = $student_role_id;
     }
 
+    /**
+     * @return string
+     */
     public function getGroupUniqueKey() : string
     {
+        return $this->group_unique_key;
     }
 
     /**

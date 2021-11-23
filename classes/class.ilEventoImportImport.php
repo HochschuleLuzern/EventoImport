@@ -197,7 +197,7 @@ class ilEventoImportImport extends ilCronJob
             $user_import_action_decider = new \EventoImport\import\data_matching\UserImportActionDecider($user_facade, $user_action_factory);
 
             $importUsers = new ilEventoImportImportUsers($user_importer, $user_import_action_decider, $logger);
-            $importUsers->run();
+            //$importUsers->run();
 
             /* Event import */
             $event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);
@@ -216,7 +216,7 @@ class ilEventoImportImport extends ilCronJob
             $event_action_decider = new \EventoImport\import\data_matching\EventImportActionDecider($repository_facade, $event_action_factory);
 
             $import_events = new ilEventoImportImportEventsAndMemberships($event_importer, $event_action_decider, $logger);
-            //$import_events->run();
+            $import_events->run();
 
             return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
         } catch (Exception $e) {

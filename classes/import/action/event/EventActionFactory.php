@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\action\ReportError;
+use EventoImport\import\action\ReportDatasetWithoutAction;
 use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
@@ -105,13 +105,25 @@ class EventActionFactory
         );
     }
 
-    public function reportNonIliasEvent(EventoEvent $evento_event) : ReportNonIliasEvent
+    public function reportNonIliasEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
-        return new ReportNonIliasEvent($evento_event, $this->logger);
+        return new ReportEventImportDatasetWithoutAction(
+            \ilEventoImportLogger::CREVENTO_MA_NON_ILIAS_EVENT,
+            $evento_event->getEventoId(),
+            null,
+            $evento_event->getDecodedApiData(),
+            $this->logger
+        );
     }
 
-    public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportError
+    public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportDatasetWithoutAction
     {
-        return new ReportError(\ilEventoImportLogger::CREVENTO_MA_NOTICE_MISSING_IN_ILIAS, [], $this->logger);
+        return new ReportEventImportDatasetWithoutAction(
+            \ilEventoImportLogger::CREVENTO_MA_EVENT_LOCATION_UNKNOWN,
+            $evento_event->getEventoId(),
+            null,
+            $evento_event->getDecodedApiData(),
+            $this->logger
+        );
     }
 }

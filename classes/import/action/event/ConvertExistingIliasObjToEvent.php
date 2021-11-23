@@ -18,6 +18,7 @@ class ConvertExistingIliasObjToEvent extends EventAction
 
     public function executeAction()
     {
+        throw new \Error("not implemented yet");
         // TODO: Implement executeAction() method.
     }
 }

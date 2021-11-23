@@ -15,7 +15,7 @@ class EventoEvent extends ApiDataModelBase
     public const JSON_IS_CREATE_COURSE_FLAG = 'isCreateCourse';
 
     public const JSON_IS_GROUP_MEMBER_FLAG = 'isGroupMember';
-    public const JSON_GROUP_UNIQUE_KEY = 'groupgroupUniqueKey';
+    public const JSON_GROUP_UNIQUE_KEY = 'groupUniqueKey';
     public const JSON_GROUP_ID = 'groupId';
     public const JSON_GROUP_NAME = 'groupName';
     public const JSON_GROUP_MEMBER_COUNT = 'groupMemberCount';
@@ -111,6 +111,7 @@ class EventoEvent extends ApiDataModelBase
         }
 
         $this->checkErrorsAndMaybeThrowException();
+        $this->decoded_api_data = $data_set;
     }
 
     private function buildMembershipList(array $account_list) : array
@@ -205,6 +206,22 @@ class EventoEvent extends ApiDataModelBase
     /**
      * @return string
      */
+    public function getGroupUniqueKey() : string
+    {
+        return $this->group_unique_key;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGroupId() : int
+    {
+        return $this->group_id;
+    }
+
+    /**
+     * @return string
+     */
     public function getGroupName() : string
     {
         return $this->group_name;
@@ -232,5 +249,13 @@ class EventoEvent extends ApiDataModelBase
     public function getStudents() : array
     {
         return $this->students;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDecodedApiData() : array
+    {
+        return $this->decoded_api_data;
     }
 }

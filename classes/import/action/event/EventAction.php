@@ -23,9 +23,12 @@ abstract class EventAction implements EventoImportAction
      */
     protected $user_facade;
 
-    public function __construct(EventoEvent $evento_event, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, \EventoImport\import\db\UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
+    protected $log_code;
+
+    public function __construct(EventoEvent $evento_event, IliasEventObjectFactory $event_object_factory, int $log_code, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, \EventoImport\import\db\UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
         $this->evento_event = $evento_event;
+        $this->log_code = $log_code;
         $this->repository_facade = $repository_facade;
         $this->user_facade = $user_facade;
         $this->event_object_factory = $event_object_factory;

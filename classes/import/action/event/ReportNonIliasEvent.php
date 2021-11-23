@@ -3,13 +3,13 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\action\ReportError;
+use EventoImport\import\action\ReportDatasetWithoutAction;
 
-class ReportNonIliasEvent extends ReportError
+class ReportNonIliasEvent extends ReportDatasetWithoutAction
 {
-    public function __construct(int $error_code, array $error_data, \ilEventoImportLogger $logger)
+    public function __construct(int $log_info_code, array $log_data, \ilEventoImportLogger $logger)
     {
-        parent::__construct($error_code, $error_data, $logger);
+        parent::__construct($log_info_code, $log_data, $logger);
     }
 
     public function executeAction()

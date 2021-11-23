@@ -13,7 +13,7 @@ class CreateEventWithParent extends EventAction
 
     public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
-        parent::__construct($evento_event, $event_object_factory, $event_settings, $repository_facade, $user_facade, $logger, $rbac_services);
+        parent::__construct($evento_event, $event_object_factory, \ilEventoImportLogger::CREVENTO_MA_EVENT_WITH_PARENT_EVENT_CREATED, $event_settings, $repository_facade, $user_facade, $logger, $rbac_services);
         $this->destination_ref_id = $destination_ref_id;
     }
 
@@ -33,5 +33,11 @@ class CreateEventWithParent extends EventAction
 
         $event_wrapper = $this->repository_facade->addNewMultiEventCourseAndGroup($this->evento_event, $parent_event_crs_obj, $event_sub_group);
         $this->synchronizeUsersInRole($event_wrapper);
+        $this->logger->logEventImport(
+            $this->log_code,
+            $this->evento_event->getEventoId(),
+            $event_sub_group->getRefId(),
+            ['api_data' => $this->evento_event->getDecodedApiData()]
+        );
     }
 }

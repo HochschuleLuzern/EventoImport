@@ -28,7 +28,7 @@
 class ilEventoImportLogger
 {
     private $ilDB;
-    
+
     const CREVENTO_SUB_CREATED = 101;
     const CREVENTO_SUB_UPDATED = 102;
     const CREVENTO_SUB_REMOVED = 103;
@@ -36,16 +36,32 @@ class ilEventoImportLogger
     const CREVENTO_SUB_ERROR_CREATING = 121;
     const CREVENTO_SUB_ERROR_REMOVING = 123;
 
+    /**************************
+     * Event Codes
+     **************************/
+
+    // First import of Event
+    const CREVENTO_MA_SINGLE_EVENT_CREATED = 201;
+    const CREVENTO_MA_EVENT_WITH_PARENT_EVENT_CREATED = 202;
+    const CREVENTO_MA_EVENT_IN_EXISTING_PARENT_EVENT_CREATED = 203;
+    const CREVENTO_MA_EXISTING_ILIAS_COURSE_AS_EVENT_MARKED = 204;
+
+
     const CREVENTO_MA_FIRST_IMPORT = 205;
     const CREVENTO_MA_FIRST_IMPORT_NO_SUBS = 206;
+
     const CREVENTO_MA_NOTICE_NAME_INVALID = 211;
     const CREVENTO_MA_NOTICE_MISSING_IN_ILIAS = 212;
     const CREVENTO_MA_NOTICE_DUPLICATE_IN_ILIAS = 213;
+    const CREVENTO_MA_NON_ILIAS_EVENT = 214;
     const CREVENTO_MA_SUBS_UPDATED = 231;
     const CREVENTO_MA_NO_SUBS = 232;
 
     const CREVENTO_MA_EVENT_LOCATION_UNKNOWN = 233; // New code
 
+    /**************************
+     * User Codes
+     **************************/
     const CREVENTO_USR_CREATED = 301;
     const CREVENTO_USR_UPDATED = 302;
     const CREVENTO_USR_RENAMED = 303;
@@ -137,5 +153,41 @@ class ilEventoImportLogger
     public function logException($operation, $message)
     {
         ilLoggerFactory::getRootLogger()->error("EventoImport failed while $operation due to '$message'");
+    }
+
+    public function logEventImport(int $log_info_code, int $evento_id, ?int $ref_id, array $import_data)
+    {
+        if ($log_info_code < 200 || $log_info_code >= 300) {
+            $this->logException("log", "Tried to log user import, info code of other import given instead: " . $log_info_code);
+            return;
+        }
+
+        $r = $this->ilDB->query("SELECT 1 FROM crnhk_crevento_mas WHERE evento_id = " . $this->ilDB->quote($evento_id, \ilDBConstants::T_INTEGER) . ' LIMIT 1');
+
+        if (count($this->ilDB->fetchAll($r)) == 0) {
+            $this->ilDB->insert(
+                'crnhk_crevento_mas',
+                [
+                    'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id],
+                    'ref_id' => [\ilDBConstants::T_TEXT, $ref_id],
+                    'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
+                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                ]
+            );
+        } else {
+            $this->ilDB->update(
+                'crnhk_crevento_mas',
+                [
+                    'ref_id' => [\ilDBConstants::T_TEXT, $ref_id],
+                    'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
+                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                ],
+                [
+                    'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
+                ]
+            );
+        }
     }
 }

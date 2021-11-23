@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\action\ReportError;
+use EventoImport\import\action\ReportDatasetWithoutAction;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 use ILIAS\UI\Component\Test\Renderer;
@@ -60,7 +60,7 @@ class UserActionFactory
     public function buildReportConflict(EventoUser $evento_user)
     {
         $log_data = $this->convertEventoUserToBasicLogData($evento_user);
-        return new ReportUserImportError(
+        return new ReportUserImportDatasetWithoutAction(
             \ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT,
             $evento_user->getEventoId(),
             $evento_user->getLoginName(),
@@ -71,7 +71,7 @@ class UserActionFactory
 
     public function buildReportError(EventoUser $evento_user)
     {
-        return new ReportUserImportError(
+        return new ReportUserImportDatasetWithoutAction(
             \ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR,
             $evento_user->getEventoId(),
             $evento_user->getLoginName(),

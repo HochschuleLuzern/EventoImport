@@ -16,7 +16,7 @@ class UpdateExistingEvent extends EventAction
 
     public function __construct(EventoEvent $evento_event, IliasEventWrapper $ilias_event, IliasEventObjectFactory $event_factory, DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
-        parent::__construct($evento_event, $event_factory, $event_settings, $repository_facade, $user_facade, $logger, $rbac_services);
+        parent::__construct($evento_event, $event_factory, \ilEventoImportLogger::CREVENTO_MA_SUBS_UPDATED, $event_settings, $repository_facade, $user_facade, $logger, $rbac_services);
 
         $this->ilias_event = $ilias_event;
     }
@@ -24,25 +24,31 @@ class UpdateExistingEvent extends EventAction
     public function executeAction()
     {
         $ilias_event_obj = $this->ilias_event->getIliasEventoEventObj();
-        if(is_null($ilias_event_obj->getStartDate())) {
-               $updated_obj = new IliasEventoEvent(
-                   $ilias_event_obj->getEventoEventId(),
-                   $ilias_event_obj->getEventoTitle(),
-                   $ilias_event_obj->getEventoDescription(),
-                   $ilias_event_obj->getEventoType(),
-                   $ilias_event_obj->wasAutomaticallyCreated(),
-                   $this->evento_event->getStartDate(),
-                   $this->evento_event->getEndDate(),
-                   $ilias_event_obj->getIliasType(),
-                   $ilias_event_obj->getRefId(),
-                   $ilias_event_obj->getObjId(),
-                   $ilias_event_obj->getAdminRoleId(),
-                   $ilias_event_obj->getStudentRoleId(),
-                   $ilias_event_obj->getParentEventRefId()
-               );
+        if (is_null($ilias_event_obj->getStartDate())) {
+            $updated_obj = new IliasEventoEvent(
+                $ilias_event_obj->getEventoEventId(),
+                $ilias_event_obj->getEventoTitle(),
+                $ilias_event_obj->getEventoDescription(),
+                $ilias_event_obj->getEventoType(),
+                $ilias_event_obj->wasAutomaticallyCreated(),
+                $this->evento_event->getStartDate(),
+                $this->evento_event->getEndDate(),
+                $ilias_event_obj->getIliasType(),
+                $ilias_event_obj->getRefId(),
+                $ilias_event_obj->getObjId(),
+                $ilias_event_obj->getAdminRoleId(),
+                $ilias_event_obj->getStudentRoleId(),
+                $ilias_event_obj->getParentEventRefId()
+            );
 
-               $this->repository_facade->iliasEventoEventRepository()->updateIliasEventoEvent($updated_obj);
+            $this->repository_facade->iliasEventoEventRepository()->updateIliasEventoEvent($updated_obj);
         }
         $this->synchronizeUsersInRole($this->ilias_event);
+        $this->logger->logEventImport(
+            $this->log_code,
+            $this->evento_event->getEventoId(),
+            $this->ilias_event->getIliasEventoEventObj()->getRefId(),
+            ['api_data' => $this->evento_event->getDecodedApiData()]
+        );
     }
 }

@@ -21,7 +21,6 @@ class EventoUser extends ApiDataModelBase
     private $login_name;
     private $email_list;
     private $roles;
-    private $decoded_api_data;
 
     public function __construct(array $data_set)
     {

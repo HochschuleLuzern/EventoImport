@@ -6,6 +6,8 @@ abstract class ApiDataModelBase
 {
     use JSONDataValidator;
 
+    protected $decoded_api_data;
+
     protected function checkErrorsAndMaybeThrowException()
     {
         if (count($this->key_errors) > 0) {
@@ -17,4 +19,9 @@ abstract class ApiDataModelBase
             throw new \InvalidArgumentException($error_message);
         }
     }
+
+    /**
+     * @return array
+     */
+    abstract public function getDecodedApiData() : array;
 }

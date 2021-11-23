@@ -92,6 +92,8 @@ class RepositoryFacade
     public function addNewMultiEventCourseAndGroup(EventoEvent $evento_event, \ilObjCourse $crs_object, \ilObjGroup $sub_group) : IliasEventWrapper
     {
         $parent_event = new IliasEventoParentEvent(
+            $evento_event->getGroupUniqueKey(),
+            $evento_event->getGroupId(),
             $crs_object->getTitle(),
             $crs_object->getRefId(),
             $crs_object->getDefaultAdminRole(),

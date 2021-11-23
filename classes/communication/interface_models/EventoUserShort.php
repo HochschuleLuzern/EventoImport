@@ -16,6 +16,7 @@ class EventoUserShort extends ApiDataModelBase
         $this->email_address = $this->validateAndReturnString($data_set, self::JSON_EMAIL);
 
         $this->checkErrorsAndMaybeThrowException();
+        $this->decoded_api_data = $data_set;
     }
 
     /**
@@ -32,5 +33,10 @@ class EventoUserShort extends ApiDataModelBase
     public function getEmailAddress() : string
     {
         return $this->email_address;
+    }
+
+    public function getDecodedApiData() : array
+    {
+        return $this->decoded_api_data;
     }
 }
