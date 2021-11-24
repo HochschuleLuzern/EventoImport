@@ -5,14 +5,14 @@ namespace EventoImport\import\action\user;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\db\UserFacade;
 
-class RenameExistingCreateNew extends UserAction
+class RenameExistingCreateNew extends UserImportAction
 {
     private $create_action;
     private $found_by;
     /** @var \ilObjUser */
     private $old_user_to_rename;
 
-    public function __construct(Create $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, UserFacade $user_facade, \ilEventoImportLogger $logger)
+    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, UserFacade $user_facade, \ilEventoImportLogger $logger)
     {
         parent::__construct($new_evento_user, $user_facade, $logger);
 

@@ -2,11 +2,12 @@
 
 namespace EventoImport\import\data_matching;
 
-use EventoImport\import\action\user\UserAction;
+use EventoImport\import\action\user\UserImportAction;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\action\user\UserActionFactory;
+use EventoImport\import\action\EventoImportAction;
 
-class UserImportActionDecider
+class UserActionDecider
 {
     public function __construct(UserFacade $user_facade, UserActionFactory $action_factory)
     {
@@ -14,7 +15,7 @@ class UserImportActionDecider
         $this->action_factory = $action_factory;
     }
 
-    public function determineAction(\EventoImport\communication\api_models\EventoUser $evento_user) : UserAction
+    public function determineImportAction(\EventoImport\communication\api_models\EventoUser $evento_user) : UserImportAction
     {
         $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
 
@@ -27,7 +28,7 @@ class UserImportActionDecider
 
     private function matchEventoUserTheOldWay(
         \EventoImport\communication\api_models\EventoUser $evento_user
-    ) : UserAction {
+    ) : UserImportAction {
         $data['id_by_login'] = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
         $data['ids_by_matriculation'] = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());
         $data['ids_by_email'] = $this->user_facade->fetchUserIdsByEmail($evento_user->getEmailList());
@@ -162,5 +163,16 @@ class UserImportActionDecider
         }
 
         return $result;
+    }
+
+    public function determineDeleteAction(int $ilias_id, int $evento_id) : EventoImportAction
+    {
+        $ilias_user_object = $this->user_facade->getExistingIliasUserObject($ilias_id);
+
+        if($this->user_facade->userWasStudent($ilias_user_object)) {
+            return $this->action_factory->buildConvertUserAuth($ilias_user_object, $evento_id);
+        } else {
+            return $this->action_factory->buildConvertAuthAndDeactivateUser($ilias_user_object, $evento_id);
+        }
     }
 }

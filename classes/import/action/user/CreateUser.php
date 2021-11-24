@@ -7,7 +7,7 @@ use EventoImport\import\action\EventoImportAction;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 
-class Create extends UserAction
+class CreateUser extends UserImportAction
 {
     protected $default_user_settings;
 

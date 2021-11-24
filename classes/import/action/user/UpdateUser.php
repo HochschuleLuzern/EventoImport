@@ -6,7 +6,7 @@ use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 
-class Update extends UserAction
+class UpdateUser extends UserImportAction
 {
     private $default_user_settings;
     private $ilias_user_id;
@@ -221,5 +221,9 @@ class Update extends UserAction
                 );
             }
         }
+
+        $this->user_facade->eventoUserRepository()->userWasImported(
+            $this->evento_user->getEventoId()
+        );
     }
 }

@@ -5,7 +5,7 @@ namespace EventoImport\import\action\user;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\db\UserFacade;
 
-abstract class UserAction implements \EventoImport\import\action\EventoImportAction
+abstract class UserImportAction implements \EventoImport\import\action\EventoImportAction
 {
     protected $evento_user;
     protected $user_facade;

@@ -85,12 +85,16 @@ abstract class ilEventoImporter
         );
 
         $json_response = $this->data_source->sendRequest($this->fetch_data_record_method, $params);
+        $json_response_decoded = $this->validateResponseAndGetAsJsonStructure($json_response);
 
-        if (strlen($json_response) > 0) {
-            $json_response_decoded = json_decode($json_response, true);
-            return is_array($json_response_decoded) ? $json_response_decoded : '';
+        if ($json_response_decoded['success'] && is_array($json_response_decoded['data'])) {
+            return $json_response_decoded['data'];
         } else {
-            return '';
+            if (!$json_response_decoded['success']) {
+                throw new \Exception("Failure in fetching id '$id' with message: " . $json_response_decoded['message']);
+            } else {
+                return null;
+            }
         }
     }
 
