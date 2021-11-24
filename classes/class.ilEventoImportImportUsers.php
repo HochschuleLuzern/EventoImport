@@ -25,6 +25,7 @@ class ilEventoImportImportUsers
     /** @var \EventoImport\communication\EventoUserImporter */
     private $evento_importer;
 
+    /** @var \EventoImport\import\db\UserFacade */
     private $user_facade;
 
     private $user_import_action_decider;
@@ -39,17 +40,36 @@ class ilEventoImportImportUsers
 
     public function __construct(
         \EventoImport\communication\EventoUserImporter $importer,
-        \EventoImport\import\data_matching\UserImportActionDecider $user_import_action_decider,
+        \EventoImport\import\data_matching\UserActionDecider $user_import_action_decider,
+        \EventoImport\import\db\UserFacade $user_facade,
         ilEventoImportLogger $logger
     ) {
         $this->evento_importer = $importer;
         $this->user_import_action_decider = $user_import_action_decider;
+        $this->user_facade = $user_facade;
         $this->evento_logger = $logger;
+    }
+
+    private function convertOrDeleteNotImportedAccounts()
+    {
+        $list = $this->user_facade->eventoUserRepository()->fetchNotImportedUsers();
+
+        foreach ($list as $evento_id => $ilias_user_id) {
+            try {
+                $result = $this->evento_importer->fetchDataRecord($evento_id);
+                if (is_null($result)) {
+                    $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
+                    $action->executeAction();
+                }
+            } catch (\Exception $e) {
+            }
+        }
     }
 
     public function run()
     {
         $this->importUsers();
+        $this->convertOrDeleteNotImportedAccounts();
         //$this->convertDeletedAccounts();
         //$this->setUserTimeLimits();
     }
@@ -77,7 +97,7 @@ class ilEventoImportImportUsers
             try {
                 $evento_user = new \EventoImport\communication\api_models\EventoUser($data_set);
 
-                $action = $this->user_import_action_decider->determineAction($evento_user);
+                $action = $this->user_import_action_decider->determineImportAction($evento_user);
                 $action->executeAction();
             } catch (Exception $e) {
                 $this->evento_logger->logException('User Import', $e->getMessage());

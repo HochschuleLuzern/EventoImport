@@ -3,7 +3,7 @@
 namespace EventoImport\import\data_matching;
 
 use EventoImport\import\action\EventoImportActionFactory;
-use EventoImport\import\action\user\UserAction;
+use EventoImport\import\action\user\UserImportAction;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\db\UserFacade;
 use Exception;
@@ -147,7 +147,7 @@ class EventoUserToIliasUserMatcher
         }
     }
 
-    public function matchGivenEventoUserToIliasUsers(\EventoImport\communication\api_models\EventoUser $evento_user) : UserAction
+    public function matchGivenEventoUserToIliasUsers(\EventoImport\communication\api_models\EventoUser $evento_user) : UserImportAction
     {
         $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
 
@@ -159,7 +159,7 @@ class EventoUserToIliasUserMatcher
         return $this->matchEventoUserTheOldWay($evento_user);
     }
 
-    public function matchEventoUserTheOldWay(\EventoImport\communication\api_models\EventoUser $evento_user) : UserAction
+    public function matchEventoUserTheOldWay(\EventoImport\communication\api_models\EventoUser $evento_user) : UserImportAction
     {
         $data['id_by_login'] = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
         $data['ids_by_matriculation'] = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());

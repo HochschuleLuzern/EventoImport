@@ -7,6 +7,7 @@ use EventoImport\import\action\ReportDatasetWithoutAction;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 use ILIAS\UI\Component\Test\Renderer;
+use EventoImport\import\action\EventoImportAction;
 
 class UserActionFactory
 {
@@ -20,14 +21,14 @@ class UserActionFactory
         $this->default_user_settings = $default_user_settings;
     }
 
-    public function buildCreateAction(EventoUser $evento_user) : Create
+    public function buildCreateAction(EventoUser $evento_user) : CreateUser
     {
-        return new Create($evento_user, $this->user_facade, $this->default_user_settings, $this->logger);
+        return new CreateUser($evento_user, $this->user_facade, $this->default_user_settings, $this->logger);
     }
 
-    public function buildUpdateAction(EventoUser $evento_user, int $ilias_user_id) : Update
+    public function buildUpdateAction(EventoUser $evento_user, int $ilias_user_id) : UpdateUser
     {
-        return new Update($evento_user, $ilias_user_id, $this->user_facade, $this->default_user_settings, $this->logger);
+        return new UpdateUser($evento_user, $ilias_user_id, $this->user_facade, $this->default_user_settings, $this->logger);
     }
 
     public function buildRenameExistingAndCreateNewAction(EventoUser $evento_user, \ilObjUser $old_ilias_user, string $found_by) : RenameExistingCreateNew
@@ -76,6 +77,28 @@ class UserActionFactory
             $evento_user->getEventoId(),
             $evento_user->getLoginName(),
             $evento_user->getDecodedApiData(),
+            $this->logger
+        );
+    }
+
+    public function buildConvertUserAuth(\ilObjUser $ilias_user_object, int $evento_id) : EventoImportAction
+    {
+        return new ConvertUserToLocalAuth(
+            $ilias_user_object,
+            $evento_id,
+            'local',
+            $this->user_facade,
+            $this->logger
+        );
+    }
+
+    public function buildConvertAuthAndDeactivateUser(\ilObjUser $ilias_user_object, int $evento_id) : EventoImportAction
+    {
+        return new ConvertAndDeactivateUser(
+            $ilias_user_object,
+            $evento_id,
+            'local',
+            $this->user_facade,
             $this->logger
         );
     }

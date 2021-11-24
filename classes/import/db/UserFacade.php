@@ -15,6 +15,8 @@ class UserFacade
     private $event_membership_rep;
     private $rbac_services;
 
+    private $student_role_id;
+
     public function __construct(IliasUserQuerying $user_query = null, EventoUserRepository $evento_user_repo = null, EventMembershipRepository $event_membership_rep = null, RBACServices $rbac_services)
     {
         global $DIC;
@@ -23,6 +25,8 @@ class UserFacade
         $this->evento_user_repo = $evento_user_repo ?? new EventoUserRepository($DIC->database());
         $this->event_membership_rep = $event_membership_rep ?? new EventMembershipRepository($DIC->database());
         $this->rbac_services = $rbac_services ?? $DIC->rbac();
+
+        $this->student_role_id = null;
     }
 
     public function fetchUserIdsByEmail($email)
@@ -84,5 +88,22 @@ class UserFacade
         $mail_options = new \ilMailOptions($user_id);
         $mail_options->setIncomingType($incoming_type);
         $mail_options->updateOptions();
+    }
+
+    public function deleteEventoIliasUserConnection(int $evento_id, \ilObjUser $ilias_user)
+    {
+        $this->evento_user_repo->deleteEventoUser($evento_id);
+    }
+
+    public function userWasStudent(\ilObjUser $ilias_user_object) : bool
+    {
+        if (is_null($this->student_role_id)) {
+            $this->student_role_id = \ilObjRole::_lookupTitle('Studierende');
+            if (is_null($this->student_role_id)) {
+                return false;
+            }
+        }
+
+        return $this->rbac_services->review()->isAssigned($ilias_user_object->getId(), $this->student_role_id);
     }
 }

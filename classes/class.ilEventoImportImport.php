@@ -194,7 +194,7 @@ class ilEventoImportImport extends ilCronJob
             $default_user_settings = new \EventoImport\import\settings\DefaultUserSettings($this->settings);
             $user_action_factory = new \EventoImport\import\action\user\UserActionFactory($user_facade, $default_user_settings, $logger);
 
-            $user_import_action_decider = new \EventoImport\import\data_matching\UserImportActionDecider($user_facade, $user_action_factory);
+            $user_import_action_decider = new \EventoImport\import\data_matching\UserActionDecider($user_facade, $user_action_factory);
 
             $importUsers = new ilEventoImportImportUsers($user_importer, $user_import_action_decider, $logger);
             //$importUsers->run();
