@@ -57,6 +57,7 @@ class ilEventoImportImportUsers
         foreach ($list as $evento_id => $ilias_user_id) {
             try {
                 $result = $this->evento_importer->fetchDataRecord($evento_id);
+
                 if (is_null($result) || (is_array($result) && count($result) < 1)) {
                     $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
                     $action->executeAction();
