@@ -52,12 +52,15 @@ class ilEventoImportImportUsers
 
     private function convertOrDeleteNotImportedAccounts()
     {
+        // Get list uf users, which were not imported since a certain time
         $list = $this->user_facade->eventoUserRepository()->fetchNotImportedUsers();
 
         foreach ($list as $evento_id => $ilias_user_id) {
             try {
+                // Try to fetch user by ID from evento
                 $result = $this->evento_importer->fetchDataRecord($evento_id);
 
+                // If evento does not deliver this user, it can be safely converted / deleted
                 if (is_null($result) || (is_array($result) && count($result) < 1)) {
                     $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
                     $action->executeAction();

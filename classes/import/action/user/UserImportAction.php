@@ -17,4 +17,17 @@ abstract class UserImportAction implements \EventoImport\import\action\EventoImp
         $this->user_facade = $user_facade;
         $this->logger = $logger;
     }
+
+    protected function convertEventoToIliasGenderChar(string $evento_gender_char) : string
+    {
+        switch (strtolower($evento_gender_char)) {
+            case 'f':
+                return 'f';
+            case 'm':
+                return 'm';
+            case 'x':
+            default:
+                return 'n';
+        }
+    }
 }

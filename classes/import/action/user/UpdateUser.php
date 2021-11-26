@@ -63,43 +63,52 @@ class UpdateUser extends UserImportAction
 
         $changed_user_data = [];
         if ($userObj->getFirstname() != $this->evento_user->getFirstName()) {
-            $userObj->setFirstname($this->evento_user->getFirstName());
             $changed_user_data['first_name'] = [
                 'old' => $userObj->getFirstname(),
                 'new' => $this->evento_user->getFirstName()
             ];
+            $userObj->setFirstname($this->evento_user->getFirstName());
         }
 
         if ($userObj->getlastname() != $this->evento_user->getLastName()) {
-            $userObj->setLastname($this->evento_user->getLastName());
             $changed_user_data['last_name'] = [
                 'old' => $userObj->getFirstname(),
                 'new' => $this->evento_user->getFirstName()
             ];
+            $userObj->setLastname($this->evento_user->getLastName());
+        }
+
+        $received_gender_char = $this->convertEventoToIliasGenderChar($this->evento_user->getGender());
+        if ($userObj->getGender() != $received_gender_char) {
+            $changed_user_data['last_name'] = [
+                'old' => $userObj->getGender(),
+                'new' => $received_gender_char
+            ];
+            $userObj->setGender($received_gender_char);
         }
 
         if ($userObj->getMatriculation() != ('Evento:' . $this->evento_user->getEventoId())) {
-            $userObj->setMatriculation('Evento:' . $this->evento_user->getEventoId());
             $changed_user_data['matriculation'] = [
                 'old' => $userObj->getMatriculation(),
                 'new' => 'Evento:' . $this->evento_user->getEventoId()
             ];
+            $userObj->setMatriculation('Evento:' . $this->evento_user->getEventoId());
         }
 
         if ($userObj->getAuthMode() != $this->default_user_settings->getAuthMode()) {
-            $userObj->setAuthMode($this->default_user_settings->getAuthMode());
             $changed_user_data['auth_mode'] = [
-                'old' => $userObj->getAuthMode,
+                'old' => $userObj->getAuthMode(),
                 'new' => $this->default_user_settings->getAuthMode()
             ];
+            $userObj->setAuthMode($this->default_user_settings->getAuthMode());
         }
 
         if (!$userObj->getActive()) {
-            $userObj->setActive(true);
             $changed_user_data['active'] = [
                 'old' => false,
                 'new' => true
             ];
+            $userObj->setActive(true);
         }
 
         if ($userObj->getFirstname() != $this->evento_user->getFirstName()

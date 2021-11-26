@@ -93,15 +93,17 @@ class EventLocationsRepository
         return null;
     }
 
-    public function fetchKindCategoryRefId(string $department, string $kind) : ?int
+    public function fetchAllLocations()
     {
-        return 1286;
-        /*
-        $query = 'SELECT ref_id FROM ' . self::TABLE_NAME . ' WHERE '
-            . self::COL_DEPARTMENT_NAME . ' = ' . $this->db->quote($department, \ilDBConstants::T_TEXT)
-            . ' AND '
-            . self::COL_EVENT_KIND . ' = ' . $this->db->quote($kind, \ilDBConstants::T_TEXT);
+        $query = "SELECT " . self::COL_DEPARTMENT_NAME . ", " . self::COL_EVENT_KIND . ", " . self::COL_YEAR . ", " . self::COL_REF_ID
+            . " FROM " . self::TABLE_NAME;
+        $result = $this->db->query($query);
 
-        $result = $this->db->query($query);*/
+        $locations = [];
+        while($row = $this->db->fetchAssoc($result)) {
+            $locations[] = $row;
+        }
+
+        return $locations;
     }
 }

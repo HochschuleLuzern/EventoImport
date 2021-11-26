@@ -10,6 +10,8 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
     private $settings;
     private $tree;
     private $tpl;
+    private $ctrl;
+    private $hard_coded_department_mapping;
 
     public function __construct()
     {
@@ -17,17 +19,40 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $this->settings = new ilSetting("crevento");
         $this->tree = $DIC->repositoryTree();
         $this->tpl = $DIC->ui()->mainTemplate();
+        $this->ctrl = $DIC->ctrl();
+
+        $this->hard_coded_department_mapping = [
+            "Hochschule Luzern" => "HSLU",
+            "Design & Kunst" => "DK",
+            "Informatik" => "I",
+            "Musik" => "M",
+            "Soziale Arbeit" => "SA",
+            "Technik & Architektur" => "TA",
+            "Wirtschaft" => "W"
+        ];
     }
 
-    private function pathSchemaToPathElements(string $path_schema)
+    private function locationsToHTMLTable(array $locations) : string
     {
-        $path_elements = [];
-        foreach (explode('/', $path_schema) as $schema_part) {
-            $without_braces = trim($schema_part, '{}');
-            if (in_array($without_braces, self::ALLOWED_PATH_SCHEMA_ELEMENTS)) {
-                $path_schema[] = $without_braces;
+        $saved_locations_string = "<table style='width: 100%'>";
+        if (count($locations) > 0) {
+            $saved_locations_string .= "<tr>";
+            foreach ($locations[0] as $key => $value) {
+                $saved_locations_string .= "<th><b>$key</b></th>";
             }
+            $saved_locations_string .= "<tr>";
         }
+        foreach ($locations as $location) {
+
+            $saved_locations_string .= "<tr>";
+            foreach ($location as $key => $value) {
+                $saved_locations_string .= "<td>$value</td>";
+            }
+            $saved_locations_string .= '</tr>';
+        }
+
+        $saved_locations_string .= "</table>";
+        return $saved_locations_string;
     }
 
     private function fetchRefIdForObjTitle(int $root_ref_id, string $searched_obj_title) : ?int
@@ -43,15 +68,21 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         return null;
     }
 
+    private function getMappedDepartmentName(string $ilias_department_cat) : string
+    {
+        if(isset($this->hard_coded_department_mapping[$ilias_department_cat])) {
+            return $this->hard_coded_department_mapping[$ilias_department_cat];
+        } else {
+            return $ilias_department_cat;
+        }
+    }
+
     private function reloadRepositoryLocations()
     {
         global $DIC;
 
         $json_settings = $this->settings->get('crevento_location_settings');
         $locations_settings = json_decode($json_settings, true);
-
-        //$path_schema = $locations_settings['path'];
-        //$path_elements = $this->pathSchemaToPathElements($path_schema);
 
         $location_repository = new \EventoImport\import\db\repository\EventLocationsRepository($DIC->database());
         $location_repository->purgeLocationTable();
@@ -65,13 +96,15 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                         foreach ($locations_settings['years'] as $year) {
                             $destination_ref_id = $this->fetchRefIdForObjTitle($kind_ref_id, $year);
                             if ($destination_ref_id) {
-                                $location_repository->addNewLocation($department, $kind, $year, $destination_ref_id);
+                                $location_repository->addNewLocation($this->getMappedDepartmentName($department), $kind, $year, $destination_ref_id);
                             }
                         }
                     }
                 }
             }
         }
+
+        return $location_repository->fetchAllLocations();
     }
 
     public function performCommand($cmd)
@@ -85,7 +118,12 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 break;
 
             case 'reload_repo_locations':
-                $this->reloadRepositoryLocations();
+                $locations = $this->reloadRepositoryLocations();
+                $saved_locations_string = $this->locationsToHTMLTable($locations);
+
+
+                ilUtil::sendSuccess('Repository tree reloaded successfully. Following locations are currently saved:<br>'.$saved_locations_string, true);
+                $this->ctrl->redirect($this, 'configure');
                 break;
         }
     }

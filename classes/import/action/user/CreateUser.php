@@ -53,22 +53,9 @@ class CreateUser extends UserImportAction
         $ilias_user_object->setLogin($this->evento_user->getLoginName());
         $ilias_user_object->setFirstname($this->evento_user->getFirstName());
         $ilias_user_object->setLastname($this->evento_user->getLastName());
-        switch (strtolower($this->evento_user->getGender())) {
-            case 'f':
-                $ilias_user_object->setGender('f');
-                break;
-            case 'm':
-                $ilias_user_object->setGender('m');
-                break;
-            case 'x':
-            default:
-                $ilias_user_object->setGender('n');
-                break;
-        }
+        $ilias_user_object->setGender($this->convertEventoToIliasGenderChar($this->evento_user->getGender()));
         $ilias_user_object->setEmail($this->evento_user->getEmailList()[0]);
-        if (isset($this->evento_user->getEmailList()[1])) {
-            $ilias_user_object->setSecondEmail($this->evento_user->getEmailList()[1]);
-        };
+        $ilias_user_object->setSecondEmail($this->evento_user->getEmailList()[0]);
         $ilias_user_object->setTitle($ilias_user_object->getFullname());
         $ilias_user_object->setDescription($ilias_user_object->getEmail());
         $ilias_user_object->setMatriculation('Evento:' . $this->evento_user->getEventoId());
