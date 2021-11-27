@@ -5,12 +5,15 @@ namespace EventoImport\communication\request_services;
 class RestClientService implements RequestClientService
 {
     private $base_uri;
-    private $timeout_in_seconds;
+    private $timeout_after_request_seconds;
 
-    public function __construct(string $base_url, int $port, string $base_path)
-    {
-        $this->base_uri = "https://$base_url:$port$base_path";
-        $this->timeout_in_seconds = 5;
+    public function __construct(
+        string $base_uri,
+        int $timeout_after_request_seconds
+    ) {
+        //$this->base_uri = "https://$base_url:$port$base_path";
+        $this->base_uri = $base_uri;
+        $this->timeout_after_request_seconds = $timeout_after_request_seconds;
 
         if (filter_var($this->base_uri, FILTER_VALIDATE_URL, [FILTER_FLAG_SCHEME_REQUIRED, FILTER_FLAG_HOST_REQUIRED, FILTER_FLAG_PATH_REQUIRED]) === false) {
             throw new \InvalidArgumentException('Invalid Base-URI given! ' . $this->base_uri);
@@ -42,9 +45,7 @@ class RestClientService implements RequestClientService
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // Might be used for auth like: ["authentication" => "lorem ipsum"]
-        //curl_setopt($ch, CURLOPT_HTTPHEADER, $this->params['HEADER']);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->timeout_after_request_seconds);
 
         $output = curl_exec($ch);
         curl_close($ch);
@@ -52,9 +53,8 @@ class RestClientService implements RequestClientService
         return $output;
     }
 
-    public function setTimeout(int $timeout_in_seconds)
+    public function setTimeoutAfterRequestInSeconds(int $timeout_in_seconds)
     {
-        $this->timeout_in_seconds = $timeout_in_seconds;
-        // TODO: Implement setTimeout() method.
+        $this->timeout_after_request_seconds = $timeout_in_seconds;
     }
 }

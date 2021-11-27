@@ -32,6 +32,180 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         ];
     }
 
+    public function performCommand($cmd)
+    {
+        switch ($cmd) {
+            case 'configure':
+                $content = $this->getFunctionalityBoardAsString();
+                $this->tpl->setContent($content);
+                break;
+
+            case 'reload_repo_locations':
+                $locations = $this->reloadRepositoryLocations();
+                $saved_locations_string = $this->locationsToHTMLTable($locations);
+
+
+                ilUtil::sendSuccess('Repository tree reloaded successfully. Following locations are currently saved:<br>' . $saved_locations_string, true);
+                $this->ctrl->redirect($this, 'configure');
+                break;
+
+            case 'fetch_data_set_users':
+            case 'fetch_data_set_events':
+                try {
+                    $importer = $this->buildImporter($cmd);
+                    $form = $this->initDataSetForm();
+                    if ($form->checkInput()) {
+                        $skip = (int) $form->getInput('skip');
+                        $take = (int) $form->getInput('take');
+                        $output = $importer->fetchSpecificDataSet($skip, $take);
+
+                        if (!is_null($output)) {
+                            $cmd = htmlspecialchars($cmd);
+                            $output = htmlspecialchars(print_r($output, true));
+                            ilUtil::sendSuccess("CMD = $cmd, Skip = $skip, Take = $take <br><br>Output from request:<br> $output", true);
+                        } else {
+                            $cmd = htmlspecialchars($cmd);
+                            ilUtil::sendFailure("Got no answer for CMD = $cmd, Skip = $skip, Take = $take", true);
+                        }
+                    } else {
+                        throw new InvalidArgumentException('Error in form input');
+                    }
+                } catch (Exception $e) {
+                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
+                }
+
+                $this->ctrl->redirect($this, 'configure');
+                break;
+
+            case 'fetch_record_user':
+            case 'fetch_record_event':
+                try {
+                    $importer = $this->buildImporter($cmd);
+                    $form = $this->initDataRecordForm();
+                    if ($form->checkInput()) {
+                        $id_from_form = (int) $form->getInput('record_id');
+                        $output = $importer->fetchDataRecord($id_from_form);
+
+                        if (!is_null($output)) {
+                            $cmd = htmlspecialchars($cmd);
+                            $output = htmlspecialchars(print_r($output, true));
+                            ilUtil::sendSuccess("CMD = $cmd, ID = $id_from_form <br><br>Output from request:<br> $output", true);
+                        } else {
+                            $cmd = htmlspecialchars($cmd);
+                            ilUtil::sendFailure("Got no answer for CMD = $cmd and ID = $id_from_form", true);
+                        }
+                    } else {
+                        throw new InvalidArgumentException('Error in form input');
+                    }
+                } catch (Exception $e) {
+                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
+                }
+                $this->ctrl->redirect($this, 'configure');
+                break;
+
+            default:
+                ilUtil::sendFailure('Command not found', true);
+                $this->ctrl->redirect($this, 'configure');
+                break;
+        }
+    }
+
+
+    private function getFunctionalityBoardAsString()
+    {
+        global $DIC;
+        $ui_factory = $DIC->ui()->factory();
+        $field_factory = $ui_factory->input()->field();
+
+        // Reload tree
+        $ui_components = [];
+        $link = $this->ctrl->getLinkTarget($this, 'reload_repo_locations');
+        $ui_components[] = $ui_factory->button()->standard("Reload Repository Locations", $link);
+
+        // Fetch data set form
+        $form = $this->initDataSetForm();
+
+        $form_html = $form->getHTML();
+
+        // Fetch data record form
+        $form = $this->initDataRecordForm();
+
+        $form_html .= $form->getHTML();
+
+        return $DIC->ui()->renderer()->render($ui_components) . $form_html;
+    }
+
+    private function buildImporter($cmd)
+    {
+        global $DIC;
+        $api_importer_settings = new \EventoImport\communication\ApiImporterSettings(new ilSetting('crevento'));
+        $iterator = new ilEventoImporterIterator($api_importer_settings->getPageSize());
+        $logger = new ilEventoImportLogger($DIC->database());
+        $request_client = $this->buildRequestService($api_importer_settings);
+
+        switch ($cmd) {
+            case 'fetch_record_user':
+            case 'fetch_data_set_users':
+                return new \EventoImport\communication\EventoUserImporter(
+                    $iterator,
+                    $api_importer_settings,
+                    $logger,
+                    $request_client
+                );
+                break;
+
+            case 'fetch_record_event':
+            case 'fetch_data_set_events':
+                return new \EventoImport\communication\EventoEventImporter(
+                    $iterator,
+                    $api_importer_settings,
+                    $logger,
+                    $request_client
+                );
+                break;
+        }
+    }
+
+    private function initDataRecordForm() : ilPropertyFormGUI
+    {
+        $form = new ilPropertyFormGUI();
+        $form->setTitle('Fetch Data Record');
+        $form->setFormAction($this->ctrl->getFormAction($this));
+        $form->addCommandButton('fetch_record_user', 'Fetch User');
+        $form->addCommandButton('fetch_record_event', 'Fetch Event');
+
+        $take = new ilNumberInputGUI('Id', 'record_id');
+        $form->addItem($take);
+
+        return $form;
+    }
+
+    private function initDataSetForm() : ilPropertyFormGUI
+    {
+        $form = new ilPropertyFormGUI();
+        $form->setTitle('Fetch Data Set');
+        $form->setFormAction($this->ctrl->getFormAction($this, 'fetch_data_set'));
+        $form->addCommandButton('fetch_data_set_users', 'Fetch Users');
+        $form->addCommandButton('fetch_data_set_events', 'Fetch Events');
+
+        $take = new ilNumberInputGUI('Take', 'take');
+        $form->addItem($take);
+
+        $skip = new ilNumberInputGUI('Skip', 'skip');
+        $form->addItem($skip);
+
+        return $form;
+    }
+
+    public function buildRequestService(\EventoImport\communication\ApiImporterSettings $importer_settings) : \EventoImport\communication\request_services\RequestClientService
+    {
+        return new \EventoImport\communication\request_services\RestClientService(
+            $importer_settings->getUrl(),
+            $importer_settings->getTimeoutAfterRequest(),
+            $importer_settings->getTimeoutFailedRequest()
+        );
+    }
+
     private function locationsToHTMLTable(array $locations) : string
     {
         $saved_locations_string = "<table style='width: 100%'>";
@@ -43,7 +217,6 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
             $saved_locations_string .= "<tr>";
         }
         foreach ($locations as $location) {
-
             $saved_locations_string .= "<tr>";
             foreach ($location as $key => $value) {
                 $saved_locations_string .= "<td>$value</td>";
@@ -70,7 +243,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 
     private function getMappedDepartmentName(string $ilias_department_cat) : string
     {
-        if(isset($this->hard_coded_department_mapping[$ilias_department_cat])) {
+        if (isset($this->hard_coded_department_mapping[$ilias_department_cat])) {
             return $this->hard_coded_department_mapping[$ilias_department_cat];
         } else {
             return $ilias_department_cat;
@@ -105,26 +278,5 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         }
 
         return $location_repository->fetchAllLocations();
-    }
-
-    public function performCommand($cmd)
-    {
-        switch ($cmd) {
-            case 'configure':
-                global $DIC;
-                $link = $DIC->ctrl()->getLinkTarget($this, 'reload_repo_locations');
-                $link_btn = $DIC->ui()->factory()->link()->standard('Reload Repository Locations', $link);
-                $this->tpl->setContent($DIC->ui()->renderer()->render($link_btn));
-                break;
-
-            case 'reload_repo_locations':
-                $locations = $this->reloadRepositoryLocations();
-                $saved_locations_string = $this->locationsToHTMLTable($locations);
-
-
-                ilUtil::sendSuccess('Repository tree reloaded successfully. Following locations are currently saved:<br>'.$saved_locations_string, true);
-                $this->ctrl->redirect($this, 'configure');
-                break;
-        }
     }
 }

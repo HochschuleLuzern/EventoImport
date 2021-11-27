@@ -6,5 +6,5 @@ interface RequestClientService
 {
     public function sendRequest(string $path, array $request_params);
 
-    public function setTimeout(int $timeout_in_seconds);
+    public function setTimeoutAfterRequestInSeconds(int $timeout_in_seconds);
 }

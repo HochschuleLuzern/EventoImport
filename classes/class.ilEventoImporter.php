@@ -42,35 +42,17 @@ abstract class ilEventoImporter
     protected $fetch_data_set_method;
     protected $fetch_data_record_method;
     
-    public function __construct(ilEventoImporterIterator $iterator, ilSetting $settings, ilEventoImportLogger $logger, \EventoImport\communication\request_services\RequestClientService $data_source)
+    public function __construct(ilEventoImporterIterator $iterator, \EventoImport\communication\ApiImporterSettings $settings, ilEventoImportLogger $logger, \EventoImport\communication\request_services\RequestClientService $data_source)
     {
         //Get Settings from dbase
         $this->iterator = $iterator;
-        $this->max_pages = (int) $settings->get('crevento_max_pages');
-        $this->max_retries = (int) $settings->get('crevento_max_retries', 3);
-        $this->seconds_before_retry = (int) $settings->get('crevento_seconds_before_retry', 60);
+        $this->max_pages = $settings->getMaxPages();
+        $this->max_retries = $settings->getMaxRetries();
+        $this->seconds_before_retry = $settings->getTimeoutFailedRequest();
         
         $this->evento_logger = $logger;
         $this->data_source = $data_source;
         $this->has_more_data = true;
-    }
-    
-    /**
-     * Retrieves a single record from the SOAP-interface
-     * @param string $operation
-     * @param array $params
-     * @return array or false
-     */
-    public function getRecord($operation, $params)
-    {
-        try {
-            $return = &$this->callWebService($operation, $params);
-        } catch (Exception $e) {
-            $this->evento_logger->logException($operation, $e->getMessage());
-            $return = false;
-        } finally {
-            return $return;
-        }
     }
 
     public function hasMoreData() : bool
@@ -85,16 +67,11 @@ abstract class ilEventoImporter
         );
 
         $json_response = $this->data_source->sendRequest($this->fetch_data_record_method, $params);
-        $json_response_decoded = $this->validateResponseAndGetAsJsonStructure($json_response);
 
-        if ($json_response_decoded['success'] && is_array($json_response_decoded['data'])) {
-            return $json_response_decoded['data'];
+        if (!is_null($json_response)) {
+            return json_decode($json_response, true);
         } else {
-            if (!$json_response_decoded['success']) {
-                throw new \Exception("Failure in fetching id '$id' with message: " . $json_response_decoded['message']);
-            } else {
-                return null;
-            }
+            return null;
         }
     }
 
@@ -117,6 +94,19 @@ abstract class ilEventoImporter
             $this->has_more_data = false;
         }
 
+        return $json_response_decoded['data'];
+    }
+
+    public function fetchSpecificDataSet(int $skip, int $take)
+    {
+        $params = array(
+            "skip" => $skip,
+            "take" => $take
+        );
+
+        $json_response = $this->data_source->sendRequest($this->fetch_data_set_method, $params);
+
+        $json_response_decoded = $this->validateResponseAndGetAsJsonStructure($json_response);
 
         return $json_response_decoded['data'];
     }

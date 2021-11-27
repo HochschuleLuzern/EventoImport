@@ -23,7 +23,8 @@ class EventLocationsRepository
 
     public function addNewLocation(string $department, string $kind, int $year, int $ref_id)
     {
-        $this->db->insert(self::TABLE_NAME,
+        $this->db->insert(
+            self::TABLE_NAME,
             [
                 self::COL_DEPARTMENT_NAME => [\ilDBConstants::T_TEXT, $department],
                 self::COL_EVENT_KIND => [\ilDBConstants::T_TEXT, $kind],
@@ -41,9 +42,9 @@ class EventLocationsRepository
 
     private function addToCache(int $ref_id, string $department, string $kind, int $year)
     {
-        if(!isset($this->cache[$department])) {
+        if (!isset($this->cache[$department])) {
             $this->cache[$department] = array($kind => array($year => $ref_id));
-        } else if(!isset($this->cache[$department][$kind])) {
+        } elseif (!isset($this->cache[$department][$kind])) {
             $this->cache[$department][$kind] = array($year => $ref_id);
         } else {
             $this->cache[$department][$kind][$year] = $ref_id;
@@ -52,10 +53,10 @@ class EventLocationsRepository
 
     private function checkCache(string $department, string $kind, int $year) : ?int
     {
-        if(isset($this->cache[$department])
+        if (isset($this->cache[$department])
             && isset($this->cache[$department][$kind])
             && isset($this->cache[$department][$kind][$year])) {
-                return $this->cache[$department][$kind][$year];
+            return $this->cache[$department][$kind][$year];
         } else {
             return null;
         }
@@ -65,11 +66,11 @@ class EventLocationsRepository
     {
         $department = $evento_event->getDepartment();
         $kind = $evento_event->getKind();
-        $year = (int)$evento_event->getStartDate()->format('Y');
+        $year = (int) $evento_event->getStartDate()->format('Y');
 
         $cached_value = $this->checkCache($department, $kind, $year);
 
-        if($cached_value != null) {
+        if ($cached_value != null) {
             return $cached_value;
         }
 
@@ -83,7 +84,7 @@ class EventLocationsRepository
 
         $result = $this->db->query($query);
 
-        if($row = $this->db->fetchAssoc($result)) {
+        if ($row = $this->db->fetchAssoc($result)) {
             $ref_id = $row['ref_id'];
             $this->addToCache($ref_id, $department, $kind, $year);
 
@@ -100,7 +101,7 @@ class EventLocationsRepository
         $result = $this->db->query($query);
 
         $locations = [];
-        while($row = $this->db->fetchAssoc($result)) {
+        while ($row = $this->db->fetchAssoc($result)) {
             $locations[] = $row;
         }
 
