@@ -44,8 +44,8 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $locations = $this->reloadRepositoryLocations();
                 $saved_locations_string = $this->locationsToHTMLTable($locations);
 
-
-                ilUtil::sendSuccess('Repository tree reloaded successfully. Following locations are currently saved:<br>' . $saved_locations_string, true);
+                $message = $this->buildMessageForNextPage('Repository tree reloaded successfully. Following locations are currently saved:', $saved_locations_string);
+                ilUtil::sendSuccess($message, true);
                 $this->ctrl->redirect($this, 'configure');
                 break;
 
@@ -62,7 +62,8 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                         if (!is_null($output)) {
                             $cmd = htmlspecialchars($cmd);
                             $output = htmlspecialchars(print_r($output, true));
-                            ilUtil::sendSuccess("CMD = $cmd, Skip = $skip, Take = $take <br><br>Output from request:<br> $output", true);
+                            $message = $this->buildMessageForNextPage("CMD = $cmd, Skip = $skip, Take = $take", $output);
+                            ilUtil::sendSuccess($message, true);
                         } else {
                             $cmd = htmlspecialchars($cmd);
                             ilUtil::sendFailure("Got no answer for CMD = $cmd, Skip = $skip, Take = $take", true);
@@ -90,7 +91,8 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                         if (!is_null($output)) {
                             $cmd = htmlspecialchars($cmd);
                             $output = htmlspecialchars(print_r($output, true));
-                            ilUtil::sendSuccess("CMD = $cmd, ID = $id_from_form <br><br>Output from request:<br> $output", true);
+                            $message = $this->buildMessageForNextPage("CMD = $cmd, ID = $id_from_form", $output);
+                            ilUtil::sendSuccess($message, true);
                         } else {
                             $cmd = htmlspecialchars($cmd);
                             ilUtil::sendFailure("Got no answer for CMD = $cmd and ID = $id_from_form", true);
@@ -136,6 +138,13 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         return $DIC->ui()->renderer()->render($ui_components) . $form_html;
     }
 
+    private function buildMessageForNextPage(string $infos, string $output) : string
+    {
+        $message = "$infos<br><br>Output from request:<br><pre>$output</pre></div></div>";
+
+        return $message;
+    }
+
     private function buildImporter($cmd)
     {
         global $DIC;
@@ -153,7 +162,6 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                     $logger,
                     $request_client
                 );
-                break;
 
             case 'fetch_record_event':
             case 'fetch_data_set_events':
@@ -163,10 +171,13 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                     $logger,
                     $request_client
                 );
-                break;
 
             case 'fetch_user_photo':
-                return new \EventoImport\communication\EventoUserPhotoImporter($request_client);
+                return new \EventoImport\communication\EventoUserPhotoImporter(
+                    $request_client,
+                    $api_importer_settings,
+                    $logger,
+                );
         }
     }
 
@@ -177,6 +188,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $form->setFormAction($this->ctrl->getFormAction($this));
         $form->addCommandButton('fetch_record_user', 'Fetch User');
         $form->addCommandButton('fetch_record_event', 'Fetch Event');
+        $form->addCommandButton('fetch_user_photo', 'Fetch Photo');
 
         $take = new ilNumberInputGUI('Id', 'record_id');
         $form->addItem($take);
@@ -207,7 +219,6 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         return new \EventoImport\communication\request_services\RestClientService(
             $importer_settings->getUrl(),
             $importer_settings->getTimeoutAfterRequest(),
-            $importer_settings->getTimeoutFailedRequest()
         );
     }
 
@@ -217,14 +228,14 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         if (count($locations) > 0) {
             $saved_locations_string .= "<tr>";
             foreach ($locations[0] as $key => $value) {
-                $saved_locations_string .= "<th><b>$key</b></th>";
+                $saved_locations_string .= "<th><b>" . htmlspecialchars($key) . "</b></th>";
             }
             $saved_locations_string .= "<tr>";
         }
         foreach ($locations as $location) {
             $saved_locations_string .= "<tr>";
             foreach ($location as $key => $value) {
-                $saved_locations_string .= "<td>$value</td>";
+                $saved_locations_string .= "<td>" . htmlspecialchars($value) . "</td>";
             }
             $saved_locations_string .= '</tr>';
         }
