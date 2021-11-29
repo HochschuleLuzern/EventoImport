@@ -9,7 +9,7 @@ class FakeRestClientService extends RestClientService
     private $file_path;
     private $has_more;
 
-    public function __construct(string $base_url, int $port, string $base_path)
+    public function __construct()
     {
         // We don't care about the given URL
         $this->file_path = "/var/www/json_mocks/";

@@ -171,7 +171,7 @@ class ilEventoImportImport extends ilCronJob
             $base_path = '';
             $data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
             */
-            $data_source = new \EventoImport\communication\request_services\FakeRestClientService('', 0, '');
+            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
 
             $user_importer = new \EventoImport\communication\EventoUserImporter(new ilEventoImporterIterator($this->page_size), $this->settings, $logger, $data_source);
             $event_importer = new \EventoImport\communication\EventoEventImporter(new ilEventoImporterIterator($this->page_size), $this->settings, $logger, $data_source);

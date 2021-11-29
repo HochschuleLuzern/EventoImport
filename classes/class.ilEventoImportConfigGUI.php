@@ -79,12 +79,13 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 
             case 'fetch_record_user':
             case 'fetch_record_event':
+            case 'fetch_user_photo':
                 try {
                     $importer = $this->buildImporter($cmd);
                     $form = $this->initDataRecordForm();
                     if ($form->checkInput()) {
                         $id_from_form = (int) $form->getInput('record_id');
-                        $output = $importer->fetchDataRecord($id_from_form);
+                        $output = $importer->fetchDataRecordById($id_from_form);
 
                         if (!is_null($output)) {
                             $cmd = htmlspecialchars($cmd);
@@ -163,6 +164,9 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                     $request_client
                 );
                 break;
+
+            case 'fetch_user_photo':
+                return new \EventoImport\communication\EventoUserPhotoImporter($request_client);
         }
     }
 
@@ -199,6 +203,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 
     public function buildRequestService(\EventoImport\communication\ApiImporterSettings $importer_settings) : \EventoImport\communication\request_services\RequestClientService
     {
+        //return new \EventoImport\communication\request_services\FakeRestClientService();
         return new \EventoImport\communication\request_services\RestClientService(
             $importer_settings->getUrl(),
             $importer_settings->getTimeoutAfterRequest(),
