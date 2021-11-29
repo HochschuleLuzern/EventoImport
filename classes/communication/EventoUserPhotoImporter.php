@@ -20,7 +20,7 @@ class EventoUserPhotoImporter extends \ilEventoImporter
     ) {
         parent::__construct($data_source, $settings, $logger);
 
-        $this->fetch_data_record_method = 'GetAccountById';
+        $this->fetch_data_record_method = 'GetPhotoById';
     }
 
     public function getDataRecordMethodName() : string
