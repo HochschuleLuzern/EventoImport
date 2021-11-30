@@ -57,7 +57,11 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                     if ($form->checkInput()) {
                         $skip = (int) $form->getInput('skip');
                         $take = (int) $form->getInput('take');
-                        $output = $importer->fetchSpecificDataSet($skip, $take);
+                        if ($importer instanceof \EventoImport\communication\EventoDataSetImporter) {
+                            $output = $importer->fetchSpecificDataSet($skip, $take);
+                        } else {
+                            throw new Exception('Class is not instance of Data Set importer');
+                        }
 
                         if (!is_null($output)) {
                             $cmd = htmlspecialchars($cmd);
@@ -86,7 +90,11 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                     $form = $this->initDataRecordForm();
                     if ($form->checkInput()) {
                         $id_from_form = (int) $form->getInput('record_id');
-                        $output = $importer->fetchDataRecordById($id_from_form);
+                        if ($importer instanceof \EventoImport\communication\EventoSingleDataRecordImporter) {
+                            $output = $importer->fetchDataRecordById($id_from_form);
+                        } else {
+                            throw new Exception('Class is not instance of Single Data Record importer');
+                        }
 
                         if (!is_null($output)) {
                             $cmd = htmlspecialchars($cmd);
@@ -153,30 +161,40 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $logger = new ilEventoImportLogger($DIC->database());
         $request_client = $this->buildRequestService($api_importer_settings);
 
+        $data_record_importer = new \EventoImport\communication\generic_importers\SingleDataRecordImport($request_client, $api_importer_settings->getMaxRetries(), 1);
+        $data_set_importer = new \EventoImport\communication\generic_importers\DataSetImport($request_client, $api_importer_settings->getMaxRetries(), 1);
+
         switch ($cmd) {
             case 'fetch_record_user':
             case 'fetch_data_set_users':
                 return new \EventoImport\communication\EventoUserImporter(
+                    $data_set_importer,
+                    $data_record_importer,
                     $iterator,
-                    $api_importer_settings,
                     $logger,
-                    $request_client
                 );
 
             case 'fetch_record_event':
             case 'fetch_data_set_events':
                 return new \EventoImport\communication\EventoEventImporter(
+                    $data_set_importer,
+                    $data_record_importer,
                     $iterator,
-                    $api_importer_settings,
                     $logger,
-                    $request_client
                 );
 
             case 'fetch_user_photo':
                 return new \EventoImport\communication\EventoUserPhotoImporter(
-                    $request_client,
-                    $api_importer_settings,
+                    $data_record_importer,
                     $logger,
+                );
+
+            case 'fetch_all_ilias_admins':
+            case 'fetch_ilias_admins_for_event':
+                return new \EventoImport\communication\EventoAdminImporter(
+                    $data_set_importer,
+                    $data_record_importer,
+                    $logger
                 );
         }
     }

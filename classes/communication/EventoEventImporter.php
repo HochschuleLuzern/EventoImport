@@ -5,48 +5,55 @@ namespace EventoImport\communication;
 use EventoImport\communication\importer_traits\DataSetImport;
 use EventoImport\communication\importer_traits\SingleDataRecordImport;
 
-class EventoEventImporter extends \ilEventoImporter
+class EventoEventImporter extends \ilEventoImporter implements EventoSingleDataRecordImporter, EventoDataSetImporter
 {
-    use DataSetImport;
-    use SingleDataRecordImport;
+    private $iterator;
+    private $data_set_import;
+    private $data_record_import;
 
-    protected $iterator;
     protected $fetch_data_set_method;
     protected $fetch_data_record_method;
 
-    public function __construct(\ilEventoImporterIterator $iterator, ApiImporterSettings $settings, \ilEventoImportLogger $logger, \EventoImport\communication\request_services\RequestClientService $data_source)
-    {
-        parent::__construct($data_source, $settings, $logger);
+    public function __construct(
+        generic_importers\DataSetImport $data_set_import,
+        generic_importers\SingleDataRecordImport $data_record_import,
+        \ilEventoImporterIterator $iterator,
+        \ilEventoImportLogger $logger
+    ) {
+        parent::__construct($logger);
 
         $this->iterator = $iterator;
+        $this->data_set_import = $data_set_import;
+        $this->data_record_import = $data_record_import;
+
         $this->fetch_data_set_method = 'GetEvents';
         $this->fetch_data_record_method = 'GetEventById';
     }
 
-    public function fetchNextDataSet()
+    public function fetchNextDataSet() : array
     {
         $skip = ($this->iterator->getPage() - 1) * $this->iterator->getPageSize();
         $take = $this->iterator->getPageSize();
 
-        $json_response_decoded = $this->fetchDataSet($skip, $take);
+        $response = $this->data_set_import->fetchPagedDataSet($this->fetch_data_set_method, $skip, $take);
 
-        if (count($json_response_decoded['data']) < 1) {
+        if (count($response->getData()) < 1) {
             $this->has_more_data = false;
             return [];
-        } elseif (!$json_response_decoded['hasMoreData']) {
-            $this->has_more_data = false;
+        } else {
+            $this->has_more_data = $response->getHasMoreData();
+            return $response->getData();
         }
-
-        return $json_response_decoded['data'];
     }
 
-    public function getDataSetMethodName() : string
+    public function fetchSpecificDataSet(int $skip, int $take) : array
     {
-        return $this->fetch_data_set_method;
+        $response = $this->data_set_import->fetchPagedDataSet($this->fetch_data_set_method, $skip, $take);
+        return $response->getData();
     }
 
-    public function getDataRecordMethodName() : string
+    public function fetchDataRecordById(int $id) : array
     {
-        return $this->fetch_data_record_method;
+        return $this->data_record_import->fetchDataRecordById($this->fetch_data_record_method, $id);
     }
 }

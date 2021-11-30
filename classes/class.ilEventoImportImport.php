@@ -171,10 +171,36 @@ class ilEventoImportImport extends ilCronJob
             $base_path = '';
             $data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
             */
-            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
 
-            $user_importer = new \EventoImport\communication\EventoUserImporter(new ilEventoImporterIterator($this->page_size), $this->settings, $logger, $data_source);
-            $event_importer = new \EventoImport\communication\EventoEventImporter(new ilEventoImporterIterator($this->page_size), $this->settings, $logger, $data_source);
+            $api_settings = new \EventoImport\communication\ApiImporterSettings($this->settings);
+            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
+            $data_record_importer = new \EventoImport\communication\generic_importers\SingleDataRecordImport(
+                $data_source,
+                $api_settings->getMaxRetries(),
+                $api_settings->getTimeoutFailedRequest()
+            );
+            $data_set_importer = new \EventoImport\communication\generic_importers\DataSetImport(
+                $data_source,
+                $api_settings->getMaxRetries(),
+                $api_settings->getTimeoutFailedRequest()
+            );
+
+            $user_importer = new \EventoImport\communication\EventoUserImporter(
+                $data_set_importer,
+                $data_record_importer,
+                new ilEventoImporterIterator($this->page_size),
+                $logger
+            );
+            $event_importer = new \EventoImport\communication\EventoEventImporter(
+                $data_set_importer,
+                $data_record_importer,
+                new ilEventoImporterIterator($this->page_size),
+                $logger
+            );
+            $user_photo_importer = new \EventoImport\communication\EventoUserPhotoImporter(
+                $data_record_importer,
+                $logger
+            );
 
 
             /*

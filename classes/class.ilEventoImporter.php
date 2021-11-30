@@ -28,42 +28,17 @@
 abstract class ilEventoImporter
 {
     private $evento_logger;
-
-    private $max_pages;
-    private $max_retries;
-    private $seconds_before_retry;
-    private $token;
+    protected $has_more_data;
 
     public function __construct(
-        \EventoImport\communication\request_services\RequestClientService $data_source,
-        \EventoImport\communication\ApiImporterSettings $settings,
         ilEventoImportLogger $logger
     ) {
         //Get Settings from dbase
-        $this->max_pages = $settings->getMaxPages();
-        $this->max_retries = $settings->getMaxRetries();
-        $this->seconds_before_retry = $settings->getTimeoutFailedRequest();
-        
         $this->evento_logger = $logger;
-        $this->data_source = $data_source;
     }
 
-    public function getDataSource() : \EventoImport\communication\request_services\RequestClientService
+    public function hasMoreData() : bool
     {
-        return $this->data_source;
-    }
-
-    public function fetchSpecificDataSet(int $skip, int $take)
-    {
-        $params = array(
-            "skip" => $skip,
-            "take" => $take
-        );
-
-        $json_response = $this->data_source->sendRequest($this->fetch_data_set_method, $params);
-
-        $json_response_decoded = $this->validateResponseAndGetAsJsonStructure($json_response);
-
-        return $json_response_decoded['data'];
+        return $this->has_more_data;
     }
 }

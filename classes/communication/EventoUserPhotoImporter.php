@@ -2,29 +2,26 @@
 
 namespace EventoImport\communication;
 
-use EventoImport\communication\importer_traits\SingleDataRecordImport;
+use EventoImport\communication\generic_importers\SingleDataRecordImport;
 
-class EventoUserPhotoImporter extends \ilEventoImporter
+class EventoUserPhotoImporter extends \ilEventoImporter implements EventoSingleDataRecordImporter
 {
-    use SingleDataRecordImport;
-
-    /**
-     * @var string
-     */
+    private $data_record_importer;
     private $fetch_data_record_method;
 
     public function __construct(
-        \EventoImport\communication\request_services\RequestClientService $data_source,
-        \EventoImport\communication\ApiImporterSettings $settings,
+        generic_importers\SingleDataRecordImport $data_record_importer,
         \ilEventoImportLogger $logger
     ) {
-        parent::__construct($data_source, $settings, $logger);
+        parent::__construct($logger);
+
+        $this->data_record_importer = $data_record_importer;
 
         $this->fetch_data_record_method = 'GetPhotoById';
     }
 
-    public function getDataRecordMethodName() : string
+    public function fetchDataRecordById(int $evento_id) : array
     {
-        return $this->fetch_data_record_method;
+        return $this->data_record_importer->fetchDataRecordById($this->fetch_data_record_method, $evento_id);
     }
 }
