@@ -31,7 +31,7 @@ class EventoAdminImporter extends \ilEventoImporter implements EventoSingleDataR
 
     public function fetchAllIliasAdmins()
     {
-        $response = $this->data_set_importer->fetchDataSetParameterless($this->$this->fetch_all_admins);
+        $response = $this->data_set_importer->fetchDataSetParameterless($this->fetch_all_admins);
 
         return $response->getData();
     }

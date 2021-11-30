@@ -85,6 +85,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
             case 'fetch_record_user':
             case 'fetch_record_event':
             case 'fetch_user_photo':
+            case 'fetch_ilias_admins_for_event':
                 try {
                     $importer = $this->buildImporter($cmd);
                     $form = $this->initDataRecordForm();
@@ -114,6 +115,32 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $this->ctrl->redirect($this, 'configure');
                 break;
 
+            case 'fetch_all_ilias_admins':
+                try {
+                    $importer = $this->buildImporter($cmd);
+
+                    if ($importer instanceof \EventoImport\communication\EventoAdminImporter) {
+                        $output = $importer->fetchAllIliasAdmins();
+                    } else {
+                        throw new Exception('Class is not instance of Data Set importer');
+                    }
+
+                    if (!is_null($output)) {
+                        $cmd = htmlspecialchars($cmd);
+                        $output = htmlspecialchars(print_r($output, true));
+                        $message = $this->buildMessageForNextPage("CMD = $cmd", $output);
+                        ilUtil::sendSuccess($message, true);
+                    } else {
+                        $cmd = htmlspecialchars($cmd);
+                        ilUtil::sendFailure("Got no answer for CMD = $cmd", true);
+                    }
+                } catch (Exception $e) {
+                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
+                }
+
+                $this->ctrl->redirect($this, 'configure');
+                break;
+
             default:
                 ilUtil::sendFailure('Command not found', true);
                 $this->ctrl->redirect($this, 'configure');
@@ -132,6 +159,10 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $ui_components = [];
         $link = $this->ctrl->getLinkTarget($this, 'reload_repo_locations');
         $ui_components[] = $ui_factory->button()->standard("Reload Repository Locations", $link);
+
+        // Get Ilias Admins
+        $link = $this->ctrl->getLinkTarget($this, 'fetch_all_ilias_admins');
+        $ui_components[] = $ui_factory->button()->standard("Fetch all ILIAS Admins", $link);
 
         // Fetch data set form
         $form = $this->initDataSetForm();
@@ -207,6 +238,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $form->addCommandButton('fetch_record_user', 'Fetch User');
         $form->addCommandButton('fetch_record_event', 'Fetch Event');
         $form->addCommandButton('fetch_user_photo', 'Fetch Photo');
+        $form->addCommandButton('fetch_ilias_admins_for_event', 'Fetch Admins for Event');
 
         $take = new ilNumberInputGUI('Id', 'record_id');
         $form->addItem($take);
