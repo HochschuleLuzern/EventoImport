@@ -8,27 +8,31 @@ use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 use ILIAS\UI\Component\Test\Renderer;
 use EventoImport\import\action\EventoImportAction;
+use EventoImport\communication\EventoUserPhotoImporter;
 
 class UserActionFactory
 {
     private $user_facade;
     private $default_user_settings;
+    private $photo_importer;
+    private $logger;
 
-    public function __construct(UserFacade $user_facade, DefaultUserSettings $default_user_settings, \ilEventoImportLogger $logger)
+    public function __construct(UserFacade $user_facade, DefaultUserSettings $default_user_settings, EventoUserPhotoImporter $photo_importer, \ilEventoImportLogger $logger)
     {
-        $this->logger = $logger;
         $this->user_facade = $user_facade;
         $this->default_user_settings = $default_user_settings;
+        $this->photo_importer = $photo_importer;
+        $this->logger = $logger;
     }
 
     public function buildCreateAction(EventoUser $evento_user) : CreateUser
     {
-        return new CreateUser($evento_user, $this->user_facade, $this->default_user_settings, $this->logger);
+        return new CreateUser($evento_user, $this->user_facade, $this->default_user_settings, $this->photo_importer, $this->logger);
     }
 
     public function buildUpdateAction(EventoUser $evento_user, int $ilias_user_id) : UpdateUser
     {
-        return new UpdateUser($evento_user, $ilias_user_id, $this->user_facade, $this->default_user_settings, $this->logger);
+        return new UpdateUser($evento_user, $ilias_user_id, $this->user_facade, $this->default_user_settings, $this->photo_importer, $this->logger);
     }
 
     public function buildRenameExistingAndCreateNewAction(EventoUser $evento_user, \ilObjUser $old_ilias_user, string $found_by) : RenameExistingCreateNew

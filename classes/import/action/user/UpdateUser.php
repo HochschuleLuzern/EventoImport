@@ -5,23 +5,29 @@ namespace EventoImport\import\action\user;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
+use EventoImport\communication\EventoUserPhotoImporter;
 
 class UpdateUser extends UserImportAction
 {
-    private $default_user_settings;
+    use ImportUserPhoto;
+
     private $ilias_user_id;
+    private $default_user_settings;
+    private $photo_importer;
 
     public function __construct(
         EventoUser $evento_user,
         int $ilias_user_id,
         UserFacade $user_facade,
         DefaultUserSettings $default_user_settings,
+        EventoUserPhotoImporter $photo_importer,
         \ilEventoImportLogger $logger
     ) {
         parent::__construct($evento_user, $user_facade, $logger);
 
-        $this->default_user_settings = $default_user_settings;
         $this->ilias_user_id = $ilias_user_id;
+        $this->default_user_settings = $default_user_settings;
+        $this->photo_importer = $photo_importer;
     }
 
     private function changeLoginName(int $getId, string $getLoginName)
@@ -193,7 +199,7 @@ class UpdateUser extends UserImportAction
             \ilObjUser::_getPersonalPicturePath($userObj->getId(), "small", false),
             'data:image/svg+xml'
         ) !== false) {
-            //$this->addPersonalPicture($this->evento_user->getEventoId(), $userObj->getId());
+            $this->importAndSetUserPhoto($this->evento_user->getEventoId(), $userObj, $this->photo_importer, $this->user_facade);
         }
 
         $oldLogin = $userObj->getLogin();
