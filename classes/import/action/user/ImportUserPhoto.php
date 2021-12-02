@@ -22,13 +22,17 @@ trait ImportUserPhoto
                 $tmp_file = \ilUtil::ilTempnam();
                 imagepng(
                     imagecreatefromstring(
-                        $photo_import['imgData'],
+                        base64_decode(
+                            $photo_import->getImgData()
+                        )
                     ),
                     $tmp_file,
                     0
                 );
                 \ilObjUser::_uploadPersonalPicture($tmp_file, $user->getId());
             } catch (\Exception $e) {
+                global $DIC;
+                $DIC->logger()->root()->log('Evento Import: Exception on Photo Upload: ' . print_r($e, true));
             } finally {
                 if (isset($tmp_file)) {
                     unlink($tmp_file);

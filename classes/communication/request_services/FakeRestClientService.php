@@ -31,6 +31,8 @@ class FakeRestClientService extends RestClientService
             } else {
                 return '{"success":true,"hasMoreData":false,"message":"OK","data":[]}';
             }
+        } elseif ($path == 'GetPhotoById') {
+            $file = $this->file_path . 'photos/photo.json';
         }
 
         $file_content = file_get_contents($file);

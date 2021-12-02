@@ -11,7 +11,7 @@ class EventoUserPhoto extends ApiDataModelBase
     private $id_account;
     private $has_photo;
     private $img_data;
-    private $decoded_api_data;
+    protected $decoded_api_data;
 
     public function __construct(array $data_set)
     {

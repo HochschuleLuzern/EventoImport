@@ -47,6 +47,7 @@ class EventoUserImporter extends \ilEventoImporter implements EventoSingleDataRe
         $take = $this->iterator->getPageSize();
 
         $response = $this->data_set_import->fetchPagedDataSet($this->fetch_data_set_method, $skip, $take);
+        $this->iterator->nextPage();
 
         if (count($response->getData()) < 1) {
             $this->has_more_data = false;
