@@ -7,12 +7,13 @@ use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
+use EventoImport\import\db\MembershipManager;
 
 class CreateEventInParentEvent extends EventAction
 {
     private $parent_event;
 
-    public function __construct(EventoEvent $evento_event, IliasEventoParentEvent $parent_event, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
+    public function __construct(EventoEvent $evento_event, IliasEventoParentEvent $parent_event, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
         parent::__construct(
             $evento_event,
@@ -21,6 +22,7 @@ class CreateEventInParentEvent extends EventAction
             $event_settings,
             $repository_facade,
             $user_facade,
+            $membership_manager,
             $logger,
             $rbac_services
         );

@@ -10,7 +10,7 @@ class IliasEventoEventsRepository
     public const TABLE_NAME = 'crevento_evnto_events';
 
     public const COL_EVENTO_ID = 'evento_id';
-    public const COL_PARENT_EVENT_REF_ID = 'parent_event_ref_id';
+    public const COL_PARENT_EVENT_KEY = 'parent_event_key';
     public const COL_REF_ID = 'ref_id';
     public const COL_OBJ_ID = 'obj_id';
     public const COL_ADMIN_ROLE_ID = 'admin_role_id';
@@ -59,7 +59,7 @@ class IliasEventoEventsRepository
             $row[self::COL_OBJ_ID],
             $row[self::COL_ADMIN_ROLE_ID],
             $row[self::COL_STUDENT_ROLE_ID],
-            isset($row[self::COL_PARENT_EVENT_REF_ID]) ? $row[self::COL_PARENT_EVENT_REF_ID] : null
+            isset($row[self::COL_PARENT_EVENT_KEY]) ? $row[self::COL_PARENT_EVENT_KEY] : null
         );
     }
 
@@ -88,7 +88,7 @@ class IliasEventoEventsRepository
                 self::COL_OBJ_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getObjId()),
                 self::COL_ADMIN_ROLE_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getAdminRoleId()),
                 self::COL_STUDENT_ROLE_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getStudentRoleId()),
-                self::COL_PARENT_EVENT_REF_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getParentEventRefId())
+                self::COL_PARENT_EVENT_KEY => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getParentEventKey())
             )
         );
     }
@@ -136,7 +136,7 @@ class IliasEventoEventsRepository
                 self::COL_OBJ_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getObjId()),
                 self::COL_ADMIN_ROLE_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getAdminRoleId()),
                 self::COL_STUDENT_ROLE_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getStudentRoleId()),
-                self::COL_PARENT_EVENT_REF_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getParentEventRefId())
+                self::COL_PARENT_EVENT_KEY => array(\ilDBConstants::T_INTEGER, $updated_obj->getParentEventKey())
             ),
             array(
                 self::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getEventoEventId())

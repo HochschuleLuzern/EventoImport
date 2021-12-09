@@ -232,7 +232,7 @@ if (!$ilDB->tableExists($table_name)) {
             'length' => 8,
             'notnull' => true
         ),
-        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_PARENT_EVENT_REF_ID => array(
+        \EventoImport\import\db\repository\IliasEventoEventsRepository::COL_PARENT_EVENT_KEY => array(
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => false

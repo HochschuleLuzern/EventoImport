@@ -10,6 +10,7 @@ use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\settings\DefaultEventSettings;
 use EventoImport\import\IliasEventWrapper;
 use EventoImport\import\db\model\IliasEventoParentEvent;
+use EventoImport\import\db\MembershipManager;
 
 class EventActionFactory
 {
@@ -18,17 +19,20 @@ class EventActionFactory
     private $user_facade;
     private $repository_facade;
     private $event_object_factory;
+    private $membership_manager;
 
     public function __construct(
         IliasEventObjectFactory $event_object_factory,
         RepositoryFacade $repository_facade,
         UserFacade $user_facade,
+        MembershipManager $membership_manager,
         DefaultEventSettings $default_event_settings,
         \ilEventoImportLogger $logger
     ) {
         $this->event_object_factory = $event_object_factory;
         $this->repository_facade = $repository_facade;
         $this->user_facade = $user_facade;
+        $this->membership_manager = $membership_manager;
         $this->default_event_settings = $default_event_settings;
         $this->logger = $logger;
     }
@@ -42,6 +46,7 @@ class EventActionFactory
             $this->default_event_settings,
             $this->repository_facade,
             $this->user_facade,
+            $this->membership_manager,
             $this->logger,
             $this->user_facade->rbacServices()
         );
@@ -56,6 +61,7 @@ class EventActionFactory
             $this->default_event_settings,
             $this->repository_facade,
             $this->user_facade,
+            $this->membership_manager,
             $this->logger,
             $this->user_facade->rbacServices()
         );
@@ -70,6 +76,7 @@ class EventActionFactory
             $this->default_event_settings,
             $this->repository_facade,
             $this->user_facade,
+            $this->membership_manager,
             $this->logger,
             $this->user_facade->rbacServices()
         );
@@ -84,6 +91,7 @@ class EventActionFactory
             $this->default_event_settings,
             $this->repository_facade,
             $this->user_facade,
+            $this->membership_manager,
             $this->logger,
             $this->user_facade->rbacServices()
         );
@@ -92,14 +100,15 @@ class EventActionFactory
     public function convertExistingIliasObjToEvent(
         EventoEvent $evento_event,
         \ilContainer $ilias_obj
-    ) : ConvertExistingIliasObjToEvent {
-        return new ConvertExistingIliasObjToEvent(
+    ) : MarkExistingIliasObjAsEvent {
+        return new MarkExistingIliasObjAsEvent(
             $evento_event,
             $ilias_obj,
             $this->event_object_factory,
             $this->default_event_settings,
             $this->repository_facade,
             $this->user_facade,
+            $this->membership_manager,
             $this->logger,
             $this->user_facade->rbacServices()
         );

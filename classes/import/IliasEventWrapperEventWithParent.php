@@ -18,10 +18,10 @@ class IliasEventWrapperEventWithParent extends IliasEventWrapper
     {
         parent::__construct($rbac_services);
 
-        $this->parent_event     = $parent_event;
+        $this->parent_event = $parent_event;
         $this->parent_event_obj = $parent_event_obj;
-        $this->sub_event        = $sub_event;
-        $this->sub_event_obj    = $sub_event_obj;
+        $this->sub_event = $sub_event;
+        $this->sub_event_obj = $sub_event_obj;
     }
 
     public function addUserAsAdminToEvent($user_id)
@@ -39,5 +39,21 @@ class IliasEventWrapperEventWithParent extends IliasEventWrapper
     public function getIliasEventoEventObj() : IliasEventoEvent
     {
         return $this->sub_event;
+    }
+
+    public function getAllAdminRoles() : array
+    {
+        return [
+            $this->parent_event->getAdminRoleId(),
+            $this->sub_event->getAdminRoleId()
+        ];
+    }
+
+    public function getAllMemberRoles() : array
+    {
+        return [
+            $this->parent_event->getStudentRoleId(),
+            $this->sub_event->getStudentRoleId()
+        ];
     }
 }

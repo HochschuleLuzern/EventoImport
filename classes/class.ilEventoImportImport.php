@@ -211,10 +211,12 @@ class ilEventoImportImport extends ilCronJob
             */
 
             /* User import */
+            $memberhip_repo = new \EventoImport\import\db\repository\EventMembershipRepository($this->db);
+            $user_repo = new \EventoImport\import\db\repository\EventoUserRepository($this->db);
             $user_facade = new \EventoImport\import\db\UserFacade(
                 new \EventoImport\import\db\query\IliasUserQuerying($this->db),
-                new \EventoImport\import\db\repository\EventoUserRepository($this->db),
-                new \EventoImport\import\db\repository\EventMembershipRepository($this->db),
+                $user_repo,
+                $memberhip_repo,
                 $this->rbac
             );
             $default_user_settings = new \EventoImport\import\settings\DefaultUserSettings($this->settings);
@@ -223,7 +225,7 @@ class ilEventoImportImport extends ilCronJob
             $user_import_action_decider = new \EventoImport\import\data_matching\UserActionDecider($user_facade, $user_action_factory);
 
             $importUsers = new ilEventoImportImportUsers($user_importer, $user_import_action_decider, $user_facade, $logger);
-            $importUsers->run();
+            //$importUsers->run();
 
             /* Event import */
             $event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);
@@ -238,11 +240,12 @@ class ilEventoImportImport extends ilCronJob
 
             $default_event_settings = new \EventoImport\import\settings\DefaultEventSettings($this->settings);
             $ilias_event_object_factory = new \EventoImport\import\IliasEventObjectFactory($repository_facade, $default_event_settings);
-            $event_action_factory = new \EventoImport\import\action\event\EventActionFactory($ilias_event_object_factory, $repository_facade, $user_facade, $default_event_settings, $logger);
+            $membership_manager = new \EventoImport\import\db\MembershipManager($memberhip_repo, $user_repo, $event_repo, new ilFavouritesManager(), $this->rbac);
+            $event_action_factory = new \EventoImport\import\action\event\EventActionFactory($ilias_event_object_factory, $repository_facade, $user_facade, $membership_manager, $default_event_settings, $logger);
             $event_action_decider = new \EventoImport\import\data_matching\EventImportActionDecider($repository_facade, $event_action_factory);
 
             $import_events = new ilEventoImportImportEventsAndMemberships($event_importer, $event_action_decider, $logger);
-            //$import_events->run();
+            $import_events->run();
 
             return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
         } catch (Exception $e) {

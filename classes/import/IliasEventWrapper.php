@@ -32,4 +32,7 @@ abstract class IliasEventWrapper
 
     abstract public function addUserAsAdminToEvent(int $user_id);
     abstract public function addUserAsStudentToEvent(int $user_id);
+
+    abstract public function getAllAdminRoles() : array;
+    abstract public function getAllMemberRoles() : array;
 }

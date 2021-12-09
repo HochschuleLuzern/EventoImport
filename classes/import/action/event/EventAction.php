@@ -9,9 +9,15 @@ use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\IliasEventWrapper;
 use EventoImport\communication\api_models\EventoUserShort;
+use EventoImport\import\db\repository\EventMembershipRepository;
+use EventoImport\import\db\MembershipManager;
 
 abstract class EventAction implements EventoImportAction
 {
+    /**
+     * @var MembershipManager
+     */
+    protected $membership_manager;
     protected $evento_event;
     protected $repository_facade;
     protected $event_object_factory;
@@ -25,12 +31,13 @@ abstract class EventAction implements EventoImportAction
 
     protected $log_code;
 
-    public function __construct(EventoEvent $evento_event, IliasEventObjectFactory $event_object_factory, int $log_code, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, \EventoImport\import\db\UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
+    public function __construct(EventoEvent $evento_event, IliasEventObjectFactory $event_object_factory, int $log_code, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, \EventoImport\import\db\UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
         $this->evento_event = $evento_event;
         $this->log_code = $log_code;
         $this->repository_facade = $repository_facade;
         $this->user_facade = $user_facade;
+        $this->membership_manager = $membership_manager;
         $this->event_object_factory = $event_object_factory;
         $this->logger = $logger;
         $this->rbac_services = $rbac_services;
@@ -39,32 +46,6 @@ abstract class EventAction implements EventoImportAction
 
     protected function synchronizeUsersInRole(IliasEventWrapper $ilias_event)
     {
-        /** @var EventoUserShort $employee */
-        foreach ($this->evento_event->getEmployees() as $employee) {
-            $user_id = $this->user_facade->fetchUserIdByMembership($this->evento_event->getEventoId(), $employee);
-
-            if (!is_null($user_id)) {
-                $ilias_event->addUserAsAdminToEvent($user_id);
-            } else {
-                $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($employee->getEventoId());
-                if (!is_null($user_id)) {
-                    $ilias_event->addUserAsAdminToEvent($user_id);
-                }
-            }
-        }
-
-        /** @var EventoUserShort $student */
-        foreach ($this->evento_event->getStudents() as $student) {
-            $user_id = $this->user_facade->fetchUserIdByMembership($this->evento_event->getEventoId(), $student);
-
-            if (!is_null($user_id)) {
-                $ilias_event->addUserAsStudentToEvent($user_id);
-            } else {
-                $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($student->getEventoId());
-                if (!is_null($user_id)) {
-                    $ilias_event->addUserAsStudentToEvent($user_id);
-                }
-            }
-        }
+        $this->membership_manager->synchronizeMembershipsWithEvent($this->evento_event, $ilias_event->getIliasEventoEventObj());
     }
 }

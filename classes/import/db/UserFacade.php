@@ -29,6 +29,14 @@ class UserFacade
         $this->student_role_id = null;
     }
 
+    /**
+     * @depracated
+     */
+    public function addEventoMembership($user_id, $event_id, $role_type)
+    {
+        $this->event_membership_rep->addMembershipIfNotExist($event_id, $user_id, $role_type);
+    }
+
     public function fetchUserIdsByEmail($email)
     {
         return $this->user_query->fetchUserIdsByEmailAdresses($email);

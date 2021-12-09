@@ -113,7 +113,7 @@ class RepositoryFacade
             $sub_group->getId(),
             $sub_group->getDefaultAdminRole(),
             $sub_group->getDefaultMemberRole(),
-            $crs_object->getRefId()
+            $evento_event->getGroupUniqueKey()
         );
 
         $this->parent_event_repo->addNewParentEvent($parent_event);
@@ -139,7 +139,7 @@ class RepositoryFacade
             $sub_group->getId(),
             $sub_group->getDefaultAdminRole(),
             $sub_group->getDefaultMemberRole(),
-            $crs_object->getId()
+            $evento_event->getGroupUniqueKey()
         );
 
         $this->event_repo->addNewEventoIliasEvent(
@@ -157,11 +157,11 @@ class RepositoryFacade
             return null;
         }
 
-        if (!is_null($ilias_evento_event->getParentEventRefId())) {
-            $parent_event = $this->parent_event_repo->fetchParentEventForRefId($ilias_evento_event->getParentEventRefId());
+        if (!is_null($ilias_evento_event->getParentEventKey())) {
+            $parent_event = $this->parent_event_repo->fetchParentEventForRefId($ilias_evento_event->getParentEventKey());
 
             if (is_null($parent_event)) {
-                throw new \InvalidArgumentException('Parent Event for ref_id ' . $ilias_evento_event->getParentEventRefId() . ' does not exist.');
+                throw new \InvalidArgumentException('Parent Event for ref_id ' . $ilias_evento_event->getParentEventKey() . ' does not exist.');
             }
 
             $parent_obj_type = \ilObject::_lookupType($parent_event->getRefId(), true);

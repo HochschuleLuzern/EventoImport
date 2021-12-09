@@ -9,14 +9,15 @@ use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\IliasEventWrapper;
 use EventoImport\import\settings\DefaultEventSettings;
+use EventoImport\import\db\MembershipManager;
 
 class UpdateExistingEvent extends EventAction
 {
     private $ilias_event;
 
-    public function __construct(EventoEvent $evento_event, IliasEventWrapper $ilias_event, IliasEventObjectFactory $event_factory, DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
+    public function __construct(EventoEvent $evento_event, IliasEventWrapper $ilias_event, IliasEventObjectFactory $event_factory, DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
-        parent::__construct($evento_event, $event_factory, \ilEventoImportLogger::CREVENTO_MA_SUBS_UPDATED, $event_settings, $repository_facade, $user_facade, $logger, $rbac_services);
+        parent::__construct($evento_event, $event_factory, \ilEventoImportLogger::CREVENTO_MA_SUBS_UPDATED, $event_settings, $repository_facade, $user_facade, $membership_manager, $logger, $rbac_services);
 
         $this->ilias_event = $ilias_event;
     }
@@ -38,7 +39,7 @@ class UpdateExistingEvent extends EventAction
                 $ilias_event_obj->getObjId(),
                 $ilias_event_obj->getAdminRoleId(),
                 $ilias_event_obj->getStudentRoleId(),
-                $ilias_event_obj->getParentEventRefId()
+                $ilias_event_obj->getParentEventKey()
             );
 
             $this->repository_facade->iliasEventoEventRepository()->updateIliasEventoEvent($updated_obj);

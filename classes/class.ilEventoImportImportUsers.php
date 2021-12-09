@@ -110,59 +110,6 @@ class ilEventoImportImportUsers
     }
 
     /**
-     * Convert deleted Users to ILIAS-Account
-     * Returns boolean for sucess
-     */
-    private function convertDeletedAccounts($operation, $deactivate = false)
-    {
-        $deletedLdapUsers = array();
-
-        $iterator = new ilEventoImporterIterator();
-
-        while (!($result = &$this->evento_importer->getRecords($operation, 'GeloeschteUser', $iterator))['finished']) {
-            foreach ($result['data'] as $user) {
-                $deletedLdapUsers[] = 'Evento:' . $user['EvtID'];
-            }
-
-            if ($result['is_last']) {
-                break;
-            }
-        }
-
-        if (count($deletedLdapUsers) > 0) {
-            for ($i = 0; $i <= count($deletedLdapUsers); $i += 100) {
-                //hole immer max 100 user aus der ilias db mit bedingung dass diese noch ldap aktiv sind
-                $r = $this->ilDB->query("SELECT login,matriculation FROM `usr_data` WHERE auth_mode='" . $this->auth_mode . "' AND matriculation IN ('" . implode(
-                    "','",
-                    array_slice($deletedLdapUsers, $i, 100)
-                ) . "')");
-                while ($row = $this->ilDB->fetchAssoc($r)) {
-                    //nochmals nachfragen, wenn user wiederhergestellt wurde
-                    $eventoid = substr($row['matriculation'], 7);
-                    $login = $row['login'];
-                    $result = $this->evento_importer->getRecord(
-                        'ExistsHSLUDomainUser',
-                        array('parameters' => array('login' => $login, 'evtid' => $eventoid))
-                    );
-
-                    if ($result->{'ExistsHSLUDomainUserResult'} === false) {
-                        //user nicht mehr aktiv in ldap
-                        if ($deactivate) {
-                            $sql = "UPDATE usr_data SET auth_mode='default', time_limit_until=UNIX_TIMESTAMP() WHERE matriculation LIKE '" . $row['matriculation'] . "'";
-                        } else {
-                            $sql = "UPDATE usr_data SET auth_mode='default' WHERE matriculation LIKE '" . $row['matriculation'] . "'";
-                        }
-
-                        $this->ilDB->manipulate($sql);
-
-                        $this->evento_logger->log(ilEventoImportLogger::CREVENTO_USR_CONVERTED, $row);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * User accounts which don't have a time limitation are limited to
      * two years since their creation.
      */
@@ -180,48 +127,6 @@ class ilEventoImportImportUsers
             //all users are constraint to a value defined in the configuration
             $q = "UPDATE usr_data set time_limit_until='" . $this->until_max . "' WHERE time_limit_until>'" . $this->until_max . "'";
             $this->ilDB->manipulate($q);
-        }
-    }
-
-    private function setMailPreferences($usrId)
-    {
-        $this->ilDB->manipulateF(
-            "UPDATE mail_options SET incoming_type = '2' WHERE user_id = %s",
-            array("integer"),
-            array($usrId)
-        ); //mail nur intern nach export
-    }
-
-    /**
-     * Change login name of a user
-     */
-    private function changeLoginName($usr_id, $new_login)
-    {
-        $q = "UPDATE usr_data SET login = '" . $new_login . "' WHERE usr_id = '" . $usr_id . "'";
-        $this->ilDB->manipulate($q);
-    }
-
-    private function addPersonalPicture($eventoid, $id)
-    {
-
-        // TODO: Implement Picture Method
-        // Early return till the new method is implemented
-        return;
-        // Upload image
-        $has_picture_result = $this->evento_importer->getRecord(
-            'HasPhoto',
-            array('parameters' => array('eventoId' => $eventoid))
-        );
-
-        if (isset($has_picture_result->{'HasPhotoResult'}) && $has_picture_result->{'HasPhotoResult'} === true) {
-            $picture_result = $this->evento_importer->getRecord(
-                'GetPhoto',
-                array('parameters' => array('eventoId' => $eventoid))
-            );
-            $tmp_file = ilUtil::ilTempnam();
-            imagepng(imagecreatefromstring($picture_result->{'GetPhotoResult'}), $tmp_file, 0);
-            ilObjUser::_uploadPersonalPicture($tmp_file, $id);
-            unlink($tmp_file);
         }
     }
 }

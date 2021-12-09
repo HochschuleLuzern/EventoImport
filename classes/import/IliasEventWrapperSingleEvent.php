@@ -33,4 +33,14 @@ class IliasEventWrapperSingleEvent extends IliasEventWrapper
     {
         return $this->evento_event;
     }
+
+    public function getAllAdminRoles() : array
+    {
+        return [$this->evento_event->getAdminRoleId()];
+    }
+
+    public function getAllMemberRoles() : array
+    {
+        return [$this->evento_event->getStudentRoleId()];
+    }
 }

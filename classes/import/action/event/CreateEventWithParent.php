@@ -6,14 +6,15 @@ use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
+use EventoImport\import\db\MembershipManager;
 
 class CreateEventWithParent extends EventAction
 {
     private int $destination_ref_id;
 
-    public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
+    public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
-        parent::__construct($evento_event, $event_object_factory, \ilEventoImportLogger::CREVENTO_MA_EVENT_WITH_PARENT_EVENT_CREATED, $event_settings, $repository_facade, $user_facade, $logger, $rbac_services);
+        parent::__construct($evento_event, $event_object_factory, \ilEventoImportLogger::CREVENTO_MA_EVENT_WITH_PARENT_EVENT_CREATED, $event_settings, $repository_facade, $user_facade, $membership_manager, $logger, $rbac_services);
         $this->destination_ref_id = $destination_ref_id;
     }
 

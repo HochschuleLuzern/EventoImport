@@ -17,7 +17,7 @@ class IliasEventoEvent
     private $end_date;
     private $ilias_type;
 
-    private $parent_event_ref_id;
+    private $parent_event_key;
     private $ref_id;
     private $obj_id;
     private $admin_role_id;
@@ -36,27 +36,26 @@ class IliasEventoEvent
         int $obj_id,
         int $admin_role_id,
         int $student_role_id,
-        int $parent_event_ref_id = null
-    )
-    {
+        string $parent_event_key = null
+    ) {
         // id
-        $this->evento_event_id           = $evento_event_id;
+        $this->evento_event_id = $evento_event_id;
 
         // evento event values
-        $this->evento_title              = $evento_title;
-        $this->evento_description        = $evento_description;
-        $this->evento_event_type         = $evento_event_type;
+        $this->evento_title = $evento_title;
+        $this->evento_description = $evento_description;
+        $this->evento_event_type = $evento_event_type;
         $this->was_automatically_created = $was_automatically_created;
-        $this->start_date                = $start_date;
-        $this->end_date                  = $end_date;
-        $this->ilias_type                = $ilias_type;
+        $this->start_date = $start_date;
+        $this->end_date = $end_date;
+        $this->ilias_type = $ilias_type;
 
         // foreign keys
-        $this->parent_event_ref_id       = $parent_event_ref_id;
-        $this->ref_id                    = $ref_id;
-        $this->obj_id                    = $obj_id;
-        $this->admin_role_id             = $admin_role_id;
-        $this->student_role_id           = $student_role_id;
+        $this->parent_event_key = $parent_event_key;
+        $this->ref_id = $ref_id;
+        $this->obj_id = $obj_id;
+        $this->admin_role_id = $admin_role_id;
+        $this->student_role_id = $student_role_id;
     }
 
     public function getEventoEventId() : int
@@ -64,9 +63,9 @@ class IliasEventoEvent
         return $this->evento_event_id;
     }
 
-    public function getParentEventRefId() : ?int
+    public function getParentEventKey() : ?string
     {
-        return $this->parent_event_ref_id;
+        return $this->parent_event_key;
     }
 
     public function getRefId() : int
