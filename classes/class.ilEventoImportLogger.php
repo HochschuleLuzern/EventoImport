@@ -29,10 +29,12 @@ class ilEventoImportLogger
 {
     private $ilDB;
 
-    const CREVENTO_SUB_CREATED = 101;
-    const CREVENTO_SUB_UPDATED = 102;
+    #const CREVENTO_SUB_CREATED = 101;
+    #const CREVENTO_SUB_UPDATED = 102;
     const CREVENTO_SUB_REMOVED = 103;
-    const CREVENTO_SUB_ADDED = 104;
+    const CREVENTO_SUB_NEWLY_ADDED = 104;
+    const CREVENTO_SUB_ALREADY_ASSIGNED = 105;
+    const CREVENTO_SUB_ALREADY_DEASSIGNED = 106;
     const CREVENTO_SUB_ERROR_CREATING = 121;
     const CREVENTO_SUB_ERROR_REMOVING = 123;
 
@@ -114,10 +116,10 @@ class ilEventoImportLogger
     public function log($result, $data)
     {
         if ($result < 200) {
-            $r = $this->ilDB->queryF("SELECT * FROM crnhk_crevento_subs WHERE usr_id = %s AND role_id = %s", array("integer", "integer"), array($data['usr_id'], $data['role_id']));
+            $r = $this->ilDB->queryF("SELECT * FROM crnhk_crevento_subs WHERE evento_user_id = %s AND evento_event_id = %s", array("integer", "integer"), array($data['usr_id'], $data['role_id']));
             
             if (count($this->ilDB->fetchAll($r)) == 0) {
-                $q = "INSERT INTO crnhk_crevento_subs (usr_id, role_id, last_import_date, update_info_code) VALUES ('{$data['usr_id']}', '{$data['role_id']}', '" . date("Y-m-d H:i:s") . "', '$result')";
+                $q = "INSERT INTO crnhk_crevento_subs (evento_user_id, evento_event_id, last_import_date, update_info_code) VALUES ('{$data['usr_id']}', '{$data['role_id']}', '" . date("Y-m-d H:i:s") . "', '$result')";
             } else {
                 $q = "UPDATE crnhk_crevento_subs SET last_import_date = '" . date("Y-m-d H:i:s") . "', update_info_code = '$result' WHERE usr_id = '{$data['usr_id']}' AND role_id = '{$data['role_id']}'";
             }
@@ -188,6 +190,48 @@ class ilEventoImportLogger
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
                 ]
             );
+        }
+    }
+
+    public function logEventMembership(int $log_info_code, int $evento_event_id, int $evento_user_id, int $role_type)
+    {
+        if ($log_info_code < 100 || $log_info_code >= 200) {
+            $this->logException("log", "Tried to log membership import, info code of other import given instead: " . $log_info_code);
+            return;
+        }
+        try {
+            $r = $this->ilDB->query('SELECT 1 FROM crnhk_crevento_subs'
+                . ' WHERE evento_event_id = ' . $this->ilDB->quote($evento_event_id, \ilDBConstants::T_INTEGER)
+                . ' AND evento_user_id = ' . $this->ilDB->quote($evento_user_id, \ilDBConstants::T_INTEGER)
+                . ' LIMIT 1');
+
+            if (count($this->ilDB->fetchAll($r)) == 0) {
+                $this->ilDB->insert(
+                    'crnhk_crevento_subs',
+                    [
+                    'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
+                    'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id],
+                    'role_type' => [\ilDBConstants::T_INTEGER, $role_type],
+                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                ]
+                );
+            } else {
+                $this->ilDB->update(
+                    'crnhk_crevento_subs',
+                    [
+                    'role_type' => [\ilDBConstants::T_INTEGER, $role_type],
+                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                ],
+                    [
+                    'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
+                    'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id]
+                ]
+                );
+            }
+        } catch (\Exception $e) {
+            $this->logException('Log Membership', $e->getMessage() . $e->getTraceAsString());
         }
     }
 }

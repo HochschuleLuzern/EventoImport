@@ -240,7 +240,7 @@ class ilEventoImportImport extends ilCronJob
 
             $default_event_settings = new \EventoImport\import\settings\DefaultEventSettings($this->settings);
             $ilias_event_object_factory = new \EventoImport\import\IliasEventObjectFactory($repository_facade, $default_event_settings);
-            $membership_manager = new \EventoImport\import\db\MembershipManager($memberhip_repo, $user_repo, $event_repo, new ilFavouritesManager(), $this->rbac);
+            $membership_manager = new \EventoImport\import\db\MembershipManager($memberhip_repo, $user_repo, $event_repo, new ilFavouritesManager(), $logger, $this->rbac);
             $event_action_factory = new \EventoImport\import\action\event\EventActionFactory($ilias_event_object_factory, $repository_facade, $user_facade, $membership_manager, $default_event_settings, $logger);
             $event_action_decider = new \EventoImport\import\data_matching\EventImportActionDecider($repository_facade, $event_action_factory);
 

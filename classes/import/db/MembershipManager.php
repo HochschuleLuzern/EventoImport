@@ -19,6 +19,7 @@ class MembershipManager
      */
     private $membership_repo;
     private $favourites_manager;
+    private $logger;
 
     private const ROLE_ADMIN = 1;
     private const ROLE_MEMBER = 2;
@@ -28,12 +29,14 @@ class MembershipManager
         EventoUserRepository $user_repo,
         IliasEventoEventsRepository $event_repo,
         \ilFavouritesManager $favourites_manager,
+        \ilEventoImportLogger $logger,
         RBACServices $rbac_services
     ) {
         $this->membership_repo = $membership_repo;
         $this->user_repo = $user_repo;
         $this->event_repo = $event_repo;
         $this->favourites_manager = $favourites_manager;
+        $this->logger = $logger;
         $this->rbac_review = $rbac_services->review();
         $this->rbac_admin = $rbac_services->admin();
     }
@@ -90,8 +93,7 @@ class MembershipManager
         int $role_id_of_main_event,
         array $parent_membership_objects,
         int $role_type
-    )
-    {
+    ) {
         /** @var EventoUserShort $evento_user */
         foreach ($evento_user_list as $evento_user) {
             $user_id = $this->user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
@@ -99,6 +101,9 @@ class MembershipManager
             if (!$this->rbac_review->isAssigned($user_id, $role_id_of_main_event)) {
                 $this->rbac_admin->assignUser($role_id_of_main_event, $user_id);
                 $this->favourites_manager->add($user_id, $ilias_evento_event->getRefId());
+                $this->logger->logEventMembership(\ilEventoImportLogger::CREVENTO_SUB_NEWLY_ADDED, $ilias_evento_event->getEventoEventId(), $evento_user->getEventoId(), $role_type);
+            } else {
+                $this->logger->logEventMembership(\ilEventoImportLogger::CREVENTO_SUB_ALREADY_ASSIGNED, $ilias_evento_event->getEventoEventId(), $evento_user->getEventoId(), $role_type);
             }
 
             /** @var \ilObject $parent_membership_object */
@@ -121,33 +126,35 @@ class MembershipManager
         array $from_import_subscribed_members,
         array $parent_membership_objects,
         int $role_type
-    )
-    {
-        /** @var IliasEventoUser $member */
-        foreach ($from_import_subscribed_members as $member) {
+    ) {
+        /** @var IliasEventoUser $ilias_evento_user */
+        foreach ($from_import_subscribed_members as $ilias_evento_user) {
 
             // Check if user was in current import
-            if (!$this->isMemberInCurrentImport($member, $evento_user_list)) {
+            if (!$this->isMemberInCurrentImport($ilias_evento_user, $evento_user_list)) {
 
                 // Always remove from main event
-                if (!$this->rbac_review->isAssigned($member->getIliasUserId(), $role_id_of_main_event)) {
-                    $this->rbac_admin->deassignUser($role_id_of_main_event, $member->getIliasUserId());
-                    $this->favourites_manager->remove($member->getIliasUserId(), $ilias_evento_event->getRefId());
+                if (!$this->rbac_review->isAssigned($ilias_evento_user->getIliasUserId(), $role_id_of_main_event)) {
+                    $this->rbac_admin->deassignUser($role_id_of_main_event, $ilias_evento_user->getIliasUserId());
+                    $this->favourites_manager->remove($ilias_evento_user->getIliasUserId(), $ilias_evento_event->getRefId());
+                    $this->logger->logEventMembership(\ilEventoImportLogger::CREVENTO_SUB_REMOVED, $ilias_evento_event->getEventoEventId(), $ilias_evento_user->getEventoId(), $role_type);
+                } else {
+                    $this->logger->logEventMembership(\ilEventoImportLogger::CREVENTO_SUB_ALREADY_DEASSIGNED, $ilias_evento_event->getEventoEventId(), $ilias_evento_user->getEventoId(), $role_type);
                 }
 
                 if (!is_null($ilias_evento_event->getParentEventKey())
                     && !$this->membership_repo->checkIfUserHasMembershipInOtherSubEvent(
                         $ilias_evento_event->getParentEventKey(),
-                        $member->getEventoUserId(),
+                        $ilias_evento_user->getEventoUserId(),
                         $ilias_evento_event->getEventoEventId()
                     )
                 ) {
                     foreach ($parent_membership_objects as $parent_membership_object) {
                         $role_id = $this->getRoleIdForObjectOrNull($parent_membership_object, $role_type);
 
-                        if (!is_null($role_id) && !$this->rbac_review->isAssigned($member->getIliasUserId(), $parent_membership_object)) {
-                            $this->rbac_admin->deassignUser($role_id, $member->getIliasUserId());
-                            $this->favourites_manager->add($member->getIliasUserId(), $parent_membership_object->getRefId());
+                        if (!is_null($role_id) && !$this->rbac_review->isAssigned($ilias_evento_user->getIliasUserId(), $parent_membership_object)) {
+                            $this->rbac_admin->deassignUser($role_id, $ilias_evento_user->getIliasUserId());
+                            $this->favourites_manager->add($ilias_evento_user->getIliasUserId(), $parent_membership_object->getRefId());
                         }
                     }
                 }

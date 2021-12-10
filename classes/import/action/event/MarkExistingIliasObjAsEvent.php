@@ -10,16 +10,20 @@ use EventoImport\import\db\MembershipManager;
 
 class MarkExistingIliasObjAsEvent extends EventAction
 {
+    private $ilias_object;
+
     public function __construct(EventoEvent $evento_event, \ilContainer $ilias_object, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
-        parent::__construct($evento_event, $event_object_factory, \ilEventoImportLogger::CREVENTO_MA_EXISTING_ILIAS_COURSE_AS_EVENT_MARKED ,$event_settings, $repository_facade, $user_facade, $membership_manager,$logger, $rbac_services);
+        parent::__construct($evento_event, $event_object_factory, \ilEventoImportLogger::CREVENTO_MA_EXISTING_ILIAS_COURSE_AS_EVENT_MARKED, $event_settings, $repository_facade, $user_facade, $membership_manager, $logger, $rbac_services);
 
         $this->ilias_object = $ilias_object;
     }
 
     public function executeAction()
     {
+        if ($this->ilias_object instanceof \ilObjCourse && $this->ilias_object->getType() == 'crs') {
+            $this->repository_facade->addNewSingleEventCourse($this->evento_event, $this->ilias_object);
+        }
         throw new \Error("not implemented yet");
-        // TODO: Implement executeAction() method.
     }
 }
