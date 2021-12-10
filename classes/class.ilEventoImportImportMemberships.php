@@ -55,8 +55,7 @@ class ilEventoImportImportMemberships
         RBACServices $rbac,
         ilRoleMailboxSearch $mailbox_search,
         ilFavouritesManager $favourites_manager
-    )
-    {
+    ) {
         $this->evento_importer = $event_importer;
         $this->evento_logger = $logger;
         

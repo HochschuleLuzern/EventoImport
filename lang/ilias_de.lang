@@ -37,8 +37,10 @@ location_years#:#Jahre
 api_settings#:#API Einstellungen
 api_uri#:#URI
 api_uri_desc#:#URI der API. Beispiel: https://evento.hslu.ch:443/services/evento_import
-auth_token#:#Authentifizierungs Token
-auth_token_desc#:#Wird verwendet um sich bei der API zu authentifizieren
+auth_key#:#API Key
+auth_key_desc#:#API Key zur Schnittstelle
+auth_secret#:#API Secret
+auth_secret_desc#:#Wird verwendet um sich bei der API zu authentifizieren
 api_page_size#:#Seitengrösse
 api_page_size_desc#:#Anzahl der Datensätze die in einem Rutsch ausgelesen werden sollen. Eine grössere Anzahl beschläunigt den Prozess, braucht aber auch mehr Arbeitsspeicher.
 api_max_pages#:#Maximale Seitenanzahl

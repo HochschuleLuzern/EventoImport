@@ -5,8 +5,10 @@ class ilEventoImportCronConfig
     const LANG_HEADER_API_SETTINGS = 'api_settings';
     const LANG_API_URI = 'api_uri';
     const LANG_API_URI_DESC = 'api_uri_desc';
-    const LANG_API_AUTH_TOKEN = 'auth_token';
-    const LANG_API_AUTH_TOKEN_DESC = 'auth_token_desc';
+    const LANG_API_AUTH_KEY = 'auth_key';
+    const LANG_API_AUTH_KEY_DESC = 'auth_key_desc';
+    const LANG_API_AUTH_SECRET = 'auth_secret';
+    const LANG_API_AUTH_SECRET_DESC = 'auth_secret_desc';
     const LANG_API_PAGE_SIZE = 'api_page_size';
     const LANG_API_PAGE_SIZE_DESC = 'api_page_size_desc';
     const LANG_API_MAX_PAGES = 'api_max_pages';
@@ -44,7 +46,8 @@ class ilEventoImportCronConfig
     const LANG_EVENT_OPT_OWNER_CUSTOM_ID = 'object_owner_id';
 
     const FORM_API_URI = 'crevento_api_uri';
-    const FORM_API_AUTH_TOKEN = 'crevento_api_auth_token';
+    const FORM_API_AUTH_KEY = 'crevento_api_auth_key';
+    const FORM_API_AUTH_SECRET = 'crevento_api_auth_secret';
     const FORM_API_PAGE_SIZE = 'crevento_api_page_size';
     const FORM_API_MAX_PAGES = 'crevento_api_max_pages';
     const FORM_API_TIMEOUT_AFTER_REQUEST = 'crevento_api_timeout_after_request';
@@ -67,7 +70,8 @@ class ilEventoImportCronConfig
     const FORM_EVENT_OPT_OWNER_CUSTOM_ID = 'crevento_object_owner_custom_id';
 
     const CONF_API_URI = 'crevento_api_uri';
-    const CONF_API_AUTH_TOKEN = 'crevento_api_auth_token';
+    const CONF_API_AUTH_KEY = 'crevento_api_auth_key';
+    const CONF_API_AUTH_SECRET = 'crevento_api_auth_secret';
     const CONF_API_PAGE_SIZE = 'crevento_api_page_size';
     const CONF_API_MAX_PAGES = 'crevento_api_max_pages';
     const CONF_API_TIMEOUT_AFTER_REQUEST = 'crevento_api_timeout_after_request';
@@ -119,12 +123,21 @@ class ilEventoImportCronConfig
         $a_form->addItem($ws_item);
 
         $ws_item = new ilTextInputGUI(
-            $this->cp->txt(self::LANG_API_AUTH_TOKEN),
-            self::FORM_API_AUTH_TOKEN
+            $this->cp->txt(self::LANG_API_AUTH_KEY),
+            self::FORM_API_AUTH_KEY
         );
-        $ws_item->setInfo($this->cp->txt(self::LANG_API_AUTH_TOKEN_DESC));
+        $ws_item->setInfo($this->cp->txt(self::LANG_API_AUTH_KEY_DESC));
         $ws_item->setRequired(false);
-        $ws_item->setValue($this->settings->get(self::CONF_API_AUTH_TOKEN, ''));
+        $ws_item->setValue($this->settings->get(self::CONF_API_AUTH_KEY, ''));
+        $a_form->addItem($ws_item);
+
+        $ws_item = new ilTextInputGUI(
+            $this->cp->txt(self::LANG_API_AUTH_SECRET),
+            self::FORM_API_AUTH_SECRET
+        );
+        $ws_item->setInfo($this->cp->txt(self::LANG_API_AUTH_SECRET_DESC));
+        $ws_item->setRequired(false);
+        $ws_item->setValue($this->settings->get(self::CONF_API_AUTH_SECRET, ''));
         $a_form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
@@ -415,7 +428,8 @@ class ilEventoImportCronConfig
          * API Settings
          ***************************/
         $this->getTextInputAndSaveIfNotNull($a_form, self::FORM_API_URI, self::CONF_API_URI);
-        $this->getTextInputAndSaveIfNotNull($a_form, self::FORM_API_AUTH_TOKEN, self::CONF_API_AUTH_TOKEN);
+        $this->getTextInputAndSaveIfNotNull($a_form, self::FORM_API_AUTH_KEY, self::CONF_API_AUTH_KEY);
+        $this->getTextInputAndSaveIfNotNull($a_form, self::FORM_API_AUTH_SECRET, self::CONF_API_AUTH_SECRET);
         $this->getIntegerInputAndSaveIfNotNull($a_form, self::FORM_API_PAGE_SIZE, self::CONF_API_PAGE_SIZE);
         $this->getIntegerInputAndSaveIfNotNull($a_form, self::FORM_API_MAX_PAGES, self::CONF_API_MAX_PAGES);
         $this->getIntegerInputAndSaveIfNotNull(

@@ -15,7 +15,7 @@ class ApiImporterSettings
     public function __construct(\ilSetting $settings)
     {
         $this->url = $settings->get(\ilEventoImportCronConfig::CONF_API_URI);
-        $this->auth_token = $settings->get(\ilEventoImportCronConfig::CONF_API_AUTH_TOKEN);
+        $this->auth_token = $settings->get(\ilEventoImportCronConfig::CONF_API_AUTH_KEY);
         $this->page_size = $settings->get(\ilEventoImportCronConfig::CONF_API_PAGE_SIZE);
         $this->max_pages = $settings->get(\ilEventoImportCronConfig::CONF_API_MAX_PAGES);
         $this->timeout_after_request = $settings->get(\ilEventoImportCronConfig::CONF_API_TIMEOUT_AFTER_REQUEST);
