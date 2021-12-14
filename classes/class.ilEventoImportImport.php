@@ -164,16 +164,16 @@ class ilEventoImportImport extends ilCronJob
     {
         try {
             $logger = new ilEventoImportLogger($this->db);
-            
-            /*
-            $base_url = '';
-            $port = 1337;
-            $base_path = '';
-            $data_source = new \EventoImport\communication\request_services\RestClientService($base_url, $port, $base_path);
-            */
 
             $api_settings = new \EventoImport\communication\ApiImporterSettings($this->settings);
-            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
+
+            $data_source = new \EventoImport\communication\request_services\RestClientService(
+                $api_settings->getUrl(),
+                $api_settings->getTimeoutAfterRequest(),
+                $api_settings->getApikey(),
+                $api_settings->getApiSecret()
+            );
+
             $data_record_importer = new \EventoImport\communication\generic_importers\SingleDataRecordImport(
                 $data_source,
                 $api_settings->getMaxRetries(),

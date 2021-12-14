@@ -5,7 +5,8 @@ namespace EventoImport\communication;
 class ApiImporterSettings
 {
     private $url;
-    private $auth_token;
+    private $api_key;
+    private $api_secret;
     private $page_size;
     private $max_pages;
     private $timeout_after_request;
@@ -15,12 +16,13 @@ class ApiImporterSettings
     public function __construct(\ilSetting $settings)
     {
         $this->url = $settings->get(\ilEventoImportCronConfig::CONF_API_URI);
-        $this->auth_token = $settings->get(\ilEventoImportCronConfig::CONF_API_AUTH_KEY);
-        $this->page_size = $settings->get(\ilEventoImportCronConfig::CONF_API_PAGE_SIZE);
-        $this->max_pages = $settings->get(\ilEventoImportCronConfig::CONF_API_MAX_PAGES);
-        $this->timeout_after_request = $settings->get(\ilEventoImportCronConfig::CONF_API_TIMEOUT_AFTER_REQUEST);
-        $this->timeout_failed_request = $settings->get(\ilEventoImportCronConfig::CONF_API_TIMEOUT_FAILED_REQUEST);
-        $this->max_retries = $settings->get(\ilEventoImportCronConfig::CONF_API_MAX_RETRIES);
+        $this->api_key = $settings->get(\ilEventoImportCronConfig::CONF_API_AUTH_KEY, '');
+        $this->api_secret = $settings->get(\ilEventoImportCronConfig::CONF_API_AUTH_SECRET, '');
+        $this->page_size = $settings->get(\ilEventoImportCronConfig::CONF_API_PAGE_SIZE, 500);
+        $this->max_pages = $settings->get(\ilEventoImportCronConfig::CONF_API_MAX_PAGES, -1);
+        $this->timeout_after_request = $settings->get(\ilEventoImportCronConfig::CONF_API_TIMEOUT_AFTER_REQUEST, 60);
+        $this->timeout_failed_request = $settings->get(\ilEventoImportCronConfig::CONF_API_TIMEOUT_FAILED_REQUEST, 60);
+        $this->max_retries = $settings->get(\ilEventoImportCronConfig::CONF_API_MAX_RETRIES, 3);
     }
 
     /**
@@ -42,17 +44,25 @@ class ApiImporterSettings
     /**
      * @return false|string
      */
-    public function getAuthToken()
+    public function getApikey()
     {
-        return $this->auth_token;
+        return $this->api_key;
     }
 
     /**
-     * @param false|string $auth_token
+     * @param false|string $api_key
      */
-    public function setAuthToken($auth_token) : void
+    public function setApikey($api_key) : void
     {
-        $this->auth_token = $auth_token;
+        $this->api_key = $api_key;
+    }
+
+    /**
+     * @return string
+     */
+    public function getApiSecret()
+    {
+        return $this->api_secret;
     }
 
     /**

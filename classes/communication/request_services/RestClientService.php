@@ -6,14 +6,20 @@ class RestClientService implements RequestClientService
 {
     private $base_uri;
     private $timeout_after_request_seconds;
+    private $api_key;
+    private $api_secret;
 
     public function __construct(
         string $base_uri,
-        int $timeout_after_request_seconds
+        int $timeout_after_request_seconds,
+        string $api_key,
+        string $api_secret
     ) {
         //$this->base_uri = "https://$base_url:$port$base_path";
         $this->base_uri = $base_uri;
         $this->timeout_after_request_seconds = $timeout_after_request_seconds;
+        $this->api_key = $api_key;
+        $this->api_secret = $api_secret;
 
         if (filter_var($this->base_uri, FILTER_VALIDATE_URL, [FILTER_FLAG_SCHEME_REQUIRED, FILTER_FLAG_HOST_REQUIRED, FILTER_FLAG_PATH_REQUIRED]) === false) {
             throw new \InvalidArgumentException('Invalid Base-URI given! ' . $this->base_uri);
@@ -36,6 +42,9 @@ class RestClientService implements RequestClientService
         if (filter_var($this->base_uri, FILTER_VALIDATE_URL, [FILTER_FLAG_SCHEME_REQUIRED, FILTER_FLAG_HOST_REQUIRED, FILTER_FLAG_PATH_REQUIRED]) === false) {
             throw new \InvalidArgumentException('Invalid Base-URI given! ' . $this->base_uri);
         }
+
+        $request_params['CampusApiKey'] = $this->api_key;
+        $request_params['CampusApiSecret'] = $this->api_secret;
 
         return $url_without_query_params . '?' . http_build_query($request_params);
     }
