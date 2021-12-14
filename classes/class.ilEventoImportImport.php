@@ -225,7 +225,7 @@ class ilEventoImportImport extends ilCronJob
             $user_import_action_decider = new \EventoImport\import\data_matching\UserActionDecider($user_facade, $user_action_factory);
 
             $importUsers = new ilEventoImportImportUsers($user_importer, $user_import_action_decider, $user_facade, $logger);
-            //$importUsers->run();
+            $importUsers->run();
 
             /* Event import */
             $event_query = new \EventoImport\import\db\query\IliasEventObjectQuery($this->db);

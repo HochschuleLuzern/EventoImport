@@ -70,7 +70,10 @@ class ilEventoImportLogger
     const CREVENTO_USR_CONVERTED = 304;
     const CREVENTO_USR_NOTICE_CONFLICT = 313;
     const CREVENTO_USR_ERROR_ERROR = 324;
-    
+
+    const TABLE_LOG_USERS = 'crevento_log_users';
+    const TABLE_LOG_EVENTS = 'crevento_log_events';
+    const TABLE_LOG_MEMBERSHIPS = 'crevento_log_members';
     
     public function __construct(ilDBInterface $db)
     {
@@ -84,11 +87,11 @@ class ilEventoImportLogger
             return;
         }
 
-        $r = $this->ilDB->query("SELECT 1 FROM crnhk_crevento_usrs WHERE evento_id = " . $this->ilDB->quote($evento_id, \ilDBConstants::T_INTEGER) . ' LIMIT 1');
+        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_USERS . " WHERE evento_id = " . $this->ilDB->quote($evento_id, \ilDBConstants::T_INTEGER) . ' LIMIT 1');
 
         if (count($this->ilDB->fetchAll($r)) == 0) {
             $this->ilDB->insert(
-                'crnhk_crevento_usrs',
+                self::TABLE_LOG_USERS,
                 [
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id],
                     'usrname' => [\ilDBConstants::T_TEXT, $username],
@@ -99,7 +102,7 @@ class ilEventoImportLogger
             );
         } else {
             $this->ilDB->update(
-                'crnhk_crevento_usrs',
+                self::TABLE_LOG_USERS,
                 [
                     'usrname' => [\ilDBConstants::T_TEXT, $username],
                     'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
@@ -112,46 +115,7 @@ class ilEventoImportLogger
             );
         }
     }
-    
-    public function log($result, $data)
-    {
-        if ($result < 200) {
-            $r = $this->ilDB->queryF("SELECT * FROM crnhk_crevento_subs WHERE evento_user_id = %s AND evento_event_id = %s", array("integer", "integer"), array($data['usr_id'], $data['role_id']));
-            
-            if (count($this->ilDB->fetchAll($r)) == 0) {
-                $q = "INSERT INTO crnhk_crevento_subs (evento_user_id, evento_event_id, last_import_date, update_info_code) VALUES ('{$data['usr_id']}', '{$data['role_id']}', '" . date("Y-m-d H:i:s") . "', '$result')";
-            } else {
-                $q = "UPDATE crnhk_crevento_subs SET last_import_date = '" . date("Y-m-d H:i:s") . "', update_info_code = '$result' WHERE usr_id = '{$data['usr_id']}' AND role_id = '{$data['role_id']}'";
-            }
-        } elseif ($result < 300) {
-            if (!isset($data['role_id'])) {
-                $data['role_id'] = "null";
-            }
-            
-            if ($data['EndDatum'] != "") {
-                $data['EndDatum'] = date('Y-m-d H:i:s', strtotime($data['EndDatum']));
-            }
-            
-            $r = $this->ilDB->query("SELECT * FROM crnhk_crevento_mas WHERE evento_id = '{$data['AnlassBezKurz']}'");
-            
-            if (count($this->ilDB->fetchAll($r)) == 0) {
-                $q = "INSERT INTO crnhk_crevento_mas (evento_id, ref_id, role_id, end_date, number_of_subs, last_import_data, last_import_date, update_info_code) VALUES ('{$data['AnlassBezKurz']}', '{$data['ref_id']}', '{$data['role_id']}', '{$data['EndDatum']}', '{$data['number_of_subs']}', " . $this->ilDB->quote(serialize($data), 'text') . ",'" . date("Y-m-d H:i:s") . "', '$result')";
-            } else {
-                $q = "UPDATE crnhk_crevento_mas SET ref_id = '{$data['ref_id']}', role_id = '{$data['role_id']}', end_date = '{$data['EndDatum']}', number_of_subs = '{$data['number_of_subs']}', last_import_data = " . $this->ilDB->quote(serialize($data), 'text') . " ,last_import_date = '" . date("Y-m-d H:i:s") . "', update_info_code = '$result' WHERE evento_id = '{$data['AnlassBezKurz']}'";
-            }
-        } else {
-            $r = $this->ilDB->query("SELECT * FROM crnhk_crevento_usrs WHERE evento_id = '{$data['id']}'");
 
-            if (count($this->ilDB->fetchAll($r)) == 0) {
-                $q = "INSERT INTO crnhk_crevento_usrs (evento_id, usrname, last_import_data, last_import_date, update_info_code) VALUES ('{$data['id']}', '{$data['loginName']}', " . $this->ilDB->quote(serialize($data), 'text') . ", '" . date("Y-m-d H:i:s") . "', '$result')";
-            } else {
-                $q = "UPDATE crnhk_crevento_usrs SET usrname = '{$data['loginName']}', last_import_data = " . $this->ilDB->quote(serialize($data), 'text') . " ,last_import_date = '" . date("Y-m-d H:i:s") . "', update_info_code = '$result' WHERE evento_id = '{$data['id']}'";
-            }
-        }
-        
-        $this->ilDB->manipulate($q);
-    }
-    
     public function logException($operation, $message)
     {
         ilLoggerFactory::getRootLogger()->error("EventoImport failed while $operation due to '$message'");
@@ -164,11 +128,11 @@ class ilEventoImportLogger
             return;
         }
 
-        $r = $this->ilDB->query("SELECT 1 FROM crnhk_crevento_mas WHERE evento_id = " . $this->ilDB->quote($evento_id, \ilDBConstants::T_INTEGER) . ' LIMIT 1');
+        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_EVENTS . " WHERE evento_id = " . $this->ilDB->quote($evento_id, \ilDBConstants::T_INTEGER) . ' LIMIT 1');
 
         if (count($this->ilDB->fetchAll($r)) == 0) {
             $this->ilDB->insert(
-                'crnhk_crevento_mas',
+                self::TABLE_LOG_EVENTS,
                 [
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id],
                     'ref_id' => [\ilDBConstants::T_TEXT, $ref_id],
@@ -179,7 +143,7 @@ class ilEventoImportLogger
             );
         } else {
             $this->ilDB->update(
-                'crnhk_crevento_mas',
+                self::TABLE_LOG_EVENTS,
                 [
                     'ref_id' => [\ilDBConstants::T_TEXT, $ref_id],
                     'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
@@ -200,14 +164,14 @@ class ilEventoImportLogger
             return;
         }
         try {
-            $r = $this->ilDB->query('SELECT 1 FROM crnhk_crevento_subs'
+            $r = $this->ilDB->query('SELECT 1 FROM ' . self::TABLE_LOG_MEMBERSHIPS
                 . ' WHERE evento_event_id = ' . $this->ilDB->quote($evento_event_id, \ilDBConstants::T_INTEGER)
                 . ' AND evento_user_id = ' . $this->ilDB->quote($evento_user_id, \ilDBConstants::T_INTEGER)
                 . ' LIMIT 1');
 
             if (count($this->ilDB->fetchAll($r)) == 0) {
                 $this->ilDB->insert(
-                    'crnhk_crevento_subs',
+                    self::TABLE_LOG_MEMBERSHIPS,
                     [
                     'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
                     'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id],
@@ -218,7 +182,7 @@ class ilEventoImportLogger
                 );
             } else {
                 $this->ilDB->update(
-                    'crnhk_crevento_subs',
+                    self::TABLE_LOG_MEMBERSHIPS,
                     [
                     'role_type' => [\ilDBConstants::T_INTEGER, $role_type],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],

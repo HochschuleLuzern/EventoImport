@@ -349,3 +349,104 @@ if (!$ilDB->tableExists($table_name)) {
     $ilDB->addPrimaryKey($table_name, array(\EventoImport\import\db\repository\ParentEventRepository::COL_GROUP_UNIQUE_KEY));
 }
 ?>
+<#7>
+<?php
+$table_name = 'crevento_log_users';
+if (!$ilDB->tableExists($table_name)) {
+    $fields = array(
+        'evento_id' => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => true
+        ),
+        'usrname' => array(
+            'type' => 'text',
+            'length' => 50,
+            'notnull' => true
+        ),
+        'last_import_data' => array(
+            'type' => 'text',
+            'length' => 4000,
+            'notnull' => false
+        ),
+        'last_import_date' => array(
+            'type' => 'timestamp',
+            'notnull' => true
+        ),
+        'update_info_code' => array(
+            'type' => 'integer',
+            'length' => 2,
+            'notnull' => true
+        )
+    );
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, array("evento_id"));
+}
+
+$table_name = 'crevento_log_members';
+if (!$ilDB->tableExists($table_name)) {
+    $fields = array(
+        'evento_event_id' => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => true
+        ),
+        'evento_user_id' => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => true
+        ),
+        'role_type' => array(
+            'type' => 'integer',
+            'length' => 1,
+            'notnull' => true
+        ),
+        'last_import_date' => array(
+            'type' => 'timestamp',
+            'notnull' => true
+        ),
+        'update_info_code' => array(
+            'type' => 'integer',
+            'length' => 2,
+            'notnull' => true
+        )
+    );
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, array('evento_event_id', 'evento_user_id'));
+}
+
+$table_name = 'crevento_log_events';
+if (!$ilDB->tableExists($table_name)) {
+    $fields = array(
+        'evento_id' => array(
+            'type' => 'text',
+            'length' => 50,
+            'notnull' => true
+        ),
+        'ref_id' => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => false
+        ),
+        'last_import_data' => array(
+            'type' => 'text',
+            'length' => 4000,
+            'notnull' => false
+        ),
+        'last_import_date' => array(
+            'type' => 'timestamp',
+            'notnull' => true
+        ),
+        'update_info_code' => array(
+            'type' => 'integer',
+            'length' => 2,
+            'notnull' => true
+        )
+    );
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, array("evento_id"));
+}
+?>
