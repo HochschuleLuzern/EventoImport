@@ -265,10 +265,11 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 
     public function buildRequestService(\EventoImport\communication\ApiImporterSettings $importer_settings) : \EventoImport\communication\request_services\RequestClientService
     {
-        //return new \EventoImport\communication\request_services\FakeRestClientService();
         return new \EventoImport\communication\request_services\RestClientService(
             $importer_settings->getUrl(),
             $importer_settings->getTimeoutAfterRequest(),
+            $importer_settings->getApikey(),
+            $importer_settings->getApiSecret()
         );
     }
 
