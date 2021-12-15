@@ -4,6 +4,7 @@ namespace EventoImport\import\data_matching;
 
 use EventoImport\import\action\event\EventActionFactory;
 use EventoImport\import\db\RepositoryFacade;
+use EventoImport\import\action\EventoImportAction;
 
 class EventImportActionDecider
 {
@@ -17,7 +18,7 @@ class EventImportActionDecider
     }
 
 
-    public function determineAction(\EventoImport\communication\api_models\EventoEvent $evento_event)
+    public function determineAction(\EventoImport\communication\api_models\EventoEvent $evento_event) : EventoImportAction
     {
         $ilias_event = $this->repository_facade->getIliasEventByEventoIdOrReturnNull($evento_event->getEventoId());
         if (!is_null($ilias_event) && $ilias_event->getIliasEventoEventObj()->wasAutomaticallyCreated() == $evento_event->hasCreateCourseFlag()) {
