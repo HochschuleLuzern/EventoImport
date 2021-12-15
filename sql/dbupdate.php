@@ -157,6 +157,10 @@ if (!$ilDB->tableExists($table_name)) {
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
+        ),
+        \EventoImport\import\db\repository\EventoUserRepository::COL_LAST_TIME_DELIVERED => array(
+            'type' => ilDBConstants::T_TIMESTAMP,
+            'notnull' => true
         )
     );
 
