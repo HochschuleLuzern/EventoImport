@@ -23,26 +23,22 @@ class RenameExistingCreateNew extends UserImportAction
 
     private function renameExistingUser(\ilObjUser $old_user)
     {
-        /*
-        $userObj = $this->user_facade->getExistingIliasUserObject($old_user_id);
-        $userObj->read();
-*/
         $old_user_evento_id = trim(substr($old_user->getMatriculation(), 8));
         $changed_user_data['user_id'] = $old_user->getId();
         $changed_user_data['EvtID'] = $old_user_evento_id;
         $changed_user_data['new_user_info'] = $this->evento_user->getEventoId();
         $changed_user_data['found_by'] = $this->found_by;
 
-        $data['Login'] = date('Ymd') . '_' . $userObj->getLogin();
-        $data['FirstName'] = $userObj->getFirstname();
-        $data['LastName'] = $userObj->getLastname();
-        $data['Gender'] = $userObj->getGender();
-        $data['Matriculation'] = $userObj->getMatriculation();
+        $data['Login'] = date('Ymd') . '_' . $old_user->getLogin();
+        $data['FirstName'] = $old_user->getFirstname();
+        $data['LastName'] = $old_user->getLastname();
+        $data['Gender'] = $old_user->getGender();
+        $data['Matriculation'] = $old_user->getMatriculation();
 
-        $userObj->setActive(false);
-        $userObj->update();
-        $userObj->setLogin($data['Login']);
-        $userObj->updateLogin($userObj->getLogin());
+        $old_user->setActive(false);
+        $old_user->update();
+        $old_user->setLogin($data['Login']);
+        $old_user->updateLogin($old_user->getLogin());
 
         $this->logger->logUserImport(
             \ilEventoImportLogger::CREVENTO_USR_RENAMED,
