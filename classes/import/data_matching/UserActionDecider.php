@@ -15,6 +15,14 @@ class UserActionDecider
         $this->action_factory = $action_factory;
     }
 
+    private function addUserToEventoIliasMappingTable(
+        \EventoImport\communication\api_models\EventoUser $evento_user,
+        int $ilias_user_id
+    ) {
+        $ilias_user = $this->user_facade->getExistingIliasUserObject($ilias_user_id);
+        $this->user_facade->eventoUserRepository()->addNewEventoIliasUser($evento_user, $ilias_user);
+    }
+
     public function determineImportAction(\EventoImport\communication\api_models\EventoUser $evento_user) : EventoImportAction
     {
         $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
@@ -70,6 +78,7 @@ class UserActionDecider
                             $evento_user,
                             $data['id_by_login']
                         );
+                        $this->addUserToEventoIliasMappingTable($evento_user, $data['id_by_login']);
                     } else {
                         if (strlen($user_obj_by_login->getMatriculation()) != 0) {
                             // The user account by login has a matriculation of some kind
@@ -82,6 +91,7 @@ class UserActionDecider
                                 $evento_user,
                                 $data['id_by_login']
                             );
+                            $this->addUserToEventoIliasMappingTable($evento_user, $data['id_by_login']);
                         }
                     }
                 }
@@ -115,6 +125,7 @@ class UserActionDecider
                                 $evento_user,
                                 $data['ids_by_email'][0]
                             );
+                            $this->addUserToEventoIliasMappingTable($evento_user, $data['ids_by_email'][0]);
                         }
                     }
                 } else {
@@ -128,6 +139,7 @@ class UserActionDecider
                             $evento_user,
                             $data['ids_by_matriculation'][0]
                         );
+                        $this->addUserToEventoIliasMappingTable($evento_user, $data['ids_by_matriculation'][0]);
                     } else {
                         if (count($data['ids_by_matriculation']) == 1 &&
                             $data['id_by_login'] == 0) {
@@ -139,6 +151,7 @@ class UserActionDecider
                                 $evento_user,
                                 $data['ids_by_matriculation'][0]
                             );
+                            $this->addUserToEventoIliasMappingTable($evento_user, $data['ids_by_matriculation'][0]);
                         } else {
                             if (count($data['ids_by_matriculation']) == 1 &&
                                 $data['id_by_login'] != 0 &&
