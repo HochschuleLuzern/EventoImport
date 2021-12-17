@@ -2,16 +2,24 @@
 
 namespace EventoImport\communication\api_models;
 
+/**
+ * Class EventoUserPhoto
+ * @package EventoImport\communication\api_models
+ */
 class EventoUserPhoto extends ApiDataModelBase
 {
     public const JSON_ID_ACCOUNT = 'idAccount';
     public const JSON_HAS_PHOTO = 'hasPhoto';
     public const JSON_IMG_DATA = 'imgData';
 
-    private $id_account;
-    private $has_photo;
-    private $img_data;
-    protected $decoded_api_data;
+    /** @var int */
+    private ?int $id_account;
+
+    /** @var bool */
+    private ?bool $has_photo;
+
+    /** @var string */
+    private ?string $img_data;
 
     public function __construct(array $data_set)
     {

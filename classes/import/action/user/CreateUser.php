@@ -8,13 +8,28 @@ use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
 
+/**
+ * Class CreateUser
+ * @package EventoImport\import\action\user
+ */
 class CreateUser extends UserImportAction
 {
     use ImportUserPhoto;
 
-    protected $default_user_settings;
-    private $photo_importer;
+    /** @var DefaultUserSettings */
+    protected DefaultUserSettings $default_user_settings;
 
+    /** @var EventoUserPhotoImporter */
+    private EventoUserPhotoImporter $photo_importer;
+
+    /**
+     * CreateUser constructor.
+     * @param EventoUser              $evento_user
+     * @param UserFacade              $user_facade
+     * @param DefaultUserSettings     $default_user_settings
+     * @param EventoUserPhotoImporter $photo_importer
+     * @param \ilEventoImportLogger   $logger
+     */
     public function __construct(
         EventoUser $evento_user,
         UserFacade $user_facade,
@@ -28,17 +43,11 @@ class CreateUser extends UserImportAction
         $this->photo_importer = $photo_importer;
     }
 
-    private function assignUserToAdditionalRoles(int $user_id, array $role_list)
-    {
-        $rbac = $this->user_facade->rbacServices();
-        foreach ($role_list as $role_id) {
-            if ($rbac->review()->isAssigned($user_id, $role_list)) {
-                $rbac->admin()->assignUser($role_id, $user_id);
-            }
-        }
-    }
-
-    private function assignUserToIliasRoles(int $user_id, array $imported_evento_roles)
+    /**
+     * @param int   $user_id
+     * @param array $imported_evento_roles
+     */
+    private function assignUserToIliasRoles(int $user_id, array $imported_evento_roles) : void
     {
         $rbac_admin = $this->user_facade->rbacServices()->admin();
 
@@ -52,7 +61,7 @@ class CreateUser extends UserImportAction
         }
     }
 
-    public function executeAction()
+    public function executeAction() : void
     {
         $ilias_user_object = $this->user_facade->createNewIliasUserObject();
 

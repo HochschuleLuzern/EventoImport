@@ -2,13 +2,20 @@
 
 namespace EventoImport\communication\api_models;
 
+/**
+ * Class EventoUserShort
+ * @package EventoImport\communication\api_models
+ */
 class EventoUserShort extends ApiDataModelBase
 {
     const JSON_ID = 'idAccount';
     const JSON_EMAIL = 'email';
 
-    private $evento_id;
-    private $email_address;
+    /** @var int */
+    private int $evento_id;
+
+    /** @var string */
+    private string $email_address;
 
     public function __construct(array $data_set)
     {

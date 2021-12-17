@@ -2,12 +2,27 @@
 
 namespace EventoImport\import\action;
 
+/**
+ * Class ReportDatasetWithoutAction
+ * @package EventoImport\import\action
+ */
 abstract class ReportDatasetWithoutAction implements EventoImportAction
 {
-    protected $log_info_code;
-    protected $log_data;
-    protected $logger;
+    /** @var int */
+    protected int $log_info_code;
 
+    /** @var array */
+    protected array $log_data;
+
+    /** @var \ilEventoImportLogger */
+    protected \ilEventoImportLogger $logger;
+
+    /**
+     * ReportDatasetWithoutAction constructor.
+     * @param int                   $log_info_code
+     * @param array                 $log_data
+     * @param \ilEventoImportLogger $logger
+     */
     public function __construct(int $log_info_code, array $log_data, \ilEventoImportLogger $logger)
     {
         $this->log_info_code = $log_info_code;

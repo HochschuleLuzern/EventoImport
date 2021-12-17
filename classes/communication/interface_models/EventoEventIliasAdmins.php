@@ -2,13 +2,20 @@
 
 namespace EventoImport\communication\api_models;
 
+/**
+ * Class EventoEventIliasAdmins
+ * @package EventoImport\communication\api_models
+ */
 class EventoEventIliasAdmins extends ApiDataModelBase
 {
     const JSON_ID = 'idEvent';
     const JSON_ACCOUNTS = 'accounts';
 
-    private $evento_id;
-    private $account_list;
+    /** @var int */
+    private ?int $evento_id;
+
+    /** @var array */
+    private array $account_list;
 
     public function __construct(array $data_set)
     {
@@ -40,6 +47,9 @@ class EventoEventIliasAdmins extends ApiDataModelBase
         return $this->account_list;
     }
 
+    /**
+     * @return array
+     */
     public function getDecodedApiData() : array
     {
         return $this->decoded_api_data;

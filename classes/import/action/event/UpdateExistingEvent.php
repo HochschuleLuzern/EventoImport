@@ -11,9 +11,14 @@ use EventoImport\import\IliasEventWrapper;
 use EventoImport\import\settings\DefaultEventSettings;
 use EventoImport\import\db\MembershipManager;
 
+/**
+ * Class UpdateExistingEvent
+ * @package EventoImport\import\action\event
+ */
 class UpdateExistingEvent extends EventAction
 {
-    private $ilias_event;
+    /** @var IliasEventWrapper */
+    private IliasEventWrapper $ilias_event;
 
     public function __construct(EventoEvent $evento_event, IliasEventWrapper $ilias_event, IliasEventObjectFactory $event_factory, DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
@@ -22,7 +27,7 @@ class UpdateExistingEvent extends EventAction
         $this->ilias_event = $ilias_event;
     }
 
-    public function executeAction()
+    public function executeAction() : void
     {
         $ilias_event_obj = $this->ilias_event->getIliasEventoEventObj();
         if (is_null($ilias_event_obj->getStartDate())) {

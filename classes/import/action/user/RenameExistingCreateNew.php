@@ -5,13 +5,30 @@ namespace EventoImport\import\action\user;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\db\UserFacade;
 
+/**
+ * Class RenameExistingCreateNew
+ * @package EventoImport\import\action\user
+ */
 class RenameExistingCreateNew extends UserImportAction
 {
-    private $create_action;
-    private $found_by;
-    /** @var \ilObjUser */
-    private $old_user_to_rename;
+    /** @var CreateUser */
+    private CreateUser $create_action;
 
+    /** @var string */
+    private string $found_by;
+
+    /** @var \ilObjUser */
+    private \ilObjUser $old_user_to_rename;
+
+    /**
+     * RenameExistingCreateNew constructor.
+     * @param CreateUser            $create_action
+     * @param EventoUser            $new_evento_user
+     * @param \ilObjUser            $old_user_to_rename
+     * @param string                $found_by
+     * @param UserFacade            $user_facade
+     * @param \ilEventoImportLogger $logger
+     */
     public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, UserFacade $user_facade, \ilEventoImportLogger $logger)
     {
         parent::__construct($new_evento_user, $user_facade, $logger);
@@ -21,6 +38,10 @@ class RenameExistingCreateNew extends UserImportAction
         $this->found_by = $found_by;
     }
 
+    /**
+     * @param \ilObjUser $old_user
+     * @throws \ilUserException
+     */
     private function renameExistingUser(\ilObjUser $old_user)
     {
         $old_user_evento_id = trim(substr($old_user->getMatriculation(), 8));
@@ -48,7 +69,7 @@ class RenameExistingCreateNew extends UserImportAction
         );
     }
 
-    public function executeAction()
+    public function executeAction() : void
     {
         $this->renameExistingUser($this->old_user_to_rename);
         $this->create_action->executeAction();

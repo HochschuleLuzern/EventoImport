@@ -2,6 +2,10 @@
 
 namespace EventoImport\communication\api_models;
 
+/**
+ * Class EventoUser
+ * @package EventoImport\communication\api_models
+ */
 class EventoUser extends ApiDataModelBase
 {
     const JSON_ID = 'idAccount';
@@ -14,13 +18,26 @@ class EventoUser extends ApiDataModelBase
     const JSON_EMAIL_3 = 'email3';
     const JSON_ROLES = 'roles';
 
-    private $evento_id;
-    private $last_name;
-    private $first_name;
-    private $gender;
-    private $login_name;
-    private $email_list;
-    private $roles;
+    /** @var int */
+    private ?int $evento_id;
+
+    /** @var string */
+    private ?string $last_name;
+
+    /** @var string */
+    private ?string $first_name;
+
+    /** @var string */
+    private ?string $gender;
+
+    /** @var string */
+    private ?string $login_name;
+
+    /** @var array */
+    private ?array $email_list;
+
+    /** @var array */
+    private ?array $roles;
 
     public function __construct(array $data_set)
     {

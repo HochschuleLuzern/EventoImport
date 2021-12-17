@@ -2,15 +2,39 @@
 
 namespace EventoImport\import\db\model;
 
+/**
+ * Class IliasEventoParentEvent
+ * @package EventoImport\import\db\model
+ */
 class IliasEventoParentEvent
 {
-    private $group_unique_key;
-    private $group_evento_id;
-    private $ref_id;
-    private $title;
-    private $admin_role_id;
-    private $student_role_id;
+    /** @var string */
+    private string $group_unique_key;
 
+    /** @var int */
+    private int $group_evento_id;
+
+    /** @var int */
+    private int $ref_id;
+
+    /** @var string */
+    private string $title;
+
+    /** @var int */
+    private int $admin_role_id;
+
+    /** @var int */
+    private int $student_role_id;
+
+    /**
+     * IliasEventoParentEvent constructor.
+     * @param string $group_unique_key
+     * @param int    $group_evento_id
+     * @param string $title
+     * @param int    $ref_id
+     * @param int    $admin_role_id
+     * @param int    $student_role_id
+     */
     public function __construct(
         string $group_unique_key,
         int $group_evento_id,

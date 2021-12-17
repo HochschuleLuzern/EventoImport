@@ -7,14 +7,32 @@ use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
 
+/**
+ * Class UpdateUser
+ * @package EventoImport\import\action\user
+ */
 class UpdateUser extends UserImportAction
 {
     use ImportUserPhoto;
 
-    private $ilias_user_id;
-    private $default_user_settings;
-    private $photo_importer;
+    /** @var int */
+    private int $ilias_user_id;
 
+    /** @var DefaultUserSettings */
+    private DefaultUserSettings $default_user_settings;
+
+    /** @var EventoUserPhotoImporter */
+    private EventoUserPhotoImporter $photo_importer;
+
+    /**
+     * UpdateUser constructor.
+     * @param EventoUser              $evento_user
+     * @param int                     $ilias_user_id
+     * @param UserFacade              $user_facade
+     * @param DefaultUserSettings     $default_user_settings
+     * @param EventoUserPhotoImporter $photo_importer
+     * @param \ilEventoImportLogger   $logger
+     */
     public function __construct(
         EventoUser $evento_user,
         int $ilias_user_id,
@@ -34,7 +52,11 @@ class UpdateUser extends UserImportAction
     {
     }
 
-    private function synchronizeUserWithGlobalRoles(int $user_id, array $imported_evento_roles)
+    /**
+     * @param int   $user_id
+     * @param array $imported_evento_roles
+     */
+    private function synchronizeUserWithGlobalRoles(int $user_id, array $imported_evento_roles) : void
     {
         $rbac = $this->user_facade->rbacServices();
         $review = $rbac->review();
@@ -60,7 +82,7 @@ class UpdateUser extends UserImportAction
         }
     }
 
-    public function executeAction()
+    public function executeAction() : void
     {
         $user_updated = false;
         $userObj = $this->user_facade->getExistingIliasUserObject($this->ilias_user_id);

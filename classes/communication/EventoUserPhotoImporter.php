@@ -6,9 +6,17 @@ use EventoImport\communication\generic_importers\SingleDataRecordImport;
 
 class EventoUserPhotoImporter extends \ilEventoImporter implements EventoSingleDataRecordImporter
 {
-    private $data_record_importer;
-    private $fetch_data_record_method;
+    /** @var SingleDataRecordImport */
+    private SingleDataRecordImport $data_record_importer;
 
+    /** @var string */
+    private string $fetch_data_record_method;
+
+    /**
+     * EventoUserPhotoImporter constructor.
+     * @param SingleDataRecordImport $data_record_importer
+     * @param \ilEventoImportLogger  $logger
+     */
     public function __construct(
         generic_importers\SingleDataRecordImport $data_record_importer,
         \ilEventoImportLogger $logger
@@ -20,6 +28,11 @@ class EventoUserPhotoImporter extends \ilEventoImporter implements EventoSingleD
         $this->fetch_data_record_method = 'GetPhotoById';
     }
 
+    /**
+     * @param int $evento_id
+     * @return array
+     * @throws \Exception
+     */
     public function fetchDataRecordById(int $evento_id) : array
     {
         return $this->data_record_importer->fetchDataRecordById($this->fetch_data_record_method, $evento_id);

@@ -11,8 +11,21 @@ use EventoImport\import\db\MembershipManager;
 
 class CreateSingleEvent extends EventAction
 {
+    /** @var int */
     private $destination_ref_id;
 
+    /**
+     * CreateSingleEvent constructor.
+     * @param EventoEvent             $evento_event
+     * @param int                     $destination_ref_id
+     * @param IliasEventObjectFactory $event_object_factory
+     * @param DefaultEventSettings    $event_settings
+     * @param RepositoryFacade        $repository_facade
+     * @param UserFacade              $user_facade
+     * @param MembershipManager       $membership_manager
+     * @param \ilEventoImportLogger   $logger
+     * @param \ILIAS\DI\RBACServices  $rbac_services
+     */
     public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectFactory $event_object_factory, DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
         parent::__construct($evento_event, $event_object_factory, \ilEventoImportLogger::CREVENTO_MA_SINGLE_EVENT_CREATED, $event_settings, $repository_facade, $user_facade, $membership_manager, $logger, $rbac_services);
@@ -20,7 +33,7 @@ class CreateSingleEvent extends EventAction
         $this->destination_ref_id = $destination_ref_id;
     }
 
-    public function executeAction()
+    public function executeAction() : void
     {
         $course_object = $this->event_object_factory->buildNewCourseObject(
             $this->evento_event->getName(),

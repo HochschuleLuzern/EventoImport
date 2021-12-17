@@ -12,15 +12,39 @@ use EventoImport\import\IliasEventWrapper;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\MembershipManager;
 
+/**
+ * Class EventActionFactory
+ * @package EventoImport\import\action\event
+ */
 class EventActionFactory
 {
-    private $logger;
-    private $default_event_settings;
-    private $user_facade;
-    private $repository_facade;
-    private $event_object_factory;
-    private $membership_manager;
+    /** @var \ilEventoImportLogger */
+    private \ilEventoImportLogger $logger;
 
+    /** @var DefaultEventSettings */
+    private DefaultEventSettings $default_event_settings;
+
+    /** @var UserFacade */
+    private UserFacade $user_facade;
+
+    /** @var RepositoryFacade */
+    private RepositoryFacade $repository_facade;
+
+    /** @var IliasEventObjectFactory */
+    private IliasEventObjectFactory $event_object_factory;
+
+    /** @var MembershipManager */
+    private MembershipManager $membership_manager;
+
+    /**
+     * EventActionFactory constructor.
+     * @param IliasEventObjectFactory $event_object_factory
+     * @param RepositoryFacade        $repository_facade
+     * @param UserFacade              $user_facade
+     * @param MembershipManager       $membership_manager
+     * @param DefaultEventSettings    $default_event_settings
+     * @param \ilEventoImportLogger   $logger
+     */
     public function __construct(
         IliasEventObjectFactory $event_object_factory,
         RepositoryFacade $repository_facade,
@@ -37,6 +61,11 @@ class EventActionFactory
         $this->logger = $logger;
     }
 
+    /**
+     * @param EventoEvent $evento_event
+     * @param int         $destination_ref_id
+     * @return CreateSingleEvent
+     */
     public function createSingleEvent(EventoEvent $evento_event, int $destination_ref_id) : CreateSingleEvent
     {
         return new CreateSingleEvent(
@@ -52,6 +81,11 @@ class EventActionFactory
         );
     }
 
+    /**
+     * @param EventoEvent $evento_event
+     * @param int         $destination_ref_id
+     * @return CreateEventWithParent
+     */
     public function createEventWithParent(EventoEvent $evento_event, int $destination_ref_id) : CreateEventWithParent
     {
         return new CreateEventWithParent(
@@ -67,6 +101,11 @@ class EventActionFactory
         );
     }
 
+    /**
+     * @param EventoEvent            $evento_event
+     * @param IliasEventoParentEvent $parent_event
+     * @return CreateEventInParentEvent
+     */
     public function createEventInParentEvent(EventoEvent $evento_event, IliasEventoParentEvent $parent_event) : CreateEventInParentEvent
     {
         return new CreateEventInParentEvent(
@@ -82,6 +121,11 @@ class EventActionFactory
         );
     }
 
+    /**
+     * @param EventoEvent       $evento_event
+     * @param IliasEventWrapper $ilias_event
+     * @return UpdateExistingEvent
+     */
     public function updateExistingEvent(EventoEvent $evento_event, IliasEventWrapper $ilias_event) : UpdateExistingEvent
     {
         return new UpdateExistingEvent(
@@ -97,6 +141,11 @@ class EventActionFactory
         );
     }
 
+    /**
+     * @param EventoEvent  $evento_event
+     * @param \ilContainer $ilias_obj
+     * @return MarkExistingIliasObjAsEvent
+     */
     public function convertExistingIliasObjToEvent(
         EventoEvent $evento_event,
         \ilContainer $ilias_obj
@@ -114,6 +163,10 @@ class EventActionFactory
         );
     }
 
+    /**
+     * @param EventoEvent $evento_event
+     * @return ReportEventImportDatasetWithoutAction
+     */
     public function reportNonIliasEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(
@@ -125,6 +178,10 @@ class EventActionFactory
         );
     }
 
+    /**
+     * @param EventoEvent $evento_event
+     * @return ReportDatasetWithoutAction
+     */
     public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(

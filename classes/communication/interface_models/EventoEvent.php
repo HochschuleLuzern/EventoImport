@@ -2,6 +2,10 @@
 
 namespace EventoImport\communication\api_models;
 
+/**
+ * Class EventoEvent
+ * @package EventoImport\communication\api_models
+ */
 class EventoEvent extends ApiDataModelBase
 {
     public const JSON_ID = 'idEvent';
@@ -27,55 +31,61 @@ class EventoEvent extends ApiDataModelBase
     public const EVENTO_TYPE_KURS = 'Kurs';
 
     /** @var int */
-    private $evento_id;
+    private ?int $evento_id;
 
     /** @var string */
-    private $name;
+    private ?string $name;
 
     /** @var string*/
-    private $description;
+    private ?string $description;
 
     /** @var string */
-    private $type;
+    private ?string $type;
 
     /** @var string */
-    private $kind;
+    private ?string $kind;
 
     /** @var string */
-    private $department;
+    private ?string $department;
 
     /** @var \DateTime */
-    private $start_date;
+    private ?\DateTime $start_date;
 
     /** @var \DateTime */
-    private $end_date;
+    private ?\DateTime $end_date;
 
     /** @var bool */
-    private $is_create_course_flag;
+    private ?bool $is_create_course_flag;
 
     /** @var bool */
-    private $is_group_member_flag;
+    private ?bool $is_group_member_flag;
 
     /** @var string */
-    private $group_unique_key;
+    private ?string $group_unique_key;
 
     /** @var int */
-    private $group_id;
+    private ?int $group_id;
 
     /** @var string */
-    private $group_name;
+    private ?string $group_name;
 
     /** @var int */
-    private $group_member_count;
+    private ?int $group_member_count;
 
     /** @var array */
-    private $employees;
+    private array $employees;
 
     /** @var array */
-    private $students;
+    private array $students;
+
     private static $CREATE_COURSES = 0;
     private static $MAX_CREATE_COURSE = 4000;
 
+    /**
+     * EventoEvent constructor.
+     * @param array $data_set
+     * @throws \Exception
+     */
     public function __construct(array $data_set)
     {
         $this->evento_id = $this->validateAndReturnNumber($data_set, self::JSON_ID);
@@ -114,6 +124,10 @@ class EventoEvent extends ApiDataModelBase
         $this->decoded_api_data = $data_set;
     }
 
+    /**
+     * @param array $account_list
+     * @return array
+     */
     private function buildMembershipList(array $account_list) : array
     {
         $typed_list = [];

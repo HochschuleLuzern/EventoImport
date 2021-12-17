@@ -2,6 +2,10 @@
 
 namespace EventoImport\import\data_matching;
 
+/**
+ * Class EventoIliasUserMatchingResult
+ * @package EventoImport\import\data_matching
+ */
 class EventoIliasUserMatchingResult
 {
     public const RESULT_NO_MATCHING_USER = 1;
@@ -17,6 +21,7 @@ class EventoIliasUserMatchingResult
         'found_by'
     );
 
+    /** @var int*/
     private $matched_user_id;
     private $result_code;
     private $additional_params;
@@ -29,8 +34,8 @@ class EventoIliasUserMatchingResult
 
     private function __construct(int $result_code, ?int $matched_user_id = null, array $additional_params = array())
     {
-        $this->matched_user_id   = $matched_user_id;
-        $this->result_code       = $result_code;
+        $this->matched_user_id = $matched_user_id;
+        $this->result_code = $result_code;
         $this->additional_params = $additional_params;
     }
 

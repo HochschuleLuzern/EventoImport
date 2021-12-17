@@ -5,6 +5,10 @@ namespace EventoImport\import\db\repository;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\model\IliasEventoUser;
 
+/**
+ * Class EventMembershipRepository
+ * @package EventoImport\import\db\repository
+ */
 class EventMembershipRepository
 {
     public const TABLE_NAME = 'crevento_memberships';
@@ -19,12 +23,21 @@ class EventMembershipRepository
     /** @var \ilDBInterface */
     private $db;
 
+    /**
+     * EventMembershipRepository constructor.
+     * @param \ilDBInterface $db
+     */
     public function __construct(\ilDBInterface $db)
     {
         $this->db = $db;
     }
 
-    public function fetchUserIdFromMembership($evento_event_id, $user_id)
+    /**
+     * @param $evento_event_id
+     * @param $user_id
+     * @return int
+     */
+    public function fetchUserIdFromMembership($evento_event_id, $user_id) : ?int
     {
         $query = "SELECT usr." . EventoUserRepository::COL_ILIAS_USER_ID . " AS user_id FROM " . self::TABLE_NAME . " AS memb"
             . " JOIN " . EventoUserRepository::TABLE_NAME . " AS usr ON memb." . self::COL_EVENTO_USER_ID . " = usr" . EventoUserRepository::COL_ILIAS_USER_ID
@@ -37,6 +50,11 @@ class EventMembershipRepository
         }
     }
 
+    /**
+     * @param int $evento_event_id
+     * @param int $role_of_event
+     * @return array
+     */
     public function fetchIliasEventoUsersForEventAndRole(int $evento_event_id, int $role_of_event) : array
     {
         $query = 'SELECT usr.' . EventoUserRepository::COL_EVENTO_ID . ' AS evento_user_id, usr.' . EventoUserRepository::COL_ILIAS_USER_ID . ' AS ilias_user_id'
@@ -55,6 +73,11 @@ class EventMembershipRepository
         return $users;
     }
 
+    /**
+     * @param int $evento_event_id
+     * @param int $user_id
+     * @param int $role_type
+     */
     public function addMembershipIfNotExist(int $evento_event_id, int $user_id, int $role_type)
     {
         $query = "SELECT 1 FROM " . self::TABLE_NAME
@@ -76,6 +99,12 @@ class EventMembershipRepository
         }
     }
 
+    /**
+     * @param int $parent_event_id
+     * @param int $user_evento_id
+     * @param int $excluding_evento_event_id
+     * @return bool
+     */
     public function checkIfUserHasMembershipInOtherSubEvent(int $parent_event_id, int $user_evento_id, int $excluding_evento_event_id) : bool
     {
         $q = "SELECT * "
@@ -87,7 +116,6 @@ class EventMembershipRepository
 
         $result = $this->db->query($q);
 
-
-        $this->db->in(self::COL_EVENTO_EVENT_ID, [], false, \ilDBConstants::T_INTEGER);
+        return $this->db->numRows($result) > 0;
     }
 }

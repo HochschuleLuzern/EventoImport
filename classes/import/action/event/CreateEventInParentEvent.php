@@ -9,10 +9,27 @@ use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\MembershipManager;
 
+/**
+ * Class CreateEventInParentEvent
+ * @package EventoImport\import\action\event
+ */
 class CreateEventInParentEvent extends EventAction
 {
+    /** @var IliasEventoParentEvent */
     private $parent_event;
 
+    /**
+     * CreateEventInParentEvent constructor.
+     * @param EventoEvent                                        $evento_event
+     * @param IliasEventoParentEvent                             $parent_event
+     * @param IliasEventObjectFactory                            $event_object_factory
+     * @param \EventoImport\import\settings\DefaultEventSettings $event_settings
+     * @param RepositoryFacade                                   $repository_facade
+     * @param UserFacade                                         $user_facade
+     * @param MembershipManager                                  $membership_manager
+     * @param \ilEventoImportLogger                              $logger
+     * @param \ILIAS\DI\RBACServices                             $rbac_services
+     */
     public function __construct(EventoEvent $evento_event, IliasEventoParentEvent $parent_event, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
     {
         parent::__construct(
@@ -30,7 +47,7 @@ class CreateEventInParentEvent extends EventAction
         $this->parent_event = $parent_event;
     }
 
-    public function executeAction()
+    public function executeAction() : void
     {
         $event_sub_group = $this->event_object_factory->buildNewGroupObject(
             $this->evento_event->getName(),

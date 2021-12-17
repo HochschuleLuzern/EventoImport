@@ -5,12 +5,27 @@ namespace EventoImport\communication\generic_importers;
 use EventoImport\communication\request_services\RequestClientService;
 use EventoImport\communication\api_models\EventoImportDataSetResponse;
 
+/**
+ * Class DataSetImport
+ * @package EventoImport\communication\generic_importers
+ */
 class DataSetImport
 {
-    private $data_source;
-    private $max_retries;
-    private $seconds_before_retry;
+    /** @var RequestClientService */
+    private RequestClientService $data_source;
 
+    /** @var int */
+    private int $max_retries;
+
+    /** @var int */
+    private int $seconds_before_retry;
+
+    /**
+     * DataSetImport constructor.
+     * @param RequestClientService $data_source
+     * @param int                  $max_retries
+     * @param int                  $seconds_before_retry
+     */
     public function __construct(RequestClientService $data_source, int $max_retries, int $seconds_before_retry)
     {
         $this->data_source = $data_source;
@@ -18,6 +33,12 @@ class DataSetImport
         $this->seconds_before_retry = $seconds_before_retry;
     }
 
+    /**
+     * @param string $method_name
+     * @param array  $params
+     * @return EventoImportDataSetResponse
+     * @throws \Exception
+     */
     private function fetchDataSet(string $method_name, array $params) : EventoImportDataSetResponse
     {
         $nr_of_tries = 0;
@@ -46,6 +67,13 @@ class DataSetImport
         return $response;
     }
 
+    /**
+     * @param string $method_name
+     * @param int    $skip
+     * @param int    $take
+     * @return EventoImportDataSetResponse
+     * @throws \Exception
+     */
     public function fetchPagedDataSet(string $method_name, int $skip, int $take) : EventoImportDataSetResponse
     {
         return $this->fetchDataSet(
@@ -57,6 +85,11 @@ class DataSetImport
         );
     }
 
+    /**
+     * @param $method_name
+     * @return EventoImportDataSetResponse
+     * @throws \Exception
+     */
     public function fetchDataSetParameterless($method_name) : EventoImportDataSetResponse
     {
         return $this->fetchDataSet(

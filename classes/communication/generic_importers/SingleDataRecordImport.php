@@ -4,12 +4,27 @@ namespace EventoImport\communication\generic_importers;
 
 use EventoImport\communication\request_services\RequestClientService;
 
+/**
+ * Class SingleDataRecordImport
+ * @package EventoImport\communication\generic_importers
+ */
 class SingleDataRecordImport
 {
-    private $data_source;
-    private $max_retries;
-    private $seconds_before_retry;
+    /** @var RequestClientService */
+    private RequestClientService $data_source;
 
+    /** @var int */
+    private int $max_retries;
+
+    /** @var int */
+    private int $seconds_before_retry;
+
+    /**
+     * SingleDataRecordImport constructor.
+     * @param RequestClientService $data_source
+     * @param int                  $max_retries
+     * @param int                  $seconds_before_retry
+     */
     public function __construct(RequestClientService $data_source, int $max_retries, int $seconds_before_retry)
     {
         $this->data_source = $data_source;
@@ -17,6 +32,12 @@ class SingleDataRecordImport
         $this->seconds_before_retry = $seconds_before_retry;
     }
 
+    /**
+     * @param string $method_name
+     * @param        $id
+     * @return mixed|null
+     * @throws \Exception
+     */
     public function fetchDataRecordById(string $method_name, $id)
     {
         $params = array(
@@ -51,6 +72,10 @@ class SingleDataRecordImport
         }
     }
 
+    /**
+     * @param string $json_response
+     * @return bool
+     */
     private function requestWasSuccessful(string $json_response) : bool
     {
         return !(is_null($json_response) || $json_response == '');

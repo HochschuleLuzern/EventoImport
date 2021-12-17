@@ -2,10 +2,20 @@
 
 namespace EventoImport\communication\api_models;
 
+/**
+ * Trait JSONDataValidator
+ * @package EventoImport\communication\api_models
+ */
 trait JSONDataValidator
 {
-    protected $key_errors = array();
+    /** @var array */
+    protected array $key_errors = array();
 
+    /**
+     * @param array  $data_array
+     * @param string $key
+     * @return int|null
+     */
     protected function validateAndReturnNumber(array $data_array, string $key) : ?int
     {
         if (!isset($data_array[$key])) {
@@ -16,6 +26,11 @@ trait JSONDataValidator
         return (int) $data_array[$key];
     }
 
+    /**
+     * @param array  $data_array
+     * @param string $key
+     * @return string|null
+     */
     protected function validateAndReturnString(array $data_array, string $key) : ?string
     {
         if (!isset($data_array[$key])) {
@@ -26,6 +41,12 @@ trait JSONDataValidator
         return $data_array[$key];
     }
 
+    /**
+     * @param array  $data_array
+     * @param string $key
+     * @param bool   $as_string_possible
+     * @return bool|null
+     */
     protected function validateAndReturnBoolean(array $data_array, string $key, bool $as_string_possible = false) : ?bool
     {
         if (!isset($data_array[$key])) {
@@ -50,6 +71,11 @@ trait JSONDataValidator
         }
     }
 
+    /**
+     * @param array  $data_array
+     * @param string $key
+     * @return array|null
+     */
     protected function validateAndReturnArray(array $data_array, string $key) : ?array
     {
         if (!isset($data_array[$key])) {
@@ -62,7 +88,13 @@ trait JSONDataValidator
 
         return $data_array[$key];
     }
-    
+
+    /**
+     * @param array $data_array
+     * @param array $key_list
+     * @param bool  $is_empty_list_allowed
+     * @return array|null
+     */
     protected function validateCombineAndReturnListOfValues(array $data_array, array $key_list, bool $is_empty_list_allowed = false) : ?array
     {
         $list_of_values = array();
@@ -81,6 +113,12 @@ trait JSONDataValidator
         return $list_of_values;
     }
 
+    /**
+     * @param array  $data_array
+     * @param string $key
+     * @return \DateTime|null
+     * @throws \Exception
+     */
     protected function validateAndReturnDateTime(array $data_array, string $key) : ?\DateTime
     {
         if (!isset($data_array[$key])) {

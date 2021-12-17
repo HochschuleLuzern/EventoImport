@@ -2,6 +2,10 @@
 
 namespace EventoImport\communication\request_services;
 
+/**
+ * Class RestClientService
+ * @package EventoImport\communication\request_services
+ */
 class RestClientService implements RequestClientService
 {
     private $base_uri;
@@ -26,6 +30,11 @@ class RestClientService implements RequestClientService
         }
     }
 
+    /**
+     * @param string $path
+     * @param array  $request_params
+     * @return bool|string
+     */
     public function sendRequest(string $path, array $request_params)
     {
         $uri = $this->buildAndValidateUrl($path, $request_params);
@@ -35,7 +44,12 @@ class RestClientService implements RequestClientService
         return $return_value;
     }
 
-    private function buildAndValidateUrl(string $path, array $request_params)
+    /**
+     * @param string $path
+     * @param array  $request_params
+     * @return string
+     */
+    private function buildAndValidateUrl(string $path, array $request_params) : string
     {
         $url_without_query_params = $this->base_uri . $path;
 
@@ -49,6 +63,10 @@ class RestClientService implements RequestClientService
         return $url_without_query_params . '?' . http_build_query($request_params);
     }
 
+    /**
+     * @param string $url
+     * @return bool|string
+     */
     private function fetch(string $url)
     {
         $ch = curl_init();
@@ -60,10 +78,5 @@ class RestClientService implements RequestClientService
         curl_close($ch);
 
         return $output;
-    }
-
-    public function setTimeoutAfterRequestInSeconds(int $timeout_in_seconds)
-    {
-        $this->timeout_after_request_seconds = $timeout_in_seconds;
     }
 }

@@ -12,6 +12,10 @@ use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\import\db\model\IliasEventoUser;
 use phpDocumentor\Reflection\Types\Self_;
 
+/**
+ * Class MembershipManager
+ * @package EventoImport\import\db
+ */
 class MembershipManager
 {
     /**
@@ -24,6 +28,15 @@ class MembershipManager
     private const ROLE_ADMIN = 1;
     private const ROLE_MEMBER = 2;
 
+    /**
+     * MembershipManager constructor.
+     * @param EventMembershipRepository   $membership_repo
+     * @param EventoUserRepository        $user_repo
+     * @param IliasEventoEventsRepository $event_repo
+     * @param \ilFavouritesManager        $favourites_manager
+     * @param \ilEventoImportLogger       $logger
+     * @param RBACServices                $rbac_services
+     */
     public function __construct(
         EventMembershipRepository $membership_repo,
         EventoUserRepository $user_repo,
@@ -41,6 +54,11 @@ class MembershipManager
         $this->rbac_admin = $rbac_services->admin();
     }
 
+    /**
+     * @param \ilObject $parent_membership_object
+     * @param int       $role_type
+     * @return int|null
+     */
     private function getRoleIdForObjectOrNull(\ilObject $parent_membership_object, int $role_type) : ?int
     {
         if ($role_type != self::ROLE_ADMIN && $role_type != self::ROLE_MEMBER) {
@@ -60,6 +78,10 @@ class MembershipManager
         return null;
     }
 
+    /**
+     * @param int $current_event_ref_id
+     * @return array
+     */
     private function searchMembershipParentObjectsForEvent(int $current_event_ref_id) : array
     {
         global $DIC;
@@ -82,11 +104,24 @@ class MembershipManager
         return $parent_objects;
     }
 
+    /**
+     * @param       $member
+     * @param array $evento_user_list
+     * @return bool
+     */
     private function isMemberInCurrentImport($member, array $evento_user_list) : bool
     {
+        // TODO: Implement to test with real data set
         return true;
     }
 
+    /**
+     * @param IliasEventoEvent $ilias_evento_event
+     * @param array            $evento_user_list
+     * @param int              $role_id_of_main_event
+     * @param array            $parent_membership_objects
+     * @param int              $role_type
+     */
     private function addUsersToEvent(
         IliasEventoEvent $ilias_evento_event,
         array $evento_user_list,
@@ -119,6 +154,14 @@ class MembershipManager
         }
     }
 
+    /**
+     * @param IliasEventoEvent $ilias_evento_event
+     * @param array            $evento_user_list
+     * @param int              $role_id_of_main_event
+     * @param array            $from_import_subscribed_members
+     * @param array            $parent_membership_objects
+     * @param int              $role_type
+     */
     private function removeUsersFromEvent(
         IliasEventoEvent $ilias_evento_event,
         array $evento_user_list,
@@ -162,6 +205,13 @@ class MembershipManager
         }
     }
 
+    /**
+     * @param IliasEventoEvent $ilias_evento_event
+     * @param array            $evento_user_list
+     * @param int              $role_id_of_main_event
+     * @param array            $parent_membership_objects
+     * @param int              $role_type
+     */
     private function synchronizeRolesWithMembers(
         IliasEventoEvent $ilias_evento_event,
         array $evento_user_list,
@@ -193,6 +243,10 @@ class MembershipManager
         }
     }
 
+    /**
+     * @param EventoEvent      $evento_event
+     * @param IliasEventoEvent $ilias_evento_event
+     */
     public function synchronizeMembershipsWithEvent(EventoEvent $evento_event, IliasEventoEvent $ilias_evento_event)
     {
         $this->synchronizeRolesWithMembers(

@@ -5,6 +5,10 @@ namespace EventoImport\import\db\repository;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\model\IliasEventoEvent;
 
+/**
+ * Class IliasEventoEventsRepository
+ * @package EventoImport\import\db\repository
+ */
 class IliasEventoEventsRepository
 {
     public const TABLE_NAME = 'crevento_evnto_events';
@@ -26,11 +30,20 @@ class IliasEventoEventsRepository
     /** @var \ilDBInterface */
     private $db;
 
+    /**
+     * IliasEventoEventsRepository constructor.
+     * @param \ilDBInterface $db
+     */
     public function __construct(\ilDBInterface $db)
     {
         $this->db = $db;
     }
 
+    /**
+     * @param string|null $db_value
+     * @return \DateTime|null
+     * @throws \Exception
+     */
     private function toDateTimeOrNull(?string $db_value)
     {
         if (is_null($db_value)) {
@@ -44,6 +57,11 @@ class IliasEventoEventsRepository
         }
     }
 
+    /**
+     * @param $row
+     * @return IliasEventoEvent
+     * @throws \Exception
+     */
     private function buildIliasEventoEventFromRow($row)
     {
         return new IliasEventoEvent(
@@ -63,6 +81,9 @@ class IliasEventoEventsRepository
         );
     }
 
+    /**
+     * @param IliasEventoEvent $ilias_evento_event
+     */
     public function addNewEventoIliasEvent(IliasEventoEvent $ilias_evento_event)
     {
         $this->db->insert(
@@ -93,6 +114,11 @@ class IliasEventoEventsRepository
         );
     }
 
+    /**
+     * @param int $evento_id
+     * @return IliasEventoEvent|null
+     * @throws \Exception
+     */
     public function getEventByEventoId(int $evento_id) : ?IliasEventoEvent
     {
         $query = "SELECT * FROM " . self::TABLE_NAME . " WHERE " . self::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
@@ -105,6 +131,10 @@ class IliasEventoEventsRepository
         return null;
     }
 
+    /**
+     * @param \DateTime|null $date_time
+     * @return string|null
+     */
     private function dateTimeToDBFormatOrNull(?\DateTime $date_time)
     {
         if (is_null($date_time)) {
@@ -114,6 +144,9 @@ class IliasEventoEventsRepository
         return $date_time->format('Y-m-d H:i:s');
     }
 
+    /**
+     * @param IliasEventoEvent $updated_obj
+     */
     public function updateIliasEventoEvent(IliasEventoEvent $updated_obj)
     {
         $this->db->update(

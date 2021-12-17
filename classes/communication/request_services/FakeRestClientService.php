@@ -40,9 +40,4 @@ class FakeRestClientService extends RestClientService
         //$this->has_more = 'false';
         return $file_content;
     }
-
-    public function setTimeoutAfterRequestInSeconds(int $timeout_in_seconds)
-    {
-        $this->timeout_in_seconds = $timeout_in_seconds;
-    }
 }

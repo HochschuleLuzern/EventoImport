@@ -2,19 +2,34 @@
 
 namespace EventoImport\communication;
 
-use EventoImport\communication\importer_traits\DataSetImport;
-use EventoImport\communication\importer_traits\SingleDataRecordImport;
-use EventoImport\communication\importer_traits\DataSetWithIteratorImport;
-
+/**
+ * Class EventoUserImporter
+ * @package EventoImport\communication
+ */
 class EventoUserImporter extends \ilEventoImporter implements EventoSingleDataRecordImporter, EventoDataSetImporter
 {
-    private $iterator;
-    private $data_set_import;
-    private $data_record_import;
+    /** @var \ilEventoImporterIterator */
+    private \ilEventoImporterIterator $iterator;
 
-    protected $fetch_data_set_method;
-    protected $fetch_data_record_method;
+    /** @var generic_importers\DataSetImport */
+    private generic_importers\DataSetImport $data_set_import;
 
+    /** @var generic_importers\SingleDataRecordImport */
+    private generic_importers\SingleDataRecordImport $data_record_import;
+
+    /** @var string */
+    protected string $fetch_data_set_method;
+
+    /** @var string */
+    protected string $fetch_data_record_method;
+
+    /**
+     * EventoUserImporter constructor.
+     * @param generic_importers\DataSetImport          $data_set_import
+     * @param generic_importers\SingleDataRecordImport $data_record_import
+     * @param \ilEventoImporterIterator                $iterator
+     * @param \ilEventoImportLogger                    $logger
+     */
     public function __construct(
         generic_importers\DataSetImport $data_set_import,
         generic_importers\SingleDataRecordImport $data_record_import,
@@ -31,16 +46,26 @@ class EventoUserImporter extends \ilEventoImporter implements EventoSingleDataRe
         $this->fetch_data_record_method = 'GetAccountById';
     }
 
+    /**
+     * @return string
+     */
     public function getDataSetMethodName() : string
     {
         return $this->fetch_data_set_method;
     }
 
+    /**
+     * @return string
+     */
     public function getDataRecordMethodName() : string
     {
         return $this->fetch_data_record_method;
     }
 
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function fetchNextDataSet() : array
     {
         $skip = ($this->iterator->getPage() - 1) * $this->iterator->getPageSize();
@@ -58,12 +83,23 @@ class EventoUserImporter extends \ilEventoImporter implements EventoSingleDataRe
         }
     }
 
+    /**
+     * @param int $skip
+     * @param int $take
+     * @return array
+     * @throws \Exception
+     */
     public function fetchSpecificDataSet(int $skip, int $take) : array
     {
         $response = $this->data_set_import->fetchPagedDataSet($this->fetch_data_set_method, $skip, $take);
         return $response->getData();
     }
 
+    /**
+     * @param int $evento_id
+     * @return array
+     * @throws \Exception
+     */
     public function fetchDataRecordById(int $evento_id) : array
     {
         return $this->data_record_import->fetchDataRecordById($this->fetch_data_record_method, $evento_id);

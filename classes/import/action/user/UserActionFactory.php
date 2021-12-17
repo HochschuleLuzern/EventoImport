@@ -12,11 +12,25 @@ use EventoImport\communication\EventoUserPhotoImporter;
 
 class UserActionFactory
 {
-    private $user_facade;
-    private $default_user_settings;
-    private $photo_importer;
-    private $logger;
+    /** @var UserFacade */
+    private UserFacade $user_facade;
 
+    /** @var DefaultUserSettings */
+    private DefaultUserSettings $default_user_settings;
+
+    /** @var EventoUserPhotoImporter */
+    private EventoUserPhotoImporter $photo_importer;
+
+    /** @var \ilEventoImportLogger */
+    private \ilEventoImportLogger $logger;
+
+    /**
+     * UserActionFactory constructor.
+     * @param UserFacade              $user_facade
+     * @param DefaultUserSettings     $default_user_settings
+     * @param EventoUserPhotoImporter $photo_importer
+     * @param \ilEventoImportLogger   $logger
+     */
     public function __construct(UserFacade $user_facade, DefaultUserSettings $default_user_settings, EventoUserPhotoImporter $photo_importer, \ilEventoImportLogger $logger)
     {
         $this->user_facade = $user_facade;
@@ -25,16 +39,31 @@ class UserActionFactory
         $this->logger = $logger;
     }
 
+    /**
+     * @param EventoUser $evento_user
+     * @return CreateUser
+     */
     public function buildCreateAction(EventoUser $evento_user) : CreateUser
     {
         return new CreateUser($evento_user, $this->user_facade, $this->default_user_settings, $this->photo_importer, $this->logger);
     }
 
+    /**
+     * @param EventoUser $evento_user
+     * @param int        $ilias_user_id
+     * @return UpdateUser
+     */
     public function buildUpdateAction(EventoUser $evento_user, int $ilias_user_id) : UpdateUser
     {
         return new UpdateUser($evento_user, $ilias_user_id, $this->user_facade, $this->default_user_settings, $this->photo_importer, $this->logger);
     }
 
+    /**
+     * @param EventoUser $evento_user
+     * @param \ilObjUser $old_ilias_user
+     * @param string     $found_by
+     * @return RenameExistingCreateNew
+     */
     public function buildRenameExistingAndCreateNewAction(EventoUser $evento_user, \ilObjUser $old_ilias_user, string $found_by) : RenameExistingCreateNew
     {
         return new RenameExistingCreateNew(
@@ -47,7 +76,11 @@ class UserActionFactory
         );
     }
 
-    private function convertEventoUserToBasicLogData(EventoUser $evento_user)
+    /**
+     * @param EventoUser $evento_user
+     * @return array
+     */
+    private function convertEventoUserToBasicLogData(EventoUser $evento_user) : array
     {
         // How the data is logged (before refactoring)
         // '{$data['id']}', '{$data['loginName']}', ".$this->ilDB->quote(serialize($data), 'text').", '".date("Y-m-d H:i:s")."', '$result')
@@ -62,7 +95,11 @@ class UserActionFactory
         ];
     }
 
-    public function buildReportConflict(EventoUser $evento_user)
+    /**
+     * @param EventoUser $evento_user
+     * @return ReportUserImportDatasetWithoutAction
+     */
+    public function buildReportConflict(EventoUser $evento_user) : ReportDatasetWithoutAction
     {
         $log_data = $this->convertEventoUserToBasicLogData($evento_user);
         return new ReportUserImportDatasetWithoutAction(

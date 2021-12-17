@@ -2,6 +2,10 @@
 
 namespace EventoImport\communication\api_models;
 
+/**
+ * Class EventoImportDataSetResponse
+ * @package EventoImport\communication\api_models
+ */
 class EventoImportDataSetResponse
 {
     use JSONDataValidator;
@@ -11,10 +15,17 @@ class EventoImportDataSetResponse
     public const JSON_MESSAGE = 'message';
     public const JSON_DATA = 'data';
 
-    private $success;
-    private $has_more_data;
-    private $message;
-    private $data;
+    /** @var bool */
+    private ?bool $success;
+
+    /** @var bool  */
+    private ?bool $has_more_data;
+
+    /** @var string */
+    private ?string $message;
+
+    /** @var array */
+    private ?array $data;
 
     /**
      * EventoImportDataSetResponse constructor.

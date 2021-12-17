@@ -6,17 +6,35 @@ use EventoImport\import\db\UserFacade;
 
 class ConvertAndDeactivateUser implements \EventoImport\import\action\EventoImportAction
 {
-    /**
-     * @var \ilObjUser
-     */
-    private $ilias_user;
-    private $evento_id;
-    private $converted_auth_mode;
-    private $user_facade;
-    private $logger;
-    private $log_info_code;
-    private $auth_mode;
+    /** @var \ilObjUser */
+    private \ilObjUser $ilias_user;
 
+    /** @var int */
+    private int $evento_id;
+
+    /** @var string */
+    private string $converted_auth_mode;
+
+    /** @var UserFacade */
+    private UserFacade $user_facade;
+
+    /** @var \ilEventoImportLogger */
+    private \ilEventoImportLogger $logger;
+
+    /** @var int */
+    private int $log_info_code;
+
+    /** @var string */
+    private string $auth_mode;
+
+    /**
+     * ConvertAndDeactivateUser constructor.
+     * @param \ilObjUser            $ilias_user
+     * @param int                   $evento_id
+     * @param string                $converted_auth_mode
+     * @param UserFacade            $user_facade
+     * @param \ilEventoImportLogger $logger
+     */
     public function __construct(\ilObjUser $ilias_user, int $evento_id, string $converted_auth_mode, UserFacade $user_facade, \ilEventoImportLogger $logger)
     {
         $this->ilias_user = $ilias_user;
@@ -28,7 +46,7 @@ class ConvertAndDeactivateUser implements \EventoImport\import\action\EventoImpo
         $this->auth_mode = 'local';
     }
 
-    public function executeAction()
+    public function executeAction() : void
     {
         $this->ilias_user->setAuthMode('local');
         $this->ilias_user->setTimeLimitUntil(date("Y-m-d H:i:s"));

@@ -6,18 +6,33 @@ use EventoImport\import\action\event\EventActionFactory;
 use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\action\EventoImportAction;
 
+/**
+ * Class EventImportActionDecider
+ * @package EventoImport\import\data_matching
+ */
 class EventImportActionDecider
 {
-    private $repository_facade;
-    private $event_action_factory;
+    /** @var RepositoryFacade */
+    private RepositoryFacade $repository_facade;
 
+    /** @var EventActionFactory */
+    private EventActionFactory $event_action_factory;
+
+    /**
+     * EventImportActionDecider constructor.
+     * @param RepositoryFacade   $repository_facade
+     * @param EventActionFactory $event_action_factory
+     */
     public function __construct(RepositoryFacade $repository_facade, EventActionFactory $event_action_factory)
     {
         $this->repository_facade = $repository_facade;
         $this->event_action_factory = $event_action_factory;
     }
 
-
+    /**
+     * @param \EventoImport\communication\api_models\EventoEvent $evento_event
+     * @return EventoImportAction
+     */
     public function determineAction(\EventoImport\communication\api_models\EventoEvent $evento_event) : EventoImportAction
     {
         $ilias_event = $this->repository_facade->getIliasEventByEventoIdOrReturnNull($evento_event->getEventoId());

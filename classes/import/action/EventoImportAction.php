@@ -2,7 +2,15 @@
 
 namespace EventoImport\import\action;
 
+/**
+ * Interface EventoImportAction
+ * @package EventoImport\import\action
+ */
 interface EventoImportAction
 {
-    public function executeAction();
+    /**
+     * Executes the action to the given Evento Object
+     * @return void
+     */
+    public function executeAction() : void;
 }

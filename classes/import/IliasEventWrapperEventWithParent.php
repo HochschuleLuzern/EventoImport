@@ -2,18 +2,36 @@
 
 namespace EventoImport\import;
 
-use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use ILIAS\DI\RBACServices;
 
+/**
+ * Class IliasEventWrapperEventWithParent
+ * @package EventoImport\import
+ */
 class IliasEventWrapperEventWithParent extends IliasEventWrapper
 {
-    private $parent_event;
-    private $parent_event_obj;
-    private $sub_event;
-    private $sub_event_obj;
+    /** @var IliasEventoParentEvent */
+    private IliasEventoParentEvent $parent_event;
 
+    /** @var \ilObjCourse */
+    private \ilObjCourse $parent_event_obj;
+
+    /** @var IliasEventoEvent */
+    private IliasEventoEvent $sub_event;
+
+    /** @var \ilObjGroup */
+    private \ilObjGroup $sub_event_obj;
+
+    /**
+     * IliasEventWrapperEventWithParent constructor.
+     * @param IliasEventoParentEvent $parent_event
+     * @param \ilObjCourse           $parent_event_obj
+     * @param IliasEventoEvent       $sub_event
+     * @param \ilObjGroup            $sub_event_obj
+     * @param RBACServices|null      $rbac_services
+     */
     public function __construct(IliasEventoParentEvent $parent_event, \ilObjCourse $parent_event_obj, IliasEventoEvent $sub_event, \ilObjGroup $sub_event_obj, RBACServices $rbac_services = null)
     {
         parent::__construct($rbac_services);
@@ -24,23 +42,35 @@ class IliasEventWrapperEventWithParent extends IliasEventWrapper
         $this->sub_event_obj = $sub_event_obj;
     }
 
-    public function addUserAsAdminToEvent($user_id)
+    /**
+     * @param int $user_id
+     */
+    public function addUserAsAdminToEvent($user_id) : void
     {
         $this->addUserToGivenRole($user_id, $this->parent_event->getAdminRoleId());
         $this->addUserToGivenRole($user_id, $this->sub_event->getAdminRoleId());
     }
 
-    public function addUserAsStudentToEvent($user_id)
+    /**
+     * @param int $user_id
+     */
+    public function addUserAsStudentToEvent($user_id) : void
     {
         $this->addUserToGivenRole($user_id, $this->parent_event->getStudentRoleId());
         $this->addUserToGivenRole($user_id, $this->sub_event->getStudentRoleId());
     }
 
+    /**
+     * @return IliasEventoEvent
+     */
     public function getIliasEventoEventObj() : IliasEventoEvent
     {
         return $this->sub_event;
     }
 
+    /**
+     * @return array
+     */
     public function getAllAdminRoles() : array
     {
         return [
@@ -49,6 +79,9 @@ class IliasEventWrapperEventWithParent extends IliasEventWrapper
         ];
     }
 
+    /**
+     * @return array
+     */
     public function getAllMemberRoles() : array
     {
         return [

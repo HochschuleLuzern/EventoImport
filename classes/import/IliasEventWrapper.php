@@ -7,11 +7,22 @@ use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use ILIAS\DI\RBACServices;
 
+/**
+ * Class IliasEventWrapper
+ * @package EventoImport\import
+ */
 abstract class IliasEventWrapper
 {
-    protected $rbac_admin;
-    protected $rbac_review;
+    /** @var \ilRbacAdmin */
+    protected \ilRbacAdmin $rbac_admin;
 
+    /** @var \ilRbacReview */
+    protected \ilRbacReview $rbac_review;
+
+    /**
+     * IliasEventWrapper constructor.
+     * @param RBACServices|null $rbac_services
+     */
     protected function __construct(RBACServices $rbac_services = null)
     {
         global $DIC;
@@ -21,8 +32,15 @@ abstract class IliasEventWrapper
         $this->rbac_review = $rbac_services->review();
     }
 
+    /**
+     * @return IliasEventoEvent
+     */
     abstract public function getIliasEventoEventObj() : IliasEventoEvent;
 
+    /**
+     * @param int $user_id
+     * @param int $role_id
+     */
     protected function addUserToGivenRole(int $user_id, int $role_id)
     {
         if (!$this->rbac_review->isAssigned($user_id, $role_id)) {
@@ -30,9 +48,23 @@ abstract class IliasEventWrapper
         }
     }
 
-    abstract public function addUserAsAdminToEvent(int $user_id);
-    abstract public function addUserAsStudentToEvent(int $user_id);
+    /**
+     * @param int $user_id
+     */
+    abstract public function addUserAsAdminToEvent(int $user_id) : void;
 
+    /**
+     * @param int $user_id
+     */
+    abstract public function addUserAsStudentToEvent(int $user_id) : void;
+
+    /**
+     * @return array
+     */
     abstract public function getAllAdminRoles() : array;
+
+    /**
+     * @return array
+     */
     abstract public function getAllMemberRoles() : array;
 }
