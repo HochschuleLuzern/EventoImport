@@ -506,7 +506,7 @@ class ilEventoImportCronConfig
         $input_object_owner = $a_form->getInput(self::FORM_EVENT_OBJECT_OWNER);
         switch ($input_object_owner) {
             case self::FORM_EVENT_OPT_OWNER_ROOT:
-                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
+                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT);
                 $this->settings->set(self::CONF_EVENT_OWNER_ID, 6);
                 break;
 

@@ -51,7 +51,7 @@ class ilEventoImportImport extends ilCronJob
     private $page_size;
 
     /** @var \EventoImport\import\EventoImportBootstrap */
-    private \EventoImport\import\EventoImportBootstrap $evento_import_object_builder;
+    private \EventoImport\import\EventoImportBootstrap $import_bootstrapping;
 
     /**
      * Constructor
@@ -70,7 +70,7 @@ class ilEventoImportImport extends ilCronJob
         $this->cp = new ilEventoImportPlugin();
         $this->settings = new ilSetting("crevento");
         $this->importUsersConfig = new ilEventoImportImportUsersConfig($this->settings, $this->rbac);
-        $this->evento_import_object_builder = new \EventoImport\import\EventoImportBootstrap($this->db, $this->rbac);
+        $this->import_bootstrapping = new \EventoImport\import\EventoImportBootstrap($this->db, $this->rbac);
 
         $this->page_size = 500;
     }
@@ -177,6 +177,7 @@ class ilEventoImportImport extends ilCronJob
                 $api_settings->getApikey(),
                 $api_settings->getApiSecret()
             );
+            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
 
             $data_record_importer = new \EventoImport\communication\generic_importers\SingleDataRecordImport(
                 $data_source,
@@ -217,49 +218,37 @@ class ilEventoImportImport extends ilCronJob
             /* User import */
             $default_user_settings = new \EventoImport\import\settings\DefaultUserSettings($this->settings);
             $user_action_factory = new \EventoImport\import\action\user\UserActionFactory(
-                $this->evento_import_object_builder->userFacade(),
-                $default_user_settings,
+                $this->import_bootstrapping->userFacade(),
+                $this->import_bootstrapping->defaultUserSettings(),
                 $user_photo_importer,
                 $logger
             );
 
             $user_import_action_decider = new \EventoImport\import\data_matching\UserActionDecider(
-                $this->evento_import_object_builder->userFacade(),
+                $this->import_bootstrapping->userFacade(),
                 $user_action_factory
             );
 
             $importUsers = new ilEventoImportImportUsers(
                 $user_importer,
                 $user_import_action_decider,
-                $this->evento_import_object_builder->userFacade(),
+                $this->import_bootstrapping->userFacade(),
                 $logger
             );
-            $importUsers->run();
+            //$importUsers->run();
 
             /* Event import */
             $default_event_settings = new \EventoImport\import\settings\DefaultEventSettings($this->settings);
-            $ilias_event_object_factory = new \EventoImport\import\IliasEventObjectFactory(
-                $this->evento_import_object_builder->repositoryFacade(),
-                $default_event_settings
-            );
-            $membership_manager = new \EventoImport\import\db\MembershipManager(
-                $this->evento_import_object_builder->membershipRepo(),
-                $this->evento_import_object_builder->eventoUserRepository(),
-                $this->evento_import_object_builder->eventoEventRepository(),
-                new ilFavouritesManager(),
-                $logger,
-                $this->rbac
-            );
             $event_action_factory = new \EventoImport\import\action\event\EventActionFactory(
-                $ilias_event_object_factory,
-                $this->evento_import_object_builder->repositoryFacade(),
-                $this->evento_import_object_builder->userFacade(),
-                $membership_manager,
+                $this->import_bootstrapping->eventObjectFactory(),
+                $this->import_bootstrapping->repositoryFacade(),
+                $this->import_bootstrapping->userFacade(),
+                $this->import_bootstrapping->membershipManager(),
                 $default_event_settings,
                 $logger
             );
             $event_action_decider = new \EventoImport\import\data_matching\EventImportActionDecider(
-                $this->evento_import_object_builder->repositoryFacade(),
+                $this->import_bootstrapping->repositoryFacade(),
                 $event_action_factory
             );
 

@@ -135,7 +135,7 @@ class ilEventoImportLogger
                 self::TABLE_LOG_EVENTS,
                 [
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id],
-                    'ref_id' => [\ilDBConstants::T_TEXT, $ref_id],
+                    'ref_id' => [\ilDBConstants::T_INTEGER, $ref_id],
                     'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
@@ -145,7 +145,7 @@ class ilEventoImportLogger
             $this->ilDB->update(
                 self::TABLE_LOG_EVENTS,
                 [
-                    'ref_id' => [\ilDBConstants::T_TEXT, $ref_id],
+                    'ref_id' => [\ilDBConstants::T_INTEGER, $ref_id],
                     'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],

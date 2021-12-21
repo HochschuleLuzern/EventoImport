@@ -36,7 +36,7 @@ class IliasEventoEvent
     private string $ilias_type;
 
     /** @var string */
-    private string $parent_event_key;
+    private ?string $parent_event_key;
 
     /** @var int */
     private int $ref_id;

@@ -109,10 +109,14 @@ class MembershipManager
      * @param array $evento_user_list
      * @return bool
      */
-    private function isMemberInCurrentImport($member, array $evento_user_list) : bool
+    private function isMemberInCurrentImport(IliasEventoUser $member, array $evento_user_list) : bool
     {
-        // TODO: Implement to test with real data set
-        return true;
+        foreach ($evento_user_list as $evento_user) {
+            if ($evento_user instanceof EventoUserShort && $member->getEventoUserId() == $evento_user->getEventoId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

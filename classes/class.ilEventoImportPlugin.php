@@ -27,59 +27,90 @@
 
 class ilEventoImportPlugin extends ilCronHookPlugin
 {
-	
-	const PLUGIN_NAME = "EventoImport";
-	
-	/**
-	 * @var ilEventoImportPlugin
-	 */
-	protected static $instance;
-	
-	/**
-	 * @return ilEventoImportPlugin
-	 */
-	public static function getInstance() {
-		if (! isset(self::$instance)) {
-			self::$instance = new self();
-		}
-		
-		return self::$instance;
-	}
-	
-	public function getPluginName() {
-		return self::PLUGIN_NAME;
-	}
-	
-	/**
-	 * @var  ilEventoImportImport
-	 */
-	protected static $cron_job_instances;
-	
-	/**
-	 * @return  ilEventoImportJobInstances[]
-	 */
-	public function getCronJobInstances() {
-		$this->loadCronJobInstance();
-		
-		return array_values(self::$cron_job_instances);
-	}
-	
-	/**
-	 * @return  ilEventoImportJobInstance or false on failure
-	 */
-	public function getCronJobInstance($a_job_id) {
-		$this->loadCronJobInstance();		
-		if (isset(self::$cron_job_instances[$a_job_id])) {
-			return self::$cron_job_instances[$a_job_id];
-		} else {
-			return false;
-		}
-	}
-	
-	protected function loadCronJobInstance() {
-		if (!isset(self::$cron_job_instances)) {
-			self::$cron_job_instances[ilEventoImportImport::ID] = new ilEventoImportImport();
-		}
-	}
-	
+    const PLUGIN_NAME = "EventoImport";
+    
+    /**
+     * @var ilEventoImportPlugin
+     */
+    protected static $instance;
+    
+    /**
+     * @return ilEventoImportPlugin
+     */
+    public static function getInstance()
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+        }
+        
+        return self::$instance;
+    }
+    
+    public function getPluginName()
+    {
+        return self::PLUGIN_NAME;
+    }
+    
+    /**
+     * @var  ilEventoImportImport
+     */
+    protected static $cron_job_instances;
+    
+    /**
+     * @return  ilEventoImportJobInstances[]
+     */
+    public function getCronJobInstances()
+    {
+        $this->loadCronJobInstance();
+        
+        return array_values(self::$cron_job_instances);
+    }
+    
+    /**
+     * @return  ilEventoImportJobInstance or false on failure
+     */
+    public function getCronJobInstance($a_job_id)
+    {
+        $this->loadCronJobInstance();
+        if (isset(self::$cron_job_instances[$a_job_id])) {
+            return self::$cron_job_instances[$a_job_id];
+        } else {
+            return false;
+        }
+    }
+    
+    protected function loadCronJobInstance()
+    {
+        if (!isset(self::$cron_job_instances)) {
+            self::$cron_job_instances[ilEventoImportImport::ID] = new ilEventoImportImport();
+        }
+    }
+
+    protected function beforeUninstall()
+    {
+        /** @var $ilDB ilDBInterface */
+        global $ilDB;
+
+        $drop_table_list = [
+            'crnhk_crevento_usrs',
+            'crnhk_crevento_mas',
+            'crnhk_crevento_subs',
+            \EventoImport\import\db\repository\EventoUserRepository::TABLE_NAME,
+            \EventoImport\import\db\repository\IliasEventoEventsRepository::TABLE_NAME,
+            \EventoImport\import\db\repository\ParentEventRepository::TABLE_NAME,
+            \EventoImport\import\db\repository\EventLocationsRepository::TABLE_NAME,
+            \EventoImport\import\db\repository\EventMembershipRepository::TABLE_NAME,
+            ilEventoImportLogger::TABLE_LOG_USERS,
+            ilEventoImportLogger::TABLE_LOG_EVENTS,
+            ilEventoImportLogger::TABLE_LOG_MEMBERSHIPS
+        ];
+
+        foreach ($drop_table_list as $key => $table) {
+            if ($ilDB->tableExists($table)) {
+                $ilDB->dropTable($table);
+            }
+        }
+
+        return true;
+    }
 }
