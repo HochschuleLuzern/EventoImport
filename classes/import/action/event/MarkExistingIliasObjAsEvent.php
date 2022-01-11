@@ -39,8 +39,24 @@ class MarkExistingIliasObjAsEvent extends EventAction
     public function executeAction() : void
     {
         if ($this->ilias_object instanceof \ilObjCourse && $this->ilias_object->getType() == 'crs') {
-            $this->repository_facade->addNewSingleEventCourse($this->evento_event, $this->ilias_object);
+            $ilias_event = $this->repository_facade->addNewSingleEventCourse($this->evento_event, $this->ilias_object);
+            $this->synchronizeUsersInRole($ilias_event);
+            $this->logger->logEventImport(
+                $this->log_code,
+                $this->evento_event->getEventoId(),
+                $this->ilias_object->getRefId(),
+                ['api_data' => $this->evento_event->getDecodedApiData()]
+            );
+        } elseif ($this->ilias_object instanceof \ilObjGroup && $this->ilias_object->getType() == 'grp') {
+            $ilias_event = $this->repository_facade->addNewSingleEventGroup($this->evento_event, $this->ilias_object);
         }
-        throw new \Error("not implemented yet");
+
+        $this->synchronizeUsersInRole($ilias_event);
+        $this->logger->logEventImport(
+            $this->log_code,
+            $this->evento_event->getEventoId(),
+            $this->ilias_object->getRefId(),
+            ['api_data' => $this->evento_event->getDecodedApiData()]
+        );
     }
 }

@@ -127,6 +127,35 @@ class RepositoryFacade
 
     /**
      * @param EventoEvent  $evento_event
+     * @param \ilObjGroup $grp_object
+     * @return IliasEventWrapper
+     */
+    public function addNewSingleEventGroup(EventoEvent $evento_event, \ilObjGroup $grp_object) : IliasEventWrapper
+    {
+        $ilias_evento_event = new IliasEventoEvent(
+            $evento_event->getEventoId(),
+            $evento_event->getName(),
+            $evento_event->getDescription(),
+            $evento_event->getType(),
+            $evento_event->hasCreateCourseFlag(),
+            $evento_event->getStartDate(),
+            $evento_event->getEndDate(),
+            $grp_object->getType(),
+            $grp_object->getRefId(),
+            $grp_object->getId(),
+            $grp_object->getDefaultAdminRole(),
+            $grp_object->getDefaultMemberRole()
+        );
+
+        $this->event_repo->addNewEventoIliasEvent(
+            $ilias_evento_event
+        );
+
+        return new IliasEventWrapperSingleEvent($ilias_evento_event, $grp_object);
+    }
+
+    /**
+     * @param EventoEvent  $evento_event
      * @param \ilObjCourse $crs_object
      * @param \ilObjGroup  $sub_group
      * @return IliasEventWrapper

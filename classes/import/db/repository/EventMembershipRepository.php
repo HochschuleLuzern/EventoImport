@@ -73,6 +73,23 @@ class EventMembershipRepository
         return $users;
     }
 
+    public function fetchIliasEventoUserForEvent(int $evento_event_id) : array
+    {
+        $query = 'SELECT usr.' . EventoUserRepository::COL_EVENTO_ID . ' AS evento_user_id, usr.' . EventoUserRepository::COL_ILIAS_USER_ID . ' AS ilias_user_id'
+            . ' FROM ' . self::TABLE_NAME . ' AS mem'
+            . ' JOIN ' . EventoUserRepository::TABLE_NAME . ' AS usr ON usr.' . EventoUserRepository::COL_EVENTO_ID . ' = mem.' . self::COL_EVENTO_USER_ID
+            . ' WHERE mem.' . self::COL_EVENTO_EVENT_ID . ' = ' . $this->db->quote($evento_event_id, \ilDBConstants::T_INTEGER);
+
+        $result = $this->db->query($query);
+
+        $users = [];
+        while ($row = $this->db->fetchAssoc($result)) {
+            $users[] = new IliasEventoUser($row['evento_user_id'], $row['ilias_user_id']);
+        }
+
+        return $users;
+    }
+
     /**
      * @param int $evento_event_id
      * @param int $user_id
