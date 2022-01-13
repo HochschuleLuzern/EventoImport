@@ -102,10 +102,10 @@ class MembershipableObjectsQuery
             $current_obj_ref = $this->tree->getParentId($current_obj_ref);
             $type = \ilObject::_lookupType($current_obj_ref, true);
             if ($type == 'crs') {
-                $parent_membershipable_objs[] = $parent_membershipable_objs;
+                $parent_membershipable_objs[] = $current_obj_ref;
                 $has_found_super_parent = true;
             } elseif ($type == 'grp') {
-                $parent_membershipable_objs[] = $parent_membershipable_objs;
+                $parent_membershipable_objs[] = $current_obj_ref;
             } elseif ($type == 'cat' || $type == 'root') {
                 $has_found_super_parent = true;
             }

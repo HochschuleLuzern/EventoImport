@@ -71,6 +71,6 @@ abstract class EventAction implements EventoImportAction
      */
     protected function synchronizeUsersInRole(IliasEventWrapper $ilias_event)
     {
-        $this->membership_manager->synchronizeMembershipsWithEvent($this->evento_event, $ilias_event->getIliasEventoEventObj());
+        $this->membership_manager->syncMemberships($this->evento_event, $ilias_event->getIliasEventoEventObj());
     }
 }
