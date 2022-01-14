@@ -19,6 +19,8 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
+use EventoImport\communication\request_services\RequestClientService;
+
 /**
  * Class ilEventoImporter
  *
@@ -27,13 +29,20 @@
 
 abstract class ilEventoImporter
 {
-    private $evento_logger;
+    protected $data_source;
+    protected $seconds_before_retry;
+    protected $max_retries;
+    protected $evento_logger;
     protected $has_more_data;
 
     public function __construct(
+        RequestClientService $data_source,
+        int $seconds_before_retry,
+        int $max_retries,
         ilEventoImportLogger $logger
     ) {
-        //Get Settings from dbase
+        $this->seconds_before_retry = $seconds_before_retry;
+        $this->max_retries = $max_retries;
         $this->evento_logger = $logger;
     }
 

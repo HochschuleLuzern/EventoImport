@@ -58,7 +58,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                         $skip = (int) $form->getInput('skip');
                         $take = (int) $form->getInput('take');
                         if ($importer instanceof \EventoImport\communication\EventoDataSetImporter) {
-                            $output = $importer->fetchSpecificDataSet($skip, $take);
+                            $output = $importer->fetchSpecificUserDataSet($skip, $take);
                         } else {
                             throw new Exception('Class is not instance of Data Set importer');
                         }
@@ -92,7 +92,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                     if ($form->checkInput()) {
                         $id_from_form = (int) $form->getInput('record_id');
                         if ($importer instanceof \EventoImport\communication\EventoSingleDataRecordImporter) {
-                            $output = $importer->fetchDataRecordById($id_from_form);
+                            $output = $importer->fetchUserPhotoDataById($id_from_form);
                         } else {
                             throw new Exception('Class is not instance of Single Data Record importer');
                         }

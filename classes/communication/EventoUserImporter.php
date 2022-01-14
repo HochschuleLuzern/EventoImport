@@ -2,20 +2,21 @@
 
 namespace EventoImport\communication;
 
+use EventoImport\communication\request_services\RequestClientService;
+use EventoImport\communication\generic_importers\SingleDataRecordImport;
+use EventoImport\communication\generic_importers\DataSetImport;
+
 /**
  * Class EventoUserImporter
  * @package EventoImport\communication
  */
-class EventoUserImporter extends \ilEventoImporter implements EventoSingleDataRecordImporter, EventoDataSetImporter
+class EventoUserImporter extends \ilEventoImporter
 {
+    use SingleDataRecordImport;
+    use DataSetImport;
+
     /** @var \ilEventoImporterIterator */
     private \ilEventoImporterIterator $iterator;
-
-    /** @var generic_importers\DataSetImport */
-    private generic_importers\DataSetImport $data_set_import;
-
-    /** @var generic_importers\SingleDataRecordImport */
-    private generic_importers\SingleDataRecordImport $data_record_import;
 
     /** @var string */
     protected string $fetch_data_set_method;
@@ -25,22 +26,22 @@ class EventoUserImporter extends \ilEventoImporter implements EventoSingleDataRe
 
     /**
      * EventoUserImporter constructor.
-     * @param generic_importers\DataSetImport          $data_set_import
-     * @param generic_importers\SingleDataRecordImport $data_record_import
-     * @param \ilEventoImporterIterator                $iterator
-     * @param \ilEventoImportLogger                    $logger
+     * @param RequestClientService      $data_source
+     * @param \ilEventoImporterIterator $iterator
+     * @param \ilEventoImportLogger     $logger
+     * @param int                       $seconds_before_retry
+     * @param int                       $max_retries
      */
     public function __construct(
-        generic_importers\DataSetImport $data_set_import,
-        generic_importers\SingleDataRecordImport $data_record_import,
+        RequestClientService $data_source,
         \ilEventoImporterIterator $iterator,
-        \ilEventoImportLogger $logger
+        \ilEventoImportLogger $logger,
+        int $seconds_before_retry,
+        int $max_retries
     ) {
-        parent::__construct($logger);
+        parent::__construct($data_source, $seconds_before_retry, $max_retries, $logger);
 
         $this->iterator = $iterator;
-        $this->data_set_import = $data_set_import;
-        $this->data_record_import = $data_record_import;
 
         $this->fetch_data_set_method = 'GetAccounts';
         $this->fetch_data_record_method = 'GetAccountById';
@@ -66,12 +67,21 @@ class EventoUserImporter extends \ilEventoImporter implements EventoSingleDataRe
      * @return array
      * @throws \Exception
      */
-    public function fetchNextDataSet() : array
+    public function fetchNextUserDataSet() : array
     {
         $skip = ($this->iterator->getPage() - 1) * $this->iterator->getPageSize();
         $take = $this->iterator->getPageSize();
 
-        $response = $this->data_set_import->fetchPagedDataSet($this->fetch_data_set_method, $skip, $take);
+        $response = $this->fetchDataSet(
+            $this->data_source,
+            $this->fetch_data_set_method,
+            [
+                "skip" => $skip,
+                "take" => $take
+            ],
+            $this->seconds_before_retry,
+            $this->max_retries
+        );
         $this->iterator->nextPage();
 
         if (count($response->getData()) < 1) {
@@ -89,19 +99,35 @@ class EventoUserImporter extends \ilEventoImporter implements EventoSingleDataRe
      * @return array
      * @throws \Exception
      */
-    public function fetchSpecificDataSet(int $skip, int $take) : array
+    public function fetchSpecificUserDataSet(int $skip, int $take) : array
     {
-        $response = $this->data_set_import->fetchPagedDataSet($this->fetch_data_set_method, $skip, $take);
+        $response = $this->fetchDataSet(
+            $this->data_source,
+            $this->fetch_data_set_method,
+            [
+                "skip" => $skip,
+                "take" => $take
+            ],
+            $this->seconds_before_retry,
+            $this->max_retries
+        );
+
         return $response->getData();
     }
 
     /**
-     * @param int $evento_id
+     * @param int $evento_user_id
      * @return array
      * @throws \Exception
      */
-    public function fetchDataRecordById(int $evento_id) : array
+    public function fetchUserDataRecordById(int $evento_user_id) : array
     {
-        return $this->data_record_import->fetchDataRecordById($this->fetch_data_record_method, $evento_id);
+        return $this->fetchDataRecordById(
+            $this->data_source,
+            $this->fetch_data_record_method,
+            $evento_user_id,
+            $this->seconds_before_retry,
+            $this->max_retries
+        );
     }
 }

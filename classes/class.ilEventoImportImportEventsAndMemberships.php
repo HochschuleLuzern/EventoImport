@@ -34,7 +34,7 @@ class ilEventoImportImportEventsAndMemberships
 
     private function importNextEventPage()
     {
-        foreach ($this->evento_importer->fetchNextDataSet() as $data_set) {
+        foreach ($this->evento_importer->fetchNextEventDataSet() as $data_set) {
             try {
                 $evento_event = new \EventoImport\communication\api_models\EventoEvent($data_set);
 

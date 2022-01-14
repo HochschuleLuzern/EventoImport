@@ -2,39 +2,39 @@
 
 namespace EventoImport\communication;
 
+use EventoImport\communication\generic_importers\DataSetImport;
+use EventoImport\communication\generic_importers\SingleDataRecordImport;
+use EventoImport\communication\request_services\RequestClientService;
+
 /**
  * Class EventoAdminImporter
  * @package EventoImport\communication
  */
-class EventoAdminImporter extends \ilEventoImporter implements EventoSingleDataRecordImporter
+class EventoAdminImporter extends \ilEventoImporter
 {
+    use SingleDataRecordImport;
+    use DataSetImport;
+
     /** @var string */
     private $fetch_single_record;
 
     /** @var string */
     private $fetch_all_admins;
 
-    /** @var generic_importers\DataSetImport */
-    private $data_set_importer;
-
-    /** @var generic_importers\SingleDataRecordImport */
-    private $data_record_importer;
-
     /**
      * EventoAdminImporter constructor.
-     * @param generic_importers\DataSetImport          $data_set_importer
-     * @param generic_importers\SingleDataRecordImport $data_record_importer
-     * @param \ilEventoImportLogger                    $logger
+     * @param RequestClientService  $data_source
+     * @param \ilEventoImportLogger $logger
+     * @param int                   $seconds_before_retry
+     * @param int                   $max_retries
      */
     public function __construct(
-        generic_importers\DataSetImport $data_set_importer,
-        generic_importers\SingleDataRecordImport $data_record_importer,
-        \ilEventoImportLogger $logger
+        RequestClientService $data_source,
+        \ilEventoImportLogger $logger,
+        int $seconds_before_retry,
+        int $max_retries
     ) {
-        parent::__construct($logger);
-
-        $this->data_set_importer = $data_set_importer;
-        $this->data_record_importer = $data_record_importer;
+        parent::__construct($data_source, $seconds_before_retry, $max_retries, $logger);
 
         $this->fetch_single_record = "GetIliasAdminsByIdEvent";
         $this->fetch_all_admins = "GetIliasAdmins";
@@ -47,13 +47,25 @@ class EventoAdminImporter extends \ilEventoImporter implements EventoSingleDataR
 
     public function fetchAllIliasAdmins() : array
     {
-        $response = $this->data_set_importer->fetchDataSetParameterless($this->fetch_all_admins);
+        $response = $this->fetchDataSet(
+            $this->data_source,
+            $this->fetch_all_admins,
+            [],
+            $this->seconds_before_retry,
+            $this->max_retries
+        );
 
         return $response->getData();
     }
 
-    public function fetchDataRecordById(int $EventoEventid) : array
+    public function fetchEventAdminDataRecordById(int $evento_event_id) : array
     {
-        return $this->data_record_importer->fetchDataRecordById($this->fetch_single_record, $EventoEventid);
+        return $this->fetchDataRecordById(
+            $this->data_source,
+            $this->fetch_single_record,
+            $evento_event_id,
+            $this->seconds_before_retry,
+            $this->max_retries
+        );
     }
 }

@@ -3,11 +3,11 @@
 namespace EventoImport\communication;
 
 use EventoImport\communication\generic_importers\SingleDataRecordImport;
+use EventoImport\communication\request_services\RequestClientService;
 
-class EventoUserPhotoImporter extends \ilEventoImporter implements EventoSingleDataRecordImporter
+class EventoUserPhotoImporter extends \ilEventoImporter
 {
-    /** @var SingleDataRecordImport */
-    private SingleDataRecordImport $data_record_importer;
+    use SingleDataRecordImport;
 
     /** @var string */
     private string $fetch_data_record_method;
@@ -18,23 +18,29 @@ class EventoUserPhotoImporter extends \ilEventoImporter implements EventoSingleD
      * @param \ilEventoImportLogger  $logger
      */
     public function __construct(
-        generic_importers\SingleDataRecordImport $data_record_importer,
+        RequestClientService $data_source,
+        int $seconds_before_retry,
+        int $max_retries,
         \ilEventoImportLogger $logger
     ) {
-        parent::__construct($logger);
-
-        $this->data_record_importer = $data_record_importer;
+        parent::__construct($data_source, $seconds_before_retry, $max_retries, $logger);
 
         $this->fetch_data_record_method = 'GetPhotoById';
     }
 
     /**
-     * @param int $evento_id
+     * @param int $user_evento_id
      * @return array
      * @throws \Exception
      */
-    public function fetchDataRecordById(int $evento_id) : array
+    public function fetchUserPhotoDataById(int $user_evento_id) : array
     {
-        return $this->data_record_importer->fetchDataRecordById($this->fetch_data_record_method, $evento_id);
+        return $this->fetchDataRecordById(
+            $this->data_source,
+            $this->fetch_data_record_method,
+            $user_evento_id,
+            $this->seconds_before_retry,
+            $this->max_retries
+        );
     }
 }

@@ -97,7 +97,7 @@ class ilEventoImportImportUsers
 
     private function importNextUserPage()
     {
-        foreach ($this->evento_importer->fetchNextDataSet() as $data_set) {
+        foreach ($this->evento_importer->fetchNextUserDataSet() as $data_set) {
             try {
                 $evento_user = new \EventoImport\communication\api_models\EventoUser($data_set);
 

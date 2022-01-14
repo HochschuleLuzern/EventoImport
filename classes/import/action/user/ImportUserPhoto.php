@@ -21,7 +21,7 @@ trait ImportUserPhoto
     public function importAndSetUserPhoto(int $evento_id, \ilObjUser $user, EventoUserPhotoImporter $photo_importer, UserFacade $user_facade)
     {
         try {
-            $photo_import = $photo_importer->fetchDataRecordById($evento_id);
+            $photo_import = $photo_importer->fetchUserPhotoDataById($evento_id);
             $photo_import = new EventoUserPhoto($photo_import);
         } catch (\Exception $e) {
             return;
