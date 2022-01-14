@@ -2,10 +2,10 @@
 
 namespace EventoImport\import\data_matching;
 
-use EventoImport\import\action\user\UserImportAction;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\action\EventoImportAction;
+use EventoImport\communication\api_models\EventoUser;
 
 /**
  * Class UserActionDecider
@@ -31,11 +31,11 @@ class UserActionDecider
     }
 
     /**
-     * @param \EventoImport\communication\api_models\EventoUser $evento_user
+     * @param EventoUser $evento_user
      * @param int                                               $ilias_user_id
      */
     private function addUserToEventoIliasMappingTable(
-        \EventoImport\communication\api_models\EventoUser $evento_user,
+        EventoUser $evento_user,
         int $ilias_user_id
     ) {
         $ilias_user = $this->user_facade->getExistingIliasUserObject($ilias_user_id);
@@ -43,10 +43,10 @@ class UserActionDecider
     }
 
     /**
-     * @param \EventoImport\communication\api_models\EventoUser $evento_user
+     * @param EventoUser $evento_user
      * @return EventoImportAction
      */
-    public function determineImportAction(\EventoImport\communication\api_models\EventoUser $evento_user) : EventoImportAction
+    public function determineImportAction(EventoUser $evento_user) : EventoImportAction
     {
         $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
 
@@ -58,11 +58,11 @@ class UserActionDecider
     }
 
     /**
-     * @param \EventoImport\communication\api_models\EventoUser $evento_user
+     * @param EventoUser $evento_user
      * @return EventoImportAction
      */
     private function matchEventoUserTheOldWay(
-        \EventoImport\communication\api_models\EventoUser $evento_user
+        EventoUser $evento_user
     ) : EventoImportAction {
         $data['id_by_login'] = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
         $data['ids_by_matriculation'] = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());

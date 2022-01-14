@@ -2,11 +2,11 @@
 
 /**
  * Class ilEventoImportConfigGUI
+ *
+ * This class currently does not contain any configuration in it
  */
 class ilEventoImportConfigGUI extends ilPluginConfigGUI
 {
-    private const ALLOWED_PATH_SCHEMA_ELEMENTS = ['department', 'kind', 'year'];
-
     private $settings;
     private $tree;
     private $tpl;

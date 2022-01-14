@@ -3,7 +3,6 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\action\EventoImportAction;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;

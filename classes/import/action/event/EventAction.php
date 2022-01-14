@@ -8,8 +8,6 @@ use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\IliasEventWrapper;
-use EventoImport\communication\api_models\EventoUserShort;
-use EventoImport\import\db\repository\EventMembershipRepository;
 use EventoImport\import\db\MembershipManager;
 
 abstract class EventAction implements EventoImportAction

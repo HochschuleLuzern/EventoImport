@@ -2,7 +2,6 @@
 
 namespace EventoImport\import\action\event;
 
-use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\ReportDatasetWithoutAction;
 
 /**

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Class ilEventoImportCronConfig
+ *
+ * This class is used to separate the config part for the cron-job from the executing class (ilEventoImportImport)
+ */
 class ilEventoImportCronConfig
 {
     const LANG_HEADER_API_SETTINGS = 'api_settings';

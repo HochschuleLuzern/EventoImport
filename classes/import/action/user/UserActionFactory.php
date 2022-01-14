@@ -6,7 +6,6 @@ use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\action\ReportDatasetWithoutAction;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
-use ILIAS\UI\Component\Test\Renderer;
 use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\EventoUserPhotoImporter;
 
