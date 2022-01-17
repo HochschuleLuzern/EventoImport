@@ -1,13 +1,5 @@
 <?php
 
-use EventoImport\import\data_matching\EventoUserToIliasUserMatcher;
-use EventoImport\import\db\query\IliasUserQuerying;
-use ILIAS\DI\RBACServices;
-use ILIAS\Refinery;
-
-include_once('./Customizing/global/plugins/Services/Cron/CronHook/EventoImport/classes/class.ilEventoImportImportUsersConfig.php');
-
-
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -27,6 +19,10 @@ include_once('./Customizing/global/plugins/Services/Cron/CronHook/EventoImport/c
  * along with EventoImport-Plugin for ILIAS.  If not,
  * see <http://www.gnu.org/licenses/>.
  */
+
+use EventoImport\communication\request_services\RequestClientService;
+use EventoImport\communication\ImporterApiSettings;
+use EventoImport\communication\request_services\RestClientService;
 
 /**
  * Class ilEventoImportImport
@@ -69,12 +65,11 @@ class ilEventoImportImport extends ilCronJob
         }
         $this->cp = new ilEventoImportPlugin();
         $this->settings = new ilSetting("crevento");
-        $this->importUsersConfig = new ilEventoImportImportUsersConfig($this->settings, $this->rbac);
         $this->import_bootstrapping = new \EventoImport\import\EventoImportBootstrap($this->db, $this->rbac);
 
         $this->page_size = 500;
     }
-    
+
     /**
      * Retrieve the ID of the cron job
      * @return string
@@ -169,96 +164,130 @@ class ilEventoImportImport extends ilCronJob
         try {
             $logger = new ilEventoImportLogger($this->db);
 
-            $api_settings = new \EventoImport\communication\ApiImporterSettings($this->settings);
+            $api_settings = new ImporterApiSettings($this->settings);
 
-            $data_source = new \EventoImport\communication\request_services\RestClientService(
+            $data_source = new RestClientService(
                 $api_settings->getUrl(),
                 $api_settings->getTimeoutAfterRequest(),
                 $api_settings->getApikey(),
                 $api_settings->getApiSecret()
             );
-            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
 
-            $data_record_importer = new \EventoImport\communication\generic_importers\SingleDataRecordImport(
-                $data_source,
-                $api_settings->getMaxRetries(),
-                $api_settings->getTimeoutFailedRequest()
-            );
-            $data_set_importer = new \EventoImport\communication\generic_importers\DataSetImport(
-                $data_source,
-                $api_settings->getMaxRetries(),
-                $api_settings->getTimeoutFailedRequest()
-            );
-
-            $user_importer = new \EventoImport\communication\EventoUserImporter(
-                $data_set_importer,
-                $data_record_importer,
-                new ilEventoImporterIterator($this->page_size),
-                $logger
-            );
-            $event_importer = new \EventoImport\communication\EventoEventImporter(
-                $data_set_importer,
-                $data_record_importer,
-                new ilEventoImporterIterator($this->page_size),
-                $logger
-            );
-            $user_photo_importer = new \EventoImport\communication\EventoUserPhotoImporter(
-                $data_record_importer,
-                $logger
-            );
-
-
-            /*
-            $mailbox_search = new ilRoleMailboxSearch(
-                new ilMailRfc822AddressParserFactory()
-                );
-            $favourites_manager = new ilFavouritesManager();
-            */
-
-            /* User import */
-            $default_user_settings = new \EventoImport\import\settings\DefaultUserSettings($this->settings);
-            $user_action_factory = new \EventoImport\import\action\user\UserActionFactory(
-                $this->import_bootstrapping->userFacade(),
-                $this->import_bootstrapping->defaultUserSettings(),
-                $user_photo_importer,
-                $logger
-            );
-
-            $user_import_action_decider = new \EventoImport\import\data_matching\UserActionDecider(
-                $this->import_bootstrapping->userFacade(),
-                $user_action_factory
-            );
-
-            $importUsers = new ilEventoImportImportUsers(
-                $user_importer,
-                $user_import_action_decider,
-                $this->import_bootstrapping->userFacade(),
-                $logger
-            );
-            //$importUsers->run();
-
-            /* Event import */
-            $default_event_settings = new \EventoImport\import\settings\DefaultEventSettings($this->settings);
-            $event_action_factory = new \EventoImport\import\action\event\EventActionFactory(
-                $this->import_bootstrapping->eventObjectFactory(),
-                $this->import_bootstrapping->repositoryFacade(),
-                $this->import_bootstrapping->userFacade(),
-                $this->import_bootstrapping->membershipManager(),
-                $default_event_settings,
-                $logger
-            );
-            $event_action_decider = new \EventoImport\import\data_matching\EventImportActionDecider(
-                $this->import_bootstrapping->repositoryFacade(),
-                $event_action_factory
-            );
-
-            $import_events = new ilEventoImportImportEventsAndMemberships($event_importer, $event_action_decider, $logger);
-            $import_events->run();
+            if ($this->wasFullImportAlreadyRunToday()) {
+                return $this->runHourlyAdminImport($data_source, $api_settings, $logger);
+            } else {
+                return $this->runDailyFullImport($data_source, $api_settings, $logger);
+            }
 
             return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
         } catch (Exception $e) {
             return new ilEventoImportResult(ilEventoImportResult::STATUS_CRASHED, 'Cron job crashed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * @param RequestClientService $data_source
+     * @param ImporterApiSettings  $api_settings
+     * @param ilEventoImportLogger $logger
+     */
+    public function runDailyFullImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger)
+    {
+        $user_importer = new \EventoImport\communication\EventoUserImporter(
+            $data_source,
+            new ilEventoImporterIterator($this->page_size),
+            $logger,
+            $api_settings->getTimeoutFailedRequest(),
+            $api_settings->getMaxRetries()
+        );
+
+        $event_importer = new \EventoImport\communication\EventoEventImporter(
+            $data_source,
+            new ilEventoImporterIterator($this->page_size),
+            $logger,
+            $api_settings->getTimeoutFailedRequest(),
+            $api_settings->getMaxRetries()
+        );
+
+        $user_photo_importer = new \EventoImport\communication\EventoUserPhotoImporter(
+            $data_source,
+            $api_settings->getTimeoutFailedRequest(),
+            $api_settings->getMaxRetries(),
+            $logger
+        );
+
+        /* User import */
+        $user_action_factory = new \EventoImport\import\action\user\UserActionFactory(
+            $this->import_bootstrapping->userFacade(),
+            $this->import_bootstrapping->defaultUserSettings(),
+            $user_photo_importer,
+            $logger
+        );
+
+        $user_import_action_decider = new \EventoImport\import\data_matching\UserActionDecider(
+            $this->import_bootstrapping->userFacade(),
+            $user_action_factory
+        );
+
+        $importUsers = new ilEventoImportImportUsers(
+            $user_importer,
+            $user_import_action_decider,
+            $this->import_bootstrapping->userFacade(),
+            $logger
+        );
+        //$importUsers->run();
+
+        /* Event import */
+        $event_action_factory = new \EventoImport\import\action\event\EventActionFactory(
+            $this->import_bootstrapping->eventObjectFactory(),
+            $this->import_bootstrapping->repositoryFacade(),
+            $this->import_bootstrapping->membershipManager(),
+            $logger
+        );
+        $event_action_decider = new \EventoImport\import\data_matching\EventImportActionDecider(
+            $this->import_bootstrapping->repositoryFacade(),
+            $event_action_factory
+        );
+
+        $import_events = new ilEventoImportImportEventsAndMemberships($event_importer, $event_action_decider, $logger);
+        $import_events->run();
+    }
+
+    /**
+     * @param RequestClientService $data_source
+     * @param ImporterApiSettings  $api_settings
+     * @param ilEventoImportLogger $logger
+     */
+    public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger)
+    {
+        $admin_importer = new \EventoImport\communication\EventoAdminImporter($data_source, $logger, $api_settings->getTimeoutFailedRequest(), $api_settings->getMaxRetries());
+
+        $import_admins = new ilEventoImportImportAdmins(
+            $admin_importer,
+            $this->import_bootstrapping->membershipManager(),
+            $this->import_bootstrapping->eventoEventRepository(),
+            $logger
+        );
+
+        $import_admins->run();
+        ;
+    }
+
+    /**
+     * @return bool
+     */
+    private function wasFullImportAlreadyRunToday() : bool
+    {
+        // Try to get the date from the last run
+        $sql = "SELECT * FROM cron_job WHERE job_id = " . $this->db->quote(self::ID, \ilDBConstants::T_TEXT);
+        $res = $this->db->query($sql);
+        $cron = $this->db->fetchAssoc($res);
+
+        $last_run = $cron['job_result_ts'];
+        if (is_null($last_run)) {
+            return false;
+        }
+
+        return date('d.m.Y H:i') == date('d.m.Y H:i', strtotime($cron['job_result_ts']));
     }
 
     /**

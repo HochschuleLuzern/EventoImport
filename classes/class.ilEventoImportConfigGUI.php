@@ -187,45 +187,47 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
     private function buildImporter($cmd)
     {
         global $DIC;
-        $api_importer_settings = new \EventoImport\communication\ApiImporterSettings(new ilSetting('crevento'));
+        $api_importer_settings = new \EventoImport\communication\ImporterApiSettings(new ilSetting('crevento'));
         $iterator = new ilEventoImporterIterator($api_importer_settings->getPageSize());
         $logger = new ilEventoImportLogger($DIC->database());
         $request_client = $this->buildRequestService($api_importer_settings);
-
-        $data_record_importer = new \EventoImport\communication\generic_importers\SingleDataRecordImport($request_client, $api_importer_settings->getMaxRetries(), 1);
-        $data_set_importer = new \EventoImport\communication\generic_importers\DataSetImport($request_client, $api_importer_settings->getMaxRetries(), 1);
 
         switch ($cmd) {
             case 'fetch_record_user':
             case 'fetch_data_set_users':
                 return new \EventoImport\communication\EventoUserImporter(
-                    $data_set_importer,
-                    $data_record_importer,
+                    $request_client,
                     $iterator,
                     $logger,
+                    $api_importer_settings->getTimeoutFailedRequest(),
+                    $api_importer_settings->getMaxRetries()
                 );
 
             case 'fetch_record_event':
             case 'fetch_data_set_events':
                 return new \EventoImport\communication\EventoEventImporter(
-                    $data_set_importer,
-                    $data_record_importer,
+                    $request_client,
                     $iterator,
                     $logger,
+                    $api_importer_settings->getTimeoutFailedRequest(),
+                    $api_importer_settings->getMaxRetries()
                 );
 
             case 'fetch_user_photo':
                 return new \EventoImport\communication\EventoUserPhotoImporter(
-                    $data_record_importer,
-                    $logger,
+                    $request_client,
+                    $api_importer_settings->getTimeoutFailedRequest(),
+                    $api_importer_settings->getMaxRetries(),
+                    $logger
                 );
 
             case 'fetch_all_ilias_admins':
             case 'fetch_ilias_admins_for_event':
                 return new \EventoImport\communication\EventoAdminImporter(
-                    $data_set_importer,
-                    $data_record_importer,
-                    $logger
+                    $request_client,
+                    $logger,
+                    $api_importer_settings->getTimeoutFailedRequest(),
+                    $api_importer_settings->getMaxRetries()
                 );
         }
     }
@@ -263,7 +265,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         return $form;
     }
 
-    public function buildRequestService(\EventoImport\communication\ApiImporterSettings $importer_settings) : \EventoImport\communication\request_services\RequestClientService
+    public function buildRequestService(\EventoImport\communication\ImporterApiSettings $importer_settings) : \EventoImport\communication\request_services\RequestClientService
     {
         return new \EventoImport\communication\request_services\RestClientService(
             $importer_settings->getUrl(),

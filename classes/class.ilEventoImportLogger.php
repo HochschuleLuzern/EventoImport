@@ -48,7 +48,6 @@ class ilEventoImportLogger
     const CREVENTO_MA_EVENT_IN_EXISTING_PARENT_EVENT_CREATED = 203;
     const CREVENTO_MA_EXISTING_ILIAS_COURSE_AS_EVENT_MARKED = 204;
 
-
     const CREVENTO_MA_FIRST_IMPORT = 205;
     const CREVENTO_MA_FIRST_IMPORT_NO_SUBS = 206;
 
@@ -56,9 +55,13 @@ class ilEventoImportLogger
     const CREVENTO_MA_NOTICE_MISSING_IN_ILIAS = 212;
     const CREVENTO_MA_NOTICE_DUPLICATE_IN_ILIAS = 213;
     const CREVENTO_MA_NON_ILIAS_EVENT = 214;
+
+    // Update of existing events
     const CREVENTO_MA_SUBS_UPDATED = 231;
     const CREVENTO_MA_NO_SUBS = 232;
+    const CREVENTO_MA_SINGLE_EVENT_TO_MULTI_GROUP_CONVERTED = 233;
 
+    // Errors
     const CREVENTO_MA_EVENT_LOCATION_UNKNOWN = 233; // New code
 
     /**************************

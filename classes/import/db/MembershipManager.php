@@ -13,6 +13,7 @@ use EventoImport\import\db\model\IliasEventoUser;
 use phpDocumentor\Reflection\Types\Self_;
 use EventoImport\import\db\query\MembershipableObjectsQuery;
 use EventoImport\communication\api_models\EventoUser;
+use EventoImport\communication\api_models\EventoEventIliasAdmins;
 
 /**
  * Class MembershipManager
@@ -270,5 +271,44 @@ class MembershipManager
         }
 
         return false;
+    }
+
+    public function addEventAdmins(EventoEventIliasAdmins $event_admin_list, IliasEventoEvent $ilias_evento_event)
+    {
+        $event_participant_obj = $this->membership_query->getParticipantsObjectForRefId($ilias_evento_event->getRefId());
+        $this->addAdminListToObject(
+            $event_participant_obj,
+            $event_admin_list->getAccountList(),
+            $ilias_evento_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN
+        );
+
+        $parent_membershipables = $this->membership_query->getRefIdsOfParentMembershipables($ilias_evento_event->getRefId());
+        foreach ($parent_membershipables as $parent_membershipable) {
+            $participants_obj = $this->membership_query->getParticipantsObjectForRefId($parent_membershipable);
+
+            if ($participants_obj instanceof \ilCourseParticipants) {
+                $this->addAdminListToObject(
+                    $participants_obj,
+                    $event_admin_list->getAccountList(),
+                    IL_CRS_ADMIN,
+                );
+            } elseif ($participants_obj instanceof \ilGroupParticipants) {
+                $this->addAdminListToObject(
+                    $participants_obj,
+                    $event_admin_list->getAccountList(),
+                    IL_GRP_ADMIN,
+                );
+            }
+        }
+    }
+
+    private function addAdminListToObject(\ilParticipants $participants_object, array $admin_list, int $admin_role_code)
+    {
+        foreach ($admin_list as $admin) {
+            $employee_user_id = $this->user_repo->getIliasUserIdByEventoId($admin->getEventoId());
+            if (!$participants_object->isAssigned($employee_user_id)) {
+                $participants_object->add($employee_user_id, $admin_role_code);
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace EventoImport\communication;
  * Class ApiImporterSettings
  * @package EventoImport\communication
  */
-class ApiImporterSettings
+class ImporterApiSettings
 {
     /** @var string */
     private string $url;
