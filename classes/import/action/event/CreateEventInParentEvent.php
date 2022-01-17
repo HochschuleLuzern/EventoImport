@@ -13,38 +13,34 @@ use EventoImport\import\db\MembershipManager;
  * Class CreateEventInParentEvent
  * @package EventoImport\import\action\event
  */
-class CreateEventInParentEvent extends EventAction
+class CreateEventInParentEvent implements EventAction
 {
-    /** @var IliasEventoParentEvent */
-    private $parent_event;
+    private EventoEvent $evento_event;
+    private IliasEventoParentEvent $parent_event;
+    private IliasEventObjectFactory $event_object_factory;
+    private RepositoryFacade $repository_facade;
+    private MembershipManager $membership_manager;
+    private \ilEventoImportLogger $logger;
+    private int $log_code;
 
     /**
      * CreateEventInParentEvent constructor.
-     * @param EventoEvent                                        $evento_event
-     * @param IliasEventoParentEvent                             $parent_event
-     * @param IliasEventObjectFactory                            $event_object_factory
-     * @param \EventoImport\import\settings\DefaultEventSettings $event_settings
-     * @param RepositoryFacade                                   $repository_facade
-     * @param UserFacade                                         $user_facade
-     * @param MembershipManager                                  $membership_manager
-     * @param \ilEventoImportLogger                              $logger
-     * @param \ILIAS\DI\RBACServices                             $rbac_services
+     * @param EventoEvent             $evento_event
+     * @param IliasEventoParentEvent  $parent_event
+     * @param IliasEventObjectFactory $event_object_factory
+     * @param RepositoryFacade        $repository_facade
+     * @param MembershipManager       $membership_manager
+     * @param \ilEventoImportLogger   $logger
      */
-    public function __construct(EventoEvent $evento_event, IliasEventoParentEvent $parent_event, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
+    public function __construct(EventoEvent $evento_event, IliasEventoParentEvent $parent_event, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
     {
-        parent::__construct(
-            $evento_event,
-            $event_object_factory,
-            \ilEventoImportLogger::CREVENTO_MA_EVENT_IN_EXISTING_PARENT_EVENT_CREATED,
-            $event_settings,
-            $repository_facade,
-            $user_facade,
-            $membership_manager,
-            $logger,
-            $rbac_services
-        );
-
+        $this->evento_event = $evento_event;
         $this->parent_event = $parent_event;
+        $this->event_object_factory = $event_object_factory;
+        $this->repository_facade = $repository_facade;
+        $this->membership_manager = $membership_manager;
+        $this->logger = $logger;
+        $this->log_code = \ilEventoImportLogger::CREVENTO_MA_EVENT_IN_EXISTING_PARENT_EVENT_CREATED;
     }
 
     public function executeAction() : void
@@ -55,10 +51,10 @@ class CreateEventInParentEvent extends EventAction
             $this->parent_event->getRefId(),
         );
 
-        $parent_event_ilias_obj = new \ilObjCourse($this->parent_event->getRefId(), true);
+        $ilias_event = $this->repository_facade->addNewIliasEvent($this->evento_event, $event_sub_group);
 
-        $event_wrapper = $this->repository_facade->addNewEventToExistingMultiGroupEvent($this->evento_event, $parent_event_ilias_obj, $event_sub_group);
-        $this->synchronizeUsersInRole($event_wrapper);
+        $this->membership_manager->syncMemberships($this->evento_event, $ilias_event);
+
         $this->logger->logEventImport(
             $this->log_code,
             $this->evento_event->getEventoId(),

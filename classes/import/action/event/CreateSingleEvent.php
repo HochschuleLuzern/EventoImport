@@ -9,28 +9,25 @@ use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\settings\DefaultEventSettings;
 use EventoImport\import\db\MembershipManager;
 
-class CreateSingleEvent extends EventAction
+class CreateSingleEvent implements EventAction
 {
-    /** @var int */
-    private $destination_ref_id;
+    private EventoEvent $evento_event;
+    private int $destination_ref_id;
+    private IliasEventObjectFactory $event_object_factory;
+    private RepositoryFacade $repository_facade;
+    private MembershipManager $membership_manager;
+    private \ilEventoImportLogger $logger;
+    private int $log_code;
 
-    /**
-     * CreateSingleEvent constructor.
-     * @param EventoEvent             $evento_event
-     * @param int                     $destination_ref_id
-     * @param IliasEventObjectFactory $event_object_factory
-     * @param DefaultEventSettings    $event_settings
-     * @param RepositoryFacade        $repository_facade
-     * @param UserFacade              $user_facade
-     * @param MembershipManager       $membership_manager
-     * @param \ilEventoImportLogger   $logger
-     * @param \ILIAS\DI\RBACServices  $rbac_services
-     */
-    public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectFactory $event_object_factory, DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
+    public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
     {
-        parent::__construct($evento_event, $event_object_factory, \ilEventoImportLogger::CREVENTO_MA_SINGLE_EVENT_CREATED, $event_settings, $repository_facade, $user_facade, $membership_manager, $logger, $rbac_services);
-
+        $this->evento_event = $evento_event;
         $this->destination_ref_id = $destination_ref_id;
+        $this->event_object_factory = $event_object_factory;
+        $this->repository_facade = $repository_facade;
+        $this->membership_manager = $membership_manager;
+        $this->logger = $logger;
+        $this->log_code = \ilEventoImportLogger::CREVENTO_MA_SINGLE_EVENT_CREATED;
     }
 
     public function executeAction() : void
@@ -39,10 +36,11 @@ class CreateSingleEvent extends EventAction
             $this->evento_event->getName(),
             $this->evento_event->getDescription(),
             $this->destination_ref_id,
-        ); // sort_mode);
+        );
 
-        $ilias_event = $this->repository_facade->addNewSingleEventCourse($this->evento_event, $course_object);
-        $this->synchronizeUsersInRole($ilias_event);
+        $ilias_event = $this->repository_facade->addNewIliasEvent($this->evento_event, $course_object);
+        $this->membership_manager->syncMemberships($this->evento_event, $ilias_event);
+
         $this->logger->logEventImport(
             $this->log_code,
             $this->evento_event->getEventoId(),

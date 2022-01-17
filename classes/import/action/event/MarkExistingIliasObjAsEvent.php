@@ -12,10 +12,14 @@ use EventoImport\import\db\MembershipManager;
  * Class MarkExistingIliasObjAsEvent
  * @package EventoImport\import\action\event
  */
-class MarkExistingIliasObjAsEvent extends EventAction
+class MarkExistingIliasObjAsEvent implements EventAction
 {
-    /** @var \ilContainer  */
+    private EventoEvent $evento_event;
     private \ilContainer $ilias_object;
+    private RepositoryFacade $repository_facade;
+    private MembershipManager $membership_manager;
+    private \ilEventoImportLogger $logger;
+    private int $log_code;
 
     /**
      * MarkExistingIliasObjAsEvent constructor.
@@ -29,29 +33,21 @@ class MarkExistingIliasObjAsEvent extends EventAction
      * @param \ilEventoImportLogger                              $logger
      * @param \ILIAS\DI\RBACServices                             $rbac_services
      */
-    public function __construct(EventoEvent $evento_event, \ilContainer $ilias_object, IliasEventObjectFactory $event_object_factory, \EventoImport\import\settings\DefaultEventSettings $event_settings, RepositoryFacade $repository_facade, UserFacade $user_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger, \ILIAS\DI\RBACServices $rbac_services)
+    public function __construct(EventoEvent $evento_event, \ilContainer $ilias_object, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
     {
-        parent::__construct($evento_event, $event_object_factory, \ilEventoImportLogger::CREVENTO_MA_EXISTING_ILIAS_COURSE_AS_EVENT_MARKED, $event_settings, $repository_facade, $user_facade, $membership_manager, $logger, $rbac_services);
-
+        $this->evento_event = $evento_event;
         $this->ilias_object = $ilias_object;
+        $this->repository_facade = $repository_facade;
+        $this->membership_manager = $membership_manager;
+        $this->logger = $logger;
+        $this->log_code = \ilEventoImportLogger::CREVENTO_MA_EXISTING_ILIAS_COURSE_AS_EVENT_MARKED;
     }
 
     public function executeAction() : void
     {
-        if ($this->ilias_object instanceof \ilObjCourse && $this->ilias_object->getType() == 'crs') {
-            $ilias_event = $this->repository_facade->addNewSingleEventCourse($this->evento_event, $this->ilias_object);
-            $this->synchronizeUsersInRole($ilias_event);
-            $this->logger->logEventImport(
-                $this->log_code,
-                $this->evento_event->getEventoId(),
-                $this->ilias_object->getRefId(),
-                ['api_data' => $this->evento_event->getDecodedApiData()]
-            );
-        } elseif ($this->ilias_object instanceof \ilObjGroup && $this->ilias_object->getType() == 'grp') {
-            $ilias_event = $this->repository_facade->addNewSingleEventGroup($this->evento_event, $this->ilias_object);
-        }
+        $ilias_event = $this->repository_facade->addNewIliasEvent($this->evento_event, $this->ilias_object);
 
-        $this->synchronizeUsersInRole($ilias_event);
+        $this->membership_manager->syncMemberships($this->evento_event, $ilias_event);
         $this->logger->logEventImport(
             $this->log_code,
             $this->evento_event->getEventoId(),

@@ -11,6 +11,7 @@ use EventoImport\import\settings\DefaultEventSettings;
 use EventoImport\import\IliasEventWrapper;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\MembershipManager;
+use EventoImport\import\db\model\IliasEventoEvent;
 
 /**
  * Class EventActionFactory
@@ -18,15 +19,6 @@ use EventoImport\import\db\MembershipManager;
  */
 class EventActionFactory
 {
-    /** @var \ilEventoImportLogger */
-    private \ilEventoImportLogger $logger;
-
-    /** @var DefaultEventSettings */
-    private DefaultEventSettings $default_event_settings;
-
-    /** @var UserFacade */
-    private UserFacade $user_facade;
-
     /** @var RepositoryFacade */
     private RepositoryFacade $repository_facade;
 
@@ -36,28 +28,25 @@ class EventActionFactory
     /** @var MembershipManager */
     private MembershipManager $membership_manager;
 
+    /** @var \ilEventoImportLogger */
+    private \ilEventoImportLogger $logger;
+
     /**
      * EventActionFactory constructor.
      * @param IliasEventObjectFactory $event_object_factory
      * @param RepositoryFacade        $repository_facade
-     * @param UserFacade              $user_facade
      * @param MembershipManager       $membership_manager
-     * @param DefaultEventSettings    $default_event_settings
      * @param \ilEventoImportLogger   $logger
      */
     public function __construct(
         IliasEventObjectFactory $event_object_factory,
         RepositoryFacade $repository_facade,
-        UserFacade $user_facade,
         MembershipManager $membership_manager,
-        DefaultEventSettings $default_event_settings,
         \ilEventoImportLogger $logger
     ) {
         $this->event_object_factory = $event_object_factory;
         $this->repository_facade = $repository_facade;
-        $this->user_facade = $user_facade;
         $this->membership_manager = $membership_manager;
-        $this->default_event_settings = $default_event_settings;
         $this->logger = $logger;
     }
 
@@ -72,12 +61,9 @@ class EventActionFactory
             $evento_event,
             $destination_ref_id,
             $this->event_object_factory,
-            $this->default_event_settings,
             $this->repository_facade,
-            $this->user_facade,
             $this->membership_manager,
             $this->logger,
-            $this->user_facade->rbacServices()
         );
     }
 
@@ -92,12 +78,9 @@ class EventActionFactory
             $evento_event,
             $destination_ref_id,
             $this->event_object_factory,
-            $this->default_event_settings,
             $this->repository_facade,
-            $this->user_facade,
             $this->membership_manager,
             $this->logger,
-            $this->user_facade->rbacServices()
         );
     }
 
@@ -112,12 +95,9 @@ class EventActionFactory
             $evento_event,
             $parent_event,
             $this->event_object_factory,
-            $this->default_event_settings,
             $this->repository_facade,
-            $this->user_facade,
             $this->membership_manager,
             $this->logger,
-            $this->user_facade->rbacServices()
         );
     }
 
@@ -126,18 +106,14 @@ class EventActionFactory
      * @param IliasEventWrapper $ilias_event
      * @return UpdateExistingEvent
      */
-    public function updateExistingEvent(EventoEvent $evento_event, IliasEventWrapper $ilias_event) : UpdateExistingEvent
+    public function updateExistingEvent(EventoEvent $evento_event, IliasEventoEvent $ilias_event) : UpdateExistingEvent
     {
         return new UpdateExistingEvent(
             $evento_event,
             $ilias_event,
-            $this->event_object_factory,
-            $this->default_event_settings,
             $this->repository_facade,
-            $this->user_facade,
             $this->membership_manager,
             $this->logger,
-            $this->user_facade->rbacServices()
         );
     }
 
@@ -153,13 +129,9 @@ class EventActionFactory
         return new MarkExistingIliasObjAsEvent(
             $evento_event,
             $ilias_obj,
-            $this->event_object_factory,
-            $this->default_event_settings,
             $this->repository_facade,
-            $this->user_facade,
             $this->membership_manager,
             $this->logger,
-            $this->user_facade->rbacServices()
         );
     }
 
@@ -182,7 +154,7 @@ class EventActionFactory
      * @param EventoEvent $evento_event
      * @return ReportDatasetWithoutAction
      */
-    public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportDatasetWithoutAction
+    public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(
             \ilEventoImportLogger::CREVENTO_MA_EVENT_LOCATION_UNKNOWN,

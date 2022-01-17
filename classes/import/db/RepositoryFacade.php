@@ -65,8 +65,6 @@ class RepositoryFacade
      */
     public function searchPossibleParentEventForEvent(EventoEvent $evento_event) : ?IliasEventoParentEvent
     {
-        global $DIC;
-
         $parent_event = $this->parent_event_repo->fetchParentEventForName($evento_event->getGroupName());
         if (!is_null($parent_event)) {
             return $parent_event;
@@ -97,182 +95,6 @@ class RepositoryFacade
     }
 
     /**
-     * @param EventoEvent  $evento_event
-     * @param \ilObjCourse $crs_object
-     * @return IliasEventWrapper
-     */
-    public function addNewSingleEventCourse(EventoEvent $evento_event, \ilObjCourse $crs_object) : IliasEventWrapper
-    {
-        $ilias_evento_event = new IliasEventoEvent(
-            $evento_event->getEventoId(),
-            $evento_event->getName(),
-            $evento_event->getDescription(),
-            $evento_event->getType(),
-            $evento_event->hasCreateCourseFlag(),
-            $evento_event->getStartDate(),
-            $evento_event->getEndDate(),
-            $crs_object->getType(),
-            $crs_object->getRefId(),
-            $crs_object->getId(),
-            $crs_object->getDefaultAdminRole(),
-            $crs_object->getDefaultMemberRole()
-        );
-
-        $this->event_repo->addNewEventoIliasEvent(
-            $ilias_evento_event
-        );
-
-        return new IliasEventWrapperSingleEvent($ilias_evento_event, $crs_object);
-    }
-
-    /**
-     * @param EventoEvent  $evento_event
-     * @param \ilObjGroup $grp_object
-     * @return IliasEventWrapper
-     */
-    public function addNewSingleEventGroup(EventoEvent $evento_event, \ilObjGroup $grp_object) : IliasEventWrapper
-    {
-        $ilias_evento_event = new IliasEventoEvent(
-            $evento_event->getEventoId(),
-            $evento_event->getName(),
-            $evento_event->getDescription(),
-            $evento_event->getType(),
-            $evento_event->hasCreateCourseFlag(),
-            $evento_event->getStartDate(),
-            $evento_event->getEndDate(),
-            $grp_object->getType(),
-            $grp_object->getRefId(),
-            $grp_object->getId(),
-            $grp_object->getDefaultAdminRole(),
-            $grp_object->getDefaultMemberRole()
-        );
-
-        $this->event_repo->addNewEventoIliasEvent(
-            $ilias_evento_event
-        );
-
-        return new IliasEventWrapperSingleEvent($ilias_evento_event, $grp_object);
-    }
-
-    /**
-     * @param EventoEvent  $evento_event
-     * @param \ilObjCourse $crs_object
-     * @param \ilObjGroup  $sub_group
-     * @return IliasEventWrapper
-     */
-    public function addNewMultiEventCourseAndGroup(EventoEvent $evento_event, \ilObjCourse $crs_object, \ilObjGroup $sub_group) : IliasEventWrapper
-    {
-        $parent_event = new IliasEventoParentEvent(
-            $evento_event->getGroupUniqueKey(),
-            $evento_event->getGroupId(),
-            $crs_object->getTitle(),
-            $crs_object->getRefId(),
-            $crs_object->getDefaultAdminRole(),
-            $crs_object->getDefaultMemberRole()
-        );
-
-        $ilias_evento_event = new IliasEventoEvent(
-            $evento_event->getEventoId(),
-            $evento_event->getName(),
-            $evento_event->getDescription(),
-            $evento_event->getType(),
-            $evento_event->hasCreateCourseFlag(),
-            $evento_event->getStartDate(),
-            $evento_event->getEndDate(),
-            $sub_group->getType(),
-            $sub_group->getRefId(),
-            $sub_group->getId(),
-            $sub_group->getDefaultAdminRole(),
-            $sub_group->getDefaultMemberRole(),
-            $evento_event->getGroupUniqueKey()
-        );
-
-        $this->parent_event_repo->addNewParentEvent($parent_event);
-        $this->event_repo->addNewEventoIliasEvent($ilias_evento_event);
-
-        return new IliasEventWrapperEventWithParent($parent_event, $crs_object, $ilias_evento_event, $sub_group);
-    }
-
-    /**
-     * @param EventoEvent  $evento_event
-     * @param \ilObjCourse $crs_object
-     * @param \ilObjGroup  $sub_group
-     * @return IliasEventWrapper
-     */
-    public function addNewEventToExistingMultiGroupEvent(EventoEvent $evento_event, \ilObjCourse $crs_object, \ilObjGroup $sub_group) : IliasEventWrapper
-    {
-        $ilias_parent_event = $this->parent_event_repo->fetchParentEventForRefId($crs_object->getRefId());
-
-        $ilias_evento_event = new IliasEventoEvent(
-            $evento_event->getEventoId(),
-            $evento_event->getName(),
-            $evento_event->getDescription(),
-            $evento_event->getType(),
-            $evento_event->hasCreateCourseFlag(),
-            $evento_event->getStartDate(),
-            $evento_event->getEndDate(),
-            $sub_group->getType(),
-            $sub_group->getRefId(),
-            $sub_group->getId(),
-            $sub_group->getDefaultAdminRole(),
-            $sub_group->getDefaultMemberRole(),
-            $evento_event->getGroupUniqueKey()
-        );
-
-        $this->event_repo->addNewEventoIliasEvent(
-            $ilias_evento_event
-        );
-
-        return new IliasEventWrapperEventWithParent($ilias_parent_event, $crs_object, $ilias_evento_event, $sub_group);
-    }
-
-    /**
-     * @param int $evento_id
-     * @return IliasEventWrapper|null
-     * @throws \Exception
-     */
-    public function getIliasEventByEventoIdOrReturnNull(int $evento_id) : ?IliasEventWrapper
-    {
-        $ilias_evento_event = $this->event_repo->getEventByEventoId($evento_id);
-
-        if (is_null($ilias_evento_event)) {
-            return null;
-        }
-
-        if (!is_null($ilias_evento_event->getParentEventKey())) {
-            $parent_event = $this->parent_event_repo->fetchParentEventForRefId($ilias_evento_event->getParentEventKey());
-
-            if (is_null($parent_event)) {
-                throw new \InvalidArgumentException('Parent Event for ref_id ' . $ilias_evento_event->getParentEventKey() . ' does not exist.');
-            }
-
-            $parent_obj_type = \ilObject::_lookupType($parent_event->getRefId(), true);
-            if ($parent_obj_type == 'crs') {
-                $parent_event_obj = new \ilObjCourse($parent_event->getRefId());
-            } elseif ($parent_obj_type == 'grp') {
-                $parent_event_obj = new \ilObjGroup($parent_event->getRefId());
-            } else {
-                throw new \InvalidArgumentException('Type of parent obj ist not an event type');
-            }
-
-            $sub_event = new \ilObjGroup($ilias_evento_event->getRefId(), true);
-
-            return new IliasEventWrapperEventWithParent($parent_event, $parent_event_obj, $ilias_evento_event, $sub_event);
-        } else {
-            $obj_type = \ilObject::_lookupType($ilias_evento_event->getRefId(), true);
-            if ($obj_type == 'crs') {
-                $ilias_event_obj = new \ilObjCourse($ilias_evento_event->getRefId());
-            } elseif ($obj_type == 'grp') {
-                $ilias_event_obj = new \ilObjGroup($ilias_evento_event->getRefId());
-            } else {
-                throw new \InvalidArgumentException('Type of given ilias obj is not an event type');
-            }
-
-            return new IliasEventWrapperSingleEvent($ilias_evento_event, $ilias_event_obj);
-        }
-    }
-
-    /**
      * @param EventoEvent $evento_event
      * @return \ilContainer|null
      */
@@ -284,6 +106,97 @@ class RepositoryFacade
             return $object_list[0];
         } else {
             return null;
+        }
+    }
+
+    /**
+     * @param EventoEvent  $evento_event
+     * @param \ilContainer $ilias_object
+     * @return IliasEventoEvent
+     */
+    public function addNewIliasEvent(EventoEvent $evento_event, \ilContainer $ilias_object) : IliasEventoEvent
+    {
+        if ($ilias_object instanceof \ilObjCourse || $ilias_object instanceof \ilObjGroup) {
+            $ilias_evento_event = new IliasEventoEvent(
+                $evento_event->getEventoId(),
+                $evento_event->getName(),
+                $evento_event->getDescription(),
+                $evento_event->getType(),
+                $evento_event->hasCreateCourseFlag(),
+                $evento_event->getStartDate(),
+                $evento_event->getEndDate(),
+                $ilias_object->getType(),
+                $ilias_object->getRefId(),
+                $ilias_object->getId(),
+                $ilias_object->getDefaultAdminRole(),
+                $ilias_object->getDefaultMemberRole(),
+                $evento_event->getGroupUniqueKey()
+            );
+
+            $this->event_repo->addNewEventoIliasEvent(
+                $ilias_evento_event
+            );
+
+            return $ilias_evento_event;
+        } else {
+            throw new \InvalidArgumentException('Invalid ILIAS Object Type given to register Ilias-Evento-Event');
+        }
+    }
+
+    /**
+     * @param EventoEvent  $evento_event
+     * @param \ilContainer $parent_event_ilias_obj
+     * @return IliasEventoParentEvent
+     */
+    public function addNewIliasEventoParentEvent(EventoEvent $evento_event, \ilContainer $parent_event_ilias_obj) : IliasEventoParentEvent
+    {
+        if ($parent_event_ilias_obj instanceof \ilObjCourse || $parent_event_ilias_obj instanceof \ilObjGroup) {
+            $ilias_evento_parent_event = new IliasEventoParentEvent(
+                $evento_event->getGroupUniqueKey(),
+                $evento_event->getGroupId(),
+                $evento_event->getGroupName(),
+                $parent_event_ilias_obj->getRefId(),
+                $parent_event_ilias_obj->getDefaultAdminRole(),
+                $parent_event_ilias_obj->getDefaultMemberRole()
+            );
+            $this->parent_event_repo->addNewParentEvent($ilias_evento_parent_event);
+
+            return $ilias_evento_parent_event;
+        } else {
+            throw new \InvalidArgumentException('Invalid ILIAS Object Type given to register Ilias-Parent-Event-Object');
+        }
+    }
+
+    /**
+     * @param EventoEvent      $evento_event
+     * @param IliasEventoEvent $old_ilias_event
+     * @param \ilContainer     $ilias_object
+     * @return IliasEventoEvent
+     */
+    public function updateIliasEventoEvent(EventoEvent $evento_event, IliasEventoEvent $old_ilias_event, \ilContainer $ilias_object) : IliasEventoEvent
+    {
+        if ($ilias_object instanceof \ilObjCourse || $ilias_object instanceof \ilObjGroup) {
+            $updated_obj = new IliasEventoEvent(
+                $evento_event->getEventoId(),
+                $evento_event->getName(),
+                $evento_event->getDescription(),
+                $old_ilias_event->getEventoType(),
+                $old_ilias_event->wasAutomaticallyCreated(),
+                $evento_event->getStartDate(),
+                $evento_event->getEndDate(),
+                $ilias_object->getType(),
+                $ilias_object->getRefId(),
+                $ilias_object->getId(),
+                $old_ilias_event->getAdminRoleId(),
+                $old_ilias_event->getStudentRoleId(),
+                $evento_event->getGroupUniqueKey()
+            );
+
+            $this->event_repo->updateIliasEventoEvent($updated_obj);
+
+            return $updated_obj;
+        } else {
+            throw new \InvalidArgumentException('Invalid ILIAS Object Type given to update Ilias-Event-Object');
         }
     }
 }
