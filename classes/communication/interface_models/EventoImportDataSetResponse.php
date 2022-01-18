@@ -45,7 +45,7 @@ class EventoImportDataSetResponse
                 $error_message .= "Field $field - $error; ";
             }
 
-            throw new \InvalidArgumentException($error_message);
+            throw new \ilEventoImportApiDataException(self::class, $error_message, $json_response);
         }
     }
 

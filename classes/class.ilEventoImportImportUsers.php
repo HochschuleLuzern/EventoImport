@@ -65,7 +65,6 @@ class ilEventoImportImportUsers
 
     /**
      * Import Users from Evento
-     * Returns the number of rows.
      */
     private function importUsers()
     {
@@ -75,7 +74,7 @@ class ilEventoImportImportUsers
             } catch (Exception $e) {
                 $this->evento_logger->logException('User Import', $e->getMessage());
             }
-        } while ($this->evento_importer->hasMoreData() && false);
+        } while ($this->evento_importer->hasMoreData());
     }
 
     private function importNextUserPage()

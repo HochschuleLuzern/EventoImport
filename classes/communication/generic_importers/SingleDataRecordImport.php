@@ -16,7 +16,7 @@ trait SingleDataRecordImport
      * @return mixed|null
      * @throws \Exception
      */
-    protected function fetchDataRecordById(RequestClientService $data_source, string $method_name, int $id, int $seconds_before_retry, int $max_retries)
+    protected function fetchDataRecordById(RequestClientService $data_source, string $method_name, int $id, int $seconds_before_retry, int $max_retries) : ?array
     {
         $params = array(
             "id" => (int) $id
@@ -44,7 +44,7 @@ trait SingleDataRecordImport
         } while (!$request_was_successful);
 
         if (!is_null($plain_response)) {
-            return json_decode($plain_response, true);
+            return json_decode($plain_response, true, 10, JSON_THROW_ON_ERROR);
         } else {
             return null;
         }

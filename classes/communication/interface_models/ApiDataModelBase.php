@@ -16,12 +16,12 @@ abstract class ApiDataModelBase
     protected function checkErrorsAndMaybeThrowException()
     {
         if (count($this->key_errors) > 0) {
-            $error_message = 'One or more fields in the given array were invalid: ';
+            $error_message = 'One or more fields in the given array were invalid or missing: ';
             foreach ($this->key_errors as $field => $error) {
                 $error_message .= "Field $field - $error; ";
             }
 
-            throw new \InvalidArgumentException($error_message);
+            throw new \ilEventoImportApiDataException('Create obj: ' . self::class, $error_message, $this->decoded_api_data);
         }
     }
 

@@ -23,10 +23,21 @@ trait DataSetImport
         do {
             try {
                 $json_response = $data_source->sendRequest($method_name, $request_params);
-                $json_response_decoded = json_decode($json_response, true);
+                $json_response_decoded = json_decode($json_response, true, 10, JSON_THROW_ON_ERROR);
 
                 $response = new EventoImportDataSetResponse($json_response_decoded);
                 $request_was_successful = $response->getSuccess();
+            } catch (\ilEventoImportApiDataException $e) {
+                throw $e;
+            } catch (\JsonException $e) {
+                throw new \ilEventoImportApiDataException(
+                    'API-Data-String to JSON',
+                    'Conversion of API response from JSON-String to JSON-Array failed',
+                    [
+                        'api_string' => $json_response,
+                        'json_error' => $e->getMessage()
+                    ]
+                );
             } catch (\Exception $e) {
                 $request_was_successful = false;
             } finally {
@@ -37,7 +48,14 @@ trait DataSetImport
                 if ($nr_of_tries < $max_retries) {
                     sleep($seconds_before_retry);
                 } else {
-                    throw new \Exception("After $nr_of_tries there was still no successful call to API");
+                    throw new \ilEventoImportCommunicationException(
+                        self::class,
+                        [
+                            'method_name' => $method_name,
+                            'request_params' => $request_params
+                        ],
+                        "After $nr_of_tries there was still no successful call to API"
+                    );
                 }
             }
         } while (!$request_was_successful);
