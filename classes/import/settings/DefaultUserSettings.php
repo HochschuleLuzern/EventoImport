@@ -10,6 +10,7 @@ class DefaultUserSettings
 
     private $now;
     private $auth_mode;
+    private $is_auth_mode_ldap;
     private $is_profile_public;
     private $is_profile_picture_public;
     private $is_mail_public;
@@ -41,6 +42,7 @@ class DefaultUserSettings
         $this->max_acc_duration = $this->addMonthsToCurrent($max_acc_duration_in_months);
 
         $this->auth_mode = $settings->get(\ilEventoImportCronConfig::CONF_USER_AUTH_MODE);
+        $this->is_auth_mode_ldap = \ilLDAPServer::isAuthModeLDAP($this->auth_mode);
         $this->is_profile_public = true;
         $this->is_profile_picture_public = true;
         $this->is_mail_public = true;
@@ -80,6 +82,11 @@ class DefaultUserSettings
     public function getAuthMode()
     {
         return $this->auth_mode;
+    }
+
+    public function isAuthModeLDAP() : bool
+    {
+        return $this->is_auth_mode_ldap;
     }
 
     public function isProfilePublic() : bool

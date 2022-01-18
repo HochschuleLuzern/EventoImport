@@ -8,7 +8,7 @@ use EventoImport\import\action\ReportDatasetWithoutAction;
  * Class ReportUserImportDatasetWithoutAction
  * @package EventoImport\import\action\user
  */
-class ReportUserImportDatasetWithoutAction extends ReportDatasetWithoutAction
+class ReportUserImportDatasetWithoutAction extends ReportDatasetWithoutAction implements UserImportAction
 {
     /** @var int */
     private int $evento_id;

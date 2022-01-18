@@ -9,16 +9,25 @@ use EventoImport\import\db\UserFacade;
  * Class RenameExistingCreateNew
  * @package EventoImport\import\action\user
  */
-class RenameExistingCreateNew extends UserImportAction
+class RenameExistingCreateNew implements UserImportAction
 {
     /** @var CreateUser */
     private CreateUser $create_action;
 
-    /** @var string */
-    private string $found_by;
+    /** @var EventoUser  */
+    private EventoUser $new_evento_user;
 
     /** @var \ilObjUser */
     private \ilObjUser $old_user_to_rename;
+
+    /** @var string */
+    private string $found_by;
+
+    /** @var UserFacade */
+    private $user_facade;
+
+    /** @var \ilEventoImportLogger */
+    private $logger;
 
     /**
      * RenameExistingCreateNew constructor.
@@ -31,11 +40,12 @@ class RenameExistingCreateNew extends UserImportAction
      */
     public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, UserFacade $user_facade, \ilEventoImportLogger $logger)
     {
-        parent::__construct($new_evento_user, $user_facade, $logger);
-
+        $this->new_evento_user = $new_evento_user;
         $this->create_action = $create_action;
         $this->old_user_to_rename = $old_user_to_rename;
         $this->found_by = $found_by;
+        $this->user_facade = $user_facade;
+        $this->logger = $logger;
     }
 
     /**
@@ -47,7 +57,7 @@ class RenameExistingCreateNew extends UserImportAction
         $old_user_evento_id = trim(substr($old_user->getMatriculation(), 8));
         $changed_user_data['user_id'] = $old_user->getId();
         $changed_user_data['EvtID'] = $old_user_evento_id;
-        $changed_user_data['new_user_info'] = $this->evento_user->getEventoId();
+        $changed_user_data['new_user_info'] = $this->new_evento_user->getEventoId();
         $changed_user_data['found_by'] = $this->found_by;
 
         $data['Login'] = date('Ymd') . '_' . $old_user->getLogin();

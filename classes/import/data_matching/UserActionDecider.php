@@ -54,14 +54,14 @@ class UserActionDecider
             return $this->action_factory->buildUpdateAction($evento_user, $user_id);
         }
 
-        return $this->matchEventoUserTheOldWay($evento_user);
+        return $this->matchToIliasUsersAndDetermineAction($evento_user);
     }
 
     /**
      * @param EventoUser $evento_user
      * @return EventoImportAction
      */
-    private function matchEventoUserTheOldWay(
+    private function matchToIliasUsersAndDetermineAction(
         EventoUser $evento_user
     ) : EventoImportAction {
         $data['id_by_login'] = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());

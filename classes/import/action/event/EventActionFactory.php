@@ -103,7 +103,7 @@ class EventActionFactory
 
     /**
      * @param EventoEvent       $evento_event
-     * @param IliasEventWrapper $ilias_event
+     * @param IliasEventoEvent $ilias_event
      * @return UpdateExistingEvent
      */
     public function updateExistingEvent(EventoEvent $evento_event, IliasEventoEvent $ilias_event) : UpdateExistingEvent

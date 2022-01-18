@@ -41,6 +41,7 @@ abstract class ilEventoImporter
         int $max_retries,
         ilEventoImportLogger $logger
     ) {
+        $this->data_source = $data_source;
         $this->seconds_before_retry = $seconds_before_retry;
         $this->max_retries = $max_retries;
         $this->evento_logger = $logger;

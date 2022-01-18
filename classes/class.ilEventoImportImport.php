@@ -40,6 +40,7 @@ class ilEventoImportImport extends ilCronJob
     
     private $rbac;
     private $db;
+
     private $refinery;
     private $cp;
     private $settings;
@@ -52,11 +53,11 @@ class ilEventoImportImport extends ilCronJob
     /**
      * Constructor
      */
-    public function __construct()
+    public function __construct(\ILIAS\DI\RBACServices $rbac_services = null, ilDBInterface $db = null)
     {
         global $DIC;
-        $this->rbac = $DIC->rbac();
-        $this->db = $DIC->database();
+        $this->rbac = $rbac_services ?? $DIC->rbac();
+        $this->db = $db ?? $DIC->database();
         $this->refinery = $DIC->refinery();
         //This is a workaround to avoid problems with missing templates
         if (!method_exists($DIC, 'ui') || !method_exists($DIC->ui(), 'factory') || !isset($DIC['ui.factory'])) {
@@ -174,9 +175,9 @@ class ilEventoImportImport extends ilCronJob
             );
 
             if ($this->wasFullImportAlreadyRunToday()) {
-                return $this->runHourlyAdminImport($data_source, $api_settings, $logger);
+                $this->runHourlyAdminImport($data_source, $api_settings, $logger);
             } else {
-                return $this->runDailyFullImport($data_source, $api_settings, $logger);
+                $this->runDailyFullImport($data_source, $api_settings, $logger);
             }
 
             return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
@@ -232,9 +233,11 @@ class ilEventoImportImport extends ilCronJob
             $user_importer,
             $user_import_action_decider,
             $this->import_bootstrapping->userFacade(),
-            $logger
+            $logger,
+            $this->import_bootstrapping->defaultUserSettings()->getMaxDurationOfAccounts(),
+            $this->db
         );
-        //$importUsers->run();
+        $importUsers->run();
 
         /* Event import */
         $event_action_factory = new \EventoImport\import\action\event\EventActionFactory(

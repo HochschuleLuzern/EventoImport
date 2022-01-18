@@ -9,7 +9,7 @@ use EventoImport\import\db\UserFacade;
  * Class ConvertUserToLocalAuth
  * @package EventoImport\import\action\user
  */
-class ConvertUserToLocalAuth implements EventoImportAction
+class ConvertUserToLocalAuth implements UserDeleteAction
 {
     /** @var \ilObjUser */
     private \ilObjUser $ilias_user;

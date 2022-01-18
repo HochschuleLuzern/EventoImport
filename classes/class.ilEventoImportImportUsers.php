@@ -33,52 +33,35 @@ class ilEventoImportImportUsers
     /** @var ilEventoImportLogger */
     private $evento_logger;
 
-    private $ilDB;
+    /** @var ilDBInterface */
+    private $db;
+
     private $until_max;
 
-    private $auth_mode;
 
     public function __construct(
         \EventoImport\communication\EventoUserImporter $importer,
         \EventoImport\import\data_matching\UserActionDecider $user_import_action_decider,
         \EventoImport\import\db\UserFacade $user_facade,
-        ilEventoImportLogger $logger
+        ilEventoImportLogger $logger,
+        $until_max,
+        ilDBInterface $db = null
     ) {
+        global $DIC;
+
         $this->evento_importer = $importer;
         $this->user_import_action_decider = $user_import_action_decider;
         $this->user_facade = $user_facade;
         $this->evento_logger = $logger;
-    }
-
-    private function convertOrDeleteNotImportedAccounts()
-    {
-        // Get list uf users, which were not imported since a certain time
-        $list = $this->user_facade->eventoUserRepository()->fetchNotImportedUsers();
-
-        foreach ($list as $evento_id => $ilias_user_id) {
-            try {
-                // Try to fetch user by ID from evento
-                $result = $this->evento_importer->fetchDataRecord($evento_id);
-
-                // If evento does not deliver this user, it can be safely converted / deleted
-                if (is_null($result) || (is_array($result) && count($result) < 1)) {
-                    $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
-                    $action->executeAction();
-                }
-            } catch (\Exception $e) {
-            }
-        }
+        $this->db = $db ?? $DIC->database();
     }
 
     public function run()
     {
         $this->importUsers();
-        $this->convertOrDeleteNotImportedAccounts();
-        //$this->convertDeletedAccounts();
-        //$this->setUserTimeLimits();
+        $this->convertDeletedAccounts();
+        $this->setUserTimeLimits();
     }
-
-    private $user_config;
 
     /**
      * Import Users from Evento
@@ -92,7 +75,7 @@ class ilEventoImportImportUsers
             } catch (Exception $e) {
                 $this->evento_logger->logException('User Import', $e->getMessage());
             }
-        } while ($this->evento_importer->hasMoreData());
+        } while ($this->evento_importer->hasMoreData() && false);
     }
 
     private function importNextUserPage()
@@ -110,6 +93,36 @@ class ilEventoImportImportUsers
     }
 
     /**
+     * User accounts which are deleted by evento should either be converted to a local account (students) or deactivate (stuff)
+     *
+     * Since there is no "getDeletedAccounts"-Method anymore, this Plugin has to find those "not anymore imported"-users
+     * by itself. For this reason, every imported account has a last-imported-timestamp. With this value, users which have not
+     * been imported since a longer time can be found.
+     */
+    private function convertDeletedAccounts()
+    {
+        // Get list uf users, which were not imported since a certain time
+        $list = $this->user_facade->eventoUserRepository()->fetchNotImportedUsers();
+
+        foreach ($list as $evento_id => $ilias_user_id) {
+            try {
+                // Try to fetch user by ID from evento
+                // -> this is just to be safe, that the API does not deliver the user anymore
+                $result = $this->evento_importer->fetchUserDataRecordById($evento_id);
+
+                // If evento does not deliver this user, it can be safely converted / deleted
+                if (is_null($result) || (is_array($result) && count($result) < 1)) {
+                    $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
+                    $action->executeAction();
+                } else {
+                    $this->user_facade->eventoUserRepository()->registerUserAsDelivered($result['id']);
+                }
+            } catch (\Exception $e) {
+            }
+        }
+    }
+
+    /**
      * User accounts which don't have a time limitation are limited to
      * two years since their creation.
      */
@@ -117,16 +130,16 @@ class ilEventoImportImportUsers
     {
         //all users have at least 90 days of access (needed for Shibboleth)
         $q = "UPDATE `usr_data` SET time_limit_until=time_limit_until+7889229 WHERE DATEDIFF(FROM_UNIXTIME(time_limit_until),create_date)<90";
-        $r = $this->ilDB->manipulate($q);
+        $r = $this->db->manipulate($q);
 
         if ($this->until_max != 0) {
             //no unlimited users
             $q = "UPDATE usr_data set time_limit_unlimited=0, time_limit_until='" . $this->until_max . "' WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous')";
-            $r = $this->ilDB->manipulate($q);
+            $r = $this->db->manipulate($q);
 
             //all users are constraint to a value defined in the configuration
             $q = "UPDATE usr_data set time_limit_until='" . $this->until_max . "' WHERE time_limit_until>'" . $this->until_max . "'";
-            $this->ilDB->manipulate($q);
+            $this->db->manipulate($q);
         }
     }
 }

@@ -29,7 +29,7 @@ class ilEventoImportImportEventsAndMemberships
             } catch (\Exception $e) {
                 $this->logger->logException('Importing Event Page', $e->getMessage());
             }
-        } while ($this->evento_importer->hasMoreData());
+        } while ($this->evento_importer->hasMoreData() && false);
     }
 
     private function importNextEventPage()

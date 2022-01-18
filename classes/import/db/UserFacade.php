@@ -7,6 +7,7 @@ use EventoImport\import\db\repository\EventMembershipRepository;
 use EventoImport\import\db\repository\EventoUserRepository;
 use ILIAS\DI\RBACServices;
 use EventoImport\communication\api_models\EventoUserShort;
+use EventoImport\communication\api_models\EventoUser;
 
 /**
  * Class UserFacade
@@ -172,5 +173,33 @@ class UserFacade
         }
 
         return $this->rbac_services->review()->isAssigned($ilias_user_object->getId(), $this->student_role_id);
+    }
+
+    /**
+     * @param \ilObjUser $ilias_user
+     * @return bool
+     * @throws \ilWACException
+     */
+    public function userHasPersonalPicture(\ilObjUser $ilias_user) : bool
+    {
+        $personal_picturpath = \ilObjUser::_getPersonalPicturePath($ilias_user->getId(), "small", false);
+
+        return strpos(
+            $personal_picturpath,
+            'data:image/svg+xml'
+        ) !== false;
+    }
+
+    public function sendLoginChangedMail(\ilObjUser $ilias_user, string $old_login, EventoUser $evento_user)
+    {
+        $mail = new \ilEventoimportMailNotification();
+        $mail->setType(\ilEventoimportMailNotification::MAIL_TYPE_USER_NAME_CHANGED);
+        $mail->setUserInformation(
+            $ilias_user->getId(),
+            $old_login,
+            $evento_user->getLoginName(),
+            $ilias_user->getEmail()
+        );
+        $mail->send();
     }
 }

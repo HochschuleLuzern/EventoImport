@@ -5,6 +5,7 @@ namespace EventoImport\communication;
 use EventoImport\communication\generic_importers\DataSetImport;
 use EventoImport\communication\generic_importers\SingleDataRecordImport;
 use EventoImport\communication\request_services\RequestClientService;
+use EventoImport\communication\api_models\EventoEvent;
 
 /**
  * Class EventoEventImporter
@@ -103,14 +104,16 @@ class EventoEventImporter extends \ilEventoImporter
      * @return array
      * @throws \Exception
      */
-    public function fetchEventDataRecordById(int $evento_event_id) : array
+    public function fetchEventDataRecordById(int $evento_event_id) : ?EventoEvent
     {
-        return $this->fetchDataRecordById(
+        $api_data = $this->fetchDataRecordById(
             $this->data_source,
             $this->fetch_data_record_method,
             $evento_event_id,
             $this->seconds_before_retry,
             $this->max_retries
         );
+
+        return !is_null($api_data) ? new EventoEvent($api_data) : null;
     }
 }

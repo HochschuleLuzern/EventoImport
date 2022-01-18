@@ -54,7 +54,14 @@ class UserActionFactory
      */
     public function buildUpdateAction(EventoUser $evento_user, int $ilias_user_id) : UpdateUser
     {
-        return new UpdateUser($evento_user, $ilias_user_id, $this->user_facade, $this->default_user_settings, $this->photo_importer, $this->logger);
+        return new UpdateUser(
+            $evento_user,
+            $this->user_facade->getExistingIliasUserObject($ilias_user_id),
+            $this->user_facade,
+            $this->default_user_settings,
+            $this->photo_importer,
+            $this->logger
+        );
     }
 
     /**

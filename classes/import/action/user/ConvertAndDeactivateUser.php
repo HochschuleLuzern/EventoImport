@@ -5,7 +5,7 @@ namespace EventoImport\import\action\user;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\action\EventoImportAction;
 
-class ConvertAndDeactivateUser implements EventoImportAction
+class ConvertAndDeactivateUser implements UserDeleteAction
 {
     /** @var \ilObjUser */
     private \ilObjUser $ilias_user;

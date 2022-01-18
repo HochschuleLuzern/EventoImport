@@ -85,7 +85,7 @@ class EventoUserRepository
     /**
      * @param int $evento_id
      */
-    public function userWasImported(int $evento_id)
+    public function registerUserAsDelivered(int $evento_id)
     {
         $this->db->update(
             self::TABLE_NAME,
