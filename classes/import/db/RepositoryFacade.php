@@ -15,6 +15,13 @@ use EventoImport\import\IliasEventWrapperSingleEvent;
 
 /**
  * Class RepositoryFacade
+ * This class is a take on encapsulation all the "Repository" specific functionality from the rest of the import. Thinks
+ * like searching a user, building a ilObjUser object from an ID or write user stuff to the DB should go through this
+ * class.
+ *
+ * It started as a take on the facade pattern (hence the name) but quickly became something more. Because of the lack
+ * for a better / more matching name, the class was not renamed till now.
+ * TODO: Find a more matching name and unify use of method (e.g. replace the object-getters with actual logic)
  * @package EventoImport\import\db
  */
 class RepositoryFacade

@@ -49,8 +49,8 @@ class EventoUser extends ApiDataModelBase
         $this->email_list = $this->validateCombineAndReturnListOfValues($data_set, [self::JSON_EMAIL, self::JSON_EMAIL_2, self::JSON_EMAIL_3], false);
         $this->roles = $this->validateAndReturnArray($data_set, self::JSON_ROLES);
 
-        $this->checkErrorsAndMaybeThrowException();
         $this->decoded_api_data = $data_set;
+        $this->checkErrorsAndMaybeThrowException();
     }
 
     /**

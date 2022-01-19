@@ -12,18 +12,18 @@ class EventoUserShort extends ApiDataModelBase
     const JSON_EMAIL = 'email';
 
     /** @var int */
-    private int $evento_id;
+    private ?int $evento_id;
 
     /** @var string */
-    private string $email_address;
+    private ?string $email_address;
 
     public function __construct(array $data_set)
     {
         $this->evento_id = $this->validateAndReturnNumber($data_set, self::JSON_ID);
         $this->email_address = $this->validateAndReturnString($data_set, self::JSON_EMAIL);
 
-        $this->checkErrorsAndMaybeThrowException();
         $this->decoded_api_data = $data_set;
+        $this->checkErrorsAndMaybeThrowException();
     }
 
     /**

@@ -27,8 +27,8 @@ class EventoEventIliasAdmins extends ApiDataModelBase
             $this->account_list[] = new EventoUserShort($account_data);
         }
 
-        $this->checkErrorsAndMaybeThrowException();
         $this->decoded_api_data = $data_set;
+        $this->checkErrorsAndMaybeThrowException();
     }
 
     /**

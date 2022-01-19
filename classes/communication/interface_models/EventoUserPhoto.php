@@ -27,8 +27,8 @@ class EventoUserPhoto extends ApiDataModelBase
         $this->has_photo = $this->validateAndReturnBoolean($data_set, self::JSON_HAS_PHOTO);
         $this->img_data = $this->validateAndReturnString($data_set, self::JSON_IMG_DATA);
 
-        $this->checkErrorsAndMaybeThrowException();
         $this->decoded_api_data = $data_set;
+        $this->checkErrorsAndMaybeThrowException();
     }
 
     /**

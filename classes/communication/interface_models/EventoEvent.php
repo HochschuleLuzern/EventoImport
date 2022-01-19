@@ -112,16 +112,8 @@ class EventoEvent extends ApiDataModelBase
             $this->students = $this->buildMembershipList($list_students);
         }
 
-        // TODO: Remove after testing!!!
-        if (self::$CREATE_COURSES < self::$MAX_CREATE_COURSE && is_array($this->students)) {
-            $this->is_create_course_flag = (count($this->students) % 2) == 0;
-            if ($this->is_create_course_flag) {
-                self::$CREATE_COURSES++;
-            }
-        }
-
-        $this->checkErrorsAndMaybeThrowException();
         $this->decoded_api_data = $data_set;
+        $this->checkErrorsAndMaybeThrowException();
     }
 
     /**

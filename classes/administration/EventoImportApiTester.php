@@ -131,7 +131,6 @@ class EventoImportApiTester
 
     private function buildDataSource(ImporterApiSettings $api_importer_settings) : RequestClientService
     {
-        //return new \EventoImport\communication\request_services\FakeRestClientService();
         return new RestClientService(
             $api_importer_settings->getUrl(),
             $api_importer_settings->getTimeoutAfterRequest(),
