@@ -4,6 +4,7 @@ namespace EventoImport\communication;
 
 use EventoImport\communication\generic_importers\SingleDataRecordImport;
 use EventoImport\communication\request_services\RequestClientService;
+use EventoImport\communication\api_models\EventoUserPhoto;
 
 class EventoUserPhotoImporter extends \ilEventoImporter
 {
@@ -33,14 +34,17 @@ class EventoUserPhotoImporter extends \ilEventoImporter
      * @return array
      * @throws \Exception
      */
-    public function fetchUserPhotoDataById(int $user_evento_id) : array
+    public function fetchUserPhotoDataById(int $user_evento_id) : ?EventoUserPhoto
     {
-        return $this->fetchDataRecordById(
+        $api_data = $this->fetchDataRecordById(
             $this->data_source,
             $this->fetch_data_record_method,
             $user_evento_id,
             $this->seconds_before_retry,
             $this->max_retries
         );
+
+
+        return !is_null($api_data) ? new EventoUserPhoto($api_data) : null;
     }
 }

@@ -5,6 +5,7 @@ namespace EventoImport\communication;
 use EventoImport\communication\generic_importers\DataSetImport;
 use EventoImport\communication\generic_importers\SingleDataRecordImport;
 use EventoImport\communication\request_services\RequestClientService;
+use EventoImport\communication\api_models\EventoEventIliasAdmins;
 
 /**
  * Class EventoAdminImporter
@@ -58,14 +59,16 @@ class EventoAdminImporter extends \ilEventoImporter
         return $response->getData();
     }
 
-    public function fetchEventAdminDataRecordById(int $evento_event_id) : array
+    public function fetchEventAdminDataRecordById(int $evento_event_id) : ?EventoEventIliasAdmins
     {
-        return $this->fetchDataRecordById(
+        $api_data = $this->fetchDataRecordById(
             $this->data_source,
             $this->fetch_single_record,
             $evento_event_id,
             $this->seconds_before_retry,
             $this->max_retries
         );
+
+        return !is_null($api_data) ? new EventoEventIliasAdmins($api_data) : null;
     }
 }

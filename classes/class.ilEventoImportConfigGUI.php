@@ -1,5 +1,7 @@
 <?php
 
+use EventoImport\administration\EventoImportApiTesterGUI;
+
 /**
  * Class ilEventoImportConfigGUI
  *
@@ -52,28 +54,11 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
             case 'fetch_data_set_users':
             case 'fetch_data_set_events':
                 try {
-                    $importer = $this->buildImporter($cmd);
-                    $form = $this->initDataSetForm();
-                    if ($form->checkInput()) {
-                        $skip = (int) $form->getInput('skip');
-                        $take = (int) $form->getInput('take');
-                        if ($importer instanceof \EventoImport\communication\EventoDataSetImporter) {
-                            $output = $importer->fetchSpecificUserDataSet($skip, $take);
-                        } else {
-                            throw new Exception('Class is not instance of Data Set importer');
-                        }
+                    $api_tester_gui = new EventoImportApiTesterGUI($this);
+                    $output = $api_tester_gui->fetchDataSetFromFormInput($cmd);
 
-                        if (!is_null($output)) {
-                            $cmd = htmlspecialchars($cmd);
-                            $output = htmlspecialchars(print_r($output, true));
-                            $message = $this->buildMessageForNextPage("CMD = $cmd, Skip = $skip, Take = $take", $output);
-                            ilUtil::sendSuccess($message, true);
-                        } else {
-                            $cmd = htmlspecialchars($cmd);
-                            ilUtil::sendFailure("Got no answer for CMD = $cmd, Skip = $skip, Take = $take", true);
-                        }
-                    } else {
-                        throw new InvalidArgumentException('Error in form input');
+                    if (strlen($output) > 0) {
+                        ilUtil::sendSuccess($output, true);
                     }
                 } catch (Exception $e) {
                     ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
@@ -86,53 +71,28 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
             case 'fetch_record_event':
             case 'fetch_user_photo':
             case 'fetch_ilias_admins_for_event':
-                try {
-                    $importer = $this->buildImporter($cmd);
-                    $form = $this->initDataRecordForm();
-                    if ($form->checkInput()) {
-                        $id_from_form = (int) $form->getInput('record_id');
-                        if ($importer instanceof \EventoImport\communication\EventoSingleDataRecordImporter) {
-                            $output = $importer->fetchUserPhotoDataById($id_from_form);
-                        } else {
-                            throw new Exception('Class is not instance of Single Data Record importer');
-                        }
 
-                        if (!is_null($output)) {
-                            $cmd = htmlspecialchars($cmd);
-                            $output = htmlspecialchars(print_r($output, true));
-                            $message = $this->buildMessageForNextPage("CMD = $cmd, ID = $id_from_form", $output);
-                            ilUtil::sendSuccess($message, true);
-                        } else {
-                            $cmd = htmlspecialchars($cmd);
-                            ilUtil::sendFailure("Got no answer for CMD = $cmd and ID = $id_from_form", true);
-                        }
-                    } else {
-                        throw new InvalidArgumentException('Error in form input');
+                try {
+                    $api_tester_gui = new EventoImportApiTesterGUI($this);
+                    $output = $api_tester_gui->fetchDataRecordFromFormInput($cmd);
+
+                    if (strlen($output) > 0) {
+                        ilUtil::sendSuccess($output, true);
                     }
                 } catch (Exception $e) {
                     ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
                 }
+
                 $this->ctrl->redirect($this, 'configure');
                 break;
 
             case 'fetch_all_ilias_admins':
                 try {
-                    $importer = $this->buildImporter($cmd);
+                    $api_tester_gui = new EventoImportApiTesterGUI($this);
+                    $output = $api_tester_gui->fetchParameterlessDataset($cmd);
 
-                    if ($importer instanceof \EventoImport\communication\EventoAdminImporter) {
-                        $output = $importer->fetchAllIliasAdmins();
-                    } else {
-                        throw new Exception('Class is not instance of Data Set importer');
-                    }
-
-                    if (!is_null($output)) {
-                        $cmd = htmlspecialchars($cmd);
-                        $output = htmlspecialchars(print_r($output, true));
-                        $message = $this->buildMessageForNextPage("CMD = $cmd", $output);
-                        ilUtil::sendSuccess($message, true);
-                    } else {
-                        $cmd = htmlspecialchars($cmd);
-                        ilUtil::sendFailure("Got no answer for CMD = $cmd", true);
+                    if (strlen($output) > 0) {
+                        ilUtil::sendSuccess($output, true);
                     }
                 } catch (Exception $e) {
                     ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
@@ -153,126 +113,15 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
     {
         global $DIC;
         $ui_factory = $DIC->ui()->factory();
-        $field_factory = $ui_factory->input()->field();
 
         // Reload tree
         $ui_components = [];
         $link = $this->ctrl->getLinkTarget($this, 'reload_repo_locations');
         $ui_components[] = $ui_factory->button()->standard("Reload Repository Locations", $link);
 
-        // Get Ilias Admins
-        $link = $this->ctrl->getLinkTarget($this, 'fetch_all_ilias_admins');
-        $ui_components[] = $ui_factory->button()->standard("Fetch all ILIAS Admins", $link);
+        $api_tester_gui = new EventoImportApiTesterGUI($this);
 
-        // Fetch data set form
-        $form = $this->initDataSetForm();
-
-        $form_html = $form->getHTML();
-
-        // Fetch data record form
-        $form = $this->initDataRecordForm();
-
-        $form_html .= $form->getHTML();
-
-        return $DIC->ui()->renderer()->render($ui_components) . $form_html;
-    }
-
-    private function buildMessageForNextPage(string $infos, string $output) : string
-    {
-        $message = "$infos<br><br>Output from request:<br><pre>$output</pre></div></div>";
-
-        return $message;
-    }
-
-    private function buildImporter($cmd)
-    {
-        global $DIC;
-        $api_importer_settings = new \EventoImport\communication\ImporterApiSettings(new ilSetting('crevento'));
-        $iterator = new ilEventoImporterIterator($api_importer_settings->getPageSize());
-        $logger = new ilEventoImportLogger($DIC->database());
-        $request_client = $this->buildRequestService($api_importer_settings);
-
-        switch ($cmd) {
-            case 'fetch_record_user':
-            case 'fetch_data_set_users':
-                return new \EventoImport\communication\EventoUserImporter(
-                    $request_client,
-                    $iterator,
-                    $logger,
-                    $api_importer_settings->getTimeoutFailedRequest(),
-                    $api_importer_settings->getMaxRetries()
-                );
-
-            case 'fetch_record_event':
-            case 'fetch_data_set_events':
-                return new \EventoImport\communication\EventoEventImporter(
-                    $request_client,
-                    $iterator,
-                    $logger,
-                    $api_importer_settings->getTimeoutFailedRequest(),
-                    $api_importer_settings->getMaxRetries()
-                );
-
-            case 'fetch_user_photo':
-                return new \EventoImport\communication\EventoUserPhotoImporter(
-                    $request_client,
-                    $api_importer_settings->getTimeoutFailedRequest(),
-                    $api_importer_settings->getMaxRetries(),
-                    $logger
-                );
-
-            case 'fetch_all_ilias_admins':
-            case 'fetch_ilias_admins_for_event':
-                return new \EventoImport\communication\EventoAdminImporter(
-                    $request_client,
-                    $logger,
-                    $api_importer_settings->getTimeoutFailedRequest(),
-                    $api_importer_settings->getMaxRetries()
-                );
-        }
-    }
-
-    private function initDataRecordForm() : ilPropertyFormGUI
-    {
-        $form = new ilPropertyFormGUI();
-        $form->setTitle('Fetch Data Record');
-        $form->setFormAction($this->ctrl->getFormAction($this));
-        $form->addCommandButton('fetch_record_user', 'Fetch User');
-        $form->addCommandButton('fetch_record_event', 'Fetch Event');
-        $form->addCommandButton('fetch_user_photo', 'Fetch Photo');
-        $form->addCommandButton('fetch_ilias_admins_for_event', 'Fetch Admins for Event');
-
-        $take = new ilNumberInputGUI('Id', 'record_id');
-        $form->addItem($take);
-
-        return $form;
-    }
-
-    private function initDataSetForm() : ilPropertyFormGUI
-    {
-        $form = new ilPropertyFormGUI();
-        $form->setTitle('Fetch Data Set');
-        $form->setFormAction($this->ctrl->getFormAction($this, 'fetch_data_set'));
-        $form->addCommandButton('fetch_data_set_users', 'Fetch Users');
-        $form->addCommandButton('fetch_data_set_events', 'Fetch Events');
-
-        $take = new ilNumberInputGUI('Take', 'take');
-        $form->addItem($take);
-
-        $skip = new ilNumberInputGUI('Skip', 'skip');
-        $form->addItem($skip);
-
-        return $form;
-    }
-
-    public function buildRequestService(\EventoImport\communication\ImporterApiSettings $importer_settings) : \EventoImport\communication\request_services\RequestClientService
-    {
-        return new \EventoImport\communication\request_services\RestClientService(
-            $importer_settings->getUrl(),
-            $importer_settings->getTimeoutAfterRequest(),
-            $importer_settings->getApikey(),
-            $importer_settings->getApiSecret()
-        );
+        return $DIC->ui()->renderer()->render($ui_components) . $api_tester_gui->getApiTesterFormAsString();
     }
 
     private function locationsToHTMLTable(array $locations) : string
