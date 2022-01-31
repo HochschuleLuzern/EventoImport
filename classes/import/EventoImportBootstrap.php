@@ -1,14 +1,14 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import;
 
+use ILIAS\DI\RBACServices;
 use EventoImport\import\db\repository\EventoUserRepository;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\import\db\query\IliasUserQuerying;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\db\query\IliasEventObjectQuery;
 use EventoImport\import\db\RepositoryFacade;
-use ILIAS\DI\RBACServices;
 use EventoImport\import\db\repository\EventMembershipRepository;
 use EventoImport\import\db\repository\EventLocationsRepository;
 use EventoImport\import\db\repository\ParentEventRepository;
@@ -21,67 +21,40 @@ class EventoImportBootstrap
     /*********************
      ** General objects **
      *********************/
-    /** @var \ilDBInterface */
     private \ilDBInterface $db;
-
-    /** @var RBACServices */
     private RBACServices $rbac_services;
-
-    /** @var \ilSetting */
     private \ilSetting $settings;
-
-    /** @var \ilEventoImportLogger */
     private \ilEventoImportLogger $logger;
 
-    /*** User related objects ***/
-    /** @var EventoUserRepository */
+    /***************************
+     ** User related objects **
+     ***************************/
     private EventoUserRepository $evento_user_repository;
-
-    /** @var IliasUserQuerying */
     private IliasUserQuerying $user_query;
-
-    /** @var UserFacade */
     private UserFacade $user_facade;
 
     /***************************
      ** Event related objects **
      ***************************/
-    /** @var IliasEventoEventsRepository */
     private IliasEventoEventsRepository $evento_event_repository;
-
-    /** @var IliasEventObjectQuery */
     private IliasEventObjectQuery $event_query;
-
-    /** @var EventLocationsRepository */
     private EventLocationsRepository $location_repository;
-
-    /** @var ParentEventRepository */
     private ParentEventRepository $parent_event_repo;
-
-    /** @var RepositoryFacade */
     private RepositoryFacade $repository_facade;
-
-    /** @var IliasEventObjectFactory */
     private IliasEventObjectFactory $event_object_factory;
-
-    /** @var DefaultEventSettings */
     private DefaultEventSettings $default_event_settings;
 
-    /*****************
-     *** Membership **
-     *****************/
-    /** @var EventMembershipRepository */
+    /*********************************
+     *** Membership related objects **
+     ********************************/
     private EventMembershipRepository $membership_repo;
-
-    /** @var MembershipManager */
     private MembershipManager $membership_manager;
 
-    public function __construct(\ilDBInterface $db = null, RBACServices $rbac_services = null, \ilSetting $settings = null)
+    public function __construct(\ilDBInterface $db, RBACServices $rbac_services, \ilSetting $settings)
     {
-        global $DIC;
-        $this->db = $db ?? $DIC->database();
-        $this->rbac_services = $rbac_services ?? $DIC->rbac();
-        $this->settings = $settings ?? new \ilSetting('crevento');
+        $this->db = $db;
+        $this->rbac_services = $rbac_services;
+        $this->settings = $settings;
     }
 
     public function logger() : \ilEventoImportLogger

@@ -2,7 +2,6 @@
 
 namespace EventoImport\import\db\repository;
 
-use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\model\IliasEventoEvent;
 
 /**

@@ -6,9 +6,9 @@ use ILIAS\UI\Implementation\Component\Input\Field\DateTime;
 
 class DefaultUserSettings
 {
-    private $settings;
+    private \ilSetting $settings;
 
-    private $now;
+    private \DateTime $now;
     private $auth_mode;
     private $is_auth_mode_ldap;
     private $is_profile_public;

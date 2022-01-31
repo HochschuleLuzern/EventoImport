@@ -1,8 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 use EventoImport\import\db\MembershipManager;
 use EventoImport\communication\EventoAdminImporter;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
+use EventoImport\communication\api_models\EventoEventIliasAdmins;
 
 class ilEventoImportImportAdmins
 {
@@ -27,7 +28,7 @@ class ilEventoImportImportAdmins
     {
         foreach ($this->evento_importer->fetchAllIliasAdmins() as $data_set) {
             try {
-                $event_admin_list = new \EventoImport\communication\api_models\EventoEventIliasAdmins($data_set);
+                $event_admin_list = new EventoEventIliasAdmins($data_set);
                 $ilias_evento_event = $this->ilias_event_repo->getEventByEventoId($event_admin_list->getEventoId());
 
                 $this->membership_manager->addEventAdmins($event_admin_list, $ilias_evento_event);
