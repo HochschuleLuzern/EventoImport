@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types = 1);
+
+use EventoImport\communication\EventoUserImporter;
+use EventoImport\import\data_matching\UserActionDecider;
+use EventoImport\import\db\UserFacade;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -17,67 +21,52 @@
  */
 
 /**
- * Class ilEventoImportImportUsers
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
  */
 class ilEventoImportImportUsers
 {
-    /** @var \EventoImport\communication\EventoUserImporter */
-    private $evento_importer;
-
-    /** @var \EventoImport\import\db\UserFacade */
-    private $user_facade;
-
-    private $user_import_action_decider;
-
-    /** @var ilEventoImportLogger */
-    private $evento_logger;
-
-    /** @var ilDBInterface */
-    private $db;
-
-    private $until_max;
+    private EventoUserImporter $evento_importer;
+    private UserFacade $user_facade;
+    private UserActionDecider $user_import_action_decider;
+    private \ilEventoImportLogger $evento_logger;
+    private int $until_max;
+    private \ilDBInterface $db;
 
 
     public function __construct(
-        \EventoImport\communication\EventoUserImporter $importer,
-        \EventoImport\import\data_matching\UserActionDecider $user_import_action_decider,
-        \EventoImport\import\db\UserFacade $user_facade,
-        ilEventoImportLogger $logger,
-        $until_max,
-        ilDBInterface $db = null
+        EventoUserImporter $importer,
+        UserActionDecider $user_import_action_decider,
+        UserFacade $user_facade,
+        \ilEventoImportLogger $logger,
+        int $until_max,
+        \ilDBInterface $db
     ) {
-        global $DIC;
-
         $this->evento_importer = $importer;
         $this->user_import_action_decider = $user_import_action_decider;
         $this->user_facade = $user_facade;
         $this->evento_logger = $logger;
-        $this->db = $db ?? $DIC->database();
+        $this->db = $db;
     }
 
-    public function run()
+    public function run() : void
     {
         $this->importUsers();
         $this->convertDeletedAccounts();
         $this->setUserTimeLimits();
     }
-
-    /**
-     * Import Users from Evento
-     */
-    private function importUsers()
+    
+    private function importUsers() : void
     {
         do {
             try {
                 $this->importNextUserPage();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->evento_logger->logException('User Import', $e->getMessage());
             }
         } while ($this->evento_importer->hasMoreData());
     }
 
-    private function importNextUserPage()
+    private function importNextUserPage() : void
     {
         foreach ($this->evento_importer->fetchNextUserDataSet() as $data_set) {
             try {
@@ -85,14 +74,14 @@ class ilEventoImportImportUsers
 
                 $action = $this->user_import_action_decider->determineImportAction($evento_user);
                 $action->executeAction();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->evento_logger->logException('User Import', $e->getMessage());
             }
         }
     }
 
     /**
-     * User accounts which are deleted by evento should either be converted to a local account (students) or deactivate (stuff)
+     * User accounts which are deleted by evento should either be converted to a local account (students) or deactivate (staff)
      *
      * Since there is no "getDeletedAccounts"-Method anymore, this Plugin has to find those "not anymore imported"-users
      * by itself. For this reason, every imported account has a last-imported-timestamp. With this value, users which have not
@@ -100,16 +89,13 @@ class ilEventoImportImportUsers
      */
     private function convertDeletedAccounts()
     {
-        // Get list uf users, which were not imported since a certain time
         $list = $this->user_facade->eventoUserRepository()->fetchNotImportedUsers();
 
         foreach ($list as $evento_id => $ilias_user_id) {
             try {
-                // Try to fetch user by ID from evento
-                // -> this is just to be safe, that the API does not deliver the user anymore
+                // Ensure that the user is not being returned by the api right now
                 $result = $this->evento_importer->fetchUserDataRecordById($evento_id);
-
-                // If evento does not deliver this user, it can be safely converted / deleted
+                
                 if (is_null($result) || (is_array($result) && count($result) < 1)) {
                     $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
                     $action->executeAction();

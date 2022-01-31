@@ -1,27 +1,49 @@
-<?php
+<?php declare(strict_types = 1);
 
+use EventoImport\communication\EventoEventImporter;
+use EventoImport\import\data_matching\EventImportActionDecider;
+
+/**
+ * Copyright (c) 2017 Hochschule Luzern
+ * This file is part of the EventoImport-Plugin for ILIAS.
+ * EventoImport-Plugin for ILIAS is free software: you can redistribute
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * EventoImport-Plugin for ILIAS is distributed in the hope that
+ * it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with EventoImport-Plugin for ILIAS.  If not,
+ * see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @author Stephan Winiker <stephan.winiker@hslu.ch>
+ */
 class ilEventoImportImportEventsAndMemberships
 {
-    private $evento_importer;
-    private $event_import_action_decider;
-    private $logger;
+    private EventoEventImporter $evento_importer;
+    private EventImportActionDecider $event_import_action_decider;
+    private \ilEventoImportLogger $logger;
 
     public function __construct(
-        \EventoImport\communication\EventoEventImporter $evento_importer,
-        \EventoImport\import\data_matching\EventImportActionDecider $event_import_action_decider,
-        ilEventoImportLogger $logger
+        EventoEventImporter $evento_importer,
+        EventImportActionDecider $event_import_action_decider,
+        \ilEventoImportLogger $logger
     ) {
         $this->evento_importer = $evento_importer;
         $this->event_import_action_decider = $event_import_action_decider;
         $this->logger = $logger;
     }
 
-    public function run()
+    public function run() : void
     {
         $this->importEvents();
     }
 
-    private function importEvents()
+    private function importEvents() : void
     {
         do {
             try {
@@ -32,7 +54,7 @@ class ilEventoImportImportEventsAndMemberships
         } while ($this->evento_importer->hasMoreData());
     }
 
-    private function importNextEventPage()
+    private function importNextEventPage() : void
     {
         foreach ($this->evento_importer->fetchNextEventDataSet() as $data_set) {
             try {
