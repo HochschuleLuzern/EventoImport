@@ -1,13 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\user;
 
 use EventoImport\import\action\EventoImportAction;
 
-/**
- * Class UserImportAction
- * @package EventoImport\import\action\user
- */
 interface UserImportAction extends EventoImportAction
 {
 }

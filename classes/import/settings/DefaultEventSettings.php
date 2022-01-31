@@ -1,13 +1,13 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\settings;
 
 class DefaultEventSettings
 {
-    private $default_object_owner_id;
-    private $default_sort_mode;
-    private $default_sort_direction;
-    private $default_online_status;
+    private int $default_object_owner_id;
+    private int $default_sort_mode;
+    private int $default_sort_direction;
+    private bool $default_online_status;
 
     public function __construct(\ilSetting $settings)
     {

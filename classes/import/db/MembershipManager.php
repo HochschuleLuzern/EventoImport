@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\db;
 
@@ -10,36 +10,20 @@ use EventoImport\communication\api_models\EventoUserShort;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\import\db\model\IliasEventoUser;
-use phpDocumentor\Reflection\Types\Self_;
 use EventoImport\import\db\query\MembershipableObjectsQuery;
-use EventoImport\communication\api_models\EventoUser;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
 
-/**
- * Class MembershipManager
- * @package EventoImport\import\db
- */
 class MembershipManager
 {
-    /**
-     * @var EventMembershipRepository
-     */
     private $membership_repo;
     private $favourites_manager;
     private $logger;
+    private \ilRbacReview $rbac_review;
+    private \ilRbacAdmin $rbac_admin;
 
     private const ROLE_ADMIN = 1;
     private const ROLE_MEMBER = 2;
 
-    /**
-     * MembershipManager constructor.
-     * @param EventMembershipRepository   $membership_repo
-     * @param EventoUserRepository        $user_repo
-     * @param IliasEventoEventsRepository $event_repo
-     * @param \ilFavouritesManager        $favourites_manager
-     * @param \ilEventoImportLogger       $logger
-     * @param RBACServices                $rbac_services
-     */
     public function __construct(
         EventMembershipRepository $membership_repo,
         EventoUserRepository $user_repo,
@@ -58,12 +42,7 @@ class MembershipManager
         $this->rbac_admin = $rbac_services->admin();
     }
 
-    /**
-     * @param EventoEvent      $imported_event
-     * @param IliasEventoEvent $ilias_event
-     * @throws \ilException
-     */
-    public function syncMemberships(EventoEvent $imported_event, IliasEventoEvent $ilias_event)
+    public function syncMemberships(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
     {
         // If Ilias Event is already a course -> no need to find parent membershipables
         if ($ilias_event->getIliasType() == 'crs') {
@@ -82,14 +61,7 @@ class MembershipManager
         }
     }
 
-    /**
-     * @param \ilParticipants $participants_object
-     * @param array           $employees
-     * @param int             $admin_role_code
-     * @param array           $students
-     * @param int             $student_role_code
-     */
-    private function addUsersToMembershipableObject(\ilParticipants $participants_object, array $employees, int $admin_role_code, array $students, int $student_role_code)
+    private function addUsersToMembershipableObject(\ilParticipants $participants_object, array $employees, int $admin_role_code, array $students, int $student_role_code) : void
     {
         foreach ($employees as $employee) {
             $employee_user_id = $this->user_repo->getIliasUserIdByEventoId($employee->getEventoId());
@@ -120,7 +92,7 @@ class MembershipManager
         return $users_to_remove;
     }
 
-    private function syncMembershipsWithoutParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event)
+    private function syncMembershipsWithoutParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
     {
         $participants_obj = $this->membership_query->getParticipantsObjectForRefId($ilias_event->getRefId());
 
@@ -134,7 +106,6 @@ class MembershipManager
             $imported_event->getStudents(),
             $member_role_code
         );
-
 
         $users_to_remove = $this->getUsersToRemove($imported_event);
 
@@ -158,7 +129,7 @@ class MembershipManager
         }
     }
 
-    private function syncMembershipsWithParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event, array $parent_events)
+    private function syncMembershipsWithParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event, array $parent_events) : void
     {
         // Add users to main event
         $participants_obj = $this->membership_query->getParticipantsObjectForRefId($ilias_event->getRefId());
@@ -241,7 +212,7 @@ class MembershipManager
         }
     }
 
-    private function removeUserFromSubMembershipables(IliasEventoUser $user_to_remove, array $sub_membershipables)
+    private function removeUserFromSubMembershipables(IliasEventoUser $user_to_remove, array $sub_membershipables) : void
     {
         foreach ($sub_membershipables as $sub_membershipable) {
             $sub_event_participants_obj = $this->membership_query->getParticipantsObjectForRefId($sub_membershipable);
@@ -251,11 +222,6 @@ class MembershipManager
         }
     }
 
-    /**
-     * @param       $user
-     * @param array $evento_user_list
-     * @return bool
-     */
     private function isUserInCurrentImport(IliasEventoUser $user, EventoEvent $imported_event) : bool
     {
         foreach ($imported_event->getEmployees() as $evento_user) {
@@ -273,7 +239,7 @@ class MembershipManager
         return false;
     }
 
-    public function addEventAdmins(EventoEventIliasAdmins $event_admin_list, IliasEventoEvent $ilias_evento_event)
+    public function addEventAdmins(EventoEventIliasAdmins $event_admin_list, IliasEventoEvent $ilias_evento_event) : void
     {
         $event_participant_obj = $this->membership_query->getParticipantsObjectForRefId($ilias_evento_event->getRefId());
         $this->addAdminListToObject(
@@ -302,7 +268,7 @@ class MembershipManager
         }
     }
 
-    private function addAdminListToObject(\ilParticipants $participants_object, array $admin_list, int $admin_role_code)
+    private function addAdminListToObject(\ilParticipants $participants_object, array $admin_list, int $admin_role_code) : void
     {
         foreach ($admin_list as $admin) {
             $employee_user_id = $this->user_repo->getIliasUserIdByEventoId($admin->getEventoId());

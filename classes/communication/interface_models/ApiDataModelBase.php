@@ -1,16 +1,11 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\communication\api_models;
 
-/**
- * Class ApiDataModelBase
- * @package EventoImport\communication\api_models
- */
 abstract class ApiDataModelBase
 {
     use JSONDataValidator;
 
-    /** @var array */
     protected array $decoded_api_data;
 
     protected function checkErrorsAndMaybeThrowException()
@@ -25,8 +20,5 @@ abstract class ApiDataModelBase
         }
     }
 
-    /**
-     * @return array
-     */
     abstract public function getDecodedApiData() : array;
 }

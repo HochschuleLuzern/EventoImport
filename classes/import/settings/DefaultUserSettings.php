@@ -1,28 +1,26 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\settings;
 
-use ILIAS\UI\Implementation\Component\Input\Field\DateTime;
-
 class DefaultUserSettings
 {
-    private $settings;
+    private \ilSetting $settings;
 
-    private $now;
+    private \DateTime $now;
     private $auth_mode;
-    private $is_auth_mode_ldap;
-    private $is_profile_public;
-    private $is_profile_picture_public;
-    private $is_mail_public;
+    private bool $is_auth_mode_ldap;
+    private bool $is_profile_public;
+    private bool $is_profile_picture_public;
+    private bool $is_mail_public;
     private $default_user_role_id;
-    private $acc_duration_after_import;
-    private $max_acc_duration;
-    private $default_hits_per_page;
-    private $default_show_users_online;
-    private $mail_incoming_type;
-    private $evento_to_ilias_role_mapping;
-    private $assignable_roles;
-    private $ilias_to_evento_role_mapping;
+    private \DateTime $acc_duration_after_import;
+    private \DateTime $max_acc_duration;
+    private int $default_hits_per_page;
+    private string $default_show_users_online;
+    private int $mail_incoming_type;
+    private array $evento_to_ilias_role_mapping;
+    private array $assignable_roles;
+    private array $ilias_to_evento_role_mapping;
 
     public function __construct(\ilSetting $settings)
     {
@@ -30,7 +28,7 @@ class DefaultUserSettings
 
         $this->assignable_roles = array();
 
-        $this->default_user_role_id = $settings->get(\ilEventoImportCronConfig::CONF_DEFAULT_USER_ROLE);
+        $this->default_user_role_id = (int) $settings->get(\ilEventoImportCronConfig::CONF_DEFAULT_USER_ROLE); // TODO: Use default user role from constants
         $this->assignable_roles[] = $this->default_user_role_id;
         $this->default_hits_per_page = 100;
         $this->default_show_users_online = 'associated';
@@ -51,6 +49,7 @@ class DefaultUserSettings
         if (!is_null($role_mapping)) {
             $role_mapping = unserialize($role_mapping);
             $this->evento_to_ilias_role_mapping = [];
+            $this->ilias_to_evento_role_mapping = [];
             foreach ($role_mapping as $ilias_role_id => $evento_role) {
                 $this->evento_to_ilias_role_mapping[$evento_role] = $ilias_role_id;
                 $this->ilias_to_evento_role_mapping[$ilias_role_id] = $evento_role;
@@ -124,7 +123,7 @@ class DefaultUserSettings
         return $this->default_show_users_online;
     }
 
-    public function getEventoCodeToIliasRoleMapping()
+    public function getEventoCodeToIliasRoleMapping() : array
     {
         return $this->evento_to_ilias_role_mapping;
     }

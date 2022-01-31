@@ -1,4 +1,8 @@
-<?php
+<?php declare(strict_types = 1);
+
+use EventoImport\communication\EventoEventImporter;
+use EventoImport\import\data_matching\EventImportActionDecider;
+use EventoImport\communication\api_models\EventoEvent;
 
 class ilEventoImportImportEventsAndMemberships
 {
@@ -7,8 +11,8 @@ class ilEventoImportImportEventsAndMemberships
     private $logger;
 
     public function __construct(
-        \EventoImport\communication\EventoEventImporter $evento_importer,
-        \EventoImport\import\data_matching\EventImportActionDecider $event_import_action_decider,
+        EventoEventImporter $evento_importer,
+        EventImportActionDecider $event_import_action_decider,
         ilEventoImportLogger $logger
     ) {
         $this->evento_importer = $evento_importer;
@@ -36,7 +40,7 @@ class ilEventoImportImportEventsAndMemberships
     {
         foreach ($this->evento_importer->fetchNextEventDataSet() as $data_set) {
             try {
-                $evento_event = new \EventoImport\communication\api_models\EventoEvent($data_set);
+                $evento_event = new EventoEvent($data_set);
 
                 $action = $this->event_import_action_decider->determineAction($evento_event);
                 $action->executeAction();

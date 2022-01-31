@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -32,10 +32,6 @@ use EventoImport\communication\request_services\RestClientService;
 
 class ilEventoImportImport extends ilCronJob
 {
-    
-    /**
-     * @var string The ID of the cron job
-     */
     const ID = "crevento_import";
     
     private $rbac;
@@ -47,12 +43,8 @@ class ilEventoImportImport extends ilCronJob
     private $importUsersConfig;
     private $page_size;
 
-    /** @var \EventoImport\import\EventoImportBootstrap */
     private \EventoImport\import\EventoImportBootstrap $import_bootstrapping;
 
-    /**
-     * Constructor
-     */
     public function __construct(\ILIAS\DI\RBACServices $rbac_services = null, ilDBInterface $db = null)
     {
         global $DIC;
@@ -149,18 +141,13 @@ class ilEventoImportImport extends ilCronJob
     {
         return true;
     }
-    
-    /**
-     * Cron job has custom settings in the cron job admin section
-     *
-     * @return boolean
-     */
+
     public function hasCustomSettings()
     {
         return true;
     }
     
-    public function run()
+    public function run() : ilEventoImportResult
     {
         try {
             $logger = new ilEventoImportLogger($this->db);
@@ -186,12 +173,7 @@ class ilEventoImportImport extends ilCronJob
         }
     }
 
-    /**
-     * @param RequestClientService $data_source
-     * @param ImporterApiSettings  $api_settings
-     * @param ilEventoImportLogger $logger
-     */
-    public function runDailyFullImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger)
+    public function runDailyFullImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger) : void
     {
         $user_importer = new \EventoImport\communication\EventoUserImporter(
             $data_source,
@@ -255,12 +237,7 @@ class ilEventoImportImport extends ilCronJob
         $import_events->run();
     }
 
-    /**
-     * @param RequestClientService $data_source
-     * @param ImporterApiSettings  $api_settings
-     * @param ilEventoImportLogger $logger
-     */
-    public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger)
+    public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger) : void
     {
         $admin_importer = new \EventoImport\communication\EventoAdminImporter($data_source, $logger, $api_settings->getTimeoutFailedRequest(), $api_settings->getMaxRetries());
 
@@ -275,9 +252,6 @@ class ilEventoImportImport extends ilCronJob
         ;
     }
 
-    /**
-     * @return bool
-     */
     private function wasFullImportAlreadyRunToday() : bool
     {
         // Try to get the date from the last run

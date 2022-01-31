@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\administration;
 
@@ -6,30 +6,28 @@ use ILIAS\DI\UIServices;
 
 class EventoImportApiTesterGUI
 {
-    private $parent_gui;
+    private \ilEventoImportConfigGUI $parent_gui;
     private UIServices $ui_services;
     private \ilSetting $settings;
     private \ilTree $tree;
     private \ilCtrl $ctrl;
     private \ILIAS\UI\Factory $ui_factory;
     private \ILIAS\UI\Renderer $ui_renderer;
+    private EventoImportApiTester $api_tester;
 
-    public function __construct($parent_gui, UIServices $ui_services = null, \ilSetting $settings = null, \ilCtrl $ctrl = null)
+    public function __construct(\ilEventoImportConfigGUI $parent_gui, UIServices $ui_services, \ilSetting $settings, \ilCtrl $ctrl, \ilTree $tree)
     {
-        global $DIC;
-
-
         $this->parent_gui = $parent_gui;
-        $this->ui_services = $ui_services ?? $DIC->ui();
+        $this->ui_services = $ui_services;
         $this->ui_factory = $this->ui_services->factory();
         $this->ui_renderer = $this->ui_services->renderer();
-        $this->settings = $setttings ?? new \ilSetting('crevento');
-        $this->tree = $tree ?? $DIC->repositoryTree();
-        $this->ctrl = $ctrl ?? $DIC->ctrl();
+        $this->settings = $settings;
+        $this->tree = $tree;
+        $this->ctrl = $ctrl;
         $this->api_tester = new EventoImportApiTester($this->settings);
     }
 
-    public function getApiTesterFormAsString()
+    public function getApiTesterFormAsString() : string
     {
         $link = $this->ctrl->getLinkTarget($this->parent_gui, 'fetch_all_ilias_admins');
         $ui_components[] = $this->ui_services->factory()->button()->standard("Fetch all ILIAS Admins", $link);

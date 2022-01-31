@@ -1,22 +1,12 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\communication\generic_importers;
 
 use EventoImport\communication\request_services\RequestClientService;
 use EventoImport\communication\api_models\EventoImportDataSetResponse;
 
-/**
- * Class DataSetImport
- * @package EventoImport\communication\generic_importers
- */
 trait DataSetImport
 {
-    /**
-     * @param string $method_name
-     * @param array  $request_params
-     * @return EventoImportDataSetResponse
-     * @throws \Exception
-     */
     protected function fetchDataSet(RequestClientService $data_source, string $method_name, array $request_params, int $seconds_before_retry, int $max_retries) : EventoImportDataSetResponse
     {
         $nr_of_tries = 0;

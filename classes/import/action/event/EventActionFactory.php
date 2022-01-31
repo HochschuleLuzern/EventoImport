@@ -1,43 +1,22 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\ReportDatasetWithoutAction;
 use EventoImport\import\db\RepositoryFacade;
-use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
-use EventoImport\import\settings\DefaultEventSettings;
-use EventoImport\import\IliasEventWrapper;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\MembershipManager;
 use EventoImport\import\db\model\IliasEventoEvent;
 
-/**
- * Class EventActionFactory
- * @package EventoImport\import\action\event
- */
 class EventActionFactory
 {
-    /** @var RepositoryFacade */
     private RepositoryFacade $repository_facade;
-
-    /** @var IliasEventObjectFactory */
     private IliasEventObjectFactory $event_object_factory;
-
-    /** @var MembershipManager */
     private MembershipManager $membership_manager;
-
-    /** @var \ilEventoImportLogger */
     private \ilEventoImportLogger $logger;
 
-    /**
-     * EventActionFactory constructor.
-     * @param IliasEventObjectFactory $event_object_factory
-     * @param RepositoryFacade        $repository_facade
-     * @param MembershipManager       $membership_manager
-     * @param \ilEventoImportLogger   $logger
-     */
     public function __construct(
         IliasEventObjectFactory $event_object_factory,
         RepositoryFacade $repository_facade,
@@ -50,11 +29,6 @@ class EventActionFactory
         $this->logger = $logger;
     }
 
-    /**
-     * @param EventoEvent $evento_event
-     * @param int         $destination_ref_id
-     * @return CreateSingleEvent
-     */
     public function createSingleEvent(EventoEvent $evento_event, int $destination_ref_id) : CreateSingleEvent
     {
         return new CreateSingleEvent(
@@ -67,11 +41,6 @@ class EventActionFactory
         );
     }
 
-    /**
-     * @param EventoEvent $evento_event
-     * @param int         $destination_ref_id
-     * @return CreateEventWithParent
-     */
     public function createEventWithParent(EventoEvent $evento_event, int $destination_ref_id) : CreateEventWithParent
     {
         return new CreateEventWithParent(
@@ -84,11 +53,6 @@ class EventActionFactory
         );
     }
 
-    /**
-     * @param EventoEvent            $evento_event
-     * @param IliasEventoParentEvent $parent_event
-     * @return CreateEventInParentEvent
-     */
     public function createEventInParentEvent(EventoEvent $evento_event, IliasEventoParentEvent $parent_event) : CreateEventInParentEvent
     {
         return new CreateEventInParentEvent(
@@ -101,11 +65,6 @@ class EventActionFactory
         );
     }
 
-    /**
-     * @param EventoEvent       $evento_event
-     * @param IliasEventoEvent $ilias_event
-     * @return UpdateExistingEvent
-     */
     public function updateExistingEvent(EventoEvent $evento_event, IliasEventoEvent $ilias_event) : UpdateExistingEvent
     {
         return new UpdateExistingEvent(
@@ -117,11 +76,6 @@ class EventActionFactory
         );
     }
 
-    /**
-     * @param EventoEvent  $evento_event
-     * @param \ilContainer $ilias_obj
-     * @return MarkExistingIliasObjAsEvent
-     */
     public function convertExistingIliasObjToEvent(
         EventoEvent $evento_event,
         \ilContainer $ilias_obj
@@ -135,10 +89,6 @@ class EventActionFactory
         );
     }
 
-    /**
-     * @param EventoEvent $evento_event
-     * @return ReportEventImportDatasetWithoutAction
-     */
     public function reportNonIliasEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(
@@ -150,10 +100,6 @@ class EventActionFactory
         );
     }
 
-    /**
-     * @param EventoEvent $evento_event
-     * @return ReportDatasetWithoutAction
-     */
     public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(

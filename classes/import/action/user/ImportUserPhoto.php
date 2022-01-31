@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\user;
 
@@ -6,18 +6,8 @@ use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\import\db\UserFacade;
 use EventoImport\communication\api_models\EventoUserPhoto;
 
-/**
- * Trait ImportUserPhoto
- * @package EventoImport\import\action\user
- */
 trait ImportUserPhoto
 {
-    /**
-     * @param int                     $evento_id
-     * @param \ilObjUser              $user
-     * @param EventoUserPhotoImporter $photo_importer
-     * @param UserFacade              $user_facade
-     */
     public function importAndSetUserPhoto(int $evento_id, \ilObjUser $user, EventoUserPhotoImporter $photo_importer, UserFacade $user_facade)
     {
         try {

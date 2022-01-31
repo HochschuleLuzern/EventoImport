@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\db;
 
@@ -26,24 +26,11 @@ use EventoImport\import\IliasEventWrapperSingleEvent;
  */
 class RepositoryFacade
 {
-    /** @var IliasEventObjectQuery */
     private IliasEventObjectQuery $event_object_query;
-
-    /** @var IliasEventoEventsRepository */
     private IliasEventoEventsRepository $event_repo;
-
-    /** @var EventLocationsRepository */
     private EventLocationsRepository $location_repo;
-
-    /** @var ParentEventRepository  */
     private ParentEventRepository $parent_event_repo;
 
-    /**
-     * RepositoryFacade constructor.
-     * @param null $event_objects_query
-     * @param null $event_repo
-     * @param null $location_repo
-     */
     public function __construct(
         IliasEventObjectQuery $event_objects_query = null,
         IliasEventoEventsRepository $event_repo = null,
@@ -58,18 +45,11 @@ class RepositoryFacade
         $this->parent_event_repo = $parent_event_repo ?? new ParentEventRepository($DIC->database());
     }
 
-    /**
-     * @param string $name
-     */
     public function fetchAllEventableObjectsForGivenTitle(string $name)
     {
         $this->event_object_query->fetchAllEventableObjectsForGivenTitle($name);
     }
 
-    /**
-     * @param EventoEvent $evento_event
-     * @return IliasEventoParentEvent|null
-     */
     public function searchPossibleParentEventForEvent(EventoEvent $evento_event) : ?IliasEventoParentEvent
     {
         $parent_event = $this->parent_event_repo->fetchParentEventForName($evento_event->getGroupName());
@@ -85,26 +65,16 @@ class RepositoryFacade
         return null;
     }
 
-    /**
-     * @return IliasEventoEventsRepository
-     */
     public function iliasEventoEventRepository() : IliasEventoEventsRepository
     {
         return $this->event_repo;
     }
 
-    /**
-     * @return EventLocationsRepository
-     */
     public function departmentLocationRepository() : EventLocationsRepository
     {
         return $this->location_repo;
     }
 
-    /**
-     * @param EventoEvent $evento_event
-     * @return \ilContainer|null
-     */
     public function searchExactlyOneMatchingCourseByTitle(EventoEvent $evento_event) : ?\ilContainer
     {
         $object_list = $this->event_object_query->fetchAllEventableObjectsForGivenTitle($evento_event->getName());
@@ -116,11 +86,6 @@ class RepositoryFacade
         }
     }
 
-    /**
-     * @param EventoEvent  $evento_event
-     * @param \ilContainer $ilias_object
-     * @return IliasEventoEvent
-     */
     public function addNewIliasEvent(EventoEvent $evento_event, \ilContainer $ilias_object) : IliasEventoEvent
     {
         if ($ilias_object instanceof \ilObjCourse || $ilias_object instanceof \ilObjGroup) {
@@ -150,11 +115,6 @@ class RepositoryFacade
         }
     }
 
-    /**
-     * @param EventoEvent  $evento_event
-     * @param \ilContainer $parent_event_ilias_obj
-     * @return IliasEventoParentEvent
-     */
     public function addNewIliasEventoParentEvent(EventoEvent $evento_event, \ilContainer $parent_event_ilias_obj) : IliasEventoParentEvent
     {
         if ($parent_event_ilias_obj instanceof \ilObjCourse || $parent_event_ilias_obj instanceof \ilObjGroup) {
@@ -174,12 +134,6 @@ class RepositoryFacade
         }
     }
 
-    /**
-     * @param EventoEvent      $evento_event
-     * @param IliasEventoEvent $old_ilias_event
-     * @param \ilContainer     $ilias_object
-     * @return IliasEventoEvent
-     */
     public function updateIliasEventoEvent(EventoEvent $evento_event, IliasEventoEvent $old_ilias_event, \ilContainer $ilias_object) : IliasEventoEvent
     {
         if ($ilias_object instanceof \ilObjCourse || $ilias_object instanceof \ilObjGroup) {

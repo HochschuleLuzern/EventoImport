@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -26,8 +26,8 @@
  */
 
 class ilEventoImporterIterator {
-	private $page;
-	private $page_size;
+	private int $page;
+	private int $page_size;
 	
 	public function __construct(int $page_size) {
 		$this->page = 1;

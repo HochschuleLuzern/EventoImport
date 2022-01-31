@@ -1,11 +1,7 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\communication\api_models;
 
-/**
- * Class EventoImportDataSetResponse
- * @package EventoImport\communication\api_models
- */
 class EventoImportDataSetResponse
 {
     use JSONDataValidator;
@@ -15,23 +11,11 @@ class EventoImportDataSetResponse
     public const JSON_MESSAGE = 'message';
     public const JSON_DATA = 'data';
 
-    /** @var bool */
     private ?bool $success;
-
-    /** @var bool  */
     private ?bool $has_more_data;
-
-    /** @var string */
     private ?string $message;
-
-    /** @var array */
     private ?array $data;
 
-    /**
-     * EventoImportDataSetResponse constructor.
-     *
-     * @param array $json_response
-     */
     public function __construct(array $json_response)
     {
         $this->success = $this->validateAndReturnBoolean($json_response, self::JSON_SUCCESS);
@@ -49,33 +33,21 @@ class EventoImportDataSetResponse
         }
     }
 
-    /**
-     * @return bool
-     */
     public function getSuccess() : bool
     {
         return $this->success;
     }
 
-    /**
-     * @return bool
-     */
     public function getHasMoreData() : bool
     {
         return $this->has_more_data;
     }
 
-    /**
-     * @return string
-     */
     public function getMessage() : string
     {
         return $this->message;
     }
 
-    /**
-     * @return array
-     */
     public function getData() : array
     {
         return $this->data;

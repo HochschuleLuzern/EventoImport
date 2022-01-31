@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\user;
 
@@ -8,10 +8,6 @@ use ILIAS\DI\RBACServices;
 
 trait UserImportActionTrait
 {
-    /**
-     * @param string $evento_gender_char
-     * @return string
-     */
     protected function convertEventoToIliasGenderChar(string $evento_gender_char) : string
     {
         switch (strtolower($evento_gender_char)) {
@@ -25,10 +21,6 @@ trait UserImportActionTrait
         }
     }
 
-    /**
-     * @param \ilObjUser          $ilias_user
-     * @param DefaultUserSettings $user_settings
-     */
     protected function setForcedUserSettings(\ilObjUser $ilias_user, DefaultUserSettings $user_settings)
     {
         /*
@@ -80,7 +72,7 @@ trait UserImportActionTrait
         $ilias_user->writePrefs();
     }
 
-    protected function synchronizeUserWithGlobalRoles(int $user_id, array $imported_evento_roles, DefaultUserSettings $user_settings, RBACServices $rbac_services)
+    protected function synchronizeUserWithGlobalRoles(int $user_id, array $imported_evento_roles, DefaultUserSettings $user_settings, RBACServices $rbac_services) : void
     {
         $review = $rbac_services->review();
         $admin = $rbac_services->admin();

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\data_matching;
 
@@ -7,33 +7,17 @@ use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\api_models\EventoUser;
 
-/**
- * Class UserActionDecider
- * @package EventoImport\import\data_matching
- */
 class UserActionDecider
 {
-    /** @var UserFacade */
     private UserFacade $user_facade;
-
-    /** @var UserActionFactory */
     private UserActionFactory $action_factory;
 
-    /**
-     * UserActionDecider constructor.
-     * @param UserFacade        $user_facade
-     * @param UserActionFactory $action_factory
-     */
     public function __construct(UserFacade $user_facade, UserActionFactory $action_factory)
     {
         $this->user_facade = $user_facade;
         $this->action_factory = $action_factory;
     }
 
-    /**
-     * @param EventoUser $evento_user
-     * @param int                                               $ilias_user_id
-     */
     private function addUserToEventoIliasMappingTable(
         EventoUser $evento_user,
         int $ilias_user_id
@@ -42,10 +26,6 @@ class UserActionDecider
         $this->user_facade->eventoUserRepository()->addNewEventoIliasUser($evento_user, $ilias_user);
     }
 
-    /**
-     * @param EventoUser $evento_user
-     * @return EventoImportAction
-     */
     public function determineImportAction(EventoUser $evento_user) : EventoImportAction
     {
         $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
@@ -57,13 +37,7 @@ class UserActionDecider
         return $this->matchToIliasUsersAndDetermineAction($evento_user);
     }
 
-    /**
-     * @param EventoUser $evento_user
-     * @return EventoImportAction
-     */
-    private function matchToIliasUsersAndDetermineAction(
-        EventoUser $evento_user
-    ) : EventoImportAction {
+    private function matchToIliasUsersAndDetermineAction(EventoUser $evento_user) : EventoImportAction {
         $data['id_by_login'] = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
         $data['ids_by_matriculation'] = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());
         $data['ids_by_email'] = $this->user_facade->fetchUserIdsByEmail($evento_user->getEmailList());
@@ -205,11 +179,6 @@ class UserActionDecider
         return $result;
     }
 
-    /**
-     * @param int $ilias_id
-     * @param int $evento_id
-     * @return EventoImportAction
-     */
     public function determineDeleteAction(int $ilias_id, int $evento_id) : EventoImportAction
     {
         $ilias_user_object = $this->user_facade->getExistingIliasUserObject($ilias_id);

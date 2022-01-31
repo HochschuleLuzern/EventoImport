@@ -1,11 +1,7 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\communication\api_models;
 
-/**
- * Class EventoUser
- * @package EventoImport\communication\api_models
- */
 class EventoUser extends ApiDataModelBase
 {
     const JSON_ID = 'idAccount';
@@ -18,25 +14,12 @@ class EventoUser extends ApiDataModelBase
     const JSON_EMAIL_3 = 'email3';
     const JSON_ROLES = 'roles';
 
-    /** @var int */
     private ?int $evento_id;
-
-    /** @var string */
     private ?string $last_name;
-
-    /** @var string */
     private ?string $first_name;
-
-    /** @var string */
     private ?string $gender;
-
-    /** @var string */
     private ?string $login_name;
-
-    /** @var array */
     private ?array $email_list;
-
-    /** @var array */
     private ?array $roles;
 
     public function __construct(array $data_set)
@@ -53,65 +36,41 @@ class EventoUser extends ApiDataModelBase
         $this->checkErrorsAndMaybeThrowException();
     }
 
-    /**
-     * @return int
-     */
     public function getEventoId() : int
     {
         return $this->evento_id;
     }
 
-    /**
-     * @return string
-     */
     public function getLastName() : string
     {
         return $this->last_name;
     }
 
-    /**
-     * @return string
-     */
     public function getFirstName() : string
     {
         return $this->first_name;
     }
 
-    /**
-     * @return string
-     */
     public function getGender() : string
     {
         return $this->gender;
     }
 
-    /**
-     * @return string
-     */
     public function getLoginName() : string
     {
         return $this->login_name;
     }
 
-    /**
-     * @return array
-     */
     public function getEmailList() : array
     {
         return $this->email_list;
     }
 
-    /**
-     * @return array
-     */
     public function getRoles() : array
     {
         return $this->roles;
     }
 
-    /**
-     * @return array
-     */
     public function getDecodedApiData() : array
     {
         return $this->decoded_api_data;

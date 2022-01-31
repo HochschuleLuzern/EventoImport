@@ -1,45 +1,19 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\user;
 
-use EventoImport\import\action\EventoImportAction;
 use EventoImport\import\db\UserFacade;
 
-/**
- * Class ConvertUserToLocalAuth
- * @package EventoImport\import\action\user
- */
 class ConvertUserToLocalAuth implements UserDeleteAction
 {
-    /** @var \ilObjUser */
     private \ilObjUser $ilias_user;
-
-    /** @var int */
     private int $evento_id;
-
-    /** @var string */
     private string $converted_auth_mode;
-
-    /** @var UserFacade */
     private UserFacade $user_facade;
-
-    /** @var \ilEventoImportLogger */
     private \ilEventoImportLogger $logger;
-
-    /** @var int */
     private int $log_info_code;
-
-    /** @var string */
     private string $auth_mode;
 
-    /**
-     * ConvertUserToLocalAuth constructor.
-     * @param \ilObjUser            $ilias_user
-     * @param int                   $evento_id
-     * @param string                $converted_auth_mode
-     * @param UserFacade            $user_facade
-     * @param \ilEventoImportLogger $logger
-     */
     public function __construct(\ilObjUser $ilias_user, int $evento_id, string $converted_auth_mode, UserFacade $user_facade, \ilEventoImportLogger $logger)
     {
         $this->ilias_user = $ilias_user;

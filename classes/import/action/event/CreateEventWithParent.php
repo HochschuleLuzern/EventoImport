@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\event;
 
@@ -7,10 +7,6 @@ use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\MembershipManager;
 
-/**
- * Class CreateEventWithParent
- * @package EventoImport\import\action\event
- */
 class CreateEventWithParent implements EventAction
 {
     private EventoEvent $evento_event;

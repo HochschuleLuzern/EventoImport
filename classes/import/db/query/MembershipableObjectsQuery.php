@@ -1,22 +1,13 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\db\query;
 
 class MembershipableObjectsQuery
 {
-    /** @var \ilTree */
     private \ilTree $tree;
-
-    /** @var array */
     private array $membershipable_co_groups_cache;
-
-    /** @var array */
     private array $participant_object_cache;
 
-    /**
-     * MembershipableObjectsQuery constructor.
-     * @param \ilTree|null $tree
-     */
     public function __construct(\ilTree $tree = null)
     {
         global $DIC;
@@ -26,10 +17,6 @@ class MembershipableObjectsQuery
         $this->participant_object_cache = [];
     }
 
-    /**
-     * @param int $ref_id
-     * @return \ilParticipants
-     */
     public function getParticipantsObjectForRefId(int $ref_id) : \ilParticipants
     {
         if (!isset($this->participant_object_cache[$ref_id])) {
@@ -39,12 +26,6 @@ class MembershipableObjectsQuery
         return $this->participant_object_cache[$ref_id];
     }
 
-    /**
-     * @param int   $parent_ref_id
-     * @param array $sub_group_list
-     * @param bool  $search_below_groups
-     * @return array
-     */
     public function recursiveSearchSubGroups(int $parent_ref_id, array $sub_group_list, bool $search_below_groups) : array
     {
         foreach ($this->tree->getChilds($parent_ref_id) as $child_ref_id) {
@@ -62,10 +43,6 @@ class MembershipableObjectsQuery
         return $sub_group_list;
     }
 
-    /**
-     * @param int $parent_group_ref_id
-     * @return array
-     */
     public function getMembershipableCoGroups(int $parent_group_ref_id) : array
     {
         if (!isset($this->membershipable_co_groups_cache[$parent_group_ref_id])) {
@@ -75,19 +52,11 @@ class MembershipableObjectsQuery
         return $this->membershipable_co_groups_cache[$parent_group_ref_id];
     }
 
-    /**
-     * @param int $parent_ref_id
-     * @return array
-     */
     public function getAllSubGroups(int $parent_ref_id) : array
     {
         return $this->recursiveSearchSubGroups($parent_ref_id, [], true);
     }
 
-    /**
-     * @param int $src_ref_id
-     * @return array
-     */
     public function getRefIdsOfParentMembershipables(int $src_ref_id) : array
     {
         $current_obj_ref = $src_ref_id;
@@ -118,12 +87,6 @@ class MembershipableObjectsQuery
         return $parent_membershipable_objs;
     }
 
-    /**
-     * @param int   $parent_ref_id
-     * @param array $sub_objects
-     * @param int   $current_depth
-     * @return array
-     */
     public function getRefIdsOfSubMembershipables(int $parent_ref_id, array $sub_objects, int $current_depth)
     {
         global $DIC;

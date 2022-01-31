@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\user;
 
@@ -7,38 +7,17 @@ use EventoImport\import\db\UserFacade;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
 
-/**
- * Class CreateUser
- * @package EventoImport\import\action\user
- */
 class CreateUser implements UserImportAction
 {
     use ImportUserPhoto;
     use UserImportActionTrait;
 
-    /** @var EventoUser */
     private EventoUser $evento_user;
-
-    /** @var UserFacade */
     private UserFacade $user_facade;
-
-    /** @var DefaultUserSettings */
     protected DefaultUserSettings $default_user_settings;
-
-    /** @var EventoUserPhotoImporter */
     private EventoUserPhotoImporter $photo_importer;
-
-    /** @var \ilEventoImportLogger */
     private \ilEventoImportLogger $logger;
 
-    /**
-     * CreateUser constructor.
-     * @param EventoUser              $evento_user
-     * @param UserFacade              $user_facade
-     * @param DefaultUserSettings     $default_user_settings
-     * @param EventoUserPhotoImporter $photo_importer
-     * @param \ilEventoImportLogger   $logger
-     */
     public function __construct(
         EventoUser $evento_user,
         UserFacade $user_facade,
@@ -87,7 +66,7 @@ class CreateUser implements UserImportAction
         );
     }
 
-    private function setUserValuesFromImport(\ilObjUser $ilias_user, EventoUser $evento_user)
+    private function setUserValuesFromImport(\ilObjUser $ilias_user, EventoUser $evento_user) : void
     {
         $ilias_user->setLogin($evento_user->getLoginName());
         $ilias_user->setFirstname($evento_user->getFirstName());
@@ -101,7 +80,7 @@ class CreateUser implements UserImportAction
         $ilias_user->setExternalAccount($evento_user->getEventoId() . '@hslu.ch');
     }
 
-    private function setUsersDefaultSettings(\ilObjUser $ilias_user_object, DefaultUserSettings $user_settings, UserFacade $user_facade)
+    private function setUsersDefaultSettings(\ilObjUser $ilias_user_object, DefaultUserSettings $user_settings, UserFacade $user_facade) : void
     {
         $ilias_user_object->setActive(true);
         $ilias_user_object->setTimeLimitFrom($this->default_user_settings->getNow()->getTimestamp());

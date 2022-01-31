@@ -1,20 +1,13 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\communication\api_models;
 
-/**
- * Class EventoEventIliasAdmins
- * @package EventoImport\communication\api_models
- */
 class EventoEventIliasAdmins extends ApiDataModelBase
 {
     const JSON_ID = 'idEvent';
     const JSON_ACCOUNTS = 'accounts';
 
-    /** @var int */
     private ?int $evento_id;
-
-    /** @var array */
     private array $account_list;
 
     public function __construct(array $data_set)
@@ -31,25 +24,16 @@ class EventoEventIliasAdmins extends ApiDataModelBase
         $this->checkErrorsAndMaybeThrowException();
     }
 
-    /**
-     * @return int
-     */
     public function getEventoId() : int
     {
         return $this->evento_id;
     }
 
-    /**
-     * @return array
-     */
     public function getAccountList() : array
     {
         return $this->account_list;
     }
 
-    /**
-     * @return array
-     */
     public function getDecodedApiData() : array
     {
         return $this->decoded_api_data;

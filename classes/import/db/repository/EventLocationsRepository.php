@@ -1,13 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\db\repository;
 
 use EventoImport\communication\api_models\EventoEvent;
 
-/**
- * Class EventLocationsRepository
- * @package EventoImport\import\db\repository
- */
 class EventLocationsRepository
 {
     public const TABLE_NAME = 'crevento_locations';
@@ -16,28 +12,15 @@ class EventLocationsRepository
     public const COL_YEAR = 'year';
     public const COL_REF_ID = 'ref_id';
 
-    /** @var \ilDBInterface */
     private \ilDBInterface $db;
-
-    /** @var array */
     private array $cache;
 
-    /**
-     * EventLocationsRepository constructor.
-     * @param \ilDBInterface $db
-     */
     public function __construct(\ilDBInterface $db)
     {
         $this->db = $db;
         $this->cache = array();
     }
 
-    /**
-     * @param string $department
-     * @param string $kind
-     * @param int    $year
-     * @param int    $ref_id
-     */
     public function addNewLocation(string $department, string $kind, int $year, int $ref_id)
     {
         $this->db->insert(
@@ -57,12 +40,6 @@ class EventLocationsRepository
         $this->db->manipulate($query);
     }
 
-    /**
-     * @param int    $ref_id
-     * @param string $department
-     * @param string $kind
-     * @param int    $year
-     */
     private function addToCache(int $ref_id, string $department, string $kind, int $year)
     {
         if (!isset($this->cache[$department])) {
@@ -74,12 +51,6 @@ class EventLocationsRepository
         }
     }
 
-    /**
-     * @param string $department
-     * @param string $kind
-     * @param int    $year
-     * @return int|null
-     */
     private function checkCache(string $department, string $kind, int $year) : ?int
     {
         if (isset($this->cache[$department])
@@ -91,10 +62,6 @@ class EventLocationsRepository
         }
     }
 
-    /**
-     * @param EventoEvent $evento_event
-     * @return int|null
-     */
     public function fetchRefIdForEventoObject(EventoEvent $evento_event) : ?int
     {
         $department = $evento_event->getDepartment();
@@ -127,9 +94,6 @@ class EventLocationsRepository
         return null;
     }
 
-    /**
-     * @return array
-     */
     public function fetchAllLocations() : array
     {
         $query = "SELECT " . self::COL_DEPARTMENT_NAME . ", " . self::COL_EVENT_KIND . ", " . self::COL_YEAR . ", " . self::COL_REF_ID

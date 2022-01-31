@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\data_matching;
 
@@ -8,33 +8,17 @@ use EventoImport\import\action\EventoImportAction;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\communication\api_models\EventoEvent;
 
-/**
- * Class EventImportActionDecider
- * @package EventoImport\import\data_matching
- */
 class EventImportActionDecider
 {
-    /** @var RepositoryFacade */
     private RepositoryFacade $repository_facade;
-
-    /** @var EventActionFactory */
     private EventActionFactory $event_action_factory;
 
-    /**
-     * EventImportActionDecider constructor.
-     * @param RepositoryFacade   $repository_facade
-     * @param EventActionFactory $event_action_factory
-     */
     public function __construct(RepositoryFacade $repository_facade, EventActionFactory $event_action_factory)
     {
         $this->repository_facade = $repository_facade;
         $this->event_action_factory = $event_action_factory;
     }
 
-    /**
-     * @param \EventoImport\communication\api_models\EventoEvent $evento_event
-     * @return EventoImportAction
-     */
     public function determineAction(\EventoImport\communication\api_models\EventoEvent $evento_event) : EventoImportAction
     {
         $ilias_event = $this->repository_facade->iliasEventoEventRepository()->getEventByEventoId($evento_event->getEventoId());
@@ -52,11 +36,6 @@ class EventImportActionDecider
         }
     }
 
-    /**
-     * @param EventoEvent      $evento_event
-     * @param IliasEventoEvent $ilias_event
-     * @return EventoImportAction
-     */
     protected function determineActionForExistingIliasEventoEvent(EventoEvent $evento_event, IliasEventoEvent $ilias_event) : EventoImportAction
     {
         if ($evento_event->hasCreateCourseFlag() == $ilias_event->wasAutomaticallyCreated()) {
@@ -72,10 +51,6 @@ class EventImportActionDecider
         }
     }
 
-    /**
-     * @param $evento_event
-     * @return EventoImportAction
-     */
     protected function determineActionForNewEventsWithCreateFlag($evento_event) : EventoImportAction
     {
         $destination_ref_id = $this->repository_facade->departmentLocationRepository()->fetchRefIdForEventoObject($evento_event);
@@ -100,10 +75,6 @@ class EventImportActionDecider
         return $this->event_action_factory->createEventWithParent($evento_event, $destination_ref_id);
     }
 
-    /**
-     * @param EventoEvent $evento_event
-     * @return EventoImportAction
-     */
     protected function determineActionForNonRegisteredEventsWithoutCreateFlag(EventoEvent $evento_event) : EventoImportAction
     {
         $matched_course = $this->repository_facade->searchExactlyOneMatchingCourseByTitle($evento_event);

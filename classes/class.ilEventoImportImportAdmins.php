@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 use EventoImport\import\db\MembershipManager;
 use EventoImport\communication\EventoAdminImporter;

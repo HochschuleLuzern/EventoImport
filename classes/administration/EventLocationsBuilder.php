@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\administration;
 
@@ -8,11 +8,7 @@ class EventLocationsBuilder
 {
     /** @var string[] */
     private array $hard_coded_department_mapping;
-
-    /** @var EventLocationsRepository */
     private EventLocationsRepository $locations_repository;
-
-    /** @var \ilTree */
     private \ilTree $tree;
 
     public function __construct(EventLocationsRepository $locations_repository = null, \ilTree $tree = null)
@@ -33,10 +29,6 @@ class EventLocationsBuilder
         ];
     }
 
-    /**
-     * @param array $locations_settings
-     * @return int Number of added locations
-     */
     public function rebuildRepositoryLocationsTable(array $locations_settings) : int
     {
         $old_locations = $this->locations_repository->fetchAllLocations();
@@ -72,10 +64,8 @@ class EventLocationsBuilder
         }
     }
 
-    private function fillRepositoryLocationsTable(array $locations_settings)
+    private function fillRepositoryLocationsTable(array $locations_settings) : void
     {
-        global $DIC;
-
         $repository_root_ref_id = 1;
         foreach ($locations_settings['departments'] as $department) {
             $department_ref_id = $this->fetchRefIdForObjTitle($repository_root_ref_id, $department);

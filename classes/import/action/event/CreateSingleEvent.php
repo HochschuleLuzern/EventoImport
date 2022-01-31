@@ -1,12 +1,10 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\RepositoryFacade;
-use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
-use EventoImport\import\settings\DefaultEventSettings;
 use EventoImport\import\db\MembershipManager;
 
 class CreateSingleEvent implements EventAction

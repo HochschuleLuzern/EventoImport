@@ -1,29 +1,16 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\db\query;
 
-/**
- * Class IliasUserQuerying
- * @package EventoImport\import\db\query
- */
 class IliasUserQuerying
 {
-    /** @var \ilDBInterface */
     private \ilDBInterface $db;
 
-    /**
-     * IliasUserQuerying constructor.
-     * @param \ilDBInterface $db
-     */
     public function __construct(\ilDBInterface $db)
     {
         $this->db = $db;
     }
 
-    /**
-     * @param int $evento_id
-     * @return array
-     */
     public function fetchUserIdsByEventoId(int $evento_id) : array
     {
         $list = array();
@@ -40,19 +27,11 @@ class IliasUserQuerying
         return $list;
     }
 
-    /**
-     * @param string $mail_adress
-     * @return array
-     */
     public function fetchUserIdsByEmailAdress(string $mail_adress) : array
     {
         return \ilObjUser::getUserIdsByEmail($mail_adress);
     }
 
-    /**
-     * @param array $evento_mail_list
-     * @return array
-     */
     public function fetchUserIdsByEmailAdresses(array $evento_mail_list) : array
     {
         $user_lists = array();

@@ -1,21 +1,11 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\communication\generic_importers;
 
 use EventoImport\communication\request_services\RequestClientService;
 
-/**
- * Class SingleDataRecordImport
- * @package EventoImport\communication\generic_importers
- */
 trait SingleDataRecordImport
 {
-    /**
-     * @param string $method_name
-     * @param        $id
-     * @return mixed|null
-     * @throws \Exception
-     */
     protected function fetchDataRecordById(RequestClientService $data_source, string $method_name, int $id, int $seconds_before_retry, int $max_retries) : ?array
     {
         $params = array(
@@ -50,10 +40,6 @@ trait SingleDataRecordImport
         }
     }
 
-    /**
-     * @param string $json_response
-     * @return bool
-     */
     private function requestWasSuccessful(string $json_response) : bool
     {
         return !(is_null($json_response) || $json_response == '');

@@ -1,19 +1,12 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\event;
 
 use EventoImport\import\action\ReportDatasetWithoutAction;
 
-/**
- * Class ReportEventImportDatasetWithoutAction
- * @package EventoImport\import\action\event
- */
 class ReportEventImportDatasetWithoutAction extends ReportDatasetWithoutAction implements EventAction
 {
-    /** @var int */
     private int $evento_id;
-
-    /** @var ?int */
     private ?int $ref_id;
 
     public function __construct(int $log_info_code, int $evento_id, ?int $ref_id, array $error_data, \ilEventoImportLogger $logger)

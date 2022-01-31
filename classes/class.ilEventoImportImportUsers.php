@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -101,7 +101,7 @@ class ilEventoImportImportUsers
     private function convertDeletedAccounts()
     {
         // Get list uf users, which were not imported since a certain time
-        $list = $this->user_facade->eventoUserRepository()->fetchNotImportedUsers();
+        $list = $this->user_facade->eventoUserRepository()->fetchUsersWithLastImportOlderThanOneWeek();
 
         foreach ($list as $evento_id => $ilias_user_id) {
             try {

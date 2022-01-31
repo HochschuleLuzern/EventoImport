@@ -1,13 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\db\repository;
 
 use EventoImport\import\db\model\IliasEventoParentEvent;
 
-/**
- * Class ParentEventRepository
- * @package EventoImport\import\db\repository
- */
 class ParentEventRepository
 {
     public const TABLE_NAME = 'crevento_parent_events';
@@ -19,22 +15,13 @@ class ParentEventRepository
     public const COL_ADMIN_ROLE_ID = 'admin_role_id';
     public const COL_STUDENT_ROLE_ID = 'student_role_id';
 
-    /** @var \ilDBInterface */
     private $db;
 
-    /**
-     * ParentEventRepository constructor.
-     * @param \ilDBInterface $db
-     */
     public function __construct(\ilDBInterface $db)
     {
         $this->db = $db;
     }
 
-    /**
-     * @param $row
-     * @return IliasEventoParentEvent
-     */
     private function buildParentEventObjectFromRow($row) : IliasEventoParentEvent
     {
         return new IliasEventoParentEvent(
@@ -47,10 +34,7 @@ class ParentEventRepository
         );
     }
 
-    /**
-     * @param IliasEventoParentEvent $parent_event
-     */
-    public function addNewParentEvent(\EventoImport\import\db\model\IliasEventoParentEvent $parent_event)
+    public function addNewParentEvent(\EventoImport\import\db\model\IliasEventoParentEvent $parent_event) : void
     {
         $this->db->insert(
             // INSERT INTO
@@ -70,11 +54,7 @@ class ParentEventRepository
         );
     }
 
-    /**
-     * @param string $group_unique_key
-     * @return IliasEventoParentEvent|null
-     */
-    public function fetchParentEventByGroupUniqueKey(string $group_unique_key)
+    public function fetchParentEventByGroupUniqueKey(string $group_unique_key) : ?IliasEventoParentEvent
     {
         $query = 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE ' . self::COL_GROUP_UNIQUE_KEY . ' = ' . $this->db->quote($group_unique_key, \ilDBConstants::T_TEXT);
         $result = $this->db->query($query);
@@ -86,10 +66,6 @@ class ParentEventRepository
         return null;
     }
 
-    /**
-     * @param string $name
-     * @return IliasEventoParentEvent|null
-     */
     public function fetchParentEventForName(string $name) : ?IliasEventoParentEvent
     {
         $query = 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE ' . self::COL_TITLE . ' = ' . $this->db->quote($name, \ilDBConstants::T_TEXT);
@@ -102,10 +78,6 @@ class ParentEventRepository
         return null;
     }
 
-    /**
-     * @param int $ref_id
-     * @return IliasEventoParentEvent|null
-     */
     public function fetchParentEventForRefId(int $ref_id)
     {
         $query = 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE ' . self::COL_REF_ID . ' = ' . $this->db->quote($ref_id, \ilDBConstants::T_INTEGER);

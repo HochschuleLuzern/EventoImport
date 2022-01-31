@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\event;
 
@@ -19,16 +19,6 @@ class ConvertSingleEventToMultiGroupEvent implements EventAction
     private \ilEventoImportLogger $logger;
     private int $log_code;
 
-    /**
-     * ConvertSingleEventToMultiGroupEvent constructor.
-     * @param EventoEvent             $evento_event
-     * @param IliasEventoEvent        $ilias_event
-     * @param \ilContainer            $current_event_object
-     * @param IliasEventObjectFactory $event_object_factory
-     * @param RepositoryFacade        $repository_facade
-     * @param MembershipManager       $membership_manager
-     * @param \ilEventoImportLogger   $logger
-     */
     public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, \ilContainer $current_event_object, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
     {
         $this->evento_event = $evento_event;
@@ -50,7 +40,7 @@ class ConvertSingleEventToMultiGroupEvent implements EventAction
         }
 
         // Create first subgroup which now is the new event object
-        $event_sub_group = $this->event_object_factory->buildNewGroupObject($this->evento_event, $this->evento_event->getDescription(), $this->current_event_object->getRefId());
+        $event_sub_group = $this->event_object_factory->buildNewGroupObject($this->evento_event->getName(), $this->evento_event->getDescription(), $this->current_event_object->getRefId());
 
         // Update DB-Entries
         $this->repository_facade->addNewIliasEventoParentEvent($this->evento_event, $this->current_event_object);

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\event;
 
@@ -9,10 +9,6 @@ use EventoImport\import\db\UserFacade;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\MembershipManager;
 
-/**
- * Class CreateEventInParentEvent
- * @package EventoImport\import\action\event
- */
 class CreateEventInParentEvent implements EventAction
 {
     private EventoEvent $evento_event;
@@ -23,15 +19,6 @@ class CreateEventInParentEvent implements EventAction
     private \ilEventoImportLogger $logger;
     private int $log_code;
 
-    /**
-     * CreateEventInParentEvent constructor.
-     * @param EventoEvent             $evento_event
-     * @param IliasEventoParentEvent  $parent_event
-     * @param IliasEventObjectFactory $event_object_factory
-     * @param RepositoryFacade        $repository_facade
-     * @param MembershipManager       $membership_manager
-     * @param \ilEventoImportLogger   $logger
-     */
     public function __construct(EventoEvent $evento_event, IliasEventoParentEvent $parent_event, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
     {
         $this->evento_event = $evento_event;

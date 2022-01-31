@@ -1,24 +1,15 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\communication\api_models;
 
-/**
- * Class EventoUserPhoto
- * @package EventoImport\communication\api_models
- */
 class EventoUserPhoto extends ApiDataModelBase
 {
     public const JSON_ID_ACCOUNT = 'idAccount';
     public const JSON_HAS_PHOTO = 'hasPhoto';
     public const JSON_IMG_DATA = 'imgData';
 
-    /** @var int */
     private ?int $id_account;
-
-    /** @var bool */
     private ?bool $has_photo;
-
-    /** @var string */
     private ?string $img_data;
 
     public function __construct(array $data_set)
@@ -31,33 +22,21 @@ class EventoUserPhoto extends ApiDataModelBase
         $this->checkErrorsAndMaybeThrowException();
     }
 
-    /**
-     * @return int
-     */
     public function getIdAccount() : int
     {
         return $this->id_account;
     }
 
-    /**
-     * @return bool
-     */
     public function getHasPhoto() : bool
     {
         return $this->has_photo;
     }
 
-    /**
-     * @return string
-     */
     public function getImgData() : string
     {
         return $this->img_data;
     }
 
-    /**
-     * @return array
-     */
     public function getDecodedApiData() : array
     {
         return $this->decoded_api_data;

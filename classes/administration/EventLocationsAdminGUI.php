@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\administration;
 
@@ -8,27 +8,11 @@ use ILIAS\DI\UIServices;
 class EventLocationsAdminGUI
 {
     private $parent_gui;
-
-    /** @var \ilSetting */
     private \ilSetting $settings;
-
-    /** @var EventLocationsRepository */
     private EventLocationsRepository $location_repo;
-
-    /** @var \ilCtrl */
     private \ilCtrl $ctrl;
-
-    /** @var UIServices */
     private UIServices $ui_services;
 
-    /**
-     * EventLocationsAdminGUI constructor.
-     * @param                               $parent_gui
-     * @param \ilSetting                    $settings
-     * @param EventLocationsRepository|null $location_repo
-     * @param \ilCtrl|null                  $ctrl
-     * @param UIServices|null               $ui_services
-     */
     public function __construct($parent_gui, \ilSetting $settings, EventLocationsRepository $location_repo = null, \ilCtrl $ctrl = null, UIServices $ui_services = null)
     {
         global $DIC;
@@ -40,9 +24,6 @@ class EventLocationsAdminGUI
         $this->ui_services = $ui_services ?? $DIC->ui();
     }
 
-    /**
-     * @return string
-     */
     public function getEventLocationsPanelHTML() : string
     {
         // Reload tree
@@ -52,10 +33,14 @@ class EventLocationsAdminGUI
         // Show Location settings from the cron-job
         $json_settings = $this->settings->get('crevento_location_settings');
         $locations_settings = json_decode($json_settings, true);
+        if(!is_array($locations_settings)) {
+            $locations_settings = [];
+        }
+
         $locations_ui_comp = [];
         foreach ($locations_settings as $location_title => $location_values) {
             $locations_ui_comp[] = $ui_factory->legacy(htmlspecialchars($location_title));
-            $locations_ui_comp[] = $ui_factory->listing()->unordered(htmlspecialchars($location_values));
+            $locations_ui_comp[] = $ui_factory->listing()->unordered($location_values);
         }
         $ui_components[] = $ui_factory->panel()->sub('Location Settings', $locations_ui_comp);
 
@@ -73,10 +58,6 @@ class EventLocationsAdminGUI
         return $this->ui_services->renderer()->render($main_panel);
     }
 
-    /**
-     * @param array $locations
-     * @return string
-     */
     private function locationsToHTMLTable(array $locations) : string
     {
         $saved_locations_string = "<table style='width: 100%'>";

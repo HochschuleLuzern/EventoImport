@@ -1,13 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\db\repository;
 
 use EventoImport\communication\api_models\EventoUser;
 
-/**
- * Class EventoUserRepository
- * @package EventoImport\import\db\repository
- */
 class EventoUserRepository
 {
     public const TABLE_NAME = 'crevento_evnto_usrs';
@@ -16,22 +12,13 @@ class EventoUserRepository
     public const COL_ILIAS_USER_ID = 'ilias_user_id';
     public const COL_LAST_TIME_DELIVERED = 'last_time_delivered';
 
-    /** @var \ilDBInterface */
     private \ilDBInterface $db;
 
-    /**
-     * EventoUserRepository constructor.
-     * @param \ilDBInterface $db
-     */
     public function __construct(\ilDBInterface $db)
     {
         $this->db = $db;
     }
 
-    /**
-     * @param EventoUser $evento_user
-     * @param \ilObjUser $ilias_user
-     */
     public function addNewEventoIliasUser(EventoUser $evento_user, \ilObjUser $ilias_user)
     {
         $this->db->insert(
@@ -47,10 +34,6 @@ class EventoUserRepository
         );
     }
 
-    /**
-     * @param int $evento_id
-     * @return int|null
-     */
     public function getIliasUserIdByEventoId(int $evento_id) : ?int
     {
         $query = 'SELECT ' . self::COL_ILIAS_USER_ID . ' FROM ' . self::TABLE_NAME
@@ -64,10 +47,6 @@ class EventoUserRepository
         return null;
     }
 
-    /**
-     * @param array $evento_ids
-     * @return array
-     */
     public function getListOfIliasUserIdsByEventoIds(array $evento_ids) : array
     {
         $query = 'SELECT ' . self::COL_ILIAS_USER_ID . ' FROM ' . self::TABLE_NAME
@@ -82,9 +61,6 @@ class EventoUserRepository
         return $user_ids;
     }
 
-    /**
-     * @param int $evento_id
-     */
     public function registerUserAsDelivered(int $evento_id)
     {
         $this->db->update(
@@ -98,10 +74,7 @@ class EventoUserRepository
         );
     }
 
-    /**
-     * @return array
-     */
-    public function fetchNotImportedUsers()
+    public function fetchUsersWithLastImportOlderThanOneWeek()
     {
         $query = 'SELECT ' . self::COL_EVENTO_ID . ', ' . self::COL_ILIAS_USER_ID . ' FROM ' . self::TABLE_NAME
             . ' WHERE ' . self::COL_LAST_TIME_DELIVERED . ' < ' . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME);
@@ -116,9 +89,6 @@ class EventoUserRepository
         return $not_imported_users;
     }
 
-    /**
-     * @param int $evento_id
-     */
     public function deleteEventoUser(int $evento_id)
     {
         $query = "DELETE FROM " . self::TABLE_NAME . " WHERE " . self::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);

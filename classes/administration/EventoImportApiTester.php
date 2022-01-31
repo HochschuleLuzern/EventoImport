@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\administration;
 
@@ -23,13 +23,7 @@ class EventoImportApiTester
         $this->db = $db ?? $DIC->database();
     }
 
-    /**
-     * @param string $cmd
-     * @param int    $id
-     * @return ApiDataModelBase
-     * @throws \Exception
-     */
-    public function fetchDataRecord(string $cmd, int $id) : ApiDataModelBase
+    public function fetchDataRecord(string $cmd, int $id) : ?ApiDataModelBase
     {
         $api_importer_settings = new ImporterApiSettings($this->settings);
         $iterator = new \ilEventoImporterIterator($api_importer_settings->getPageSize());
@@ -80,7 +74,7 @@ class EventoImportApiTester
         }
     }
 
-    public function fetchDataSet(string $cmd, int $skip, int $take)
+    public function fetchDataSet(string $cmd, int $skip, int $take) : array
     {
         $api_importer_settings = new ImporterApiSettings($this->settings);
         $iterator = new \ilEventoImporterIterator($api_importer_settings->getPageSize());
@@ -111,7 +105,7 @@ class EventoImportApiTester
         }
     }
 
-    public function fetchParameterlessDataset(string $cmd)
+    public function fetchParameterlessDataset(string $cmd) : array
     {
         $api_importer_settings = new ImporterApiSettings($this->settings);
         $logger = new \ilEventoImportLogger($this->db);

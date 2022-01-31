@@ -1,17 +1,11 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\RepositoryFacade;
-use EventoImport\import\db\UserFacade;
-use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\MembershipManager;
 
-/**
- * Class MarkExistingIliasObjAsEvent
- * @package EventoImport\import\action\event
- */
 class MarkExistingIliasObjAsEvent implements EventAction
 {
     private EventoEvent $evento_event;
@@ -21,18 +15,6 @@ class MarkExistingIliasObjAsEvent implements EventAction
     private \ilEventoImportLogger $logger;
     private int $log_code;
 
-    /**
-     * MarkExistingIliasObjAsEvent constructor.
-     * @param EventoEvent                                        $evento_event
-     * @param \ilContainer                                       $ilias_object
-     * @param IliasEventObjectFactory                            $event_object_factory
-     * @param \EventoImport\import\settings\DefaultEventSettings $event_settings
-     * @param RepositoryFacade                                   $repository_facade
-     * @param UserFacade                                         $user_facade
-     * @param MembershipManager                                  $membership_manager
-     * @param \ilEventoImportLogger                              $logger
-     * @param \ILIAS\DI\RBACServices                             $rbac_services
-     */
     public function __construct(EventoEvent $evento_event, \ilContainer $ilias_object, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
     {
         $this->evento_event = $evento_event;

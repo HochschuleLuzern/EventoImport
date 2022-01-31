@@ -1,20 +1,13 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace EventoImport\communication\api_models;
 
-/**
- * Class EventoUserShort
- * @package EventoImport\communication\api_models
- */
 class EventoUserShort extends ApiDataModelBase
 {
     const JSON_ID = 'idAccount';
     const JSON_EMAIL = 'email';
 
-    /** @var int */
     private ?int $evento_id;
-
-    /** @var string */
     private ?string $email_address;
 
     public function __construct(array $data_set)
@@ -26,17 +19,11 @@ class EventoUserShort extends ApiDataModelBase
         $this->checkErrorsAndMaybeThrowException();
     }
 
-    /**
-     * @return int
-     */
     public function getEventoId() : int
     {
         return $this->evento_id;
     }
 
-    /**
-     * @return string
-     */
     public function getEmailAddress() : string
     {
         return $this->email_address;

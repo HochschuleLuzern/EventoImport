@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 use EventoImport\administration\EventoImportApiTesterGUI;
 use EventoImport\administration\EventLocationsBuilder;
