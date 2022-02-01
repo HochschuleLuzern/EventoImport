@@ -76,12 +76,11 @@ class EventoImportBootstrap
     /** @var MembershipManager */
     private MembershipManager $membership_manager;
 
-    public function __construct(\ilDBInterface $db = null, RBACServices $rbac_services = null, \ilSetting $settings = null)
+    public function __construct(\ilDBInterface $db, RBACServices $rbac_services, \ilSetting $settings)
     {
-        global $DIC;
-        $this->db = $db ?? $DIC->database();
-        $this->rbac_services = $rbac_services ?? $DIC->rbac();
-        $this->settings = $settings ?? new \ilSetting('crevento');
+        $this->db = $db;
+        $this->rbac_services = $rbac_services;
+        $this->settings = $settings;
     }
 
     public function logger() : \ilEventoImportLogger

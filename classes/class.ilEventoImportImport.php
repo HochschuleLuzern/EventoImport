@@ -44,10 +44,12 @@ class ilEventoImportImport extends ilCronJob
     private $page_size;
 
     private \EventoImport\import\EventoImportBootstrap $import_bootstrapping;
+    private ilEventoImportCronStateChecker $import_state_checker;
 
     public function __construct(\ILIAS\DI\RBACServices $rbac_services = null, ilDBInterface $db = null)
     {
         global $DIC;
+
         $this->rbac = $rbac_services ?? $DIC->rbac();
         $this->db = $db ?? $DIC->database();
         $this->refinery = $DIC->refinery();
@@ -58,7 +60,8 @@ class ilEventoImportImport extends ilCronJob
         }
         $this->cp = new ilEventoImportPlugin();
         $this->settings = new ilSetting("crevento");
-        $this->import_bootstrapping = new \EventoImport\import\EventoImportBootstrap($this->db, $this->rbac);
+        $this->import_bootstrapping = new \EventoImport\import\EventoImportBootstrap($this->db, $this->rbac, $this->settings);
+        $this->import_state_checker = new ilEventoImportCronStateChecker($this->db);
 
         $this->page_size = 500;
     }
@@ -161,7 +164,7 @@ class ilEventoImportImport extends ilCronJob
                 $api_settings->getApiSecret()
             );
 
-            if ($this->wasFullImportAlreadyRunToday()) {
+            if ($this->import_state_checker->wasFullImportAlreadyRunToday()) {
                 $this->runHourlyAdminImport($data_source, $api_settings, $logger);
             } else {
                 $this->runDailyFullImport($data_source, $api_settings, $logger);
@@ -216,7 +219,6 @@ class ilEventoImportImport extends ilCronJob
             $user_import_action_decider,
             $this->import_bootstrapping->userFacade(),
             $logger,
-            $this->import_bootstrapping->defaultUserSettings()->getMaxDurationOfAccounts(),
             $this->db
         );
         $importUsers->run();
@@ -249,22 +251,6 @@ class ilEventoImportImport extends ilCronJob
         );
 
         $import_admins->run();
-        ;
-    }
-
-    private function wasFullImportAlreadyRunToday() : bool
-    {
-        // Try to get the date from the last run
-        $sql = "SELECT * FROM cron_job WHERE job_id = " . $this->db->quote(self::ID, \ilDBConstants::T_TEXT);
-        $res = $this->db->query($sql);
-        $cron = $this->db->fetchAssoc($res);
-
-        $last_run = $cron['job_result_ts'];
-        if (is_null($last_run)) {
-            return false;
-        }
-
-        return date('d.m.Y H:i') == date('d.m.Y H:i', strtotime($cron['job_result_ts']));
     }
 
     /**
@@ -274,7 +260,7 @@ class ilEventoImportImport extends ilCronJob
      */
     public function addCustomSettingsToForm(ilPropertyFormGUI $a_form)
     {
-        $conf = new ilEventoImportCronConfig($this->settings, $this->cp);
+        $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
         $conf->fillCronJobSettingsForm($a_form);
     }
     
@@ -286,7 +272,7 @@ class ilEventoImportImport extends ilCronJob
      */
     public function saveCustomSettings(ilPropertyFormGUI $a_form)
     {
-        $conf = new ilEventoImportCronConfig($this->settings, $this->cp);
+        $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
 
         return $conf->saveCustomCronJobSettings($a_form);
     }

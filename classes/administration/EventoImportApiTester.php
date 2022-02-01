@@ -15,12 +15,10 @@ class EventoImportApiTester
 {
     private \ilSetting $settings;
 
-    public function __construct(\ilSetting $settings, \ilDBInterface $db = null)
+    public function __construct(\ilSetting $settings, \ilDBInterface $db)
     {
-        global $DIC;
-
         $this->settings = $settings;
-        $this->db = $db ?? $DIC->database();
+        $this->db = $db;
     }
 
     public function fetchDataRecord(string $cmd, int $id) : ?ApiDataModelBase

@@ -32,17 +32,15 @@ class RepositoryFacade
     private ParentEventRepository $parent_event_repo;
 
     public function __construct(
-        IliasEventObjectQuery $event_objects_query = null,
-        IliasEventoEventsRepository $event_repo = null,
-        EventLocationsRepository $location_repo = null,
-        ParentEventRepository $parent_event_repo = null
+        IliasEventObjectQuery $event_objects_query,
+        IliasEventoEventsRepository $event_repo,
+        EventLocationsRepository $location_repo,
+        ParentEventRepository $parent_event_repo
     ) {
-        global $DIC;
-
-        $this->event_object_query = $event_objects_query ?? new IliasEventObjectQuery($DIC->database());
-        $this->event_repo = $event_repo ?? new IliasEventoEventsRepository($DIC->database());
-        $this->location_repo = $location_repo ?? new EventLocationsRepository($DIC->database());
-        $this->parent_event_repo = $parent_event_repo ?? new ParentEventRepository($DIC->database());
+        $this->event_object_query = $event_objects_query;
+        $this->event_repo = $event_repo;
+        $this->location_repo = $location_repo;
+        $this->parent_event_repo = $parent_event_repo;
     }
 
     public function fetchAllEventableObjectsForGivenTitle(string $name)

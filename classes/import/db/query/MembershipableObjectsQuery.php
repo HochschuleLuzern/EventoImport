@@ -8,11 +8,9 @@ class MembershipableObjectsQuery
     private array $membershipable_co_groups_cache;
     private array $participant_object_cache;
 
-    public function __construct(\ilTree $tree = null)
+    public function __construct(\ilTree $tree)
     {
-        global $DIC;
-
-        $this->tree = $tree ?? $DIC->repositoryTree();
+        $this->tree = $tree;
         $this->membershipable_co_groups_cache = [];
         $this->participant_object_cache = [];
     }
@@ -89,15 +87,13 @@ class MembershipableObjectsQuery
 
     public function getRefIdsOfSubMembershipables(int $parent_ref_id, array $sub_objects, int $current_depth)
     {
-        global $DIC;
-
         // Deadlock prevention
         if ($current_depth > 10) {
             return $sub_objects;
         }
         $current_depth++;
 
-        foreach ($DIC->repositoryTree()->getChilds($parent_ref_id) as $child) {
+        foreach ($this->tree->getChilds($parent_ref_id) as $child) {
             $type = \ilObject::_lookupType($child, true);
             if ($type == 'grp') {
                 $sub_objects[] = $child;

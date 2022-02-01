@@ -16,44 +16,34 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
+use EventoImport\communication\EventoUserImporter;
+use EventoImport\import\data_matching\UserActionDecider;
+use EventoImport\import\db\UserFacade;
+
 /**
  * Class ilEventoImportImportUsers
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
  */
 class ilEventoImportImportUsers
 {
-    /** @var \EventoImport\communication\EventoUserImporter */
     private $evento_importer;
-
-    /** @var \EventoImport\import\db\UserFacade */
     private $user_facade;
-
     private $user_import_action_decider;
-
-    /** @var ilEventoImportLogger */
     private $evento_logger;
-
-    /** @var ilDBInterface */
     private $db;
 
-    private $until_max;
-
-
     public function __construct(
-        \EventoImport\communication\EventoUserImporter $importer,
-        \EventoImport\import\data_matching\UserActionDecider $user_import_action_decider,
-        \EventoImport\import\db\UserFacade $user_facade,
+        EventoUserImporter $importer,
+        UserActionDecider $user_import_action_decider,
+        UserFacade $user_facade,
         ilEventoImportLogger $logger,
-        $until_max,
-        ilDBInterface $db = null
+        ilDBInterface $db
     ) {
-        global $DIC;
-
         $this->evento_importer = $importer;
         $this->user_import_action_decider = $user_import_action_decider;
         $this->user_facade = $user_facade;
         $this->evento_logger = $logger;
-        $this->db = $db ?? $DIC->database();
+        $this->db = $db;
     }
 
     public function run()
@@ -127,18 +117,6 @@ class ilEventoImportImportUsers
      */
     private function setUserTimeLimits()
     {
-        //all users have at least 90 days of access (needed for Shibboleth)
-        $q = "UPDATE `usr_data` SET time_limit_until=time_limit_until+7889229 WHERE DATEDIFF(FROM_UNIXTIME(time_limit_until),create_date)<90";
-        $r = $this->db->manipulate($q);
-
-        if ($this->until_max != 0) {
-            //no unlimited users
-            $q = "UPDATE usr_data set time_limit_unlimited=0, time_limit_until='" . $this->until_max . "' WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous')";
-            $r = $this->db->manipulate($q);
-
-            //all users are constraint to a value defined in the configuration
-            $q = "UPDATE usr_data set time_limit_until='" . $this->until_max . "' WHERE time_limit_until>'" . $this->until_max . "'";
-            $this->db->manipulate($q);
-        }
+        $this->user_facade->setUserTimeLimits();
     }
 }

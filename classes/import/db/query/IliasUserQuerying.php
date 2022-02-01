@@ -49,4 +49,35 @@ class IliasUserQuerying
 
         return $user_lists;
     }
+
+    public function setTimeLimitForUnlimitedUsersExceptSpecialUsers(int $new_time_limit_ts) : void
+    {
+        if ($new_time_limit_ts == 0) {
+            throw new \InvalidArgumentException("Error in setting time limit for unlimited users: new time limit cannot be 0");
+        }
+
+        //no unlimited users
+        $q = "UPDATE usr_data set time_limit_unlimited=0, time_limit_until='" . $this->db->quote($new_time_limit_ts, \ilDBConstants::T_INTEGER) . "' WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous')";
+        $this->db->manipulate($q);
+    }
+
+    public function setUserTimeLimitsToAMaxValue(int $until_max_ts) : void
+    {
+        if ($until_max_ts == 0) {
+            throw new \InvalidArgumentException("Error in setting user time limits to max value: Until Max cannot be 0");
+        }
+
+        //all users are constraint to a value defined in the configuration
+        $q = "UPDATE usr_data set time_limit_until='" . $this->db->quote($until_max_ts, \ilDBConstants::T_INTEGER) . "'"
+            . " WHERE time_limit_until>'" . $this->db->quote($until_max_ts, \ilDBConstants::T_INTEGER) . "'";
+        $this->db->manipulate($q);
+    }
+
+    public function setUserTimeLimitsBelowThresholdToGivenValue(int $min_threshold_in_days, int $new_time_limit_ts) : void
+    {
+        //all users have at least 90 days of access (needed for Shibboleth)
+        $q = "UPDATE `usr_data` SET time_limit_until=time_limit_until+" . $this->db->quote($new_time_limit_ts, \ilDBConstants::T_INTEGER)
+            . " WHERE DATEDIFF(FROM_UNIXTIME(time_limit_until),create_date)< " . $this->db->quote($min_threshold_in_days, \ilDBConstants::T_INTEGER);
+        $this->db->manipulate($q);
+    }
 }

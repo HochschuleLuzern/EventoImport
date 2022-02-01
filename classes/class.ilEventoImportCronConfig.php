@@ -1,5 +1,7 @@
 <?php declare(strict_types = 1);
 
+use ILIAS\DI\RBACServices;
+
 /**
  * Class ilEventoImportCronConfig
  *
@@ -100,13 +102,11 @@ class ilEventoImportCronConfig
     private $cp;
     private $rbac;
 
-    public function __construct(ilSetting $settings, ilPlugin $plugin, \ILIAS\DI\RBACServices $rbac = null)
+    public function __construct(ilSetting $settings, ilPlugin $plugin, RBACServices $rbac)
     {
-        global $DIC;
-
         $this->settings = $settings;
         $this->cp = $plugin;
-        $this->rbac = $rbac ?? $DIC->rbac();
+        $this->rbac = $rbac;
     }
 
     public function fillCronJobSettingsForm(ilPropertyFormGUI $a_form)

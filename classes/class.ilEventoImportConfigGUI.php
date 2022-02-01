@@ -3,6 +3,7 @@
 use EventoImport\administration\EventoImportApiTesterGUI;
 use EventoImport\administration\EventLocationsBuilder;
 use EventoImport\administration\EventLocationsAdminGUI;
+use ILIAS\DI\UIServices;
 
 /**
  * Class ilEventoImportConfigGUI
@@ -11,26 +12,34 @@ use EventoImport\administration\EventLocationsAdminGUI;
  */
 class ilEventoImportConfigGUI extends ilPluginConfigGUI
 {
-    private $settings;
-    private $tree;
-    private $tpl;
-    private $ctrl;
-    private $hard_coded_department_mapping;
+    private ilSetting $settings;
+    private ilTree $tree;
+    private ilTemplate $tpl;
+    private ilCtrl $ctrl;
+    private UIServices $ui_services;
 
     public function __construct()
     {
         global $DIC;
+
         $this->settings = new ilSetting("crevento");
         $this->tree = $DIC->repositoryTree();
         $this->tpl = $DIC->ui()->mainTemplate();
         $this->ctrl = $DIC->ctrl();
+        $this->ui_services = $DIC->ui();
     }
 
     public function performCommand($cmd)
     {
         switch ($cmd) {
             case 'configure':
-                $api_tester_gui = new EventoImportApiTesterGUI($this);
+                $api_tester_gui = new EventoImportApiTesterGUI(
+                    $this,
+                    $this->settings,
+                    $this->ui_services,
+                    $this->ctrl,
+                    $this->tree
+                );
                 $api_tester_html = $api_tester_gui->getApiTesterFormAsString();
 
                 $locations_gui = new EventLocationsAdminGUI($this, $this->settings);
@@ -53,7 +62,13 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
             case 'fetch_data_set_users':
             case 'fetch_data_set_events':
                 try {
-                    $api_tester_gui = new EventoImportApiTesterGUI($this);
+                    $api_tester_gui = new EventoImportApiTesterGUI(
+                        $this,
+                        $this->settings,
+                        $this->ui_services,
+                        $this->ctrl,
+                        $this->tree
+                    );
                     $output = $api_tester_gui->fetchDataSetFromFormInput($cmd);
 
                     if (strlen($output) > 0) {
@@ -72,7 +87,13 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
             case 'fetch_ilias_admins_for_event':
 
                 try {
-                    $api_tester_gui = new EventoImportApiTesterGUI($this);
+                    $api_tester_gui = new EventoImportApiTesterGUI(
+                        $this,
+                        $this->settings,
+                        $this->ui_services,
+                        $this->ctrl,
+                        $this->tree
+                    );
                     $output = $api_tester_gui->fetchDataRecordFromFormInput($cmd);
 
                     if (strlen($output) > 0) {
@@ -87,7 +108,13 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 
             case 'fetch_all_ilias_admins':
                 try {
-                    $api_tester_gui = new EventoImportApiTesterGUI($this);
+                    $api_tester_gui = new EventoImportApiTesterGUI(
+                        $this,
+                        $this->settings,
+                        $this->ui_services,
+                        $this->ctrl,
+                        $this->tree
+                    );
                     $output = $api_tester_gui->fetchParameterlessDataset($cmd);
 
                     if (strlen($output) > 0) {
@@ -105,11 +132,5 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $this->ctrl->redirect($this, 'configure');
                 break;
         }
-    }
-
-
-    private function getFunctionalityBoardAsString()
-    {
-        global $DIC;
     }
 }

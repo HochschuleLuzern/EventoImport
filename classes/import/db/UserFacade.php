@@ -148,4 +148,12 @@ class UserFacade
         );
         $mail->send();
     }
+
+    public function setUserTimeLimits()
+    {
+        $until_max = 0;
+        $this->user_query->setTimeLimitForUnlimitedUsersExceptSpecialUsers($until_max);
+        $this->user_query->setUserTimeLimitsToAMaxValue($until_max);
+        $this->user_query->setUserTimeLimitsBelowThresholdToGivenValue(90, 7889229);
+    }
 }

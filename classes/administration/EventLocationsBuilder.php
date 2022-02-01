@@ -11,12 +11,10 @@ class EventLocationsBuilder
     private EventLocationsRepository $locations_repository;
     private \ilTree $tree;
 
-    public function __construct(EventLocationsRepository $locations_repository = null, \ilTree $tree = null)
+    public function __construct(EventLocationsRepository $locations_repository, \ilTree $tree)
     {
-        global $DIC;
-
-        $this->locations_repository = $locations_repository ?? new EventLocationsRepository($DIC->database());
-        $this->tree = $tree ?? $DIC->repositoryTree();
+        $this->locations_repository = $locations_repository;
+        $this->tree = $tree;
 
         $this->hard_coded_department_mapping = [
             "Hochschule Luzern" => "HSLU",
