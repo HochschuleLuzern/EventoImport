@@ -89,4 +89,21 @@ class ParentEventRepository
 
         return null;
     }
+
+    public function removeParentEventIfItHasNoChildEvent(string $parent_event_key)
+    {
+        $query = 'SELECT count(1) as cnt FROM ' . IliasEventoEventsRepository::TABLE_NAME
+            . " WHERE " . IliasEventoEventsRepository::COL_PARENT_EVENT_KEY . ' = ' . $this->db->quote($parent_event_key, \ilDBConstants::T_TEXT);
+        $res = $this->db->query($query);
+        $data = $this->db->fetchAssoc($res);
+        if (isset($data['cnt']) && ((int) $data['cnt']) <= 1) {
+            $this->removeParentEvent($parent_event_key);
+        }
+    }
+
+    private function removeParentEvent(string $parent_event_key)
+    {
+        $query = 'DELETE FROM ' . self::TABLE_NAME . ' WHERE ' . self::COL_GROUP_UNIQUE_KEY . ' = ' . $this->db->quote($parent_event_key, \ilDBConstants::T_TEXT);
+        $this->db->manipulate($query);
+    }
 }

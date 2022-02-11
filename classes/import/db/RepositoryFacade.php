@@ -158,4 +158,23 @@ class RepositoryFacade
             throw new \InvalidArgumentException('Invalid ILIAS Object Type given to update Ilias-Event-Object');
         }
     }
+
+    public function removeIliasEventoEvent(IliasEventoEvent $ilias_evento_event)
+    {
+        if (!is_null($ilias_evento_event->getParentEventKey())) {
+            $this->parent_event_repo->removeParentEventIfItHasNoChildEvent($ilias_evento_event->getParentEventKey());
+        }
+        $this->event_repo->removeEventoEvent($ilias_evento_event);
+    }
+
+    public function removeIliasEventObject(IliasEventoEvent $ilias_event_to_remove)
+    {
+        if ($ilias_event_to_remove->getIliasType() == 'crs') {
+            $ilias_obj = new \ilObjCourse($ilias_event_to_remove->getRefId(), true);
+        } else {
+            $ilias_obj = new \ilObjGroup($ilias_event_to_remove->getRefId(), true);
+        }
+
+        $ilias_obj->delete();
+    }
 }

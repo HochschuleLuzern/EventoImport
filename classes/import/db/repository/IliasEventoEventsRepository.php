@@ -141,4 +141,11 @@ class IliasEventoEventsRepository
             )
         );
     }
+
+    public function removeEventoEvent(IliasEventoEvent $ilias_evento_event)
+    {
+        $query = 'DELETE FROM ' . self::TABLE_NAME
+            . ' WHERE ' . self::COL_EVENTO_ID . ' = ' . $this->db->quote($ilias_evento_event->getEventoEventId(), \ilDBConstants::T_INTEGER);
+        $this->db->query($query);
+    }
 }

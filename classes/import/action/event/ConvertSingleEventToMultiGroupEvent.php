@@ -19,11 +19,12 @@ class ConvertSingleEventToMultiGroupEvent implements EventAction
     private \ilEventoImportLogger $logger;
     private int $log_code;
 
-    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, \ilContainer $current_event_object, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
+    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
     {
         $this->evento_event = $evento_event;
         $this->ilias_event = $ilias_event;
-        $this->current_event_object = $current_event_object;
+        // TODO: Refactor with refactoring of repository facade
+        $this->current_event_object = new \ilObjCourse($ilias_event->getRefId(), true);
         $this->event_object_factory = $event_object_factory;
         $this->repository_facade = $repository_facade;
         $this->membership_manager = $membership_manager;
@@ -33,7 +34,7 @@ class ConvertSingleEventToMultiGroupEvent implements EventAction
 
     public function executeAction() : void
     {
-        // Change the event object to be the parent event object
+        // Only change title of crs-obj if it has not been changed by an admin
         if ($this->evento_event->getName() == $this->current_event_object->getTitle()) {
             $this->current_event_object->setTitle($this->evento_event->getGroupName());
             $this->current_event_object->update();

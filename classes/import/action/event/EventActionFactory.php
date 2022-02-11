@@ -3,7 +3,6 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\action\ReportDatasetWithoutAction;
 use EventoImport\import\db\RepositoryFacade;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\model\IliasEventoParentEvent;
@@ -76,7 +75,19 @@ class EventActionFactory
         );
     }
 
-    public function convertExistingIliasObjToEvent(
+    public function convertSingleEventToMultiGroupEvent(EventoEvent $evento_event, IliasEventoEvent $ilias_event)
+    {
+        return new ConvertSingleEventToMultiGroupEvent(
+            $evento_event,
+            $ilias_event,
+            $this->event_object_factory,
+            $this->repository_facade,
+            $this->membership_manager,
+            $this->logger
+        );
+    }
+
+    public function markExistingIliasObjAsEvent(
         EventoEvent $evento_event,
         \ilContainer $ilias_obj
     ) : MarkExistingIliasObjAsEvent {
