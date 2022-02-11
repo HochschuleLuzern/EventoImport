@@ -1,4 +1,7 @@
 <?php declare(strict_types = 1);
+
+use EventoImport\communication\request_services\RequestClientService;
+
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -19,8 +22,6 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-use EventoImport\communication\request_services\RequestClientService;
-
 /**
  * Class ilEventoImporter
  *
@@ -29,11 +30,11 @@ use EventoImport\communication\request_services\RequestClientService;
 
 abstract class ilEventoImporter
 {
-    protected $data_source;
-    protected $seconds_before_retry;
-    protected $max_retries;
-    protected $evento_logger;
-    protected $has_more_data;
+    protected RequestClientService $data_source;
+    protected int $seconds_before_retry;
+    protected int $max_retries;
+    protected ilEventoImportLogger $evento_logger;
+    protected bool $has_more_data;
 
     public function __construct(
         RequestClientService $data_source,

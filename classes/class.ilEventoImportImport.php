@@ -23,10 +23,19 @@
 use EventoImport\communication\request_services\RequestClientService;
 use EventoImport\communication\ImporterApiSettings;
 use EventoImport\communication\request_services\RestClientService;
+use EventoImport\communication\EventoUserImporter;
+use EventoImport\communication\EventoEventImporter;
+use EventoImport\communication\EventoUserPhotoImporter;
+use EventoImport\communication\EventoAdminImporter;
+use EventoImport\import\EventoImportBootstrap;
+use EventoImport\import\action\user\UserActionFactory;
+use EventoImport\import\action\event\EventActionFactory;
+use EventoImport\import\data_matching\UserActionDecider;
+use EventoImport\import\data_matching\EventImportActionDecider;
+use ILIAS\DI\RBACServices;
+use ILIAS\Refinery\Factory;
 
 /**
- * Class ilEventoImportImport
- *
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
  */
 
@@ -34,123 +43,83 @@ class ilEventoImportImport extends ilCronJob
 {
     const ID = "crevento_import";
     
-    private $rbac;
-    private $db;
+    private RBACServices $rbac;
+    private ilDBInterface $db;
 
-    private $refinery;
-    private $cp;
-    private $settings;
+    private Factory $refinery;
+    private \ilEventoImportPlugin $cp;
+    private ilSetting $settings;
     private $importUsersConfig;
-    private $page_size;
+    private int $page_size;
+    private ilEventoImportCronStateChecker $state_checker;
 
-    private \EventoImport\import\EventoImportBootstrap $import_bootstrapping;
-    private ilEventoImportCronStateChecker $import_state_checker;
-
-    public function __construct(\ILIAS\DI\RBACServices $rbac_services = null, ilDBInterface $db = null)
-    {
-        global $DIC;
-
-        $this->rbac = $rbac_services ?? $DIC->rbac();
-        $this->db = $db ?? $DIC->database();
-        $this->refinery = $DIC->refinery();
-        //This is a workaround to avoid problems with missing templates
-        if (!method_exists($DIC, 'ui') || !method_exists($DIC->ui(), 'factory') || !isset($DIC['ui.factory'])) {
-            ilInitialisation::initUIFramework($DIC);
-            ilStyleDefinition::setCurrentStyle('Desktop');
-        }
-        $this->cp = new ilEventoImportPlugin();
-        $this->settings = new ilSetting("crevento");
-        $this->import_bootstrapping = new \EventoImport\import\EventoImportBootstrap($this->db, $this->rbac, $this->settings);
-        $this->import_state_checker = new ilEventoImportCronStateChecker($this->db);
+    private EventoImportBootstrap $import_bootstrapping;
+    
+    public function __construct(
+        \ilEventoImportPlugin $cp,
+        RBACServices $rbac_services,
+        ilDBInterface $db,
+        Factory $refinery,
+        ilSetting $settings
+    ) {
+        $this->cp = $cp;
+        $this->rbac = $rbac_services;
+        $this->db = $db;
+        $this->refinery = $refinery;
+        $this->settings = $settings;
+        $this->state_checker = new ilEventoImportCronStateChecker($this->db);
+        
+        $this->import_bootstrapping = new EventoImportBootstrap($this->db, $this->rbac, $this->settings);
 
         $this->page_size = 500;
     }
-
-    /**
-     * Retrieve the ID of the cron job
-     * @return string
-     */
-    public function getId()
+    
+    public function getId() : string
     {
         return self::ID;
     }
     
-    /**
-     * Cron job will not be activated on Plugin activation
-     *
-     * @return bool
-     */
-    public function hasAutoActivation()
+    public function hasAutoActivation() : bool
     {
         return false;
     }
     
-    /**
-     * Cron job schedule can be set in the interface
-     *
-     * @return bool
-     */
-    public function hasFlexibleSchedule()
+    public function hasFlexibleSchedule() : bool
     {
         return true;
     }
     
-    /**
-     * Cron job schedule is set to daily by default
-     *
-     * @return int
-     */
-    public function getDefaultScheduleType()
+    public function getDefaultScheduleType() : int
     {
         return self::SCHEDULE_TYPE_DAILY;
     }
     
-    /**
-     * Defines the interval between cron job runs in SCHEDULE_TYPE
-     *
-     * @return array|int
-     */
-    public function getDefaultScheduleValue()
+    public function getDefaultScheduleValue() : int
     {
         return 1;
     }
     
-    /**
-     * Get title
-     *
-     * @return string
-     */
-    public function getTitle()
+    public function getTitle() : string
     {
         return $this->cp->txt("title");
     }
     
-    /**
-     * Get description
-     *
-     * @return string
-     */
-    public function getDescription()
+    public function getDescription() : string
     {
         return $this->cp->txt("description");
     }
     
-    /**
-     * Cron job can be started manually
-     *
-     * @return bool
-     */
-    public function isManuallyExecutable()
+    public function isManuallyExecutable() : bool
     {
         return true;
     }
 
-    public function hasCustomSettings()
+    public function hasCustomSettings() : bool
     {
         return true;
     }
     
-    public function run() : ilEventoImportResult
+    public function run() : ilCronJobResult
     {
         try {
             $logger = new ilEventoImportLogger($this->db);
@@ -178,7 +147,7 @@ class ilEventoImportImport extends ilCronJob
 
     public function runDailyFullImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger) : void
     {
-        $user_importer = new \EventoImport\communication\EventoUserImporter(
+        $user_importer = new EventoUserImporter(
             $data_source,
             new ilEventoImporterIterator($this->page_size),
             $logger,
@@ -186,7 +155,7 @@ class ilEventoImportImport extends ilCronJob
             $api_settings->getMaxRetries()
         );
 
-        $event_importer = new \EventoImport\communication\EventoEventImporter(
+        $event_importer = new EventoEventImporter(
             $data_source,
             new ilEventoImporterIterator($this->page_size),
             $logger,
@@ -194,22 +163,21 @@ class ilEventoImportImport extends ilCronJob
             $api_settings->getMaxRetries()
         );
 
-        $user_photo_importer = new \EventoImport\communication\EventoUserPhotoImporter(
+        $user_photo_importer = new EventoUserPhotoImporter(
             $data_source,
             $api_settings->getTimeoutFailedRequest(),
             $api_settings->getMaxRetries(),
             $logger
         );
-
-        /* User import */
-        $user_action_factory = new \EventoImport\import\action\user\UserActionFactory(
+        
+        $user_action_factory = new UserActionFactory(
             $this->import_bootstrapping->userFacade(),
             $this->import_bootstrapping->defaultUserSettings(),
             $user_photo_importer,
             $logger
         );
 
-        $user_import_action_decider = new \EventoImport\import\data_matching\UserActionDecider(
+        $user_import_action_decider = new UserActionDecider(
             $this->import_bootstrapping->userFacade(),
             $user_action_factory
         );
@@ -222,15 +190,14 @@ class ilEventoImportImport extends ilCronJob
             $this->db
         );
         $importUsers->run();
-
-        /* Event import */
-        $event_action_factory = new \EventoImport\import\action\event\EventActionFactory(
+        
+        $event_action_factory = new EventActionFactory(
             $this->import_bootstrapping->eventObjectFactory(),
             $this->import_bootstrapping->repositoryFacade(),
             $this->import_bootstrapping->membershipManager(),
             $logger
         );
-        $event_action_decider = new \EventoImport\import\data_matching\EventImportActionDecider(
+        $event_action_decider = new EventImportActionDecider(
             $this->import_bootstrapping->repositoryFacade(),
             $event_action_factory
         );
@@ -241,7 +208,12 @@ class ilEventoImportImport extends ilCronJob
 
     public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger) : void
     {
-        $admin_importer = new \EventoImport\communication\EventoAdminImporter($data_source, $logger, $api_settings->getTimeoutFailedRequest(), $api_settings->getMaxRetries());
+        $admin_importer = new EventoAdminImporter(
+            $data_source,
+            $logger,
+            $api_settings->getTimeoutFailedRequest(),
+            $api_settings->getMaxRetries()
+        );
 
         $import_admins = new ilEventoImportImportAdmins(
             $admin_importer,
@@ -253,24 +225,13 @@ class ilEventoImportImport extends ilCronJob
         $import_admins->run();
     }
 
-    /**
-     * Defines the custom settings form and returns it to plugin slot
-     *
-     * @param ilPropertyFormGUI $a_form
-     */
-    public function addCustomSettingsToForm(ilPropertyFormGUI $a_form)
+    public function addCustomSettingsToForm(ilPropertyFormGUI $a_form) : void
     {
         $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
         $conf->fillCronJobSettingsForm($a_form);
     }
     
-    /**
-     * Saves the custom settings values
-     *
-     * @param ilPropertyFormGUI $a_form
-     * @return boolean
-     */
-    public function saveCustomSettings(ilPropertyFormGUI $a_form)
+    public function saveCustomSettings(ilPropertyFormGUI $a_form) : bool
     {
         $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
 

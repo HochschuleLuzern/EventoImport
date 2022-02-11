@@ -1,4 +1,7 @@
 <?php declare(strict_types = 1);
+
+use  EventoImport\import\db\repository as Repository;
+
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -29,37 +32,21 @@ class ilEventoImportPlugin extends ilCronHookPlugin
 {
     const PLUGIN_NAME = "EventoImport";
     
-    /**
-     * @var ilEventoImportPlugin
-     */
-    protected static $instance;
-    
-    /**
-     * @return ilEventoImportPlugin
-     */
-    public static function getInstance()
-    {
-        if (!isset(self::$instance)) {
-            self::$instance = new self();
-        }
-        
-        return self::$instance;
-    }
-    
     public function getPluginName()
     {
         return self::PLUGIN_NAME;
     }
     
     /**
-     * @var  ilEventoImportImport
+     *
+     * @var ilEventoImportImport[]
      */
     protected static $cron_job_instances;
     
     /**
-     * @return  ilEventoImportJobInstances[]
+     * @return  ilEventoImportImport[]
      */
-    public function getCronJobInstances()
+    public function getCronJobInstances() : array
     {
         $this->loadCronJobInstance();
         
@@ -67,7 +54,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
     }
     
     /**
-     * @return  ilEventoImportJobInstance or false on failure
+     * @return  ilEventoImportImport or false on failure
      */
     public function getCronJobInstance($a_job_id)
     {
@@ -81,33 +68,44 @@ class ilEventoImportPlugin extends ilCronHookPlugin
     
     protected function loadCronJobInstance()
     {
+        global $DIC;
+        $db = $DIC->database();
+        $rbac = $DIC->rbac();
+        $refinery = $DIC->refinery();
+        
+        //This is a workaround to avoid problems with missing templates
+        if (!method_exists($DIC, 'ui') || !method_exists($DIC->ui(), 'factory') || !isset($DIC['ui.factory'])) {
+            ilInitialisation::initUIFramework($DIC);
+            ilStyleDefinition::setCurrentStyle('Desktop');
+        }
+        
         if (!isset(self::$cron_job_instances)) {
-            self::$cron_job_instances[ilEventoImportImport::ID] = new ilEventoImportImport();
+            self::$cron_job_instances[ilEventoImportImport::ID] = new ilEventoImportImport($this, $rbac, $db, $refinery, new ilSetting('crevento'));
         }
     }
 
     protected function beforeUninstall()
     {
-        /** @var $ilDB ilDBInterface */
-        global $ilDB;
-
+        global $DIC;
+        $db = $DIC->database();
+        
         $drop_table_list = [
             'crnhk_crevento_usrs',
             'crnhk_crevento_mas',
             'crnhk_crevento_subs',
-            \EventoImport\import\db\repository\EventoUserRepository::TABLE_NAME,
-            \EventoImport\import\db\repository\IliasEventoEventsRepository::TABLE_NAME,
-            \EventoImport\import\db\repository\ParentEventRepository::TABLE_NAME,
-            \EventoImport\import\db\repository\EventLocationsRepository::TABLE_NAME,
-            \EventoImport\import\db\repository\EventMembershipRepository::TABLE_NAME,
+            Repository\EventoUserRepository::TABLE_NAME,
+            Repository\IliasEventoEventsRepository::TABLE_NAME,
+            Repository\ParentEventRepository::TABLE_NAME,
+            Repository\EventLocationsRepository::TABLE_NAME,
+            Repository\EventMembershipRepository::TABLE_NAME,
             ilEventoImportLogger::TABLE_LOG_USERS,
             ilEventoImportLogger::TABLE_LOG_EVENTS,
             ilEventoImportLogger::TABLE_LOG_MEMBERSHIPS
         ];
 
         foreach ($drop_table_list as $key => $table) {
-            if ($ilDB->tableExists($table)) {
-                $ilDB->dropTable($table);
+            if ($db->tableExists($table)) {
+                $db->dropTable($table);
             }
         }
 

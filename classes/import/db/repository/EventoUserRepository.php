@@ -11,7 +11,6 @@ class EventoUserRepository
     public const COL_EVENTO_ID = 'evento_id';
     public const COL_ILIAS_USER_ID = 'ilias_user_id';
     public const COL_LAST_TIME_DELIVERED = 'last_time_delivered';
-
     private \ilDBInterface $db;
 
     public function __construct(\ilDBInterface $db)
