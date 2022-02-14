@@ -4,15 +4,15 @@ namespace EventoImport\import;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\RepositoryFacade;
+use EventoImport\import\db\IliasEventObjectService;
 use EventoImport\import\settings\DefaultEventSettings;
 
 class IliasEventObjectFactory
 {
     private DefaultEventSettings $default_event_settings;
-    private RepositoryFacade $repository_facade;
+    private IliasEventObjectService $repository_facade;
 
-    public function __construct(RepositoryFacade $repository_facade, DefaultEventSettings $default_event_settings)
+    public function __construct(IliasEventObjectService $repository_facade, DefaultEventSettings $default_event_settings)
     {
         $this->repository_facade = $repository_facade;
         $this->default_event_settings = $default_event_settings;
@@ -84,14 +84,5 @@ class IliasEventObjectFactory
         }
 
         return $event_wrapper;
-    }
-
-    public function buildNewIliasEventObject(EventoEvent $evento_event, $destiniation) : IliasEventWrapper
-    {
-        if ($evento_event->hasGroupMemberFlag()) {
-            return $this->createAsMultiGroupEvent($evento_event, $destiniation);
-        } else {
-            return $this->createAsSingleGroupEvent($evento_event, $destiniation);
-        }
     }
 }

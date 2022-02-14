@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\db\RepositoryFacade;
+use EventoImport\import\db\IliasEventObjectService;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\MembershipManager;
@@ -11,14 +11,14 @@ use EventoImport\import\db\model\IliasEventoEvent;
 
 class EventActionFactory
 {
-    private RepositoryFacade $repository_facade;
+    private IliasEventObjectService $repository_facade;
     private IliasEventObjectFactory $event_object_factory;
     private MembershipManager $membership_manager;
     private \EventoImport\import\Logger $logger;
 
     public function __construct(
         IliasEventObjectFactory $event_object_factory,
-        RepositoryFacade $repository_facade,
+        IliasEventObjectService $repository_facade,
         MembershipManager $membership_manager,
         \EventoImport\import\Logger $logger
     ) {

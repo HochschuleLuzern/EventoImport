@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\db\RepositoryFacade;
+use EventoImport\import\db\IliasEventObjectService;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\MembershipManager;
 
@@ -12,12 +12,12 @@ class CreateEventWithParent implements EventAction
     private EventoEvent $evento_event;
     private int $destination_ref_id;
     private IliasEventObjectFactory $event_object_factory;
-    private RepositoryFacade $repository_facade;
+    private IliasEventObjectService $repository_facade;
     private MembershipManager $membership_manager;
     private \EventoImport\import\Logger $logger;
     private int $log_code;
 
-    public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
+    public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectFactory $event_object_factory, IliasEventObjectService $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
     {
         $this->evento_event = $evento_event;
         $this->destination_ref_id = $destination_ref_id;

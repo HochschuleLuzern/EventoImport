@@ -3,7 +3,7 @@
 namespace EventoImport\import\data_matching;
 
 use EventoImport\import\action\event\EventActionFactory;
-use EventoImport\import\db\RepositoryFacade;
+use EventoImport\import\db\IliasEventObjectService;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\event\EventAction;
@@ -11,10 +11,10 @@ use EventoImport\import\action\ReportDatasetWithoutAction;
 
 class EventImportActionDecider
 {
-    private RepositoryFacade $repository_facade;
+    private IliasEventObjectService $repository_facade;
     private EventActionFactory $event_action_factory;
 
-    public function __construct(RepositoryFacade $repository_facade, EventActionFactory $event_action_factory)
+    public function __construct(IliasEventObjectService $repository_facade, EventActionFactory $event_action_factory)
     {
         $this->repository_facade = $repository_facade;
         $this->event_action_factory = $event_action_factory;

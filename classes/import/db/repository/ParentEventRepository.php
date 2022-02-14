@@ -24,58 +24,22 @@ class ParentEventRepository
 
     private function buildParentEventObjectFromRow($row) : IliasEventoParentEvent
     {
-        return new IliasEventoParentEvent(
-            $row[self::COL_GROUP_UNIQUE_KEY],
-            $row[self::COL_GROUP_EVENTO_ID],
-            $row[self::COL_TITLE],
-            $row[self::COL_REF_ID],
-            $row[self::COL_ADMIN_ROLE_ID],
-            $row[self::COL_STUDENT_ROLE_ID],
-        );
+
     }
 
     public function addNewParentEvent(\EventoImport\import\db\model\IliasEventoParentEvent $parent_event) : void
     {
-        $this->db->insert(
-            // INSERT INTO
-            self::TABLE_NAME,
 
-            // VALUES
-            [
-                // id
-                self::COL_GROUP_UNIQUE_KEY => [\ilDBConstants::T_TEXT, $parent_event->getGroupUniqueKey()],
-
-                // foreign keys
-                self::COL_TITLE => [\ilDBConstants::T_TEXT, $parent_event->getTitle()],
-                self::COL_REF_ID => [\ilDBConstants::T_INTEGER, $parent_event->getRefId()],
-                self::COL_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER, $parent_event->getAdminRoleId()],
-                self::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER, $parent_event->getStudentRoleId()],
-            ]
-        );
     }
 
     public function fetchParentEventByGroupUniqueKey(string $group_unique_key) : ?IliasEventoParentEvent
     {
-        $query = 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE ' . self::COL_GROUP_UNIQUE_KEY . ' = ' . $this->db->quote($group_unique_key, \ilDBConstants::T_TEXT);
-        $result = $this->db->query($query);
 
-        if ($row = $this->db->fetchAssoc($result)) {
-            return $this->buildParentEventObjectFromRow($row);
-        }
-
-        return null;
     }
 
     public function fetchParentEventForName(string $name) : ?IliasEventoParentEvent
     {
-        $query = 'SELECT * FROM ' . self::TABLE_NAME . ' WHERE ' . self::COL_TITLE . ' = ' . $this->db->quote($name, \ilDBConstants::T_TEXT);
-        $result = $this->db->query($query);
 
-        if ($row = $this->db->fetchAssoc($result)) {
-            return $this->buildParentEventObjectFromRow($row);
-        }
-
-        return null;
     }
 
     public function fetchParentEventForRefId(int $ref_id)
@@ -92,18 +56,11 @@ class ParentEventRepository
 
     public function removeParentEventIfItHasNoChildEvent(string $parent_event_key)
     {
-        $query = 'SELECT count(1) as cnt FROM ' . IliasEventoEventsRepository::TABLE_NAME
-            . " WHERE " . IliasEventoEventsRepository::COL_PARENT_EVENT_KEY . ' = ' . $this->db->quote($parent_event_key, \ilDBConstants::T_TEXT);
-        $res = $this->db->query($query);
-        $data = $this->db->fetchAssoc($res);
-        if (isset($data['cnt']) && ((int) $data['cnt']) <= 1) {
-            $this->removeParentEvent($parent_event_key);
-        }
+
     }
 
     private function removeParentEvent(string $parent_event_key)
     {
-        $query = 'DELETE FROM ' . self::TABLE_NAME . ' WHERE ' . self::COL_GROUP_UNIQUE_KEY . ' = ' . $this->db->quote($parent_event_key, \ilDBConstants::T_TEXT);
-        $this->db->manipulate($query);
+
     }
 }

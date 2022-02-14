@@ -4,19 +4,19 @@ namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\RepositoryFacade;
+use EventoImport\import\db\IliasEventObjectService;
 use EventoImport\import\db\MembershipManager;
 
 class UpdateExistingEvent implements EventAction
 {
     private EventoEvent $evento_event;
     private IliasEventoEvent $ilias_event;
-    private RepositoryFacade $repository_facade;
+    private IliasEventObjectService $repository_facade;
     private MembershipManager $membership_manager;
     private \EventoImport\import\Logger $logger;
     private int $log_code;
 
-    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
+    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, IliasEventObjectService $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
     {
         $this->evento_event = $evento_event;
         $this->ilias_event = $ilias_event;

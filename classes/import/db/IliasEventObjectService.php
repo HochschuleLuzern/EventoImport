@@ -24,7 +24,7 @@ use EventoImport\import\IliasEventWrapperSingleEvent;
  * TODO: Find a more matching name and unify use of method (e.g. replace the object-getters with actual logic)
  * @package EventoImport\import\db
  */
-class RepositoryFacade
+class IliasEventObjectService
 {
     private IliasEventObjectQuery $event_object_query;
     private IliasEventoEventsRepository $event_repo;

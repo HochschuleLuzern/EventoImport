@@ -8,7 +8,7 @@ use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\import\db\query\IliasUserQuerying;
 use EventoImport\import\db\UserFacade;
 use EventoImport\import\db\query\IliasEventObjectQuery;
-use EventoImport\import\db\RepositoryFacade;
+use EventoImport\import\db\IliasEventObjectService;
 use EventoImport\import\db\repository\EventMembershipRepository;
 use EventoImport\import\db\repository\EventLocationsRepository;
 use EventoImport\import\db\repository\ParentEventRepository;
@@ -40,7 +40,7 @@ class EventoImportBootstrap
     private IliasEventObjectQuery $event_query;
     private EventLocationsRepository $location_repository;
     private ParentEventRepository $parent_event_repo;
-    private RepositoryFacade $repository_facade;
+    private IliasEventObjectService $repository_facade;
     private IliasEventObjectFactory $event_object_factory;
     private DefaultEventSettings $default_event_settings;
 
@@ -142,10 +142,10 @@ class EventoImportBootstrap
         return $this->parent_event_repo;
     }
 
-    public function repositoryFacade() : RepositoryFacade
+    public function repositoryFacade() : IliasEventObjectService
     {
         if (!isset($this->repository_facade)) {
-            $this->repository_facade = new RepositoryFacade(
+            $this->repository_facade = new IliasEventObjectService(
                 $this->iliasEventObjectQuery(),
                 $this->eventoEventRepository(),
                 $this->eventLocationRepository(),

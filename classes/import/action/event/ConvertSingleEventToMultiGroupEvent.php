@@ -4,7 +4,7 @@ namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\IliasEventObjectFactory;
-use EventoImport\import\db\RepositoryFacade;
+use EventoImport\import\db\IliasEventObjectService;
 use EventoImport\import\db\MembershipManager;
 use EventoImport\import\db\model\IliasEventoEvent;
 
@@ -14,12 +14,12 @@ class ConvertSingleEventToMultiGroupEvent implements EventAction
     private IliasEventoEvent $ilias_event;
     private \ilContainer $current_event_object;
     private IliasEventObjectFactory $event_object_factory;
-    private RepositoryFacade $repository_facade;
+    private IliasEventObjectService $repository_facade;
     private MembershipManager $membership_manager;
     private \EventoImport\import\Logger $logger;
     private int $log_code;
 
-    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
+    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, IliasEventObjectFactory $event_object_factory, IliasEventObjectService $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
     {
         $this->evento_event = $evento_event;
         $this->ilias_event = $ilias_event;
