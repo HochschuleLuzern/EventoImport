@@ -16,14 +16,14 @@ class CreateUser implements UserImportAction
     private UserFacade $user_facade;
     protected DefaultUserSettings $default_user_settings;
     private EventoUserPhotoImporter $photo_importer;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
 
     public function __construct(
         EventoUser $evento_user,
         UserFacade $user_facade,
         DefaultUserSettings $default_user_settings,
         EventoUserPhotoImporter $photo_importer,
-        \ilEventoImportLogger $logger
+        \EventoImport\import\Logger $logger
     ) {
         $this->evento_user = $evento_user;
         $this->user_facade = $user_facade;
@@ -59,7 +59,7 @@ class CreateUser implements UserImportAction
         // Create map from evento to ilias user and log this to log-table
         $this->user_facade->eventoUserRepository()->addNewEventoIliasUser($this->evento_user, $ilias_user_object);
         $this->logger->logUserImport(
-            \ilEventoImportLogger::CREVENTO_USR_CREATED,
+            \EventoImport\import\Logger::CREVENTO_USR_CREATED,
             $this->evento_user->getEventoId(),
             $this->evento_user->getLoginName(),
             ['api_data' => $this->evento_user->getDecodedApiData()]

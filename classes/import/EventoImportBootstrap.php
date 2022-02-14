@@ -24,7 +24,7 @@ class EventoImportBootstrap
     private \ilDBInterface $db;
     private RBACServices $rbac_services;
     private \ilSetting $settings;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
 
     /***************************
      ** User related objects **
@@ -57,10 +57,10 @@ class EventoImportBootstrap
         $this->settings = $settings;
     }
 
-    public function logger() : \ilEventoImportLogger
+    public function logger() : \EventoImport\import\Logger
     {
         if (!isset($this->logger)) {
-            $this->logger = new \ilEventoImportLogger($this->db);
+            $this->logger = new \EventoImport\import\Logger($this->db);
         }
         return $this->logger;
     }

@@ -24,8 +24,8 @@ class EventoImportApiTester
     public function fetchDataRecord(string $cmd, int $id) : ?ApiDataModelBase
     {
         $api_importer_settings = new ImporterApiSettings($this->settings);
-        $iterator = new \ilEventoImporterIterator($api_importer_settings->getPageSize());
-        $logger = new \ilEventoImportLogger($this->db);
+        $iterator = new \EventoImport\communication\ImporterIterator($api_importer_settings->getPageSize());
+        $logger = new \EventoImport\import\Logger($this->db);
 
         $request_client = $this->buildDataSource($api_importer_settings);
 
@@ -75,8 +75,8 @@ class EventoImportApiTester
     public function fetchDataSet(string $cmd, int $skip, int $take) : array
     {
         $api_importer_settings = new ImporterApiSettings($this->settings);
-        $iterator = new \ilEventoImporterIterator($api_importer_settings->getPageSize());
-        $logger = new \ilEventoImportLogger($this->db);
+        $iterator = new \EventoImport\communication\ImporterIterator($api_importer_settings->getPageSize());
+        $logger = new \EventoImport\import\Logger($this->db);
 
         $request_client = $this->buildDataSource($api_importer_settings);
 
@@ -106,7 +106,7 @@ class EventoImportApiTester
     public function fetchParameterlessDataset(string $cmd) : array
     {
         $api_importer_settings = new ImporterApiSettings($this->settings);
-        $logger = new \ilEventoImportLogger($this->db);
+        $logger = new \EventoImport\import\Logger($this->db);
 
         $data_source = $this->buildDataSource($api_importer_settings);
 

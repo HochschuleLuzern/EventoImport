@@ -16,8 +16,8 @@ class EventoEventImporter extends \ilEventoImporter
     use SingleDataRecordImport;
     use DataSetImport;
 
-    /** @var \ilEventoImporterIterator */
-    private \ilEventoImporterIterator $iterator;
+    /** @var \EventoImport\communication\ImporterIterator */
+    private \EventoImport\communication\ImporterIterator $iterator;
 
     /** @var string */
     protected string $fetch_data_set_method;
@@ -27,16 +27,16 @@ class EventoEventImporter extends \ilEventoImporter
 
     /**
      * EventoEventImporter constructor.
-     * @param RequestClientService      $data_source
-     * @param \ilEventoImporterIterator $iterator
-     * @param \ilEventoImportLogger     $logger
-     * @param int                       $seconds_before_retry
-     * @param int                       $max_retries
+     * @param RequestClientService                         $data_source
+     * @param \EventoImport\communication\ImporterIterator $iterator
+     * @param \EventoImport\import\Logger                  $logger
+     * @param int                                          $seconds_before_retry
+     * @param int                                          $max_retries
      */
     public function __construct(
         RequestClientService $data_source,
-        \ilEventoImporterIterator $iterator,
-        \ilEventoImportLogger $logger,
+        \EventoImport\communication\ImporterIterator $iterator,
+        \EventoImport\import\Logger $logger,
         int $seconds_before_retry,
         int $max_retries
     ) {

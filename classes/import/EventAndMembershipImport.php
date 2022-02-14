@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php declare(strict_types=1);
+
+namespace EventoImport\import;
 
 use EventoImport\communication\EventoEventImporter;
 use EventoImport\import\data_matching\EventImportActionDecider;
@@ -23,16 +25,16 @@ use EventoImport\communication\api_models\EventoEvent;
 /**
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
  */
-class ilEventoImportImportEventsAndMemberships
+class EventAndMembershipImport
 {
     private EventoEventImporter $evento_importer;
     private EventImportActionDecider $event_import_action_decider;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
 
     public function __construct(
         EventoEventImporter $evento_importer,
         EventImportActionDecider $event_import_action_decider,
-        \ilEventoImportLogger $logger
+        \EventoImport\import\Logger $logger
     ) {
         $this->evento_importer = $evento_importer;
         $this->event_import_action_decider = $event_import_action_decider;

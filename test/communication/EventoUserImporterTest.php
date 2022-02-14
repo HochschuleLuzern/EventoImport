@@ -2,6 +2,8 @@
 
 use EventoImport\communication\EventoUserImporter;
 use PHPUnit\Framework\TestCase;
+use EventoImport\import\Logger;
+use EventoImport\communication\ImporterIterator;
 
 class EventoUserImporterTest extends TestCase
 {
@@ -24,7 +26,7 @@ class EventoUserImporterTest extends TestCase
     public function smokeTest()
     {
         // Arrange
-        $iterator = $this->createStub(ilEventoImporterIterator::class);
+        $iterator = $this->createStub(ImporterIterator::class);
         $iterator->method('getPage')->willReturn(1);
         $iterator->method('getPageSize')->willReturn(100);
 
@@ -34,7 +36,7 @@ class EventoUserImporterTest extends TestCase
                 ->willReturn($this->getJsonExample(true, false));
 
         $settings = $this->createStub(ilSetting::class);
-        $logger = $this->createStub(ilEventoImportLogger::class);
+        $logger = $this->createStub(Logger::class);
         $obj = new EventoUserImporter($iterator, $settings, $logger, $request);
 
         // Act

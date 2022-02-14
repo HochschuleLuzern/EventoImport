@@ -12,17 +12,17 @@ class MarkExistingIliasObjAsEvent implements EventAction
     private \ilContainer $ilias_object;
     private RepositoryFacade $repository_facade;
     private MembershipManager $membership_manager;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
     private int $log_code;
 
-    public function __construct(EventoEvent $evento_event, \ilContainer $ilias_object, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
+    public function __construct(EventoEvent $evento_event, \ilContainer $ilias_object, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
     {
         $this->evento_event = $evento_event;
         $this->ilias_object = $ilias_object;
         $this->repository_facade = $repository_facade;
         $this->membership_manager = $membership_manager;
         $this->logger = $logger;
-        $this->log_code = \ilEventoImportLogger::CREVENTO_MA_EXISTING_ILIAS_COURSE_AS_EVENT_MARKED;
+        $this->log_code = \EventoImport\import\Logger::CREVENTO_MA_EXISTING_ILIAS_COURSE_AS_EVENT_MARKED;
     }
 
     public function executeAction() : void

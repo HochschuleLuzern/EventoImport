@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php declare(strict_types=1);
+
+namespace EventoImport\import;
 
 use EventoImport\communication\EventoUserImporter;
 use EventoImport\import\db\UserFacade;
@@ -19,20 +21,19 @@ use EventoImport\import\data_matching\UserActionDecider;
  * along with EventoImport-Plugin for ILIAS.  If not,
  * see <http://www.gnu.org/licenses/>.
  */
-class ilEventoImportImportUsers
+class UserImport
 {
     private EventoUserImporter $evento_importer;
     private UserFacade $user_facade;
     private UserActionDecider $user_import_action_decider;
-    private \ilEventoImportLogger $evento_logger;
-    private int $until_max;
+    private Logger $evento_logger;
     private \ilDBInterface $db;
 
     public function __construct(
         EventoUserImporter $importer,
         UserActionDecider $user_import_action_decider,
         UserFacade $user_facade,
-        \ilEventoImportLogger $logger,
+        Logger $logger,
         \ilDBInterface $db
     ) {
         $this->evento_importer = $importer;
@@ -48,7 +49,7 @@ class ilEventoImportImportUsers
         $this->convertDeletedAccounts();
         $this->setUserTimeLimits();
     }
-    
+
     private function importUsers() : void
     {
         do {
@@ -76,7 +77,6 @@ class ilEventoImportImportUsers
 
     /**
      * User accounts which are deleted by evento should either be converted to a local account (students) or deactivate (staff)
-     *
      * Since there is no "getDeletedAccounts"-Method anymore, this Plugin has to find those "not anymore imported"-users
      * by itself. For this reason, every imported account has a last-imported-timestamp. With this value, users which have not
      * been imported since a longer time can be found.
@@ -89,7 +89,7 @@ class ilEventoImportImportUsers
             try {
                 // Ensure that the user is not being returned by the api right now
                 $result = $this->evento_importer->fetchUserDataRecordById($evento_id);
-                
+
                 if (is_null($result) || (is_array($result) && count($result) < 1)) {
                     $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
                     $action->executeAction();

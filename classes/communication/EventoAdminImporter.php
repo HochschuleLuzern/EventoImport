@@ -24,14 +24,14 @@ class EventoAdminImporter extends \ilEventoImporter
 
     /**
      * EventoAdminImporter constructor.
-     * @param RequestClientService  $data_source
-     * @param \ilEventoImportLogger $logger
-     * @param int                   $seconds_before_retry
-     * @param int                   $max_retries
+     * @param RequestClientService        $data_source
+     * @param \EventoImport\import\Logger $logger
+     * @param int                         $seconds_before_retry
+     * @param int                         $max_retries
      */
     public function __construct(
         RequestClientService $data_source,
-        \ilEventoImportLogger $logger,
+        \EventoImport\import\Logger $logger,
         int $seconds_before_retry,
         int $max_retries
     ) {

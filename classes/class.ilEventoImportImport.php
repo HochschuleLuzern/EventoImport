@@ -34,6 +34,11 @@ use EventoImport\import\data_matching\UserActionDecider;
 use EventoImport\import\data_matching\EventImportActionDecider;
 use ILIAS\DI\RBACServices;
 use ILIAS\Refinery\Factory;
+use EventoImport\import\UserImport;
+use EventoImport\import\AdminImport;
+use EventoImport\import\EventAndMembershipImport;
+use EventoImport\import\Logger;
+use EventoImport\communication\ImporterIterator;
 
 /**
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
@@ -51,7 +56,7 @@ class ilEventoImportImport extends ilCronJob
     private ilSetting $settings;
     private $importUsersConfig;
     private int $page_size;
-    private ilEventoImportCronStateChecker $state_checker;
+    private ilEventoImportCronStateChecker $import_state_checker;
 
     private EventoImportBootstrap $import_bootstrapping;
     
@@ -67,7 +72,7 @@ class ilEventoImportImport extends ilCronJob
         $this->db = $db;
         $this->refinery = $refinery;
         $this->settings = $settings;
-        $this->state_checker = new ilEventoImportCronStateChecker($this->db);
+        $this->import_state_checker = new ilEventoImportCronStateChecker($this->db);
         
         $this->import_bootstrapping = new EventoImportBootstrap($this->db, $this->rbac, $this->settings);
 
@@ -122,7 +127,7 @@ class ilEventoImportImport extends ilCronJob
     public function run() : ilCronJobResult
     {
         try {
-            $logger = new ilEventoImportLogger($this->db);
+            $logger = new Logger($this->db);
 
             $api_settings = new ImporterApiSettings($this->settings);
 
@@ -145,11 +150,11 @@ class ilEventoImportImport extends ilCronJob
         }
     }
 
-    public function runDailyFullImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger) : void
+    public function runDailyFullImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \EventoImport\import\Logger $logger) : void
     {
         $user_importer = new EventoUserImporter(
             $data_source,
-            new ilEventoImporterIterator($this->page_size),
+            new ImporterIterator($this->page_size),
             $logger,
             $api_settings->getTimeoutFailedRequest(),
             $api_settings->getMaxRetries()
@@ -157,7 +162,7 @@ class ilEventoImportImport extends ilCronJob
 
         $event_importer = new EventoEventImporter(
             $data_source,
-            new ilEventoImporterIterator($this->page_size),
+            new ImporterIterator($this->page_size),
             $logger,
             $api_settings->getTimeoutFailedRequest(),
             $api_settings->getMaxRetries()
@@ -182,7 +187,7 @@ class ilEventoImportImport extends ilCronJob
             $user_action_factory
         );
 
-        $importUsers = new ilEventoImportImportUsers(
+        $importUsers = new UserImport(
             $user_importer,
             $user_import_action_decider,
             $this->import_bootstrapping->userFacade(),
@@ -202,11 +207,11 @@ class ilEventoImportImport extends ilCronJob
             $event_action_factory
         );
 
-        $import_events = new ilEventoImportImportEventsAndMemberships($event_importer, $event_action_decider, $logger);
+        $import_events = new EventAndMembershipImport($event_importer, $event_action_decider, $logger);
         $import_events->run();
     }
 
-    public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \ilEventoImportLogger $logger) : void
+    public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \EventoImport\import\Logger $logger) : void
     {
         $admin_importer = new EventoAdminImporter(
             $data_source,
@@ -215,7 +220,7 @@ class ilEventoImportImport extends ilCronJob
             $api_settings->getMaxRetries()
         );
 
-        $import_admins = new ilEventoImportImportAdmins(
+        $import_admins = new AdminImport(
             $admin_importer,
             $this->import_bootstrapping->membershipManager(),
             $this->import_bootstrapping->eventoEventRepository(),

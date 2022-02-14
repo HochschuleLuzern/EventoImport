@@ -1,6 +1,7 @@
 <?php declare(strict_types = 1);
 
 use  EventoImport\import\db\repository as Repository;
+use EventoImport\import\Logger;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -98,9 +99,9 @@ class ilEventoImportPlugin extends ilCronHookPlugin
             Repository\ParentEventRepository::TABLE_NAME,
             Repository\EventLocationsRepository::TABLE_NAME,
             Repository\EventMembershipRepository::TABLE_NAME,
-            ilEventoImportLogger::TABLE_LOG_USERS,
-            ilEventoImportLogger::TABLE_LOG_EVENTS,
-            ilEventoImportLogger::TABLE_LOG_MEMBERSHIPS
+            Logger::TABLE_LOG_USERS,
+            Logger::TABLE_LOG_EVENTS,
+            Logger::TABLE_LOG_MEMBERSHIPS
         ];
 
         foreach ($drop_table_list as $key => $table) {

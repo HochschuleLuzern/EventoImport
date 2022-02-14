@@ -14,9 +14,9 @@ class UserActionFactory
     private UserFacade $user_facade;
     private DefaultUserSettings $default_user_settings;
     private EventoUserPhotoImporter $photo_importer;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
 
-    public function __construct(UserFacade $user_facade, DefaultUserSettings $default_user_settings, EventoUserPhotoImporter $photo_importer, \ilEventoImportLogger $logger)
+    public function __construct(UserFacade $user_facade, DefaultUserSettings $default_user_settings, EventoUserPhotoImporter $photo_importer, \EventoImport\import\Logger $logger)
     {
         $this->user_facade = $user_facade;
         $this->default_user_settings = $default_user_settings;
@@ -56,7 +56,7 @@ class UserActionFactory
     public function buildReportConflict(EventoUser $evento_user) : ReportDatasetWithoutAction
     {
         return new ReportUserImportDatasetWithoutAction(
-            \ilEventoImportLogger::CREVENTO_USR_NOTICE_CONFLICT,
+            \EventoImport\import\Logger::CREVENTO_USR_NOTICE_CONFLICT,
             $evento_user->getEventoId(),
             $evento_user->getLoginName(),
             $evento_user->getDecodedApiData(),
@@ -67,7 +67,7 @@ class UserActionFactory
     public function buildReportError(EventoUser $evento_user)
     {
         return new ReportUserImportDatasetWithoutAction(
-            \ilEventoImportLogger::CREVENTO_USR_ERROR_ERROR,
+            \EventoImport\import\Logger::CREVENTO_USR_ERROR_ERROR,
             $evento_user->getEventoId(),
             $evento_user->getLoginName(),
             $evento_user->getDecodedApiData(),

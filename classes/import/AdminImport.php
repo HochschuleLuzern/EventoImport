@@ -1,22 +1,25 @@
-<?php declare(strict_types = 1);
+<?php declare(strict_types=1);
+
+namespace EventoImport\import;
 
 use EventoImport\import\db\MembershipManager;
 use EventoImport\communication\EventoAdminImporter;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
+use EventoImport\import\Logger;
 
-class ilEventoImportImportAdmins
+class AdminImport
 {
     private EventoAdminImporter $evento_importer;
     private MembershipManager $membership_manager;
     private IliasEventoEventsRepository $ilias_event_repo;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
 
     public function __construct(
         EventoAdminImporter $evento_importer,
         MembershipManager $membership_manager,
         IliasEventoEventsRepository $ilias_event_repo,
-        ilEventoImportLogger $logger
+        Logger $logger
     ) {
         $this->evento_importer = $evento_importer;
         $this->membership_manager = $membership_manager;

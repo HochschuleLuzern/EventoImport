@@ -14,13 +14,13 @@ class EventActionFactory
     private RepositoryFacade $repository_facade;
     private IliasEventObjectFactory $event_object_factory;
     private MembershipManager $membership_manager;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
 
     public function __construct(
         IliasEventObjectFactory $event_object_factory,
         RepositoryFacade $repository_facade,
         MembershipManager $membership_manager,
-        \ilEventoImportLogger $logger
+        \EventoImport\import\Logger $logger
     ) {
         $this->event_object_factory = $event_object_factory;
         $this->repository_facade = $repository_facade;
@@ -103,7 +103,7 @@ class EventActionFactory
     public function reportNonIliasEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(
-            \ilEventoImportLogger::CREVENTO_MA_NON_ILIAS_EVENT,
+            \EventoImport\import\Logger::CREVENTO_MA_NON_ILIAS_EVENT,
             $evento_event->getEventoId(),
             null,
             $evento_event->getDecodedApiData(),
@@ -114,7 +114,7 @@ class EventActionFactory
     public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(
-            \ilEventoImportLogger::CREVENTO_MA_EVENT_LOCATION_UNKNOWN,
+            \EventoImport\import\Logger::CREVENTO_MA_EVENT_LOCATION_UNKNOWN,
             $evento_event->getEventoId(),
             null,
             $evento_event->getDecodedApiData(),

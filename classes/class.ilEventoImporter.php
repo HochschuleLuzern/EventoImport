@@ -1,6 +1,7 @@
 <?php declare(strict_types = 1);
 
 use EventoImport\communication\request_services\RequestClientService;
+use EventoImport\import\Logger;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -33,14 +34,14 @@ abstract class ilEventoImporter
     protected RequestClientService $data_source;
     protected int $seconds_before_retry;
     protected int $max_retries;
-    protected ilEventoImportLogger $evento_logger;
+    protected Logger $evento_logger;
     protected bool $has_more_data;
 
     public function __construct(
         RequestClientService $data_source,
         int $seconds_before_retry,
         int $max_retries,
-        ilEventoImportLogger $logger
+        Logger $logger
     ) {
         $this->data_source = $data_source;
         $this->seconds_before_retry = $seconds_before_retry;

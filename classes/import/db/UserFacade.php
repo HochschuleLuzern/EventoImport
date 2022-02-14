@@ -138,8 +138,8 @@ class UserFacade
 
     public function sendLoginChangedMail(\ilObjUser $ilias_user, string $old_login, EventoUser $evento_user)
     {
-        $mail = new \ilEventoimportMailNotification();
-        $mail->setType(\ilEventoimportMailNotification::MAIL_TYPE_USER_NAME_CHANGED);
+        $mail = new \EventoImport\import\ImportMailNotification();
+        $mail->setType(\EventoImport\import\ImportMailNotification::MAIL_TYPE_USER_NAME_CHANGED);
         $mail->setUserInformation(
             $ilias_user->getId(),
             $old_login,

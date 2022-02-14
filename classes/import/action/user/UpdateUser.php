@@ -17,7 +17,7 @@ class UpdateUser implements UserImportAction
     private UserFacade $user_facade;
     private DefaultUserSettings $default_user_settings;
     private EventoUserPhotoImporter $photo_importer;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
 
     public function __construct(
         EventoUser $evento_user,
@@ -25,7 +25,7 @@ class UpdateUser implements UserImportAction
         UserFacade $user_facade,
         DefaultUserSettings $default_user_settings,
         EventoUserPhotoImporter $photo_importer,
-        \ilEventoImportLogger $logger
+        \EventoImport\import\Logger $logger
     ) {
         $this->evento_user = $evento_user;
         $this->ilias_user = $ilias_user;
@@ -61,7 +61,7 @@ class UpdateUser implements UserImportAction
                 $this->user_facade->sendLoginChangedMail($this->ilias_user, $old_login, $this->evento_user);
 
                 $this->logger->logUserImport(
-                    \ilEventoImportLogger::CREVENTO_USR_RENAMED,
+                    \EventoImport\import\Logger::CREVENTO_USR_RENAMED,
                     $this->evento_user->getEventoId(),
                     $this->evento_user->getLoginName(),
                     [
@@ -73,7 +73,7 @@ class UpdateUser implements UserImportAction
             } else {
                 $this->logger->logException('UserImport - UpdateUser', 'Failed to change login from user with evento ID ' . $this->evento_user->getEventoId());
                 $this->logger->logUserImport(
-                    \ilEventoImportLogger::CREVENTO_USR_UPDATED,
+                    \EventoImport\import\Logger::CREVENTO_USR_UPDATED,
                     $this->evento_user->getEventoId(),
                     $this->evento_user->getLoginName(),
                     [
@@ -85,7 +85,7 @@ class UpdateUser implements UserImportAction
         } else {
             if (count($changed_user_data) > 0) {
                 $this->logger->logUserImport(
-                    \ilEventoImportLogger::CREVENTO_USR_UPDATED,
+                    \EventoImport\import\Logger::CREVENTO_USR_UPDATED,
                     $this->evento_user->getEventoId(),
                     $this->evento_user->getLoginName(),
                     [

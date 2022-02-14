@@ -16,10 +16,10 @@ class ConvertSingleEventToMultiGroupEvent implements EventAction
     private IliasEventObjectFactory $event_object_factory;
     private RepositoryFacade $repository_facade;
     private MembershipManager $membership_manager;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
     private int $log_code;
 
-    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
+    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, IliasEventObjectFactory $event_object_factory, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
     {
         $this->evento_event = $evento_event;
         $this->ilias_event = $ilias_event;
@@ -29,7 +29,7 @@ class ConvertSingleEventToMultiGroupEvent implements EventAction
         $this->repository_facade = $repository_facade;
         $this->membership_manager = $membership_manager;
         $this->logger = $logger;
-        $this->log_code = \ilEventoImportLogger::CREVENTO_MA_SINGLE_EVENT_TO_MULTI_GROUP_CONVERTED;
+        $this->log_code = \EventoImport\import\Logger::CREVENTO_MA_SINGLE_EVENT_TO_MULTI_GROUP_CONVERTED;
     }
 
     public function executeAction() : void

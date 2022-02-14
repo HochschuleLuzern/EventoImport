@@ -12,9 +12,9 @@ class RenameExistingCreateNew implements UserImportAction
     private \ilObjUser $old_user_to_rename;
     private string $found_by;
     private UserFacade $user_facade;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
 
-    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, UserFacade $user_facade, \ilEventoImportLogger $logger)
+    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, UserFacade $user_facade, \EventoImport\import\Logger $logger)
     {
         $this->new_evento_user = $new_evento_user;
         $this->create_action = $create_action;
@@ -50,7 +50,7 @@ class RenameExistingCreateNew implements UserImportAction
         $old_user->updateLogin($old_user->getLogin());
 
         $this->logger->logUserImport(
-            \ilEventoImportLogger::CREVENTO_USR_RENAMED,
+            \EventoImport\import\Logger::CREVENTO_USR_RENAMED,
             $old_user_evento_id,
             $old_user->getLogin(),
             ['changed_user_data' => $changed_user_data]

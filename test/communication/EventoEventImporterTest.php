@@ -2,6 +2,7 @@
 
 use EventoImport\communication\EventoEventImporter;
 use PHPUnit\Framework\TestCase;
+use EventoImport\import\Logger;
 
 class EventoEventImporterTest extends TestCase
 {
@@ -30,11 +31,11 @@ class EventoEventImporterTest extends TestCase
                         "data":[{"This data does not matter for the unit test": ""},{"This data does not matter for the unit test": ""},{"This data does not matter for the unit test": ""}]}';
         $request = $this->createStub(\EventoImport\communication\request_services\RequestClientService::class);
         $settings = $this->createMock(ilSetting::class);
-        $logger = $this->createStub(ilEventoImportLogger::class);
+        $logger = $this->createStub(Logger::class);
 
         $request->method('sendRequest')->willReturn($mock_json);
         $settings->method('get')->willReturn(null);
-        $obj = new EventoEventImporter(new \ilEventoImporterIterator($number_of_takes), $settings, $logger, $request);
+        $obj = new EventoEventImporter(new \EventoImport\communication\ImporterIterator($number_of_takes), $settings, $logger, $request);
 
         // Act
         $data = $obj->fetchNextEventDataSet();
@@ -56,11 +57,11 @@ class EventoEventImporterTest extends TestCase
                         "data":[{"This data does not matter for the unit test": ""},{"This data does not matter for the unit test": ""}]}';
         $request = $this->createStub(\EventoImport\communication\request_services\RequestClientService::class);
         $settings = $this->createMock(ilSetting::class);
-        $logger = $this->createStub(ilEventoImportLogger::class);
+        $logger = $this->createStub(Logger::class);
 
         $request->method('sendRequest')->willReturn($mock_json);
         $settings->method('get')->willReturn(null);
-        $obj = new EventoEventImporter(new \ilEventoImporterIterator($number_of_takes), $settings, $logger, $request);
+        $obj = new EventoEventImporter(new \EventoImport\communication\ImporterIterator($number_of_takes), $settings, $logger, $request);
 
         // Act
         $data = $obj->fetchNextEventDataSet();

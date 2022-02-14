@@ -29,7 +29,7 @@ class MembershipManager
         EventoUserRepository $user_repo,
         IliasEventoEventsRepository $event_repo,
         \ilFavouritesManager $favourites_manager,
-        \ilEventoImportLogger $logger,
+        \EventoImport\import\Logger $logger,
         RBACServices $rbac_services
     ) {
         $this->membership_repo = $membership_repo;
@@ -115,10 +115,10 @@ class MembershipManager
         foreach ($users_to_remove as $user_to_remove) {
             if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                 $participants_obj->delete($user_to_remove->getIliasUserId());
-                $this->logger->logEventMembership(\ilEventoImportLogger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
+                $this->logger->logEventMembership(\EventoImport\import\Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
             } else {
                 $this->logger->logEventMembership(
-                    \ilEventoImportLogger::CREVENTO_SUB_ALREADY_DEASSIGNED,
+                    \EventoImport\import\Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
                     $imported_event->getEventoId(),
                     $user_to_remove->getEventoUserId(),
                     0
@@ -174,10 +174,10 @@ class MembershipManager
             // Remove from main event
             if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                 $participants_obj->delete($user_to_remove->getIliasUserId());
-                $this->logger->logEventMembership(\ilEventoImportLogger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
+                $this->logger->logEventMembership(\EventoImport\import\Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
             } else {
                 $this->logger->logEventMembership(
-                    \ilEventoImportLogger::CREVENTO_SUB_ALREADY_DEASSIGNED,
+                    \EventoImport\import\Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
                     $imported_event->getEventoId(),
                     $user_to_remove->getEventoUserId(),
                     0

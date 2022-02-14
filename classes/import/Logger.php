@@ -1,31 +1,30 @@
-<?php declare(strict_types = 1);
+<?php declare(strict_types=1);
 /**
  * Copyright (c) 2017 Hochschule Luzern
- *
  * This file is part of the EventoImport-Plugin for ILIAS.
-
  * EventoImport-Plugin for ILIAS is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
-
  * EventoImport-Plugin for ILIAS is distributed in the hope that
  * it will be useful, but WITHOUT ANY WARRANTY; without even the implied
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
  * You should have received a copy of the GNU General Public License
  * along with EventoImport-Plugin for ILIAS.  If not,
  * see <http://www.gnu.org/licenses/>.
  */
 
+namespace EventoImport\import;
+
+use ilDBInterface;
+use ilLoggerFactory;
+
 /**
  * Class ilEventoImportLogger
- *
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
  */
-
-class ilEventoImportLogger
+class Logger
 {
     private $ilDB;
 
@@ -77,7 +76,7 @@ class ilEventoImportLogger
     const TABLE_LOG_USERS = 'crevento_log_users';
     const TABLE_LOG_EVENTS = 'crevento_log_events';
     const TABLE_LOG_MEMBERSHIPS = 'crevento_log_members';
-    
+
     public function __construct(ilDBInterface $db)
     {
         $this->ilDB = $db;
@@ -86,11 +85,13 @@ class ilEventoImportLogger
     public function logUserImport($log_info_code, $evento_id, $username, $import_data)
     {
         if ($log_info_code < 300 || $log_info_code >= 400) {
-            $this->logException("log", "Tried to log user import, info code of other import given instead: " . $log_info_code);
+            $this->logException("log",
+                "Tried to log user import, info code of other import given instead: " . $log_info_code);
             return;
         }
 
-        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_USERS . " WHERE evento_id = " . $this->ilDB->quote($evento_id, \ilDBConstants::T_INTEGER) . ' LIMIT 1');
+        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_USERS . " WHERE evento_id = " . $this->ilDB->quote($evento_id,
+                \ilDBConstants::T_INTEGER) . ' LIMIT 1');
 
         if (count($this->ilDB->fetchAll($r)) == 0) {
             $this->ilDB->insert(
@@ -127,11 +128,13 @@ class ilEventoImportLogger
     public function logEventImport(int $log_info_code, int $evento_id, ?int $ref_id, array $import_data)
     {
         if ($log_info_code < 200 || $log_info_code >= 300) {
-            $this->logException("log", "Tried to log user import, info code of other import given instead: " . $log_info_code);
+            $this->logException("log",
+                "Tried to log user import, info code of other import given instead: " . $log_info_code);
             return;
         }
 
-        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_EVENTS . " WHERE evento_id = " . $this->ilDB->quote($evento_id, \ilDBConstants::T_INTEGER) . ' LIMIT 1');
+        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_EVENTS . " WHERE evento_id = " . $this->ilDB->quote($evento_id,
+                \ilDBConstants::T_INTEGER) . ' LIMIT 1');
 
         if (count($this->ilDB->fetchAll($r)) == 0) {
             $this->ilDB->insert(
@@ -163,7 +166,8 @@ class ilEventoImportLogger
     public function logEventMembership(int $log_info_code, int $evento_event_id, int $evento_user_id, int $role_type)
     {
         if ($log_info_code < 100 || $log_info_code >= 200) {
-            $this->logException("log", "Tried to log membership import, info code of other import given instead: " . $log_info_code);
+            $this->logException("log",
+                "Tried to log membership import, info code of other import given instead: " . $log_info_code);
             return;
         }
         try {
@@ -176,25 +180,25 @@ class ilEventoImportLogger
                 $this->ilDB->insert(
                     self::TABLE_LOG_MEMBERSHIPS,
                     [
-                    'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
-                    'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id],
-                    'role_type' => [\ilDBConstants::T_INTEGER, $role_type],
-                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
-                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                ]
+                        'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
+                        'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id],
+                        'role_type' => [\ilDBConstants::T_INTEGER, $role_type],
+                        'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                        'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                    ]
                 );
             } else {
                 $this->ilDB->update(
                     self::TABLE_LOG_MEMBERSHIPS,
                     [
-                    'role_type' => [\ilDBConstants::T_INTEGER, $role_type],
-                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
-                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                ],
+                        'role_type' => [\ilDBConstants::T_INTEGER, $role_type],
+                        'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                        'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                    ],
                     [
-                    'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
-                    'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id]
-                ]
+                        'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
+                        'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id]
+                    ]
                 );
             }
         } catch (\Exception $e) {

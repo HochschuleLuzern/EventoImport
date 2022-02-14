@@ -15,14 +15,14 @@ class EventoUserPhotoImporter extends \ilEventoImporter
 
     /**
      * EventoUserPhotoImporter constructor.
-     * @param SingleDataRecordImport $data_record_importer
-     * @param \ilEventoImportLogger  $logger
+     * @param SingleDataRecordImport      $data_record_importer
+     * @param \EventoImport\import\Logger $logger
      */
     public function __construct(
         RequestClientService $data_source,
         int $seconds_before_retry,
         int $max_retries,
-        \ilEventoImportLogger $logger
+        \EventoImport\import\Logger $logger
     ) {
         parent::__construct($data_source, $seconds_before_retry, $max_retries, $logger);
 

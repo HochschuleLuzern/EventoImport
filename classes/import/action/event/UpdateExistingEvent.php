@@ -13,17 +13,17 @@ class UpdateExistingEvent implements EventAction
     private IliasEventoEvent $ilias_event;
     private RepositoryFacade $repository_facade;
     private MembershipManager $membership_manager;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
     private int $log_code;
 
-    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \ilEventoImportLogger $logger)
+    public function __construct(EventoEvent $evento_event, IliasEventoEvent $ilias_event, RepositoryFacade $repository_facade, MembershipManager $membership_manager, \EventoImport\import\Logger $logger)
     {
         $this->evento_event = $evento_event;
         $this->ilias_event = $ilias_event;
         $this->repository_facade = $repository_facade;
         $this->membership_manager = $membership_manager;
         $this->logger = $logger;
-        $this->log_code = \ilEventoImportLogger::CREVENTO_MA_SUBS_UPDATED;
+        $this->log_code = \EventoImport\import\Logger::CREVENTO_MA_SUBS_UPDATED;
     }
 
     public function executeAction() : void

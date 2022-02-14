@@ -10,18 +10,18 @@ class ConvertUserToLocalAuth implements UserDeleteAction
     private int $evento_id;
     private string $converted_auth_mode;
     private UserFacade $user_facade;
-    private \ilEventoImportLogger $logger;
+    private \EventoImport\import\Logger $logger;
     private int $log_info_code;
     private string $auth_mode;
 
-    public function __construct(\ilObjUser $ilias_user, int $evento_id, string $converted_auth_mode, UserFacade $user_facade, \ilEventoImportLogger $logger)
+    public function __construct(\ilObjUser $ilias_user, int $evento_id, string $converted_auth_mode, UserFacade $user_facade, \EventoImport\import\Logger $logger)
     {
         $this->ilias_user = $ilias_user;
         $this->evento_id = $evento_id;
         $this->converted_auth_mode = $converted_auth_mode;
         $this->user_facade = $user_facade;
         $this->logger = $logger;
-        $this->log_info_code = \ilEventoImportLogger::CREVENTO_USR_CONVERTED;
+        $this->log_info_code = \EventoImport\import\Logger::CREVENTO_USR_CONVERTED;
         $this->auth_mode = 'local';
     }
 

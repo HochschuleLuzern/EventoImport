@@ -9,7 +9,7 @@ class ReportUserImportDatasetWithoutAction extends ReportDatasetWithoutAction im
     private int $evento_id;
     private string $user_name;
 
-    public function __construct(int $log_info_code, int $evento_id, string $user_name, array $error_data, \ilEventoImportLogger $logger)
+    public function __construct(int $log_info_code, int $evento_id, string $user_name, array $error_data, \EventoImport\import\Logger $logger)
     {
         $this->evento_id = $evento_id;
         $this->user_name = $user_name;

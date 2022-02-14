@@ -12,14 +12,14 @@ class EventoUserImporter extends \ilEventoImporter
     use SingleDataRecordImport;
     use DataSetImport;
 
-    private \ilEventoImporterIterator $iterator;
+    private \EventoImport\communication\ImporterIterator $iterator;
     protected string $fetch_data_set_method;
     protected string $fetch_data_record_method;
 
     public function __construct(
         RequestClientService $data_source,
-        \ilEventoImporterIterator $iterator,
-        \ilEventoImportLogger $logger,
+        \EventoImport\communication\ImporterIterator $iterator,
+        \EventoImport\import\Logger $logger,
         int $seconds_before_retry,
         int $max_retries
     ) {
