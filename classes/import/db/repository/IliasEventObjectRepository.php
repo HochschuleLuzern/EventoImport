@@ -90,8 +90,10 @@ class IliasEventObjectRepository
 
     public function getEventByEventoId(int $evento_id) : ?IliasEventoEvent
     {
-        $query = "SELECT * FROM " . IliasEventoEvents::TABLE_NAME . " WHERE " . IliasEventoEvents::COL_EVENTO_ID . " = " . $this->db->quote($evento_id,
-                \ilDBConstants::T_INTEGER);
+        $query = "SELECT * FROM " . IliasEventoEvents::TABLE_NAME . " WHERE " . IliasEventoEvents::COL_EVENTO_ID . " = " . $this->db->quote(
+            $evento_id,
+            \ilDBConstants::T_INTEGER
+        );
 
         $result = $this->db->query($query);
         if ($row = $this->db->fetchAssoc($result)) {
@@ -103,8 +105,10 @@ class IliasEventObjectRepository
 
     public function getParentEventbyGroupUniqueKey(string $group_unique_key) : ?IliasEventoParentEvent
     {
-        $query = 'SELECT * FROM ' . IliasParentEvents::TABLE_NAME . ' WHERE ' . IliasParentEvents::COL_GROUP_UNIQUE_KEY . ' = ' . $this->db->quote($group_unique_key,
-                \ilDBConstants::T_TEXT);
+        $query = 'SELECT * FROM ' . IliasParentEvents::TABLE_NAME . ' WHERE ' . IliasParentEvents::COL_GROUP_UNIQUE_KEY . ' = ' . $this->db->quote(
+            $group_unique_key,
+            \ilDBConstants::T_TEXT
+        );
         $result = $this->db->query($query);
 
         if ($row = $this->db->fetchAssoc($result)) {

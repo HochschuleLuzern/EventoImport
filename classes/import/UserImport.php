@@ -3,8 +3,9 @@
 namespace EventoImport\import;
 
 use EventoImport\communication\EventoUserImporter;
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 use EventoImport\import\data_matching\UserActionDecider;
+use EventoImport\import\db\repository\IliasEventoUserRepository;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -24,7 +25,8 @@ use EventoImport\import\data_matching\UserActionDecider;
 class UserImport
 {
     private EventoUserImporter $evento_importer;
-    private UserFacade $user_facade;
+    private IliasUserServices $user_facade;
+    private IliasEventoUserRepository $ilias_evento_user_repo;
     private UserActionDecider $user_import_action_decider;
     private Logger $evento_logger;
     private \ilDBInterface $db;
@@ -32,13 +34,15 @@ class UserImport
     public function __construct(
         EventoUserImporter $importer,
         UserActionDecider $user_import_action_decider,
-        UserFacade $user_facade,
+        IliasUserServices $user_facade,
+        IliasEventoUserRepository $ilias_evento_user_repo,
         Logger $logger,
         \ilDBInterface $db
     ) {
         $this->evento_importer = $importer;
         $this->user_import_action_decider = $user_import_action_decider;
         $this->user_facade = $user_facade;
+        $this->ilias_evento_user_repo = $ilias_evento_user_repo;
         $this->evento_logger = $logger;
         $this->db = $db;
     }
@@ -83,18 +87,18 @@ class UserImport
      */
     private function convertDeletedAccounts()
     {
-        $list = $this->user_facade->eventoUserRepository()->fetchUsersWithLastImportOlderThanOneWeek();
+        $list = $this->ilias_evento_user_repo->getUsersWithLastImportOlderThanOneWeek();
 
         foreach ($list as $evento_id => $ilias_user_id) {
             try {
                 // Ensure that the user is not being returned by the api right now
                 $result = $this->evento_importer->fetchUserDataRecordById($evento_id);
 
-                if (is_null($result) || (is_array($result) && count($result) < 1)) {
+                if (is_null($result)) {
                     $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
                     $action->executeAction();
                 } else {
-                    $this->user_facade->eventoUserRepository()->registerUserAsDelivered($result['id']);
+                    $this->ilias_evento_user_repo->registerUserAsDelivered($result->getEventoId());
                 }
             } catch (\Exception $e) {
             }

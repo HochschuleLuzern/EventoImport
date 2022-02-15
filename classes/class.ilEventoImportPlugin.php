@@ -94,7 +94,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
             'crnhk_crevento_usrs',
             'crnhk_crevento_mas',
             'crnhk_crevento_subs',
-            Repository\EventoUserRepository::TABLE_NAME,
+            Repository\IliasEventoUserRepository::TABLE_NAME,
             Repository\IliasEventoEventsRepository::TABLE_NAME,
             Repository\ParentEventRepository::TABLE_NAME,
             Repository\EventLocationsRepository::TABLE_NAME,

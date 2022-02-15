@@ -24,22 +24,18 @@ class ParentEventRepository
 
     private function buildParentEventObjectFromRow($row) : IliasEventoParentEvent
     {
-
     }
 
     public function addNewParentEvent(\EventoImport\import\db\model\IliasEventoParentEvent $parent_event) : void
     {
-
     }
 
     public function fetchParentEventByGroupUniqueKey(string $group_unique_key) : ?IliasEventoParentEvent
     {
-
     }
 
     public function fetchParentEventForName(string $name) : ?IliasEventoParentEvent
     {
-
     }
 
     public function fetchParentEventForRefId(int $ref_id)
@@ -56,11 +52,9 @@ class ParentEventRepository
 
     public function removeParentEventIfItHasNoChildEvent(string $parent_event_key)
     {
-
     }
 
     private function removeParentEvent(string $parent_event_key)
     {
-
     }
 }

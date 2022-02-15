@@ -20,7 +20,7 @@ class EventoImportDataSetResponse
     {
         $this->success = $this->validateAndReturnBoolean($json_response, self::JSON_SUCCESS);
         $this->has_more_data = $this->validateAndReturnBoolean($json_response, self::JSON_HAS_MORE_DATA);
-        $this->success = $this->validateAndReturnString($json_response, self::JSON_MESSAGE);
+        $this->message = $this->validateAndReturnString($json_response, self::JSON_MESSAGE);
         $this->data = $this->validateAndReturnArray($json_response, self::JSON_DATA);
 
         if (count($this->key_errors) > 0) {

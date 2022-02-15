@@ -31,23 +31,19 @@ class IliasEventoEventsRepository
 
     private function toDateTimeOrNull(?string $db_value)
     {
-
     }
 
     private function buildIliasEventoEventFromRow($row)
     {
-
     }
 
 
     public function addNewEventoIliasEvent(IliasEventoEvent $ilias_evento_event)
     {
-
     }
 
     public function getEventByEventoId(int $evento_id) : ?IliasEventoEvent
     {
-
     }
 
     private function dateTimeToDBFormatOrNull(?\DateTime $date_time) : ?string
@@ -56,11 +52,9 @@ class IliasEventoEventsRepository
 
     public function updateIliasEventoEvent(IliasEventoEvent $updated_obj)
     {
-
     }
 
     public function removeEventoEvent(IliasEventoEvent $ilias_evento_event)
     {
-
     }
 }

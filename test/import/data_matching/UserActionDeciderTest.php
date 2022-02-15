@@ -3,11 +3,11 @@
 namespace EventoImport\import\data_matching;
 
 use PHPUnit\Framework\TestCase;
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\action\user\CreateUser;
-use EventoImport\import\db\repository\EventoUserRepository;
+use EventoImport\import\db\repository\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoEvent;
 
 class UserActionDeciderTest extends TestCase
@@ -22,12 +22,12 @@ class UserActionDeciderTest extends TestCase
         $evento_id = 5;
         $login_name = 'login';
         $evento_user = new \MockEventoUser([EventoUser::JSON_ID => $evento_id, EventoUser::JSON_LOGIN_NAME => $login_name]);
-        $event_repo = $this->createMock(EventoUserRepository::class);
+        $event_repo = $this->createMock(IliasEventoUserRepository::class);
         $event_repo->expects($this->once())
                     ->method('getIliasUserIdByEventoId')
                     ->with($this->equalTo($evento_id))
                     ->willReturn(null);
-        $user_facade = $this->createMock(UserFacade::class);
+        $user_facade = $this->createMock(IliasUserServices::class);
         $user_facade->expects($this->once())
                     ->method('eventoUserRepository')
                     ->willReturn($event_repo);

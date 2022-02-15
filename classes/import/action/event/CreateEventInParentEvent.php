@@ -5,7 +5,7 @@ namespace EventoImport\import\action\event;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\IliasEventObjectService;
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\MembershipManager;
 

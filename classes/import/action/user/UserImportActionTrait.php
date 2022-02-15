@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\import\settings\DefaultUserSettings;
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 use ILIAS\DI\RBACServices;
 
 trait UserImportActionTrait
@@ -72,27 +72,16 @@ trait UserImportActionTrait
         $ilias_user->writePrefs();
     }
 
-    protected function synchronizeUserWithGlobalRoles(int $user_id, array $imported_evento_roles, DefaultUserSettings $user_settings, RBACServices $rbac_services) : void
+    protected function synchronizeUserWithGlobalRoles(int $user_id, array $imported_evento_roles, DefaultUserSettings $user_settings, IliasUserServices $ilias_user_service) : void
     {
-        $review = $rbac_services->review();
-        $admin = $rbac_services->admin();
-
-        // Assign default user role if not assigned
-        if (!$review->isAssigned($user_id, $user_settings->getDefaultUserRoleId())) {
-            $admin->assignUser($user_settings->getDefaultUserRoleId(), $user_id);
-        }
+        $ilias_user_service->assignUserToRole($user_id, $user_settings->getDefaultUserRoleId());
 
         // Set ilias roles according to given evento roles
         foreach ($user_settings->getEventoCodeToIliasRoleMapping() as $evento_role_code => $ilias_role_id) {
-
-            // Assign if import delivers role but user is not assigned
-            if (in_array($evento_role_code, $imported_evento_roles) && !$review->isAssigned($user_id, $ilias_role_id)) {
-                $admin->assignUser($ilias_role_id, $user_id);
+            if (in_array($evento_role_code, $imported_evento_roles)) {
+                $ilias_user_service->assignUserToRole($user_id, $ilias_role_id);
             } else {
-                // Deassign if import does not deliver role but user is assigned
-                if (!in_array($evento_role_code, $imported_evento_roles) && $review->isAssigned($user_id, $ilias_role_id)) {
-                    $admin->deassignUser($ilias_role_id, $user_id);
-                }
+                $ilias_user_service->deassignUserFromRole($user_id, $ilias_role_id);
             }
         }
     }

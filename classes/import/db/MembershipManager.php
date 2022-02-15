@@ -5,7 +5,7 @@ namespace EventoImport\import\db;
 use EventoImport\import\db\repository\EventMembershipRepository;
 use ILIAS\DI\RBACServices;
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\db\repository\EventoUserRepository;
+use EventoImport\import\db\repository\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoUserShort;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
@@ -26,7 +26,7 @@ class MembershipManager
 
     public function __construct(
         EventMembershipRepository $membership_repo,
-        EventoUserRepository $user_repo,
+        IliasEventoUserRepository $user_repo,
         IliasEventoEventsRepository $event_repo,
         \ilFavouritesManager $favourites_manager,
         \EventoImport\import\Logger $logger,

@@ -3,9 +3,11 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
+use EventoImport\import\Logger;
+use EventoImport\import\db\repository\IliasEventoUserRepository;
 
 class CreateUser implements UserImportAction
 {
@@ -13,20 +15,23 @@ class CreateUser implements UserImportAction
     use UserImportActionTrait;
 
     private EventoUser $evento_user;
-    private UserFacade $user_facade;
+    private IliasUserServices $user_facade;
+    private IliasEventoUserRepository $ilias_evento_user_repo;
     protected DefaultUserSettings $default_user_settings;
     private EventoUserPhotoImporter $photo_importer;
-    private \EventoImport\import\Logger $logger;
+    private Logger $logger;
 
     public function __construct(
         EventoUser $evento_user,
-        UserFacade $user_facade,
+        IliasUserServices $user_facade,
+        IliasEventoUserRepository $ilias_evento_user_repository,
         DefaultUserSettings $default_user_settings,
         EventoUserPhotoImporter $photo_importer,
-        \EventoImport\import\Logger $logger
+        Logger $logger
     ) {
         $this->evento_user = $evento_user;
         $this->user_facade = $user_facade;
+        $this->ilias_evento_user_repo = $ilias_evento_user_repository;
         $this->default_user_settings = $default_user_settings;
         $this->photo_importer = $photo_importer;
         $this->logger = $logger;
@@ -50,16 +55,16 @@ class CreateUser implements UserImportAction
             $ilias_user_object->getId(),
             $this->evento_user->getRoles(),
             $this->default_user_settings,
-            $this->user_facade->rbacServices()
+            $this->user_facade
         );
 
         // Import and set User Photos
         $this->importAndSetUserPhoto($this->evento_user->getEventoId(), $ilias_user_object, $this->photo_importer, $this->user_facade);
 
         // Create map from evento to ilias user and log this to log-table
-        $this->user_facade->eventoUserRepository()->addNewEventoIliasUser($this->evento_user, $ilias_user_object);
+        $this->ilias_evento_user_repo->addNewEventoIliasUser($this->evento_user, $ilias_user_object);
         $this->logger->logUserImport(
-            \EventoImport\import\Logger::CREVENTO_USR_CREATED,
+            Logger::CREVENTO_USR_CREATED,
             $this->evento_user->getEventoId(),
             $this->evento_user->getLoginName(),
             ['api_data' => $this->evento_user->getDecodedApiData()]
@@ -80,7 +85,7 @@ class CreateUser implements UserImportAction
         $ilias_user->setExternalAccount($evento_user->getEventoId() . '@hslu.ch');
     }
 
-    private function setUsersDefaultSettings(\ilObjUser $ilias_user_object, DefaultUserSettings $user_settings, UserFacade $user_facade) : void
+    private function setUsersDefaultSettings(\ilObjUser $ilias_user_object, DefaultUserSettings $user_settings, IliasUserServices $user_facade) : void
     {
         $ilias_user_object->setActive(true);
         $ilias_user_object->setTimeLimitFrom($this->default_user_settings->getNow()->getTimestamp());

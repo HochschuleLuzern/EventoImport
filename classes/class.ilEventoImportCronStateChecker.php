@@ -12,7 +12,7 @@ class ilEventoImportCronStateChecker
     public function wasFullImportAlreadyRunToday() : bool
     {
         // Try to get the date from the last run
-        $sql = "SELECT * FROM cron_job WHERE job_id = " . $this->db->quote(self::ID, \ilDBConstants::T_TEXT);
+        $sql = "SELECT * FROM cron_job WHERE job_id = " . $this->db->quote(ilEventoImportImport::ID, \ilDBConstants::T_TEXT);
         $res = $this->db->query($sql);
         $cron = $this->db->fetchAssoc($res);
 

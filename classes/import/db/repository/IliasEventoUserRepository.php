@@ -4,7 +4,7 @@ namespace EventoImport\import\db\repository;
 
 use EventoImport\communication\api_models\EventoUser;
 
-class EventoUserRepository
+class IliasEventoUserRepository
 {
     public const TABLE_NAME = 'crevento_evnto_usrs';
 
@@ -18,7 +18,7 @@ class EventoUserRepository
         $this->db = $db;
     }
 
-    public function addNewEventoIliasUser(EventoUser $evento_user, \ilObjUser $ilias_user)
+    public function addNewEventoIliasUser(EventoUser $evento_user, \ilObjUser $ilias_user) : void
     {
         $this->db->insert(
             // INSERT INTO
@@ -40,7 +40,7 @@ class EventoUserRepository
         $result = $this->db->query($query);
 
         if ($data = $this->db->fetchAssoc($result)) {
-            return $data[self::COL_ILIAS_USER_ID];
+            return (int) $data[self::COL_ILIAS_USER_ID];
         }
 
         return null;
@@ -60,7 +60,7 @@ class EventoUserRepository
         return $user_ids;
     }
 
-    public function registerUserAsDelivered(int $evento_id)
+    public function registerUserAsDelivered(int $evento_id) : void
     {
         $this->db->update(
             self::TABLE_NAME,
@@ -73,7 +73,7 @@ class EventoUserRepository
         );
     }
 
-    public function fetchUsersWithLastImportOlderThanOneWeek()
+    public function getUsersWithLastImportOlderThanOneWeek() : array
     {
         $query = 'SELECT ' . self::COL_EVENTO_ID . ', ' . self::COL_ILIAS_USER_ID . ' FROM ' . self::TABLE_NAME
             . ' WHERE ' . self::COL_LAST_TIME_DELIVERED . ' < ' . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME);
@@ -88,7 +88,7 @@ class EventoUserRepository
         return $not_imported_users;
     }
 
-    public function deleteEventoUser(int $evento_id)
+    public function deleteEventoIliasUserConnectionByEventoId(int $evento_id) : void
     {
         $query = "DELETE FROM " . self::TABLE_NAME . " WHERE " . self::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
         $this->db->manipulate($query);

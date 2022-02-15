@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 
 class RenameExistingCreateNew implements UserImportAction
 {
@@ -11,10 +11,10 @@ class RenameExistingCreateNew implements UserImportAction
     private EventoUser $new_evento_user;
     private \ilObjUser $old_user_to_rename;
     private string $found_by;
-    private UserFacade $user_facade;
+    private IliasUserServices $user_facade;
     private \EventoImport\import\Logger $logger;
 
-    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, UserFacade $user_facade, \EventoImport\import\Logger $logger)
+    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, IliasUserServices $user_facade, \EventoImport\import\Logger $logger)
     {
         $this->new_evento_user = $new_evento_user;
         $this->create_action = $create_action;

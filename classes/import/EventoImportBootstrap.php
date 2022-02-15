@@ -3,10 +3,10 @@
 namespace EventoImport\import;
 
 use ILIAS\DI\RBACServices;
-use EventoImport\import\db\repository\EventoUserRepository;
+use EventoImport\import\db\repository\IliasEventoUserRepository;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\import\db\query\IliasUserQuerying;
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 use EventoImport\import\db\query\IliasEventObjectQuery;
 use EventoImport\import\db\IliasEventObjectService;
 use EventoImport\import\db\repository\EventMembershipRepository;
@@ -29,9 +29,9 @@ class EventoImportBootstrap
     /***************************
      ** User related objects **
      ***************************/
-    private EventoUserRepository $evento_user_repository;
+    private IliasEventoUserRepository $evento_user_repository;
     private IliasUserQuerying $user_query;
-    private UserFacade $user_facade;
+    private IliasUserServices $user_facade;
 
     /***************************
      ** Event related objects **
@@ -65,10 +65,10 @@ class EventoImportBootstrap
         return $this->logger;
     }
 
-    public function eventoUserRepository() : EventoUserRepository
+    public function eventoUserRepository() : IliasEventoUserRepository
     {
         if (!isset($this->evento_user_repository)) {
-            $this->evento_user_repository = new EventoUserRepository($this->db);
+            $this->evento_user_repository = new IliasEventoUserRepository($this->db);
         }
         return $this->evento_user_repository;
     }
@@ -89,13 +89,11 @@ class EventoImportBootstrap
         return $this->membership_repo;
     }
 
-    public function userFacade() : UserFacade
+    public function userFacade() : IliasUserServices
     {
         if (!isset($this->user_facade)) {
-            $this->user_facade = new UserFacade(
-                $this->iliasUserQuery(),
-                $this->eventoUserRepository(),
-                $this->membershipRepo(),
+            $this->user_facade = new IliasUserServices(
+                $this->db,
                 $this->rbac_services
             );
         }

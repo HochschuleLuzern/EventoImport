@@ -46,7 +46,7 @@ use EventoImport\communication\ImporterIterator;
 
 class ilEventoImportImport extends ilCronJob
 {
-    const ID = "crevento_import";
+    public const ID = "crevento_import";
     
     private RBACServices $rbac;
     private ilDBInterface $db;
@@ -54,8 +54,6 @@ class ilEventoImportImport extends ilCronJob
     private Factory $refinery;
     private \ilEventoImportPlugin $cp;
     private ilSetting $settings;
-    private $importUsersConfig;
-    private int $page_size;
     private ilEventoImportCronStateChecker $import_state_checker;
 
     private EventoImportBootstrap $import_bootstrapping;
@@ -75,8 +73,6 @@ class ilEventoImportImport extends ilCronJob
         $this->import_state_checker = new ilEventoImportCronStateChecker($this->db);
         
         $this->import_bootstrapping = new EventoImportBootstrap($this->db, $this->rbac, $this->settings);
-
-        $this->page_size = 500;
     }
     
     public function getId() : string
@@ -137,6 +133,7 @@ class ilEventoImportImport extends ilCronJob
                 $api_settings->getApikey(),
                 $api_settings->getApiSecret()
             );
+            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
 
             if ($this->import_state_checker->wasFullImportAlreadyRunToday()) {
                 $this->runHourlyAdminImport($data_source, $api_settings, $logger);
@@ -154,7 +151,7 @@ class ilEventoImportImport extends ilCronJob
     {
         $user_importer = new EventoUserImporter(
             $data_source,
-            new ImporterIterator($this->page_size),
+            new ImporterIterator($api_settings->getPageSize()),
             $logger,
             $api_settings->getTimeoutFailedRequest(),
             $api_settings->getMaxRetries()
@@ -162,7 +159,7 @@ class ilEventoImportImport extends ilCronJob
 
         $event_importer = new EventoEventImporter(
             $data_source,
-            new ImporterIterator($this->page_size),
+            new ImporterIterator($api_settings->getPageSize()),
             $logger,
             $api_settings->getTimeoutFailedRequest(),
             $api_settings->getMaxRetries()
@@ -177,6 +174,7 @@ class ilEventoImportImport extends ilCronJob
         
         $user_action_factory = new UserActionFactory(
             $this->import_bootstrapping->userFacade(),
+            $this->import_bootstrapping->eventoUserRepository(),
             $this->import_bootstrapping->defaultUserSettings(),
             $user_photo_importer,
             $logger
@@ -184,6 +182,7 @@ class ilEventoImportImport extends ilCronJob
 
         $user_import_action_decider = new UserActionDecider(
             $this->import_bootstrapping->userFacade(),
+            $this->import_bootstrapping->eventoUserRepository(),
             $user_action_factory
         );
 
@@ -191,6 +190,7 @@ class ilEventoImportImport extends ilCronJob
             $user_importer,
             $user_import_action_decider,
             $this->import_bootstrapping->userFacade(),
+            $this->import_bootstrapping->eventoUserRepository(),
             $logger,
             $this->db
         );
@@ -208,7 +208,7 @@ class ilEventoImportImport extends ilCronJob
         );
 
         $import_events = new EventAndMembershipImport($event_importer, $event_action_decider, $logger);
-        $import_events->run();
+        //$import_events->run();
     }
 
     public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \EventoImport\import\Logger $logger) : void

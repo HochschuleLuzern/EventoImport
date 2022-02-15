@@ -3,9 +3,11 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
+use EventoImport\import\db\repository\IliasEventoUserRepository;
+use EventoImport\import\Logger;
 
 class UpdateUser implements UserImportAction
 {
@@ -14,22 +16,25 @@ class UpdateUser implements UserImportAction
 
     private EventoUser $evento_user;
     private \ilObjUser $ilias_user;
-    private UserFacade $user_facade;
+    private IliasUserServices $user_facade;
+    private IliasEventoUserRepository $ilias_evento_user_repository;
     private DefaultUserSettings $default_user_settings;
     private EventoUserPhotoImporter $photo_importer;
-    private \EventoImport\import\Logger $logger;
+    private Logger $logger;
 
     public function __construct(
         EventoUser $evento_user,
         \ilObjUser $ilias_user,
-        UserFacade $user_facade,
+        IliasUserServices $user_facade,
+        IliasEventoUserRepository $ilias_evento_user_repository,
         DefaultUserSettings $default_user_settings,
         EventoUserPhotoImporter $photo_importer,
-        \EventoImport\import\Logger $logger
+        Logger $logger
     ) {
         $this->evento_user = $evento_user;
         $this->ilias_user = $ilias_user;
         $this->user_facade = $user_facade;
+        $this->ilias_evento_user_repository = $ilias_evento_user_repository;
         $this->default_user_settings = $default_user_settings;
         $this->photo_importer = $photo_importer;
         $this->logger = $logger;
@@ -37,7 +42,7 @@ class UpdateUser implements UserImportAction
 
     public function executeAction() : void
     {
-        $this->user_facade->eventoUserRepository()->registerUserAsDelivered(
+        $this->ilias_evento_user_repository->registerUserAsDelivered(
             $this->evento_user->getEventoId()
         );
 
@@ -47,7 +52,7 @@ class UpdateUser implements UserImportAction
             $this->ilias_user->getId(),
             $this->evento_user->getRoles(),
             $this->default_user_settings,
-            $this->user_facade->rbacServices()
+            $this->user_facade
         );
 
         if (!$this->user_facade->userHasPersonalPicture($this->ilias_user)) {
@@ -61,31 +66,31 @@ class UpdateUser implements UserImportAction
                 $this->user_facade->sendLoginChangedMail($this->ilias_user, $old_login, $this->evento_user);
 
                 $this->logger->logUserImport(
-                    \EventoImport\import\Logger::CREVENTO_USR_RENAMED,
+                    Logger::CREVENTO_USR_RENAMED,
                     $this->evento_user->getEventoId(),
                     $this->evento_user->getLoginName(),
                     [
-                            'api_data' => $this->evento_user->getDecodedApiData(),
-                            'old_login' => $old_login,
-                            'changed_user_data' => $changed_user_data
-                        ]
+                        'api_data' => $this->evento_user->getDecodedApiData(),
+                        'old_login' => $old_login,
+                        'changed_user_data' => $changed_user_data
+                    ]
                 );
             } else {
                 $this->logger->logException('UserImport - UpdateUser', 'Failed to change login from user with evento ID ' . $this->evento_user->getEventoId());
                 $this->logger->logUserImport(
-                    \EventoImport\import\Logger::CREVENTO_USR_UPDATED,
+                    Logger::CREVENTO_USR_UPDATED,
                     $this->evento_user->getEventoId(),
                     $this->evento_user->getLoginName(),
                     [
-                            'api_data' => $this->evento_user->getDecodedApiData(),
-                            'changed_user_data' => $changed_user_data
-                        ]
+                        'api_data' => $this->evento_user->getDecodedApiData(),
+                        'changed_user_data' => $changed_user_data
+                    ]
                 );
             }
         } else {
             if (count($changed_user_data) > 0) {
                 $this->logger->logUserImport(
-                    \EventoImport\import\Logger::CREVENTO_USR_UPDATED,
+                    Logger::CREVENTO_USR_UPDATED,
                     $this->evento_user->getEventoId(),
                     $this->evento_user->getLoginName(),
                     [

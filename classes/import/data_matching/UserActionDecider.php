@@ -2,19 +2,23 @@
 
 namespace EventoImport\import\data_matching;
 
-use EventoImport\import\db\UserFacade;
+use EventoImport\import\db\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\api_models\EventoUser;
+use EventoImport\import\db\model\IliasEventoUser;
+use EventoImport\import\db\repository\IliasEventoUserRepository;
 
 class UserActionDecider
 {
-    private UserFacade $user_facade;
+    private IliasUserServices $user_facade;
     private UserActionFactory $action_factory;
+    private IliasEventoUserRepository $ilias_evento_user_repo;
 
-    public function __construct(UserFacade $user_facade, UserActionFactory $action_factory)
+    public function __construct(IliasUserServices $user_facade, IliasEventoUserRepository $ilias_evento_user_repo, UserActionFactory $action_factory)
     {
         $this->user_facade = $user_facade;
+        $this->ilias_evento_user_repo = $ilias_evento_user_repo;
         $this->action_factory = $action_factory;
     }
 
@@ -22,13 +26,13 @@ class UserActionDecider
         EventoUser $evento_user,
         int $ilias_user_id
     ) {
-        $ilias_user = $this->user_facade->getExistingIliasUserObject($ilias_user_id);
-        $this->user_facade->eventoUserRepository()->addNewEventoIliasUser($evento_user, $ilias_user);
+        $ilias_user = $this->user_facade->getExistingIliasUserObjectById($ilias_user_id);
+        $this->ilias_evento_user_repo->addNewEventoIliasUser($evento_user, $ilias_user);
     }
 
     public function determineImportAction(EventoUser $evento_user) : EventoImportAction
     {
-        $user_id = $this->user_facade->eventoUserRepository()->getIliasUserIdByEventoId($evento_user->getEventoId());
+        $user_id = $this->ilias_evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
 
         if (!is_null($user_id)) {
             return $this->action_factory->buildUpdateAction($evento_user, $user_id);
@@ -37,12 +41,12 @@ class UserActionDecider
         return $this->matchToIliasUsersAndDetermineAction($evento_user);
     }
 
-    private function matchToIliasUsersAndDetermineAction(EventoUser $evento_user) : EventoImportAction {
-        $data['id_by_login'] = $this->user_facade->fetchUserIdByLogin($evento_user->getLoginName());
-        $data['ids_by_matriculation'] = $this->user_facade->fetchUserIdsByEventoId($evento_user->getEventoId());
-        $data['ids_by_email'] = $this->user_facade->fetchUserIdsByEmail($evento_user->getEmailList());
+    private function matchToIliasUsersAndDetermineAction(EventoUser $evento_user) : EventoImportAction
+    {
+        $data['id_by_login'] = $this->user_facade->getUserIdByLogin($evento_user->getLoginName());
+        $data['ids_by_matriculation'] = $this->user_facade->getUserIdsByEventoId($evento_user->getEventoId());
+        $data['ids_by_email'] = $this->user_facade->getUserIdsByEmailAddresses($evento_user->getEmailList());
 
-        $usrId = 0;
 
         if (count($data['ids_by_matriculation']) == 0 &&
             $data['id_by_login'] == 0 &&
@@ -60,7 +64,7 @@ class UserActionDecider
                 // We couldn't find a user account by matriculation, but we found
                 // one by login.
 
-                $user_obj_by_login = $this->user_facade->getExistingIliasUserObject($data['id_by_login']);
+                $user_obj_by_login = $this->user_facade->getExistingIliasUserObjectById($data['id_by_login']);
 
                 if (substr($user_obj_by_login->getMatriculation(), 0, 7) == 'Evento:') {
                     // The user account by login has a different evento number.
@@ -103,7 +107,7 @@ class UserActionDecider
 
                     // We couldn't find a user account by matriculation, but we found
                     // one by e-mail.
-                    $user_obj_by_mail = $this->user_facade->getExistingIliasUserObject($data['ids_by_email'][0]);
+                    $user_obj_by_mail = $this->user_facade->getExistingIliasUserObjectById($data['ids_by_email'][0]);
 
                     if (substr($user_obj_by_mail->getMatriculation(), 0, 7) == 'Evento:') {
                         // The user account by e-mail has a different evento number.
@@ -161,7 +165,7 @@ class UserActionDecider
                                 // We found a user account by matriculation but with the wrong
                                 // login. The login is taken by another user account.
                                 // --> Rename and deactivate conflicting account, then update user account.
-                                $user_obj_by_login = $this->user_facade->getExistingIliasUserObject($data['id_by_login']);
+                                $user_obj_by_login = $this->user_facade->getExistingIliasUserObjectById($data['id_by_login']);
                                 $result = $this->action_factory->buildRenameExistingAndCreateNewAction(
                                     $evento_user,
                                     $user_obj_by_login,
@@ -181,7 +185,7 @@ class UserActionDecider
 
     public function determineDeleteAction(int $ilias_id, int $evento_id) : EventoImportAction
     {
-        $ilias_user_object = $this->user_facade->getExistingIliasUserObject($ilias_id);
+        $ilias_user_object = $this->user_facade->getExistingIliasUserObjectById($ilias_id);
 
         if ($this->user_facade->userWasStudent($ilias_user_object)) {
             return $this->action_factory->buildConvertUserAuth($ilias_user_object, $evento_id);

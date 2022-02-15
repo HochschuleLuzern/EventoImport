@@ -145,28 +145,28 @@
 <#2>
 <?php
 
-$table_name = \EventoImport\import\db\repository\EventoUserRepository::TABLE_NAME;
+$table_name = \EventoImport\import\db\repository\IliasEventoUserRepository::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
     $fields = array(
-        \EventoImport\import\db\repository\EventoUserRepository::COL_EVENTO_ID => array(
+        \EventoImport\import\db\repository\IliasEventoUserRepository::COL_EVENTO_ID => array(
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
         ),
-        \EventoImport\import\db\repository\EventoUserRepository::COL_ILIAS_USER_ID => array(
+        \EventoImport\import\db\repository\IliasEventoUserRepository::COL_ILIAS_USER_ID => array(
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
         ),
-        \EventoImport\import\db\repository\EventoUserRepository::COL_LAST_TIME_DELIVERED => array(
+        \EventoImport\import\db\repository\IliasEventoUserRepository::COL_LAST_TIME_DELIVERED => array(
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
         )
     );
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, [\EventoImport\import\db\repository\EventoUserRepository::COL_EVENTO_ID]);
-    $ilDB->addUniqueConstraint($table_name, [\EventoImport\import\db\repository\EventoUserRepository::COL_ILIAS_USER_ID], 'usr');
+    $ilDB->addPrimaryKey($table_name, [\EventoImport\import\db\repository\IliasEventoUserRepository::COL_EVENTO_ID]);
+    $ilDB->addUniqueConstraint($table_name, [\EventoImport\import\db\repository\IliasEventoUserRepository::COL_ILIAS_USER_ID], 'usr');
 }
 
 ?>
