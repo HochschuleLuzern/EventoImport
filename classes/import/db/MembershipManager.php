@@ -10,8 +10,9 @@ use EventoImport\communication\api_models\EventoUserShort;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\import\db\model\IliasEventoUser;
-use EventoImport\import\db\query\MembershipableObjectsQuery;
+use EventoImport\import\db\query\MembershipablesInTreeSeeker;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
+use EventoImport\import\Logger;
 
 class MembershipManager
 {
@@ -23,23 +24,25 @@ class MembershipManager
 
     private const ROLE_ADMIN = 1;
     private const ROLE_MEMBER = 2;
+    private IliasEventoUserRepository $user_repo;
+    /** @var \ilParticipants[]  */
+    private array $participant_object_cache;
 
     public function __construct(
         EventMembershipRepository $membership_repo,
         IliasEventoUserRepository $user_repo,
-        IliasEventoEventsRepository $event_repo,
         \ilFavouritesManager $favourites_manager,
-        \EventoImport\import\Logger $logger,
+        Logger $logger,
         RBACServices $rbac_services
     ) {
         $this->membership_repo = $membership_repo;
-        $this->membership_query = new MembershipableObjectsQuery();
+        $this->membership_query = new MembershipablesInTreeSeeker();
         $this->user_repo = $user_repo;
-        $this->event_repo = $event_repo;
         $this->favourites_manager = $favourites_manager;
         $this->logger = $logger;
         $this->rbac_review = $rbac_services->review();
         $this->rbac_admin = $rbac_services->admin();
+        $this->participant_object_cache = [];
     }
 
     public function syncMemberships(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
@@ -94,7 +97,7 @@ class MembershipManager
 
     private function syncMembershipsWithoutParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
     {
-        $participants_obj = $this->membership_query->getParticipantsObjectForRefId($ilias_event->getRefId());
+        $participants_obj = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
 
         $admin_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN;
         $member_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_MEMBER : IL_GRP_MEMBER;
@@ -115,10 +118,10 @@ class MembershipManager
         foreach ($users_to_remove as $user_to_remove) {
             if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                 $participants_obj->delete($user_to_remove->getIliasUserId());
-                $this->logger->logEventMembership(\EventoImport\import\Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
+                $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
             } else {
                 $this->logger->logEventMembership(
-                    \EventoImport\import\Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
+                    Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
                     $imported_event->getEventoId(),
                     $user_to_remove->getEventoUserId(),
                     0
@@ -132,7 +135,7 @@ class MembershipManager
     private function syncMembershipsWithParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event, array $parent_events) : void
     {
         // Add users to main event
-        $participants_obj = $this->membership_query->getParticipantsObjectForRefId($ilias_event->getRefId());
+        $participants_obj = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
         $this->addUsersToMembershipableObject(
             $participants_obj,
             $imported_event->getEmployees(),
@@ -143,7 +146,7 @@ class MembershipManager
 
         // Add users to all parent membershipable objects
         foreach ($parent_events as $parent_event) {
-            $participants_obj = $this->membership_query->getParticipantsObjectForRefId($parent_event);
+            $participants_obj = $this->getParticipantsObjectForRefId($parent_event);
 
             if ($participants_obj instanceof \ilCourseParticipants) {
                 $this->addUsersToMembershipableObject(
@@ -174,10 +177,10 @@ class MembershipManager
             // Remove from main event
             if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                 $participants_obj->delete($user_to_remove->getIliasUserId());
-                $this->logger->logEventMembership(\EventoImport\import\Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
+                $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
             } else {
                 $this->logger->logEventMembership(
-                    \EventoImport\import\Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
+                    Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
                     $imported_event->getEventoId(),
                     $user_to_remove->getEventoUserId(),
                     0
@@ -196,14 +199,14 @@ class MembershipManager
                         continue;
                     }
 
-                    $co_particpants_list = $this->membership_query->getParticipantsObjectForRefId($co_membershipable);
+                    $co_particpants_list = $this->getParticipantsObjectForRefId($co_membershipable);
                     if ($co_particpants_list->isAssigned($user_to_remove)) {
                         $is_in_co_membershipable = true;
                     }
                 }
 
                 if (!$is_in_co_membershipable) {
-                    $sub_event_participants_obj = $this->membership_query->getParticipantsObjectForRefId($parent_event);
+                    $sub_event_participants_obj = $this->getParticipantsObjectForRefId($parent_event);
                     if ($sub_event_participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                         $sub_event_participants_obj->delete($user_to_remove->getIliasUserId());
                     }
@@ -215,7 +218,7 @@ class MembershipManager
     private function removeUserFromSubMembershipables(IliasEventoUser $user_to_remove, array $sub_membershipables) : void
     {
         foreach ($sub_membershipables as $sub_membershipable) {
-            $sub_event_participants_obj = $this->membership_query->getParticipantsObjectForRefId($sub_membershipable);
+            $sub_event_participants_obj = $this->getParticipantsObjectForRefId($sub_membershipable);
             if ($sub_event_participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                 $sub_event_participants_obj->delete($user_to_remove->getIliasUserId());
             }
@@ -241,7 +244,7 @@ class MembershipManager
 
     public function addEventAdmins(EventoEventIliasAdmins $event_admin_list, IliasEventoEvent $ilias_evento_event) : void
     {
-        $event_participant_obj = $this->membership_query->getParticipantsObjectForRefId($ilias_evento_event->getRefId());
+        $event_participant_obj = $this->getParticipantsObjectForRefId($ilias_evento_event->getRefId());
         $this->addAdminListToObject(
             $event_participant_obj,
             $event_admin_list->getAccountList(),
@@ -250,7 +253,7 @@ class MembershipManager
 
         $parent_membershipables = $this->membership_query->getRefIdsOfParentMembershipables($ilias_evento_event->getRefId());
         foreach ($parent_membershipables as $parent_membershipable) {
-            $participants_obj = $this->membership_query->getParticipantsObjectForRefId($parent_membershipable);
+            $participants_obj = $this->getParticipantsObjectForRefId($parent_membershipable);
 
             if ($participants_obj instanceof \ilCourseParticipants) {
                 $this->addAdminListToObject(
@@ -276,5 +279,14 @@ class MembershipManager
                 $participants_object->add($employee_user_id, $admin_role_code);
             }
         }
+    }
+
+    private function getParticipantsObjectForRefId(int $ref_id) : \ilParticipants
+    {
+        if (!isset($this->participant_object_cache[$ref_id])) {
+            $this->participant_object_cache[$ref_id] = \ilParticipants::getInstance($ref_id);
+        }
+
+        return $this->participant_object_cache[$ref_id];
     }
 }

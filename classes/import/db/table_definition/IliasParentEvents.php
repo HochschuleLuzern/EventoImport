@@ -1,6 +1,6 @@
 <?php
 
-namespace EventoImport\import\db\table_definitions;
+namespace EventoImport\import\db\table_definition;
 
 class IliasParentEvents
 {

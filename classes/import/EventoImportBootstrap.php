@@ -41,7 +41,6 @@ class EventoImportBootstrap
     private EventLocationsRepository $location_repository;
     private ParentEventRepository $parent_event_repo;
     private IliasEventObjectService $repository_facade;
-    private IliasEventObjectFactory $event_object_factory;
     private DefaultEventSettings $default_event_settings;
 
     /*********************************
@@ -144,8 +143,6 @@ class EventoImportBootstrap
     {
         if (!isset($this->repository_facade)) {
             $this->repository_facade = new IliasEventObjectService(
-                $this->iliasEventObjectQuery(),
-                $this->eventoEventRepository(),
                 $this->eventLocationRepository(),
                 $this->parentEventRepository()
             );
@@ -159,17 +156,6 @@ class EventoImportBootstrap
             $this->default_event_settings = new DefaultEventSettings($this->settings);
         }
         return $this->default_event_settings;
-    }
-
-    public function eventObjectFactory() : IliasEventObjectFactory
-    {
-        if (!isset($this->event_object_factory)) {
-            $this->event_object_factory = new IliasEventObjectFactory(
-                $this->repositoryFacade(),
-                $this->defaultEventSettings()
-            );
-        }
-        return $this->event_object_factory;
     }
 
     public function membershipManager() : MembershipManager

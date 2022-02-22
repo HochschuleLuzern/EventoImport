@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-use  EventoImport\import\db\repository as Repository;
+use EventoImport\import\db\table_definition;
 use EventoImport\import\Logger;
 
 /**
@@ -94,11 +94,11 @@ class ilEventoImportPlugin extends ilCronHookPlugin
             'crnhk_crevento_usrs',
             'crnhk_crevento_mas',
             'crnhk_crevento_subs',
-            Repository\IliasEventoUserRepository::TABLE_NAME,
-            Repository\IliasEventoEventsRepository::TABLE_NAME,
-            Repository\ParentEventRepository::TABLE_NAME,
-            Repository\EventLocationsRepository::TABLE_NAME,
-            Repository\EventMembershipRepository::TABLE_NAME,
+            table_definition\IliasEventoUser::TABLE_NAME,
+            table_definition\IliasEventoEvents::TABLE_NAME,
+            table_definition\IliasParentEvents::TABLE_NAME,
+            table_definition\IliasEventLocations::TABLE_NAME,
+            table_definition\IliasEventoEventMemberships::TABLE_NAME,
             Logger::TABLE_LOG_USERS,
             Logger::TABLE_LOG_EVENTS,
             Logger::TABLE_LOG_MEMBERSHIPS

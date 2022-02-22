@@ -3,9 +3,9 @@
 namespace EventoImport\import\db;
 
 use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\table_definitions\IliasEventoEvents;
+use EventoImport\import\db\table_definition\IliasEventoEvents;
 use EventoImport\import\db\model\IliasEventoParentEvent;
-use EventoImport\import\db\table_definitions\IliasParentEvents;
+use EventoImport\import\db\table_definition\IliasParentEvents;
 
 class IliasEventObjectRepository
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace EventoImport\import\db\table_definitions;
+namespace EventoImport\import\db\table_definition;
 
-class EventMemberships
+class IliasEventoEventMemberships
 {
     public const TABLE_NAME = 'crevento_memberships';
 

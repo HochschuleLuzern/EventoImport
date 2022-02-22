@@ -3,6 +3,7 @@
 namespace EventoImport\import\db\repository;
 
 use EventoImport\communication\api_models\EventoUser;
+use EventoImport\import\db\table_definition\IliasEventoUser;
 
 class IliasEventoUserRepository
 {
@@ -22,25 +23,25 @@ class IliasEventoUserRepository
     {
         $this->db->insert(
             // INSERT INTO
-            self::TABLE_NAME,
+            IliasEventoUser::TABLE_NAME,
 
             // VALUES
             array(
-                self::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $evento_user->getEventoId()),
-                self::COL_ILIAS_USER_ID => array(\ilDBConstants::T_INTEGER, $ilias_user->getId()),
-                self::COL_LAST_TIME_DELIVERED => array(\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s"))
+                IliasEventoUser::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $evento_user->getEventoId()),
+                IliasEventoUser::COL_ILIAS_USER_ID => array(\ilDBConstants::T_INTEGER, $ilias_user->getId()),
+                IliasEventoUser::COL_LAST_TIME_DELIVERED => array(\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s"))
             )
         );
     }
 
     public function getIliasUserIdByEventoId(int $evento_id) : ?int
     {
-        $query = 'SELECT ' . self::COL_ILIAS_USER_ID . ' FROM ' . self::TABLE_NAME
-            . ' WHERE ' . self::COL_EVENTO_ID . '=' . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
+        $query = 'SELECT ' . IliasEventoUser::COL_ILIAS_USER_ID . ' FROM ' . IliasEventoUser::TABLE_NAME
+              . ' WHERE ' . IliasEventoUser::COL_EVENTO_ID . '=' . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
         $result = $this->db->query($query);
 
         if ($data = $this->db->fetchAssoc($result)) {
-            return (int) $data[self::COL_ILIAS_USER_ID];
+            return (int) $data[IliasEventoUser::COL_ILIAS_USER_ID];
         }
 
         return null;
@@ -48,13 +49,13 @@ class IliasEventoUserRepository
 
     public function getListOfIliasUserIdsByEventoIds(array $evento_ids) : array
     {
-        $query = 'SELECT ' . self::COL_ILIAS_USER_ID . ' FROM ' . self::TABLE_NAME
-            . ' WHERE ' . $this->db->in(self::COL_EVENTO_ID, $evento_ids, false, \ilDBConstants::T_INTEGER);
+        $query = 'SELECT ' . IliasEventoUser::COL_ILIAS_USER_ID . ' FROM ' . IliasEventoUser::TABLE_NAME
+              . ' WHERE ' . $this->db->in(IliasEventoUser::COL_EVENTO_ID, $evento_ids, false, \ilDBConstants::T_INTEGER);
         $result = $this->db->query($query);
 
         $user_ids = array();
         while ($data = $this->db->fetchAssoc($result)) {
-            $user_ids[] = $data[self::COL_ILIAS_USER_ID];
+            $user_ids[] = $data[IliasEventoUser::COL_ILIAS_USER_ID];
         }
 
         return $user_ids;
@@ -63,26 +64,27 @@ class IliasEventoUserRepository
     public function registerUserAsDelivered(int $evento_id) : void
     {
         $this->db->update(
-            self::TABLE_NAME,
+            IliasEventoUser::TABLE_NAME,
             [
-                self::COL_LAST_TIME_DELIVERED => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")]
+                IliasEventoUser::COL_LAST_TIME_DELIVERED => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")]
             ],
             [
-                self::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER, $evento_id]
+                IliasEventoUser::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER, $evento_id]
             ]
         );
     }
 
     public function getUsersWithLastImportOlderThanOneWeek() : array
     {
-        $query = 'SELECT ' . self::COL_EVENTO_ID . ', ' . self::COL_ILIAS_USER_ID . ' FROM ' . self::TABLE_NAME
-            . ' WHERE ' . self::COL_LAST_TIME_DELIVERED . ' < ' . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME);
+        $query = 'SELECT ' . IliasEventoUser::COL_EVENTO_ID . ', ' . IliasEventoUser::COL_ILIAS_USER_ID
+            . ' FROM ' . IliasEventoUser::TABLE_NAME
+            . ' WHERE ' . IliasEventoUser::COL_LAST_TIME_DELIVERED . ' < ' . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME);
 
         $result = $this->db->query($query);
 
         $not_imported_users = [];
         while ($row = $this->db->fetchAssoc($result)) {
-            $not_imported_users[$row[self::COL_EVENTO_ID]] = (int) $row[self::COL_ILIAS_USER_ID];
+            $not_imported_users[$row[IliasEventoUser::COL_EVENTO_ID]] = (int) $row[IliasEventoUser::COL_ILIAS_USER_ID];
         }
 
         return $not_imported_users;
@@ -90,7 +92,8 @@ class IliasEventoUserRepository
 
     public function deleteEventoIliasUserConnectionByEventoId(int $evento_id) : void
     {
-        $query = "DELETE FROM " . self::TABLE_NAME . " WHERE " . self::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
+        $query = "DELETE FROM " . IliasEventoUser::TABLE_NAME
+              . " WHERE " . IliasEventoUser::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
         $this->db->manipulate($query);
     }
 }

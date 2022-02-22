@@ -2,32 +2,21 @@
 
 namespace EventoImport\import\db\query;
 
-class MembershipableObjectsQuery
+class MembershipablesInTreeSeeker
 {
     private \ilTree $tree;
     private array $membershipable_co_groups_cache;
-    private array $participant_object_cache;
 
     public function __construct(\ilTree $tree)
     {
         $this->tree = $tree;
         $this->membershipable_co_groups_cache = [];
-        $this->participant_object_cache = [];
-    }
-
-    public function getParticipantsObjectForRefId(int $ref_id) : \ilParticipants
-    {
-        if (!isset($this->participant_object_cache[$ref_id])) {
-            $this->participant_object_cache[$ref_id] = \ilParticipants::getInstance($ref_id);
-        }
-
-        return $this->participant_object_cache[$ref_id];
     }
 
     public function recursiveSearchSubGroups(int $parent_ref_id, array $sub_group_list, bool $search_below_groups) : array
     {
         foreach ($this->tree->getChilds($parent_ref_id) as $child_ref_id) {
-            $type = \ilObject::_lookupType($parent_ref_id, true);
+            $type = $this->lookupObjTypeByRefId($parent_ref_id);
             if ($type == 'grp') {
                 $sub_group_list[$child_ref_id] = $child_ref_id;
                 if ($search_below_groups) {
@@ -67,7 +56,7 @@ class MembershipableObjectsQuery
         $deadlock_prevention = 0;
         do {
             $current_obj_ref = $this->tree->getParentId($current_obj_ref);
-            $type = \ilObject::_lookupType($current_obj_ref, true);
+            $type = $this->lookupObjTypeByRefId($current_obj_ref);
             if ($type == 'crs') {
                 $parent_membershipable_objs[] = $current_obj_ref;
                 $has_found_super_parent = true;
@@ -94,7 +83,7 @@ class MembershipableObjectsQuery
         $current_depth++;
 
         foreach ($this->tree->getChilds($parent_ref_id) as $child) {
-            $type = \ilObject::_lookupType($child, true);
+            $type = $this->lookupObjTypeByRefId($child);
             if ($type == 'grp') {
                 $sub_objects[] = $child;
             }
@@ -103,5 +92,10 @@ class MembershipableObjectsQuery
         }
 
         return $sub_objects;
+    }
+
+    protected function lookupObjTypeByRefId(int $ref_id) : string
+    {
+        return \ilObject::_lookupType($ref_id, true);
     }
 }
