@@ -19,7 +19,7 @@ class IliasEventObjectRepository
     public function addNewEventoIliasEvent(IliasEventoEvent $ilias_evento_event)
     {
         $this->db->insert(
-        // INSERT INTO
+            // INSERT INTO
             IliasEventoEvents::TABLE_NAME,
 
             // VALUES

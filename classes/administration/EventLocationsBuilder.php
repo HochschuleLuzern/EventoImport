@@ -29,11 +29,11 @@ class EventLocationsBuilder
 
     public function rebuildRepositoryLocationsTable(array $locations_settings) : int
     {
-        $old_locations = $this->locations_repository->fetchAllLocations();
+        $old_locations = $this->locations_repository->getAllLocations();
         $this->locations_repository->purgeLocationTable();
 
         $this->fillRepositoryLocationsTable($locations_settings);
-        $new_locations = $this->locations_repository->fetchAllLocations();
+        $new_locations = $this->locations_repository->getAllLocations();
 
         $diff = count($new_locations) - count($old_locations);
 

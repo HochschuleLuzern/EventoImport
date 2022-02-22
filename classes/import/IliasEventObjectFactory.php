@@ -56,33 +56,4 @@ class IliasEventObjectFactory
 
         return $group_object;
     }
-
-    private function createAsSingleGroupEvent(EventoEvent $evento_event, $destiniation) : IliasEventWrapper
-    {
-        $crs_object = $this->buildNewCourseObject($evento_event->getName(), $evento_event->getDescription(), $destiniation);
-
-        return $this->repository_facade->addNewSingleEventCourse($evento_event, $crs_object);
-    }
-
-    private function createAsMultiGroupEvent(EventoEvent $evento_event, $destiniation) : IliasEventoEvent
-    {
-        $parent_event_crs_obj = $this->repository_facade->searchPossibleParentEventForEvent($evento_event);
-        $obj_for_parent_already_existed = false;
-
-        if (is_null($parent_event_crs_obj)) {
-            $parent_event_crs_obj = $this->buildNewCourseObject($evento_event->getGroupName(), $evento_event->getDescription(), $destiniation);
-        } else {
-            $obj_for_parent_already_existed = true;
-        }
-
-        $event_sub_group = $this->buildNewGroupObject($evento_event->getName(), $evento_event->getDescription(), $parent_event_crs_obj->getRefId());
-
-        if ($obj_for_parent_already_existed) {
-            $event_wrapper = $this->repository_facade->addNewIliasEvent($evento_event, $parent_event_crs_obj, $event_sub_group);
-        } else {
-            $event_wrapper = $this->repository_facade->addNewMultiEventCourseAndGroup($evento_event, $parent_event_crs_obj, $event_sub_group);
-        }
-
-        return $event_wrapper;
-    }
 }

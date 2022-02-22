@@ -2,16 +2,9 @@
 
 namespace EventoImport\import\db;
 
-use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\model\IliasEventoParentEvent;
-use EventoImport\import\db\query\IliasEventObjectQuery;
 use EventoImport\import\db\repository\EventLocationsRepository;
-use EventoImport\import\db\repository\IliasEventoEventsRepository;
-use EventoImport\import\db\repository\ParentEventRepository;
-use EventoImport\import\IliasEventWrapper;
-use EventoImport\import\IliasEventWrapperEventWithParent;
-use EventoImport\import\IliasEventWrapperSingleEvent;
+use EventoImport\import\settings\DefaultEventSettings;
 
 /**
  * Class RepositoryFacade
@@ -26,153 +19,107 @@ use EventoImport\import\IliasEventWrapperSingleEvent;
  */
 class IliasEventObjectService
 {
-    private IliasEventObjectQuery $event_object_query;
-    private IliasEventoEventsRepository $event_repo;
+    private IliasEventObjectRepository $event_object_repo;
     private EventLocationsRepository $location_repo;
-    private ParentEventRepository $parent_event_repo;
+    private DefaultEventSettings $default_event_settings;
+    private \ilDBInterface $db;
 
     public function __construct(
-        IliasEventObjectQuery $event_objects_query,
-        IliasEventoEventsRepository $event_repo,
+        IliasEventObjectRepository $event_object_repo,
+        DefaultEventSettings $default_event_settings,
         EventLocationsRepository $location_repo,
-        ParentEventRepository $parent_event_repo
+        \ilDBInterface $db
     ) {
-        $this->event_object_query = $event_objects_query;
-        $this->event_repo = $event_repo;
+        $this->event_object_repo = $event_object_repo;
+        $this->default_event_settings = $default_event_settings;
         $this->location_repo = $location_repo;
-        $this->parent_event_repo = $parent_event_repo;
+        $this->db = $db;
     }
 
-    public function fetchAllEventableObjectsForGivenTitle(string $name)
+    public function searchEventableIliasObjectByTitle(string $obj_title, string $filter_for_only_this_type = null) : ?\ilContainer
     {
-        $this->event_object_query->fetchAllEventableObjectsForGivenTitle($name);
-    }
+        $query = 'SELECT obj_id, type FROM object_data WHERE title = ' . $this->db->quote($obj_title, \ilDBConstants::T_TEXT);
 
-    public function searchPossibleParentEventForEvent(EventoEvent $evento_event) : ?IliasEventoParentEvent
-    {
-        $parent_event = $this->parent_event_repo->fetchParentEventForName($evento_event->getGroupName());
-        if (!is_null($parent_event)) {
-            return $parent_event;
+        if (!is_null($filter_for_only_this_type) && ($filter_for_only_this_type == 'crs' || $filter_for_only_this_type == 'grp')) {
+            $query .= ' AND type = ' . $this->db->quote($filter_for_only_this_type, \ilDBConstants::T_TEXT);
+        } else {
+            $query .= ' AND type IN ("crs", "grp")';
         }
 
-        $obj_id = $this->event_object_query->searchPossibleParentEventForEvent($evento_event);
-        if (!is_null($obj_id)) {
-            return $parent_event;
+        $result = $this->db->query($query);
+
+        if ($this->db->numRows($result) == 1) {
+            $row = $this->db->fetchAssoc($result);
+            switch ($row['type']) {
+                case 'crs':
+                    return new \ilObjCourse($row['obj_id'], false);
+                case 'grp':
+                    return new \ilObjGroup($row['obj_id'], false);
+                default:
+                    throw new \InvalidArgumentException('Invalid object type given for event object');
+            }
         }
 
         return null;
     }
 
-    public function iliasEventoEventRepository() : IliasEventoEventsRepository
+    private function setValuesToContainerObject(\ilContainer $container_object, string $title, string $description, int $destination_ref_id)
     {
-        return $this->event_repo;
+        $container_object->setTitle($title);
+        $container_object->setDescription($description);
+        $container_object->setOwner($this->default_event_settings->getDefaultObjectOwnerId());
+        $container_object->create();
+
+        $container_object->createReference();
+        $container_object->putInTree($destination_ref_id);
+        $container_object->setPermissions($destination_ref_id);
+
+        $settings = new \ilContainerSortingSettings($container_object->getId());
+        $settings->setSortMode($this->default_event_settings->getDefaultSortMode());
+        $settings->setSortDirection($this->default_event_settings->getDefaultSortDirection());
+
+        $container_object->setOrderType($this->default_event_settings->getDefaultSortMode());
+
+        $settings->update();
+        $container_object->update();
     }
 
-    public function departmentLocationRepository() : EventLocationsRepository
+    public function buildNewCourseObject(string $title, string $description, int $destination_ref_id) : \ilObjCourse
     {
-        return $this->location_repo;
+        $course_object = new \ilObjCourse();
+
+        $this->setValuesToContainerObject($course_object, $title, $description, $destination_ref_id);
+
+        return $course_object;
     }
 
-    public function searchExactlyOneMatchingCourseByTitle(EventoEvent $evento_event) : ?\ilContainer
+    public function buildNewGroupObject(string $title, string $description, int $destination_ref_id)
     {
-        $object_list = $this->event_object_query->fetchAllEventableObjectsForGivenTitle($evento_event->getName());
+        $group_object = new \ilObjGroup();
 
-        if (count($object_list) == 1) {
-            return $object_list[0];
-        } else {
-            return null;
-        }
+        $this->setValuesToContainerObject($group_object, $title, $description, $destination_ref_id);
+
+        return $group_object;
     }
 
-    public function addNewIliasEvent(EventoEvent $evento_event, \ilContainer $ilias_object) : IliasEventoEvent
+    public function getCourseObjectForRefId(int $ref_id) : \ilObjCourse
     {
-        if ($ilias_object instanceof \ilObjCourse || $ilias_object instanceof \ilObjGroup) {
-            $ilias_evento_event = new IliasEventoEvent(
-                $evento_event->getEventoId(),
-                $evento_event->getName(),
-                $evento_event->getDescription(),
-                $evento_event->getType(),
-                $evento_event->hasCreateCourseFlag(),
-                $evento_event->getStartDate(),
-                $evento_event->getEndDate(),
-                $ilias_object->getType(),
-                $ilias_object->getRefId(),
-                $ilias_object->getId(),
-                $ilias_object->getDefaultAdminRole(),
-                $ilias_object->getDefaultMemberRole(),
-                $evento_event->getGroupUniqueKey()
-            );
-
-            $this->event_repo->addNewEventoIliasEvent(
-                $ilias_evento_event
-            );
-
-            return $ilias_evento_event;
-        } else {
-            throw new \InvalidArgumentException('Invalid ILIAS Object Type given to register Ilias-Evento-Event');
-        }
+        return new \ilObjCourse($ref_id, true);
     }
 
-    public function addNewIliasEventoParentEvent(EventoEvent $evento_event, \ilContainer $parent_event_ilias_obj) : IliasEventoParentEvent
+    public function getGroupObjectForRefId(int $ref_id) : \ilObjGroup
     {
-        if ($parent_event_ilias_obj instanceof \ilObjCourse || $parent_event_ilias_obj instanceof \ilObjGroup) {
-            $ilias_evento_parent_event = new IliasEventoParentEvent(
-                $evento_event->getGroupUniqueKey(),
-                $evento_event->getGroupId(),
-                $evento_event->getGroupName(),
-                $parent_event_ilias_obj->getRefId(),
-                $parent_event_ilias_obj->getDefaultAdminRole(),
-                $parent_event_ilias_obj->getDefaultMemberRole()
-            );
-            $this->parent_event_repo->addNewParentEvent($ilias_evento_parent_event);
-
-            return $ilias_evento_parent_event;
-        } else {
-            throw new \InvalidArgumentException('Invalid ILIAS Object Type given to register Ilias-Parent-Event-Object');
-        }
-    }
-
-    public function updateIliasEventoEvent(EventoEvent $evento_event, IliasEventoEvent $old_ilias_event, \ilContainer $ilias_object) : IliasEventoEvent
-    {
-        if ($ilias_object instanceof \ilObjCourse || $ilias_object instanceof \ilObjGroup) {
-            $updated_obj = new IliasEventoEvent(
-                $evento_event->getEventoId(),
-                $evento_event->getName(),
-                $evento_event->getDescription(),
-                $old_ilias_event->getEventoType(),
-                $old_ilias_event->wasAutomaticallyCreated(),
-                $evento_event->getStartDate(),
-                $evento_event->getEndDate(),
-                $ilias_object->getType(),
-                $ilias_object->getRefId(),
-                $ilias_object->getId(),
-                $old_ilias_event->getAdminRoleId(),
-                $old_ilias_event->getStudentRoleId(),
-                $evento_event->getGroupUniqueKey()
-            );
-
-            $this->event_repo->updateIliasEventoEvent($updated_obj);
-
-            return $updated_obj;
-        } else {
-            throw new \InvalidArgumentException('Invalid ILIAS Object Type given to update Ilias-Event-Object');
-        }
-    }
-
-    public function removeIliasEventoEvent(IliasEventoEvent $ilias_evento_event)
-    {
-        if (!is_null($ilias_evento_event->getParentEventKey())) {
-            $this->parent_event_repo->removeParentEventIfItHasNoChildEvent($ilias_evento_event->getParentEventKey());
-        }
-        $this->event_repo->removeEventoEvent($ilias_evento_event);
+        return new \ilObjGroup($ref_id, true);
     }
 
     public function removeIliasEventObject(IliasEventoEvent $ilias_event_to_remove)
     {
         if ($ilias_event_to_remove->getIliasType() == 'crs') {
-            $ilias_obj = new \ilObjCourse($ilias_event_to_remove->getRefId(), true);
+            $ilias_obj = $this->getCourseObjectForRefId($ilias_event_to_remove->getRefId());
+        } elseif ($ilias_event_to_remove->getIliasType() == 'grp') {
+            $ilias_obj = $this->getGroupObjectForRefId($ilias_event_to_remove->getRefId());
         } else {
-            $ilias_obj = new \ilObjGroup($ilias_event_to_remove->getRefId(), true);
+            throw new \InvalidArgumentException('Invalid type to remove ilias event object given. Type should be "crs" or "grp". Evento ID of DB-Entry = ' . $ilias_event_to_remove->getEventoEventId());
         }
 
         $ilias_obj->delete();

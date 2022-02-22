@@ -21,7 +21,7 @@ class EventLocationsRepository
         $this->cache = array();
     }
 
-    public function addNewLocation(string $department, string $kind, int $year, int $ref_id)
+    public function addNewLocation(string $department, string $kind, int $year, int $ref_id) : void
     {
         $this->db->insert(
             self::TABLE_NAME,
@@ -34,13 +34,13 @@ class EventLocationsRepository
         );
     }
 
-    public function purgeLocationTable()
+    public function purgeLocationTable() : void
     {
         $query = "DELETE FROM " . self::TABLE_NAME;
         $this->db->manipulate($query);
     }
 
-    private function addToCache(int $ref_id, string $department, string $kind, int $year)
+    private function addToCache(int $ref_id, string $department, string $kind, int $year) : void
     {
         if (!isset($this->cache[$department])) {
             $this->cache[$department] = array($kind => array($year => $ref_id));
@@ -62,7 +62,7 @@ class EventLocationsRepository
         }
     }
 
-    public function fetchRefIdForEventoObject(EventoEvent $evento_event) : ?int
+    public function getRefIdForEventoObject(EventoEvent $evento_event) : ?int
     {
         $department = $evento_event->getDepartment();
         $kind = $evento_event->getKind();
@@ -73,7 +73,6 @@ class EventLocationsRepository
         if ($cached_value != null) {
             return $cached_value;
         }
-
 
         $query = 'SELECT ref_id FROM ' . self::TABLE_NAME . ' WHERE '
             . self::COL_DEPARTMENT_NAME . ' = ' . $this->db->quote($department, \ilDBConstants::T_TEXT)
@@ -94,7 +93,7 @@ class EventLocationsRepository
         return null;
     }
 
-    public function fetchAllLocations() : array
+    public function getAllLocations() : array
     {
         $query = "SELECT " . self::COL_DEPARTMENT_NAME . ", " . self::COL_EVENT_KIND . ", " . self::COL_YEAR . ", " . self::COL_REF_ID
             . " FROM " . self::TABLE_NAME;

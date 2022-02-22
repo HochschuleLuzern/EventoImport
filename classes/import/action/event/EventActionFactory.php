@@ -8,21 +8,23 @@ use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\MembershipManager;
 use EventoImport\import\db\model\IliasEventoEvent;
+use EventoImport\import\db\IliasEventObjectRepository;
+use EventoImport\import\Logger;
 
 class EventActionFactory
 {
+    private IliasEventObjectRepository $ilias_event_object_repo;
     private IliasEventObjectService $repository_facade;
-    private IliasEventObjectFactory $event_object_factory;
     private MembershipManager $membership_manager;
-    private \EventoImport\import\Logger $logger;
+    private Logger $logger;
 
     public function __construct(
-        IliasEventObjectFactory $event_object_factory,
+        IliasEventObjectRepository $ilias_event_object_repo,
         IliasEventObjectService $repository_facade,
         MembershipManager $membership_manager,
-        \EventoImport\import\Logger $logger
+        Logger $logger
     ) {
-        $this->event_object_factory = $event_object_factory;
+        $this->ilias_event_object_repo = $ilias_event_object_repo;
         $this->repository_facade = $repository_facade;
         $this->membership_manager = $membership_manager;
         $this->logger = $logger;
@@ -33,8 +35,8 @@ class EventActionFactory
         return new CreateSingleEvent(
             $evento_event,
             $destination_ref_id,
-            $this->event_object_factory,
             $this->repository_facade,
+            $this->ilias_event_object_repo,
             $this->membership_manager,
             $this->logger,
         );
@@ -45,8 +47,8 @@ class EventActionFactory
         return new CreateEventWithParent(
             $evento_event,
             $destination_ref_id,
-            $this->event_object_factory,
             $this->repository_facade,
+            $this->ilias_event_object_repo,
             $this->membership_manager,
             $this->logger,
         );
@@ -57,8 +59,8 @@ class EventActionFactory
         return new CreateEventInParentEvent(
             $evento_event,
             $parent_event,
-            $this->event_object_factory,
             $this->repository_facade,
+            $this->ilias_event_object_repo,
             $this->membership_manager,
             $this->logger,
         );
@@ -80,8 +82,8 @@ class EventActionFactory
         return new ConvertSingleEventToMultiGroupEvent(
             $evento_event,
             $ilias_event,
-            $this->event_object_factory,
             $this->repository_facade,
+            $this->ilias_event_object_repo,
             $this->membership_manager,
             $this->logger
         );
@@ -94,7 +96,7 @@ class EventActionFactory
         return new MarkExistingIliasObjAsEvent(
             $evento_event,
             $ilias_obj,
-            $this->repository_facade,
+            $this->ilias_event_object_repo,
             $this->membership_manager,
             $this->logger,
         );
@@ -103,7 +105,7 @@ class EventActionFactory
     public function reportNonIliasEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(
-            \EventoImport\import\Logger::CREVENTO_MA_NON_ILIAS_EVENT,
+            Logger::CREVENTO_MA_NON_ILIAS_EVENT,
             $evento_event->getEventoId(),
             null,
             $evento_event->getDecodedApiData(),
@@ -114,7 +116,7 @@ class EventActionFactory
     public function reportUnknownLocationForEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(
-            \EventoImport\import\Logger::CREVENTO_MA_EVENT_LOCATION_UNKNOWN,
+            Logger::CREVENTO_MA_EVENT_LOCATION_UNKNOWN,
             $evento_event->getEventoId(),
             null,
             $evento_event->getDecodedApiData(),

@@ -3,13 +3,14 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\import\action\ReportDatasetWithoutAction;
+use EventoImport\import\Logger;
 
 class ReportEventImportDatasetWithoutAction extends ReportDatasetWithoutAction implements EventAction
 {
     private int $evento_id;
     private ?int $ref_id;
 
-    public function __construct(int $log_info_code, int $evento_id, ?int $ref_id, array $error_data, \EventoImport\import\Logger $logger)
+    public function __construct(int $log_info_code, int $evento_id, ?int $ref_id, array $error_data, Logger $logger)
     {
         $this->evento_id = $evento_id;
         $this->ref_id = $ref_id;
