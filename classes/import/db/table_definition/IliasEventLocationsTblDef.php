@@ -2,7 +2,7 @@
 
 namespace EventoImport\import\db\table_definition;
 
-class IliasEventLocations
+class IliasEventLocationsTblDef
 {
     public const TABLE_NAME = 'crevento_locations';
 

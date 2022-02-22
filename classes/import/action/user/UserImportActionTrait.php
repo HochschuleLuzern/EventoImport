@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\import\settings\DefaultUserSettings;
-use EventoImport\import\db\IliasUserServices;
+use EventoImport\import\service\IliasUserServices;
 use ILIAS\DI\RBACServices;
 
 trait UserImportActionTrait

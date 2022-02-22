@@ -6,20 +6,21 @@ use EventoImport\communication\request_services\RequestClientService;
 use EventoImport\communication\generic_importers\SingleDataRecordImport;
 use EventoImport\communication\generic_importers\DataSetImport;
 use EventoImport\communication\api_models\EventoUser;
+use EventoImport\import\Logger;
 
-class EventoUserImporter extends \ilEventoImporter
+class EventoUserImporter extends EventoImporterBase
 {
     use SingleDataRecordImport;
     use DataSetImport;
 
-    private \EventoImport\communication\ImporterIterator $iterator;
+    private ImporterIterator $iterator;
     protected string $fetch_data_set_method;
     protected string $fetch_data_record_method;
 
     public function __construct(
         RequestClientService $data_source,
-        \EventoImport\communication\ImporterIterator $iterator,
-        \EventoImport\import\Logger $logger,
+        ImporterIterator $iterator,
+        Logger $logger,
         int $seconds_before_retry,
         int $max_retries
     ) {

@@ -1,14 +1,13 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\db;
+namespace EventoImport\import\service;
 
-use EventoImport\import\db\repository\EventMembershipRepository;
+use EventoImport\import\db\EventMembershipRepository;
 use ILIAS\DI\RBACServices;
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\db\repository\IliasEventoUserRepository;
+use EventoImport\import\db\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoUserShort;
 use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\import\db\model\IliasEventoUser;
 use EventoImport\import\db\query\MembershipablesInTreeSeeker;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
@@ -22,13 +21,14 @@ class MembershipManager
     private \ilRbacReview $rbac_review;
     private \ilRbacAdmin $rbac_admin;
 
-    private const ROLE_ADMIN = 1;
-    private const ROLE_MEMBER = 2;
     private IliasEventoUserRepository $user_repo;
+    private MembershipablesInTreeSeeker $tree_seeker;
+
     /** @var \ilParticipants[]  */
     private array $participant_object_cache;
 
     public function __construct(
+        MembershipablesInTreeSeeker $tree_seeker,
         EventMembershipRepository $membership_repo,
         IliasEventoUserRepository $user_repo,
         \ilFavouritesManager $favourites_manager,
@@ -36,7 +36,7 @@ class MembershipManager
         RBACServices $rbac_services
     ) {
         $this->membership_repo = $membership_repo;
-        $this->membership_query = new MembershipablesInTreeSeeker();
+        $this->tree_seeker = $tree_seeker;
         $this->user_repo = $user_repo;
         $this->favourites_manager = $favourites_manager;
         $this->logger = $logger;
@@ -53,7 +53,7 @@ class MembershipManager
         } else {
 
             // Else -> search for parent membershipable objects
-            $parent_events = $this->membership_query->getRefIdsOfParentMembershipables($ilias_event->getRefId());
+            $parent_events = $this->tree_seeker->getRefIdsOfParentMembershipables($ilias_event->getRefId());
 
             // Check if any parent membershipables were found
             if (count($parent_events) > 0) {
@@ -113,7 +113,7 @@ class MembershipManager
         $users_to_remove = $this->getUsersToRemove($imported_event);
 
         // Remove from event and sub events
-        $sub_membershipable_objs = $this->membership_query->getAllSubGroups($ilias_event->getRefId());
+        $sub_membershipable_objs = $this->tree_seeker->getAllSubGroups($ilias_event->getRefId());
         /** @var IliasEventoUser $user_to_remove */
         foreach ($users_to_remove as $user_to_remove) {
             if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
@@ -169,7 +169,7 @@ class MembershipManager
 
         $users_to_remove = $this->getUsersToRemove($imported_event);
 
-        $sub_membershipable_objs = $this->membership_query->getAllSubGroups($ilias_event->getRefId());
+        $sub_membershipable_objs = $this->tree_seeker->getAllSubGroups($ilias_event->getRefId());
 
         /** @var IliasEventoUser $user_to_remove */
         foreach ($users_to_remove as $user_to_remove) {
@@ -192,7 +192,7 @@ class MembershipManager
 
             // For each parent event -> remove user if it is not in a co-membershipable
             foreach ($parent_events as $parent_event) {
-                $co_membershipables = $this->membership_query->getMembershipableCoGroups($ilias_event->getRefId());
+                $co_membershipables = $this->tree_seeker->getMembershipableCoGroups($ilias_event->getRefId());
                 $is_in_co_membershipable = false;
                 foreach ($co_membershipables as $co_membershipable) {
                     if ($co_membershipable == $ilias_event->getRefId()) {
@@ -251,7 +251,7 @@ class MembershipManager
             $ilias_evento_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN
         );
 
-        $parent_membershipables = $this->membership_query->getRefIdsOfParentMembershipables($ilias_evento_event->getRefId());
+        $parent_membershipables = $this->tree_seeker->getRefIdsOfParentMembershipables($ilias_evento_event->getRefId());
         foreach ($parent_membershipables as $parent_membershipable) {
             $participants_obj = $this->getParticipantsObjectForRefId($parent_membershipable);
 

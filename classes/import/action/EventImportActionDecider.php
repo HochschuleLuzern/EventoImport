@@ -1,15 +1,14 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\data_matching;
+namespace EventoImport\import\action;
 
 use EventoImport\import\action\event\EventActionFactory;
-use EventoImport\import\db\IliasEventObjectService;
+use EventoImport\import\service\IliasEventObjectService;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\event\EventAction;
-use EventoImport\import\action\ReportDatasetWithoutAction;
 use EventoImport\import\db\IliasEventObjectRepository;
-use EventoImport\import\db\repository\EventLocationsRepository;
+use EventoImport\import\db\EventLocationsRepository;
 
 class EventImportActionDecider
 {

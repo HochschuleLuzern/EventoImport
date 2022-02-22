@@ -6,32 +6,19 @@ use EventoImport\communication\generic_importers\DataSetImport;
 use EventoImport\communication\generic_importers\SingleDataRecordImport;
 use EventoImport\communication\request_services\RequestClientService;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
+use EventoImport\import\Logger;
 
-/**
- * Class EventoAdminImporter
- * @package EventoImport\communication
- */
-class EventoAdminImporter extends \ilEventoImporter
+class EventoAdminImporter extends EventoImporterBase
 {
     use SingleDataRecordImport;
     use DataSetImport;
 
-    /** @var string */
     private $fetch_single_record;
-
-    /** @var string */
     private $fetch_all_admins;
 
-    /**
-     * EventoAdminImporter constructor.
-     * @param RequestClientService        $data_source
-     * @param \EventoImport\import\Logger $logger
-     * @param int                         $seconds_before_retry
-     * @param int                         $max_retries
-     */
     public function __construct(
         RequestClientService $data_source,
-        \EventoImport\import\Logger $logger,
+        Logger $logger,
         int $seconds_before_retry,
         int $max_retries
     ) {

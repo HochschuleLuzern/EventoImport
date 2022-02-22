@@ -3,7 +3,7 @@
 namespace EventoImport\import;
 
 use EventoImport\communication\EventoEventImporter;
-use EventoImport\import\data_matching\EventImportActionDecider;
+use EventoImport\import\action\EventImportActionDecider;
 use EventoImport\communication\api_models\EventoEvent;
 
 /**
@@ -29,12 +29,12 @@ class EventAndMembershipImport
 {
     private EventoEventImporter $evento_importer;
     private EventImportActionDecider $event_import_action_decider;
-    private \EventoImport\import\Logger $logger;
+    private Logger $logger;
 
     public function __construct(
         EventoEventImporter $evento_importer,
         EventImportActionDecider $event_import_action_decider,
-        \EventoImport\import\Logger $logger
+        Logger $logger
     ) {
         $this->evento_importer = $evento_importer;
         $this->event_import_action_decider = $event_import_action_decider;

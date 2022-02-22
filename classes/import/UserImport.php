@@ -3,9 +3,10 @@
 namespace EventoImport\import;
 
 use EventoImport\communication\EventoUserImporter;
-use EventoImport\import\db\IliasUserServices;
-use EventoImport\import\data_matching\UserActionDecider;
-use EventoImport\import\db\repository\IliasEventoUserRepository;
+use EventoImport\import\service\IliasUserServices;
+use EventoImport\import\action\UserImportActionDecider;
+use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\communication\api_models\EventoUser;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -27,24 +28,21 @@ class UserImport
     private EventoUserImporter $evento_importer;
     private IliasUserServices $user_facade;
     private IliasEventoUserRepository $ilias_evento_user_repo;
-    private UserActionDecider $user_import_action_decider;
+    private UserImportActionDecider $user_import_action_decider;
     private Logger $evento_logger;
-    private \ilDBInterface $db;
 
     public function __construct(
         EventoUserImporter $importer,
-        UserActionDecider $user_import_action_decider,
+        UserImportActionDecider $user_import_action_decider,
         IliasUserServices $user_facade,
         IliasEventoUserRepository $ilias_evento_user_repo,
-        Logger $logger,
-        \ilDBInterface $db
+        Logger $logger
     ) {
         $this->evento_importer = $importer;
         $this->user_import_action_decider = $user_import_action_decider;
         $this->user_facade = $user_facade;
         $this->ilias_evento_user_repo = $ilias_evento_user_repo;
         $this->evento_logger = $logger;
-        $this->db = $db;
     }
 
     public function run() : void
@@ -69,7 +67,7 @@ class UserImport
     {
         foreach ($this->evento_importer->fetchNextUserDataSet() as $data_set) {
             try {
-                $evento_user = new \EventoImport\communication\api_models\EventoUser($data_set);
+                $evento_user = new EventoUser($data_set);
 
                 $action = $this->user_import_action_decider->determineImportAction($evento_user);
                 $action->executeAction();

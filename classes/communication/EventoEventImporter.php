@@ -6,37 +6,22 @@ use EventoImport\communication\generic_importers\DataSetImport;
 use EventoImport\communication\generic_importers\SingleDataRecordImport;
 use EventoImport\communication\request_services\RequestClientService;
 use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\Logger;
 
-/**
- * Class EventoEventImporter
- * @package EventoImport\communication
- */
-class EventoEventImporter extends \ilEventoImporter
+class EventoEventImporter extends EventoImporterBase
 {
     use SingleDataRecordImport;
     use DataSetImport;
 
-    /** @var \EventoImport\communication\ImporterIterator */
-    private \EventoImport\communication\ImporterIterator $iterator;
-
-    /** @var string */
+    private ImporterIterator $iterator;
     protected string $fetch_data_set_method;
-
-    /** @var string */
     protected string $fetch_data_record_method;
 
-    /**
-     * EventoEventImporter constructor.
-     * @param RequestClientService                         $data_source
-     * @param \EventoImport\communication\ImporterIterator $iterator
-     * @param \EventoImport\import\Logger                  $logger
-     * @param int                                          $seconds_before_retry
-     * @param int                                          $max_retries
-     */
+
     public function __construct(
         RequestClientService $data_source,
-        \EventoImport\communication\ImporterIterator $iterator,
-        \EventoImport\import\Logger $logger,
+        ImporterIterator $iterator,
+        Logger $logger,
         int $seconds_before_retry,
         int $max_retries
     ) {
@@ -47,10 +32,6 @@ class EventoEventImporter extends \ilEventoImporter
         $this->fetch_data_record_method = 'GetEventById';
     }
 
-    /**
-     * @return array
-     * @throws \Exception
-     */
     public function fetchNextEventDataSet() : array
     {
         $skip = ($this->iterator->getPage() - 1) * $this->iterator->getPageSize();
@@ -77,12 +58,6 @@ class EventoEventImporter extends \ilEventoImporter
         }
     }
 
-    /**
-     * @param int $skip
-     * @param int $take
-     * @return array
-     * @throws \Exception
-     */
     public function fetchSpecificEventDataSet(int $skip, int $take) : array
     {
         $response = $this->fetchDataSet(
@@ -99,11 +74,6 @@ class EventoEventImporter extends \ilEventoImporter
         return $response->getData();
     }
 
-    /**
-     * @param int $evento_event_id
-     * @return array
-     * @throws \Exception
-     */
     public function fetchEventDataRecordById(int $evento_event_id) : ?EventoEvent
     {
         $api_data = $this->fetchDataRecordById(

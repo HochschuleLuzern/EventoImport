@@ -1,15 +1,14 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\data_matching;
+namespace EventoImport\import\action;
 
-use EventoImport\import\db\IliasUserServices;
+use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\db\model\IliasEventoUser;
-use EventoImport\import\db\repository\IliasEventoUserRepository;
+use EventoImport\import\db\IliasEventoUserRepository;
 
-class UserActionDecider
+class UserImportActionDecider
 {
     private IliasUserServices $user_facade;
     private UserActionFactory $action_factory;

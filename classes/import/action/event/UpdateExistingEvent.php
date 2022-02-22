@@ -4,8 +4,8 @@ namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\IliasEventObjectService;
-use EventoImport\import\db\MembershipManager;
+use EventoImport\import\service\IliasEventObjectService;
+use EventoImport\import\service\MembershipManager;
 use EventoImport\import\Logger;
 
 class UpdateExistingEvent implements EventAction

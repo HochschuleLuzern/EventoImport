@@ -1,9 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\db;
+namespace EventoImport\import\service;
 
 use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\repository\EventLocationsRepository;
 use EventoImport\import\settings\DefaultEventSettings;
 
 /**
@@ -19,20 +18,14 @@ use EventoImport\import\settings\DefaultEventSettings;
  */
 class IliasEventObjectService
 {
-    private IliasEventObjectRepository $event_object_repo;
-    private EventLocationsRepository $location_repo;
     private DefaultEventSettings $default_event_settings;
     private \ilDBInterface $db;
 
     public function __construct(
-        IliasEventObjectRepository $event_object_repo,
         DefaultEventSettings $default_event_settings,
-        EventLocationsRepository $location_repo,
         \ilDBInterface $db
     ) {
-        $this->event_object_repo = $event_object_repo;
         $this->default_event_settings = $default_event_settings;
-        $this->location_repo = $location_repo;
         $this->db = $db;
     }
 

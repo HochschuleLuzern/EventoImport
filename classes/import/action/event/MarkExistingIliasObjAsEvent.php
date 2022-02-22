@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\db\MembershipManager;
+use EventoImport\import\service\MembershipManager;
 use EventoImport\import\db\IliasEventObjectRepository;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\Logger;

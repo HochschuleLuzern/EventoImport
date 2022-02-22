@@ -15,7 +15,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-namespace EventoImport\import;
+namespace EventoImport\import\service;
 
 /**
  * Class ilEventoImportMailNotification

@@ -1,10 +1,10 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\db;
+namespace EventoImport\import\service;
 
 use ILIAS\DI\RBACServices;
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\ImportMailNotification;
+use EventoImport\import\service\ImportMailNotification;
 
 /**
  * Class UserFacade

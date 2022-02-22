@@ -1,17 +1,12 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\db\repository;
+namespace EventoImport\import\db;
 
 use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\db\table_definition\IliasEventLocationsTblDef;
 
 class EventLocationsRepository
 {
-    public const TABLE_NAME = 'crevento_locations';
-    public const COL_DEPARTMENT_NAME = 'department';
-    public const COL_EVENT_KIND = 'kind';
-    public const COL_YEAR = 'year';
-    public const COL_REF_ID = 'ref_id';
-
     private \ilDBInterface $db;
     private array $cache;
 
@@ -24,19 +19,19 @@ class EventLocationsRepository
     public function addNewLocation(string $department, string $kind, int $year, int $ref_id) : void
     {
         $this->db->insert(
-            self::TABLE_NAME,
+            IliasEventLocationsTblDef::TABLE_NAME,
             [
-                self::COL_DEPARTMENT_NAME => [\ilDBConstants::T_TEXT, $department],
-                self::COL_EVENT_KIND => [\ilDBConstants::T_TEXT, $kind],
-                self::COL_YEAR => [\ilDBConstants::T_INTEGER, $year],
-                self::COL_REF_ID => [\ilDBConstants::T_INTEGER, $ref_id],
+                IliasEventLocationsTblDef::COL_DEPARTMENT_NAME => [\ilDBConstants::T_TEXT, $department],
+                IliasEventLocationsTblDef::COL_EVENT_KIND => [\ilDBConstants::T_TEXT, $kind],
+                IliasEventLocationsTblDef::COL_YEAR => [\ilDBConstants::T_INTEGER, $year],
+                IliasEventLocationsTblDef::COL_REF_ID => [\ilDBConstants::T_INTEGER, $ref_id],
             ]
         );
     }
 
     public function purgeLocationTable() : void
     {
-        $query = "DELETE FROM " . self::TABLE_NAME;
+        $query = "DELETE FROM " . IliasEventLocationsTblDef::TABLE_NAME;
         $this->db->manipulate($query);
     }
 
@@ -74,12 +69,12 @@ class EventLocationsRepository
             return $cached_value;
         }
 
-        $query = 'SELECT ref_id FROM ' . self::TABLE_NAME . ' WHERE '
-            . self::COL_DEPARTMENT_NAME . ' = ' . $this->db->quote($department, \ilDBConstants::T_TEXT)
+        $query = 'SELECT ref_id FROM ' . IliasEventLocationsTblDef::TABLE_NAME . ' WHERE '
+            . IliasEventLocationsTblDef::COL_DEPARTMENT_NAME . ' = ' . $this->db->quote($department, \ilDBConstants::T_TEXT)
             . ' AND '
-            . self::COL_EVENT_KIND . ' = ' . $this->db->quote($kind, \ilDBConstants::T_TEXT)
+            . IliasEventLocationsTblDef::COL_EVENT_KIND . ' = ' . $this->db->quote($kind, \ilDBConstants::T_TEXT)
             . ' AND '
-            . self::COL_YEAR . ' = ' . $this->db->quote($year, \ilDBConstants::T_INTEGER);
+            . IliasEventLocationsTblDef::COL_YEAR . ' = ' . $this->db->quote($year, \ilDBConstants::T_INTEGER);
 
         $result = $this->db->query($query);
 
@@ -95,8 +90,8 @@ class EventLocationsRepository
 
     public function getAllLocations() : array
     {
-        $query = "SELECT " . self::COL_DEPARTMENT_NAME . ", " . self::COL_EVENT_KIND . ", " . self::COL_YEAR . ", " . self::COL_REF_ID
-            . " FROM " . self::TABLE_NAME;
+        $query = "SELECT " . IliasEventLocationsTblDef::COL_DEPARTMENT_NAME . ", " . IliasEventLocationsTblDef::COL_EVENT_KIND . ", " . IliasEventLocationsTblDef::COL_YEAR . ", " . IliasEventLocationsTblDef::COL_REF_ID
+            . " FROM " . IliasEventLocationsTblDef::TABLE_NAME;
         $result = $this->db->query($query);
 
         $locations = [];

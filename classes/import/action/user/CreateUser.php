@@ -3,11 +3,11 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\db\IliasUserServices;
+use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\import\Logger;
-use EventoImport\import\db\repository\IliasEventoUserRepository;
+use EventoImport\import\db\IliasEventoUserRepository;
 
 class CreateUser implements UserImportAction
 {

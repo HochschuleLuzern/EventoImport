@@ -30,8 +30,8 @@ use EventoImport\communication\EventoAdminImporter;
 use EventoImport\import\EventoImportBootstrap;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\action\event\EventActionFactory;
-use EventoImport\import\data_matching\UserActionDecider;
-use EventoImport\import\data_matching\EventImportActionDecider;
+use EventoImport\import\action\UserImportActionDecider;
+use EventoImport\import\action\EventImportActionDecider;
 use ILIAS\DI\RBACServices;
 use ILIAS\Refinery\Factory;
 use EventoImport\import\UserImport;
@@ -39,6 +39,7 @@ use EventoImport\import\AdminImport;
 use EventoImport\import\EventAndMembershipImport;
 use EventoImport\import\Logger;
 use EventoImport\communication\ImporterIterator;
+use EventoImport\import\ImportFactory;
 
 /**
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
@@ -56,8 +57,8 @@ class ilEventoImportImport extends ilCronJob
     private ilSetting $settings;
     private ilEventoImportCronStateChecker $import_state_checker;
 
-    private EventoImportBootstrap $import_bootstrapping;
-    
+    private ImportFactory $import_factory;
+
     public function __construct(
         \ilEventoImportPlugin $cp,
         RBACServices $rbac_services,
@@ -65,14 +66,16 @@ class ilEventoImportImport extends ilCronJob
         Factory $refinery,
         ilSetting $settings
     ) {
+        global $DIC;
+
         $this->cp = $cp;
         $this->rbac = $rbac_services;
         $this->db = $db;
         $this->refinery = $refinery;
         $this->settings = $settings;
+
         $this->import_state_checker = new ilEventoImportCronStateChecker($this->db);
-        
-        $this->import_bootstrapping = new EventoImportBootstrap($this->db, $this->rbac, $this->settings);
+        $this->import_factory = new ImportFactory($db, $DIC->repositoryTree(), $rbac_services, $settings);
     }
     
     public function getId() : string
@@ -133,7 +136,6 @@ class ilEventoImportImport extends ilCronJob
                 $api_settings->getApikey(),
                 $api_settings->getApiSecret()
             );
-            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
 
             if ($this->import_state_checker->wasFullImportAlreadyRunToday()) {
                 $this->runHourlyAdminImport($data_source, $api_settings, $logger);
@@ -147,86 +149,48 @@ class ilEventoImportImport extends ilCronJob
         }
     }
 
-    public function runDailyFullImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \EventoImport\import\Logger $logger) : void
+    public function runDailyFullImport(RequestClientService $data_source, ImporterApiSettings $api_settings, Logger $logger) : void
     {
-        $user_importer = new EventoUserImporter(
-            $data_source,
-            new ImporterIterator($api_settings->getPageSize()),
-            $logger,
-            $api_settings->getTimeoutFailedRequest(),
-            $api_settings->getMaxRetries()
+        $import_users = $this->import_factory->buildUserImport(
+            new EventoUserImporter(
+                $data_source,
+                new ImporterIterator($api_settings->getPageSize()),
+                $logger,
+                $api_settings->getTimeoutFailedRequest(),
+                $api_settings->getMaxRetries()
+            ),
+            new EventoUserPhotoImporter(
+                $data_source,
+                $api_settings->getTimeoutFailedRequest(),
+                $api_settings->getMaxRetries(),
+                $logger
+            )
         );
 
-        $event_importer = new EventoEventImporter(
-            $data_source,
-            new ImporterIterator($api_settings->getPageSize()),
-            $logger,
-            $api_settings->getTimeoutFailedRequest(),
-            $api_settings->getMaxRetries()
+        $import_events = $this->import_factory->buildEventImport(
+            new EventoEventImporter(
+                $data_source,
+                new ImporterIterator($api_settings->getPageSize()),
+                $logger,
+                $api_settings->getTimeoutFailedRequest(),
+                $api_settings->getMaxRetries()
+            )
         );
 
-        $user_photo_importer = new EventoUserPhotoImporter(
-            $data_source,
-            $api_settings->getTimeoutFailedRequest(),
-            $api_settings->getMaxRetries(),
-            $logger
-        );
-        
-        $user_action_factory = new UserActionFactory(
-            $this->import_bootstrapping->userFacade(),
-            $this->import_bootstrapping->eventoUserRepository(),
-            $this->import_bootstrapping->defaultUserSettings(),
-            $user_photo_importer,
-            $logger
-        );
-
-        $user_import_action_decider = new UserActionDecider(
-            $this->import_bootstrapping->userFacade(),
-            $this->import_bootstrapping->eventoUserRepository(),
-            $user_action_factory
-        );
-
-        $importUsers = new UserImport(
-            $user_importer,
-            $user_import_action_decider,
-            $this->import_bootstrapping->userFacade(),
-            $this->import_bootstrapping->eventoUserRepository(),
-            $logger,
-            $this->db
-        );
-        $importUsers->run();
-        
-        $event_action_factory = new EventActionFactory(
-            $this->import_bootstrapping->eventObjectFactory(),
-            $this->import_bootstrapping->repositoryFacade(),
-            $this->import_bootstrapping->membershipManager(),
-            $logger
-        );
-        $event_action_decider = new EventImportActionDecider(
-            $this->import_bootstrapping->repositoryFacade(),
-            $event_action_factory
-        );
-
-        $import_events = new EventAndMembershipImport($event_importer, $event_action_decider, $logger);
-        //$import_events->run();
+        $import_users->run();
+        $import_events->run();
     }
 
-    public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, \EventoImport\import\Logger $logger) : void
+    public function runHourlyAdminImport(RequestClientService $data_source, ImporterApiSettings $api_settings, Logger $logger) : void
     {
-        $admin_importer = new EventoAdminImporter(
-            $data_source,
-            $logger,
-            $api_settings->getTimeoutFailedRequest(),
-            $api_settings->getMaxRetries()
+        $import_admins = $this->import_factory->buildAdminImport(
+            new EventoAdminImporter(
+                $data_source,
+                $logger,
+                $api_settings->getTimeoutFailedRequest(),
+                $api_settings->getMaxRetries()
+            )
         );
-
-        $import_admins = new AdminImport(
-            $admin_importer,
-            $this->import_bootstrapping->membershipManager(),
-            $this->import_bootstrapping->eventoEventRepository(),
-            $logger
-        );
-
         $import_admins->run();
     }
 

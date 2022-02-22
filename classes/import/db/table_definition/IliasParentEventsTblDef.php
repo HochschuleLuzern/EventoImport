@@ -2,7 +2,7 @@
 
 namespace EventoImport\import\db\table_definition;
 
-class IliasParentEvents
+class IliasParentEventsTblDef
 {
     public const TABLE_NAME = 'crevento_parent_events';
 
