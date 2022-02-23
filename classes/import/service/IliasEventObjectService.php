@@ -6,14 +6,11 @@ use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\settings\DefaultEventSettings;
 
 /**
- * Class RepositoryFacade
- * This class is a take on encapsulation all the "Repository" specific functionality from the rest of the import. Thinks
- * like searching a user, building a ilObjUser object from an ID or write user stuff to the DB should go through this
- * class.
+ * Class IliasEventObjectService
+ * This class is a take on encapsulation all the "Repository Object" specific functionality from the rest of the import.
+ * Things like searching a course/group by title, building a course/group object from an ID or write object stuff to the
+ * DB should go through this class.
  *
- * It started as a take on the facade pattern (hence the name) but quickly became something more. Because of the lack
- * for a better / more matching name, the class was not renamed till now.
- * TODO: Find a more matching name and unify use of method (e.g. replace the object-getters with actual logic)
  * @package EventoImport\import\db
  */
 class IliasEventObjectService
@@ -31,7 +28,9 @@ class IliasEventObjectService
 
     public function searchEventableIliasObjectByTitle(string $obj_title, string $filter_for_only_this_type = null) : ?\ilContainer
     {
-        $query = 'SELECT obj_id, type FROM object_data WHERE title = ' . $this->db->quote($obj_title, \ilDBConstants::T_TEXT);
+        $query = 'SELECT obj.obj_id obj_id, obj.type type, ref.ref_id ref_id FROM object_data AS obj'
+              . ' JOIN object_reference AS ref ON obj.obj_id = ref.obj_id'
+              . ' WHERE title = ' . $this->db->quote($obj_title, \ilDBConstants::T_TEXT);
 
         if (!is_null($filter_for_only_this_type) && ($filter_for_only_this_type == 'crs' || $filter_for_only_this_type == 'grp')) {
             $query .= ' AND type = ' . $this->db->quote($filter_for_only_this_type, \ilDBConstants::T_TEXT);
@@ -45,9 +44,9 @@ class IliasEventObjectService
             $row = $this->db->fetchAssoc($result);
             switch ($row['type']) {
                 case 'crs':
-                    return new \ilObjCourse($row['obj_id'], false);
+                    return $this->getCourseObjectForRefId((int) $row['ref_id']);
                 case 'grp':
-                    return new \ilObjGroup($row['obj_id'], false);
+                    return $this->getGroupObjectForRefId((int) $row['ref_id']);
                 default:
                     throw new \InvalidArgumentException('Invalid object type given for event object');
             }
@@ -56,7 +55,7 @@ class IliasEventObjectService
         return null;
     }
 
-    private function setValuesToContainerObject(\ilContainer $container_object, string $title, string $description, int $destination_ref_id)
+    private function createContainerObject(\ilContainer $container_object, string $title, string $description, int $destination_ref_id)
     {
         $container_object->setTitle($title);
         $container_object->setDescription($description);
@@ -81,7 +80,7 @@ class IliasEventObjectService
     {
         $course_object = new \ilObjCourse();
 
-        $this->setValuesToContainerObject($course_object, $title, $description, $destination_ref_id);
+        $this->createContainerObject($course_object, $title, $description, $destination_ref_id);
 
         return $course_object;
     }
@@ -90,7 +89,7 @@ class IliasEventObjectService
     {
         $group_object = new \ilObjGroup();
 
-        $this->setValuesToContainerObject($group_object, $title, $description, $destination_ref_id);
+        $this->createContainerObject($group_object, $title, $description, $destination_ref_id);
 
         return $group_object;
     }

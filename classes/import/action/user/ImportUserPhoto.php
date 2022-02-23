@@ -8,7 +8,7 @@ use EventoImport\communication\api_models\EventoUserPhoto;
 
 trait ImportUserPhoto
 {
-    public function importAndSetUserPhoto(int $evento_id, \ilObjUser $user, EventoUserPhotoImporter $photo_importer, IliasUserServices $user_facade)
+    public function importAndSetUserPhoto(int $evento_id, \ilObjUser $user, EventoUserPhotoImporter $photo_importer, IliasUserServices $ilias_user_service)
     {
         try {
             $photo_import = $photo_importer->fetchUserPhotoDataById($evento_id);
@@ -21,7 +21,7 @@ trait ImportUserPhoto
         }
 
         if ($photo_import->getHasPhoto() && $photo_import->getImgData() && strlen($photo_import->getImgData()) > 10) {
-            $user_facade->saveEncodedPersonalPictureToUserProfile($user, $photo_import->getImgData());
+            $ilias_user_service->saveEncodedPersonalPictureToUserProfile($user, $photo_import->getImgData());
         }
     }
 }

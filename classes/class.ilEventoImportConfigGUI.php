@@ -4,6 +4,7 @@ use EventoImport\administration\EventoImportApiTesterGUI;
 use EventoImport\administration\EventLocationsBuilder;
 use EventoImport\administration\EventLocationsAdminGUI;
 use ILIAS\DI\UIServices;
+use EventoImport\administration\EventoImportApiTester;
 
 /**
  * Class ilEventoImportConfigGUI
@@ -14,9 +15,10 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 {
     private ilSetting $settings;
     private ilTree $tree;
-    private ilTemplate $tpl;
+    private ilGlobalPageTemplate $tpl;
     private ilCtrl $ctrl;
     private UIServices $ui_services;
+    private ilDBInterface $db;
 
     public function __construct()
     {
@@ -27,6 +29,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $this->tpl = $DIC->ui()->mainTemplate();
         $this->ctrl = $DIC->ctrl();
         $this->ui_services = $DIC->ui();
+        $this->db = $DIC->database();
     }
 
     public function performCommand($cmd)
@@ -35,6 +38,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
             case 'configure':
                 $api_tester_gui = new EventoImportApiTesterGUI(
                     $this,
+                    new EventoImportApiTester($this->settings, $this->db),
                     $this->settings,
                     $this->ui_services,
                     $this->ctrl,
@@ -42,7 +46,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 );
                 $api_tester_html = $api_tester_gui->getApiTesterFormAsString();
 
-                $locations_gui = new EventLocationsAdminGUI($this, $this->settings);
+                $locations_gui = new EventLocationsAdminGUI($this, $this->settings, new \EventoImport\import\db\EventLocationsRepository($this->db), $this->ctrl, $this->ui_services);
                 $locations_html = $locations_gui->getEventLocationsPanelHTML();
 
                 $this->tpl->setContent($api_tester_html . $locations_html);
@@ -52,7 +56,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $json_settings = $this->settings->get('crevento_location_settings');
                 $locations_settings = json_decode($json_settings, true);
 
-                $locations_builder = new EventLocationsBuilder();
+                $locations_builder = new EventLocationsBuilder(new \EventoImport\import\db\EventLocationsRepository($this->db), $this->tree);
                 $diff = $locations_builder->rebuildRepositoryLocationsTable($locations_settings);
 
                 \ilUtil::sendSuccess("Event Locats reloaded successfully. Added $diff new locations", true);
@@ -64,6 +68,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 try {
                     $api_tester_gui = new EventoImportApiTesterGUI(
                         $this,
+                        new EventoImportApiTester($this->settings, $this->db),
                         $this->settings,
                         $this->ui_services,
                         $this->ctrl,
@@ -89,6 +94,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 try {
                     $api_tester_gui = new EventoImportApiTesterGUI(
                         $this,
+                        new EventoImportApiTester($this->settings, $this->db),
                         $this->settings,
                         $this->ui_services,
                         $this->ctrl,
@@ -110,6 +116,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 try {
                     $api_tester_gui = new EventoImportApiTesterGUI(
                         $this,
+                        new EventoImportApiTester($this->settings, $this->db),
                         $this->settings,
                         $this->ui_services,
                         $this->ctrl,

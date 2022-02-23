@@ -15,23 +15,23 @@ class CreateUser implements UserImportAction
     use UserImportActionTrait;
 
     private EventoUser $evento_user;
-    private IliasUserServices $user_facade;
-    private IliasEventoUserRepository $ilias_evento_user_repo;
+    private IliasUserServices $ilias_user_service;
+    private IliasEventoUserRepository $evento_user_repo;
     protected DefaultUserSettings $default_user_settings;
     private EventoUserPhotoImporter $photo_importer;
     private Logger $logger;
 
     public function __construct(
         EventoUser $evento_user,
-        IliasUserServices $user_facade,
-        IliasEventoUserRepository $ilias_evento_user_repository,
+        IliasUserServices $ilias_user_service,
+        IliasEventoUserRepository $evento_user_repo,
         DefaultUserSettings $default_user_settings,
         EventoUserPhotoImporter $photo_importer,
         Logger $logger
     ) {
         $this->evento_user = $evento_user;
-        $this->user_facade = $user_facade;
-        $this->ilias_evento_user_repo = $ilias_evento_user_repository;
+        $this->ilias_user_service = $ilias_user_service;
+        $this->evento_user_repo = $evento_user_repo;
         $this->default_user_settings = $default_user_settings;
         $this->photo_importer = $photo_importer;
         $this->logger = $logger;
@@ -39,7 +39,7 @@ class CreateUser implements UserImportAction
 
     public function executeAction() : void
     {
-        $ilias_user_object = $this->user_facade->createNewIliasUserObject();
+        $ilias_user_object = $this->ilias_user_service->createNewIliasUserObject();
 
         $this->setUserValuesFromImport($ilias_user_object, $this->evento_user);
         $ilias_user_object->create();
@@ -48,21 +48,21 @@ class CreateUser implements UserImportAction
         $ilias_user_object->saveAsNew(false);
 
         $this->setForcedUserSettings($ilias_user_object, $this->default_user_settings);
-        $this->setUsersDefaultSettings($ilias_user_object, $this->default_user_settings, $this->user_facade);
+        $this->setUsersDefaultSettings($ilias_user_object, $this->default_user_settings, $this->ilias_user_service);
 
         // Assign user to global user role
         $this->synchronizeUserWithGlobalRoles(
             $ilias_user_object->getId(),
             $this->evento_user->getRoles(),
             $this->default_user_settings,
-            $this->user_facade
+            $this->ilias_user_service
         );
 
         // Import and set User Photos
-        $this->importAndSetUserPhoto($this->evento_user->getEventoId(), $ilias_user_object, $this->photo_importer, $this->user_facade);
+        $this->importAndSetUserPhoto($this->evento_user->getEventoId(), $ilias_user_object, $this->photo_importer, $this->ilias_user_service);
 
         // Create map from evento to ilias user and log this to log-table
-        $this->ilias_evento_user_repo->addNewEventoIliasUser($this->evento_user, $ilias_user_object);
+        $this->evento_user_repo->addNewEventoIliasUser($this->evento_user, $ilias_user_object);
         $this->logger->logUserImport(
             Logger::CREVENTO_USR_CREATED,
             $this->evento_user->getEventoId(),
@@ -85,33 +85,33 @@ class CreateUser implements UserImportAction
         $ilias_user->setExternalAccount($evento_user->getEventoId() . '@hslu.ch');
     }
 
-    private function setUsersDefaultSettings(\ilObjUser $ilias_user_object, DefaultUserSettings $user_settings, IliasUserServices $user_facade) : void
+    private function setUsersDefaultSettings(\ilObjUser $ilias_user_object, DefaultUserSettings $user_settings, IliasUserServices $ilias_user_service) : void
     {
         $ilias_user_object->setActive(true);
-        $ilias_user_object->setTimeLimitFrom($this->default_user_settings->getNow()->getTimestamp());
-        if ($this->default_user_settings->getAccDurationAfterImport() == 0) {
+        $ilias_user_object->setTimeLimitFrom($user_settings->getNow()->getTimestamp());
+        if ($user_settings->getAccDurationAfterImport() == 0) {
             $ilias_user_object->setTimeLimitUnlimited(true);
         } else {
             $ilias_user_object->setTimeLimitUnlimited(false);
-            $ilias_user_object->setTimeLimitUntil($this->default_user_settings->getAccDurationAfterImport()->getTimestamp());
+            $ilias_user_object->setTimeLimitUntil($user_settings->getAccDurationAfterImport()->getTimestamp());
         }
 
-        $ilias_user_object->setAuthMode($this->default_user_settings->getAuthMode());
+        $ilias_user_object->setAuthMode($user_settings->getAuthMode());
 
         // Set default prefs
         $ilias_user_object->setPref(
             'hits_per_page',
-            (string) $this->default_user_settings->getDefaultHitsPerPage()
+            (string) $user_settings->getDefaultHitsPerPage()
         ); //100 hits per page
         $ilias_user_object->setPref(
             'show_users_online',
-            $this->default_user_settings->getDefaultShowUsersOnline()
+            $user_settings->getDefaultShowUsersOnline()
         ); //nur Leute aus meinen Kursen zeigen
 
         // update mail preferences
-        $user_facade->setMailPreferences(
+        $ilias_user_service->setMailPreferences(
             $ilias_user_object->getId(),
-            $this->default_user_settings->getMailIncomingType()
+            $user_settings->getMailIncomingType()
         );
     }
 }

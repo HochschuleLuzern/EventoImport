@@ -8,24 +8,24 @@ use EventoImport\import\IliasEventObjectFactory;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\service\MembershipManager;
 use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\IliasEventObjectRepository;
+use EventoImport\import\db\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
 
 class EventActionFactory
 {
-    private IliasEventObjectRepository $ilias_event_object_repo;
-    private IliasEventObjectService $repository_facade;
+    private IliasEventoEventObjectRepository $evento_event_object_repo;
+    private IliasEventObjectService $ilias_event_obj_service;
     private MembershipManager $membership_manager;
     private Logger $logger;
 
     public function __construct(
-        IliasEventObjectRepository $ilias_event_object_repo,
-        IliasEventObjectService $repository_facade,
+        IliasEventoEventObjectRepository $evento_event_object_repo,
+        IliasEventObjectService $ilias_event_obj_service,
         MembershipManager $membership_manager,
         Logger $logger
     ) {
-        $this->ilias_event_object_repo = $ilias_event_object_repo;
-        $this->repository_facade = $repository_facade;
+        $this->evento_event_object_repo = $evento_event_object_repo;
+        $this->ilias_event_obj_service = $ilias_event_obj_service;
         $this->membership_manager = $membership_manager;
         $this->logger = $logger;
     }
@@ -35,8 +35,8 @@ class EventActionFactory
         return new CreateSingleEvent(
             $evento_event,
             $destination_ref_id,
-            $this->repository_facade,
-            $this->ilias_event_object_repo,
+            $this->ilias_event_obj_service,
+            $this->evento_event_object_repo,
             $this->membership_manager,
             $this->logger,
         );
@@ -47,8 +47,8 @@ class EventActionFactory
         return new CreateEventWithParent(
             $evento_event,
             $destination_ref_id,
-            $this->repository_facade,
-            $this->ilias_event_object_repo,
+            $this->ilias_event_obj_service,
+            $this->evento_event_object_repo,
             $this->membership_manager,
             $this->logger,
         );
@@ -59,8 +59,8 @@ class EventActionFactory
         return new CreateEventInParentEvent(
             $evento_event,
             $parent_event,
-            $this->repository_facade,
-            $this->ilias_event_object_repo,
+            $this->ilias_event_obj_service,
+            $this->evento_event_object_repo,
             $this->membership_manager,
             $this->logger,
         );
@@ -71,7 +71,7 @@ class EventActionFactory
         return new UpdateExistingEvent(
             $evento_event,
             $ilias_event,
-            $this->repository_facade,
+            $this->ilias_event_obj_service,
             $this->membership_manager,
             $this->logger,
         );
@@ -82,8 +82,8 @@ class EventActionFactory
         return new ConvertSingleEventToMultiGroupEvent(
             $evento_event,
             $ilias_event,
-            $this->repository_facade,
-            $this->ilias_event_object_repo,
+            $this->ilias_event_obj_service,
+            $this->evento_event_object_repo,
             $this->membership_manager,
             $this->logger
         );
@@ -96,7 +96,7 @@ class EventActionFactory
         return new MarkExistingIliasObjAsEvent(
             $evento_event,
             $ilias_obj,
-            $this->ilias_event_object_repo,
+            $this->evento_event_object_repo,
             $this->membership_manager,
             $this->logger,
         );

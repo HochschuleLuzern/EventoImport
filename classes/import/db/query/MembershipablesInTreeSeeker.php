@@ -55,7 +55,7 @@ class MembershipablesInTreeSeeker
 
         $deadlock_prevention = 0;
         do {
-            $current_obj_ref = $this->tree->getParentId($current_obj_ref);
+            $current_obj_ref = (int) $this->tree->getParentId($current_obj_ref);
             $type = $this->lookupObjTypeByRefId($current_obj_ref);
             if ($type == 'crs') {
                 $parent_membershipable_objs[] = $current_obj_ref;

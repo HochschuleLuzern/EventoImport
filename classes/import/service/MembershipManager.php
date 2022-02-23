@@ -2,7 +2,7 @@
 
 namespace EventoImport\import\service;
 
-use EventoImport\import\db\EventMembershipRepository;
+use EventoImport\import\db\IliasEventoEventMembershipRepository;
 use ILIAS\DI\RBACServices;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\db\IliasEventoUserRepository;
@@ -29,7 +29,7 @@ class MembershipManager
 
     public function __construct(
         MembershipablesInTreeSeeker $tree_seeker,
-        EventMembershipRepository $membership_repo,
+        IliasEventoEventMembershipRepository $membership_repo,
         IliasEventoUserRepository $user_repo,
         \ilFavouritesManager $favourites_manager,
         Logger $logger,

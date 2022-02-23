@@ -7,27 +7,27 @@ use EventoImport\import\service\IliasEventObjectService;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\event\EventAction;
-use EventoImport\import\db\IliasEventObjectRepository;
+use EventoImport\import\db\IliasEventoEventObjectRepository;
 use EventoImport\import\db\EventLocationsRepository;
 
 class EventImportActionDecider
 {
-    private IliasEventObjectService $repository_facade;
+    private IliasEventObjectService $ilias_event_obj_service;
     private EventActionFactory $event_action_factory;
-    private IliasEventObjectRepository $ilias_event_obj_repo;
+    private IliasEventoEventObjectRepository $evento_event_object_repo;
     private EventLocationsRepository $location_repository;
 
-    public function __construct(IliasEventObjectService $repository_facade, IliasEventObjectRepository $ilias_event_obj_repo, EventActionFactory $event_action_factory, EventLocationsRepository $location_repo)
+    public function __construct(IliasEventObjectService $ilias_event_obj_service, IliasEventoEventObjectRepository $evento_event_object_repo, EventActionFactory $event_action_factory, EventLocationsRepository $location_repo)
     {
-        $this->repository_facade = $repository_facade;
-        $this->ilias_event_obj_repo = $ilias_event_obj_repo;
+        $this->ilias_event_obj_service = $ilias_event_obj_service;
+        $this->evento_event_object_repo = $evento_event_object_repo;
         $this->event_action_factory = $event_action_factory;
         $this->location_repository = $location_repo;
     }
 
     public function determineAction(EventoEvent $evento_event) : EventAction
     {
-        $ilias_event = $this->ilias_event_obj_repo->getEventByEventoId($evento_event->getEventoId());
+        $ilias_event = $this->evento_event_object_repo->getEventByEventoId($evento_event->getEventoId());
         if (!is_null($ilias_event)) {
             // Already is registered as ilias-event
             return $this->determineActionForExistingIliasEventoEvent($evento_event, $ilias_event);
@@ -66,7 +66,7 @@ class EventImportActionDecider
         }
 
         // Is MultiGroup
-        $parent_event = $this->ilias_event_obj_repo->getParentEventForName($evento_event->getGroupUniqueKey());
+        $parent_event = $this->evento_event_object_repo->getParentEventForName($evento_event->getGroupUniqueKey());
         if (!is_null($parent_event)) {
             // Parent event in multi group exists
             return $this->event_action_factory->createEventInParentEvent($evento_event, $parent_event);
@@ -78,7 +78,7 @@ class EventImportActionDecider
 
     protected function determineActionForNonRegisteredEventsWithoutCreateFlag(EventoEvent $evento_event) : EventAction
     {
-        $matched_course = $this->repository_facade->searchEventableIliasObjectByTitle($evento_event->getName());
+        $matched_course = $this->ilias_event_obj_service->searchEventableIliasObjectByTitle($evento_event->getName());
 
         if (!is_null($matched_course)) {
             return $this->event_action_factory->markExistingIliasObjAsEvent($evento_event, $matched_course);

@@ -1,14 +1,15 @@
 <?php
 
-namespace EventoImport\import\data_matching;
+namespace EventoImport\import\action_decider;
 
 use PHPUnit\Framework\TestCase;
-use EventoImport\import\db\IliasUserServices;
+use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\action\user\CreateUser;
-use EventoImport\import\db\repository\IliasEventoUserRepository;
+use EventoImport\import\db\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\action\UserImportActionDecider;
 
 class UserActionDeciderTest extends TestCase
 {
@@ -46,7 +47,7 @@ class UserActionDeciderTest extends TestCase
                     ->method('buildCreateAction')
                     ->with($this->equalTo($evento_user))
                     ->willReturn($this->createMock(CreateUser::class));
-        $action_decider = new UserActionDecider($user_facade, $action_factory);
+        $action_decider = new UserImportActionDecider($user_facade, $action_factory);
 
         // Act
         $action = $action_decider->determineImportAction($evento_user);

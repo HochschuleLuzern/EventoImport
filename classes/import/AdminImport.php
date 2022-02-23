@@ -7,19 +7,19 @@ use EventoImport\communication\EventoAdminImporter;
 use EventoImport\import\db\repository\IliasEventoEventsRepository;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
 use EventoImport\import\Logger;
-use EventoImport\import\db\IliasEventObjectRepository;
+use EventoImport\import\db\IliasEventoEventObjectRepository;
 
 class AdminImport
 {
     private EventoAdminImporter $evento_importer;
     private MembershipManager $membership_manager;
-    private IliasEventObjectRepository $ilias_event_repo;
+    private IliasEventoEventObjectRepository $ilias_event_repo;
     private \EventoImport\import\Logger $logger;
 
     public function __construct(
         EventoAdminImporter $evento_importer,
         MembershipManager $membership_manager,
-        IliasEventObjectRepository $ilias_event_repo,
+        IliasEventoEventObjectRepository $ilias_event_repo,
         Logger $logger
     ) {
         $this->evento_importer = $evento_importer;

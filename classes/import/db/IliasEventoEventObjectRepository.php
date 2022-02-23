@@ -7,7 +7,7 @@ use EventoImport\import\db\table_definition\IliasEventoEventsTblDef;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\db\table_definition\IliasParentEventsTblDef;
 
-class IliasEventObjectRepository
+class IliasEventoEventObjectRepository
 {
     private \ilDBInterface $db;
 

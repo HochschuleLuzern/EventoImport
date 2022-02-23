@@ -26,22 +26,22 @@ use EventoImport\communication\api_models\EventoUser;
 class UserImport
 {
     private EventoUserImporter $evento_importer;
-    private IliasUserServices $user_facade;
-    private IliasEventoUserRepository $ilias_evento_user_repo;
+    private IliasUserServices $ilias_user_service;
+    private IliasEventoUserRepository $evento_user_repo;
     private UserImportActionDecider $user_import_action_decider;
     private Logger $evento_logger;
 
     public function __construct(
         EventoUserImporter $importer,
         UserImportActionDecider $user_import_action_decider,
-        IliasUserServices $user_facade,
-        IliasEventoUserRepository $ilias_evento_user_repo,
+        IliasUserServices $ilias_user_service,
+        IliasEventoUserRepository $evento_user_repo,
         Logger $logger
     ) {
         $this->evento_importer = $importer;
         $this->user_import_action_decider = $user_import_action_decider;
-        $this->user_facade = $user_facade;
-        $this->ilias_evento_user_repo = $ilias_evento_user_repo;
+        $this->ilias_user_service = $ilias_user_service;
+        $this->evento_user_repo = $evento_user_repo;
         $this->evento_logger = $logger;
     }
 
@@ -85,7 +85,7 @@ class UserImport
      */
     private function convertDeletedAccounts()
     {
-        $list = $this->ilias_evento_user_repo->getUsersWithLastImportOlderThanOneWeek();
+        $list = $this->evento_user_repo->getUsersWithLastImportOlderThanOneWeek();
 
         foreach ($list as $evento_id => $ilias_user_id) {
             try {
@@ -96,7 +96,7 @@ class UserImport
                     $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
                     $action->executeAction();
                 } else {
-                    $this->ilias_evento_user_repo->registerUserAsDelivered($result->getEventoId());
+                    $this->evento_user_repo->registerUserAsDelivered($result->getEventoId());
                 }
             } catch (\Exception $e) {
             }
@@ -109,6 +109,6 @@ class UserImport
      */
     private function setUserTimeLimits()
     {
-        $this->user_facade->setUserTimeLimits();
+        $this->ilias_user_service->setUserTimeLimits();
     }
 }

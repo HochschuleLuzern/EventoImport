@@ -5,7 +5,7 @@ namespace EventoImport\import\action\event;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\service\IliasEventObjectService;
 use EventoImport\import\service\MembershipManager;
-use EventoImport\import\db\IliasEventObjectRepository;
+use EventoImport\import\db\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
 use EventoImport\import\db\model\IliasEventoEvent;
 
@@ -13,18 +13,18 @@ class CreateSingleEvent implements EventAction
 {
     private EventoEvent $evento_event;
     private int $destination_ref_id;
-    private IliasEventObjectService $repository_facade;
-    private IliasEventObjectRepository $event_object_repo;
+    private IliasEventObjectService $ilias_event_obj_service;
+    private IliasEventoEventObjectRepository $evento_event_object_repo;
     private MembershipManager $membership_manager;
     private Logger $logger;
     private int $log_code;
 
-    public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectService $repository_facade, IliasEventObjectRepository $event_object_repo, MembershipManager $membership_manager, Logger $logger)
+    public function __construct(EventoEvent $evento_event, int $destination_ref_id, IliasEventObjectService $ilias_event_obj_service, IliasEventoEventObjectRepository $evento_event_object_repo, MembershipManager $membership_manager, Logger $logger)
     {
         $this->evento_event = $evento_event;
         $this->destination_ref_id = $destination_ref_id;
-        $this->repository_facade = $repository_facade;
-        $this->event_object_repo = $event_object_repo;
+        $this->ilias_event_obj_service = $ilias_event_obj_service;
+        $this->evento_event_object_repo = $evento_event_object_repo;
         $this->membership_manager = $membership_manager;
         $this->logger = $logger;
         $this->log_code = Logger::CREVENTO_MA_SINGLE_EVENT_CREATED;
@@ -32,7 +32,7 @@ class CreateSingleEvent implements EventAction
 
     public function executeAction() : void
     {
-        $course_object = $this->repository_facade->buildNewCourseObject(
+        $course_object = $this->ilias_event_obj_service->buildNewCourseObject(
             $this->evento_event->getName(),
             $this->evento_event->getDescription(),
             $this->destination_ref_id,
@@ -47,14 +47,14 @@ class CreateSingleEvent implements EventAction
             $this->evento_event->getStartDate(),
             $this->evento_event->getEndDate(),
             $course_object->getType(),
-            $course_object->getRefId(),
-            $course_object->getId(),
-            $course_object->getDefaultAdminRole(),
-            $course_object->getDefaultMemberRole(),
+            (int) $course_object->getRefId(),
+            (int) $course_object->getId(),
+            (int) $course_object->getDefaultAdminRole(),
+            (int) $course_object->getDefaultMemberRole(),
             $this->evento_event->getGroupUniqueKey()
         );
 
-        $this->event_object_repo->addNewEventoIliasEvent($ilias_evento_event);
+        $this->evento_event_object_repo->addNewEventoIliasEvent($ilias_evento_event);
 
         $this->membership_manager->syncMemberships($this->evento_event, $ilias_evento_event);
 

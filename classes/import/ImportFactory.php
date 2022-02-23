@@ -16,8 +16,8 @@ use EventoImport\import\action\event\EventActionFactory;
 use EventoImport\import\service\IliasEventObjectService;
 use EventoImport\import\settings\DefaultEventSettings;
 use EventoImport\import\service\MembershipManager;
-use EventoImport\import\db\EventMembershipRepository;
-use EventoImport\import\db\IliasEventObjectRepository;
+use EventoImport\import\db\IliasEventoEventMembershipRepository;
+use EventoImport\import\db\IliasEventoEventObjectRepository;
 use EventoImport\import\db\EventLocationsRepository;
 use EventoImport\communication\EventoAdminImporter;
 use EventoImport\import\db\query\MembershipablesInTreeSeeker;
@@ -40,16 +40,16 @@ class ImportFactory
 
     public function buildUserImport(EventoUserImporter $user_importer, EventoUserPhotoImporter $user_photo_importer) : UserImport
     {
-        $user_services = new IliasUserServices($this->db, $this->rbac);
+        $ilias_user_service = new IliasUserServices($this->db, $this->rbac);
         $evento_user_repo = new IliasEventoUserRepository($this->db);
 
         return new UserImport(
             $user_importer,
             new UserImportActionDecider(
-                $user_services,
+                $ilias_user_service,
                 $evento_user_repo,
                 new UserActionFactory(
-                    $user_services,
+                    $ilias_user_service,
                     $evento_user_repo,
                     new DefaultUserSettings(
                         $this->setting
@@ -58,7 +58,7 @@ class ImportFactory
                     $this->logger
                 )
             ),
-            $user_services,
+            $ilias_user_service,
             $evento_user_repo,
             $this->logger
         );
@@ -67,7 +67,7 @@ class ImportFactory
     public function buildEventImport(EventoEventImporter $event_importer) : EventAndMembershipImport
     {
         $event_obj_service = new IliasEventObjectService(new DefaultEventSettings($this->setting), $this->db);
-        $event_obj_repo = new IliasEventObjectRepository($this->db);
+        $event_obj_repo = new IliasEventoEventObjectRepository($this->db);
 
         return new EventAndMembershipImport(
             $event_importer,
@@ -79,7 +79,7 @@ class ImportFactory
                     $event_obj_service,
                     new MembershipManager(
                         new MembershipablesInTreeSeeker($this->tree),
-                        new EventMembershipRepository($this->db),
+                        new IliasEventoEventMembershipRepository($this->db),
                         new IliasEventoUserRepository($this->db),
                         new \ilFavouritesManager(),
                         $this->logger,
@@ -98,13 +98,14 @@ class ImportFactory
         return new AdminImport(
             $admin_importer,
             new MembershipManager(
-                new EventMembershipRepository($this->db),
+                new MembershipablesInTreeSeeker($this->tree),
+                new IliasEventoEventMembershipRepository($this->db),
                 new IliasEventoUserRepository($this->db),
                 new \ilFavouritesManager(),
                 $this->logger,
                 $this->rbac
             ),
-            new IliasEventObjectRepository($this->db),
+            new IliasEventoEventObjectRepository($this->db),
             $this->logger
         );
     }

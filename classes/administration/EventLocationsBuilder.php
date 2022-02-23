@@ -46,7 +46,7 @@ class EventLocationsBuilder
             $child_ref = $child_node['child'];
             $obj_id = \ilObject::_lookupObjectId($child_ref);
             if (\ilObject::_lookupTitle($obj_id) == $searched_obj_title) {
-                return $child_ref;
+                return (int) $child_ref;
             }
         }
 
@@ -74,7 +74,7 @@ class EventLocationsBuilder
                         foreach ($locations_settings['years'] as $year) {
                             $destination_ref_id = $this->fetchRefIdForObjTitle($kind_ref_id, $year);
                             if ($destination_ref_id) {
-                                $this->locations_repository->addNewLocation($this->getMappedDepartmentName($department), $kind, $year, $destination_ref_id);
+                                $this->locations_repository->addNewLocation($this->getMappedDepartmentName($department), $kind, (int) $year, $destination_ref_id);
                             }
                         }
                     }

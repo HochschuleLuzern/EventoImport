@@ -7,7 +7,7 @@ use EventoImport\import\db\table_definition\IliasEventoEventsTblDef;
 use EventoImport\import\db\table_definition\IliasEventoEventMembershipsTblDef;
 use EventoImport\import\db\table_definition\IliasEventoUserTblDef;
 
-class EventMembershipRepository
+class IliasEventoEventMembershipRepository
 {
     public const ROLE_ADMIN = 1;
     public const ROLE_MEMBER = 2;

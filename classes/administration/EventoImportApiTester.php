@@ -14,6 +14,7 @@ use EventoImport\communication\ImporterApiSettings;
 class EventoImportApiTester
 {
     private \ilSetting $settings;
+    private \ilDBInterface $db;
 
     public function __construct(\ilSetting $settings, \ilDBInterface $db)
     {

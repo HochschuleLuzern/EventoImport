@@ -4,6 +4,7 @@ namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\service\IliasUserServices;
+use EventoImport\import\Logger;
 
 class RenameExistingCreateNew implements UserImportAction
 {
@@ -11,16 +12,16 @@ class RenameExistingCreateNew implements UserImportAction
     private EventoUser $new_evento_user;
     private \ilObjUser $old_user_to_rename;
     private string $found_by;
-    private IliasUserServices $user_facade;
-    private \EventoImport\import\Logger $logger;
+    private IliasUserServices $ilias_user_service;
+    private Logger $logger;
 
-    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, IliasUserServices $user_facade, \EventoImport\import\Logger $logger)
+    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, IliasUserServices $ilias_user_service, Logger $logger)
     {
         $this->new_evento_user = $new_evento_user;
         $this->create_action = $create_action;
         $this->old_user_to_rename = $old_user_to_rename;
         $this->found_by = $found_by;
-        $this->user_facade = $user_facade;
+        $this->ilias_user_service = $ilias_user_service;
         $this->logger = $logger;
     }
 
@@ -50,7 +51,7 @@ class RenameExistingCreateNew implements UserImportAction
         $old_user->updateLogin($old_user->getLogin());
 
         $this->logger->logUserImport(
-            \EventoImport\import\Logger::CREVENTO_USR_RENAMED,
+            Logger::CREVENTO_USR_RENAMED,
             $old_user_evento_id,
             $old_user->getLogin(),
             ['changed_user_data' => $changed_user_data]

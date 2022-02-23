@@ -79,7 +79,7 @@ class EventLocationsRepository
         $result = $this->db->query($query);
 
         if ($row = $this->db->fetchAssoc($result)) {
-            $ref_id = $row['ref_id'];
+            $ref_id = (int) $row['ref_id'];
             $this->addToCache($ref_id, $department, $kind, $year);
 
             return $ref_id;

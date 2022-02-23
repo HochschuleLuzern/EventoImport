@@ -17,6 +17,7 @@ class EventoImportApiTesterGUI
 
     public function __construct(
         \ilEventoImportConfigGUI $parent_gui,
+        EventoImportApiTester $api_tester,
         \ilSetting $settings,
         UIServices $ui_services,
         \ilCtrl $ctrl,
@@ -29,7 +30,7 @@ class EventoImportApiTesterGUI
         $this->settings = $settings;
         $this->tree = $tree;
         $this->ctrl = $ctrl;
-        $this->api_tester = new EventoImportApiTester($this->settings);
+        $this->api_tester = $api_tester;
     }
 
     public function getApiTesterFormAsString() : string

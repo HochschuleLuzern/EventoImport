@@ -16,8 +16,8 @@ class UpdateUser implements UserImportAction
 
     private EventoUser $evento_user;
     private \ilObjUser $ilias_user;
-    private IliasUserServices $user_facade;
-    private IliasEventoUserRepository $ilias_evento_user_repository;
+    private IliasUserServices $ilias_user_service;
+    private IliasEventoUserRepository $evento_user_repo;
     private DefaultUserSettings $default_user_settings;
     private EventoUserPhotoImporter $photo_importer;
     private Logger $logger;
@@ -25,16 +25,16 @@ class UpdateUser implements UserImportAction
     public function __construct(
         EventoUser $evento_user,
         \ilObjUser $ilias_user,
-        IliasUserServices $user_facade,
-        IliasEventoUserRepository $ilias_evento_user_repository,
+        IliasUserServices $ilias_user_service,
+        IliasEventoUserRepository $evento_user_repo,
         DefaultUserSettings $default_user_settings,
         EventoUserPhotoImporter $photo_importer,
         Logger $logger
     ) {
         $this->evento_user = $evento_user;
         $this->ilias_user = $ilias_user;
-        $this->user_facade = $user_facade;
-        $this->ilias_evento_user_repository = $ilias_evento_user_repository;
+        $this->ilias_user_service = $ilias_user_service;
+        $this->evento_user_repo = $evento_user_repo;
         $this->default_user_settings = $default_user_settings;
         $this->photo_importer = $photo_importer;
         $this->logger = $logger;
@@ -42,7 +42,7 @@ class UpdateUser implements UserImportAction
 
     public function executeAction() : void
     {
-        $this->ilias_evento_user_repository->registerUserAsDelivered(
+        $this->evento_user_repo->registerUserAsDelivered(
             $this->evento_user->getEventoId()
         );
 
@@ -52,18 +52,18 @@ class UpdateUser implements UserImportAction
             $this->ilias_user->getId(),
             $this->evento_user->getRoles(),
             $this->default_user_settings,
-            $this->user_facade
+            $this->ilias_user_service
         );
 
-        if (!$this->user_facade->userHasPersonalPicture($this->ilias_user)) {
-            $this->importAndSetUserPhoto($this->evento_user->getEventoId(), $this->ilias_user, $this->photo_importer, $this->user_facade);
+        if (!$this->ilias_user_service->userHasPersonalPicture($this->ilias_user)) {
+            $this->importAndSetUserPhoto($this->evento_user->getEventoId(), $this->ilias_user, $this->photo_importer, $this->ilias_user_service);
         }
 
         $old_login = $this->ilias_user->getLogin();
         if ($old_login != $this->evento_user->getLoginName()) {
             $login_change_successful = $this->ilias_user->updateLogin($this->evento_user->getLoginName());
             if ($login_change_successful) {
-                $this->user_facade->sendLoginChangedMail($this->ilias_user, $old_login, $this->evento_user);
+                $this->ilias_user_service->sendLoginChangedMail($this->ilias_user, $old_login, $this->evento_user);
 
                 $this->logger->logUserImport(
                     Logger::CREVENTO_USR_RENAMED,
