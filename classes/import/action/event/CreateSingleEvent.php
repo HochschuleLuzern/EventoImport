@@ -9,7 +9,7 @@ use EventoImport\import\db\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
 use EventoImport\import\db\model\IliasEventoEvent;
 
-class CreateSingleEvent implements EventAction
+class CreateSingleEvent implements EventImportAction
 {
     private EventoEvent $evento_event;
     private int $destination_ref_id;

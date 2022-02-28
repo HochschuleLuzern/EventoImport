@@ -5,7 +5,7 @@ namespace EventoImport\import\action\event;
 use EventoImport\import\action\ReportDatasetWithoutAction;
 use EventoImport\import\Logger;
 
-class ReportEventImportDatasetWithoutAction extends ReportDatasetWithoutAction implements EventAction
+class ReportEventImportDatasetWithoutAction extends ReportDatasetWithoutAction implements EventImportAction
 {
     private int $evento_id;
     private ?int $ref_id;

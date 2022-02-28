@@ -5,6 +5,7 @@ namespace EventoImport\import\service;
 use ILIAS\DI\RBACServices;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\service\ImportMailNotification;
+use EventoImport\import\settings\DefaultUserSettings;
 
 /**
  * Class IliasUserServices
@@ -16,14 +17,16 @@ use EventoImport\import\service\ImportMailNotification;
  */
 class IliasUserServices
 {
+    private DefaultUserSettings $user_settings;
     private \ilDBInterface $db;
     private RBACServices $rbac_services;
     private \ilRbacReview $rbac_review;
     private \ilRbacAdmin $rbac_admin;
     private ?int $student_role_id;
 
-    public function __construct(\ilDBInterface $db, RBACServices $rbac_services)
+    public function __construct(DefaultUserSettings $user_settings, \ilDBInterface $db, RBACServices $rbac_services)
     {
+        $this->user_settings = $user_settings;
         $this->db = $db;
         $this->rbac_services = $rbac_services;
         $this->rbac_review = $rbac_services->review();
@@ -186,7 +189,8 @@ class IliasUserServices
 
     public function setUserTimeLimits()
     {
-        $until_max = 0;
+        $until_max = $this->user_settings->getMaxDurationOfAccounts()->getTimestamp();
+
         $this->setTimeLimitForUnlimitedUsersExceptSpecialUsers($until_max);
         $this->setUserTimeLimitsToAMaxValue($until_max);
         $this->setUserTimeLimitsBelowThresholdToGivenValue(90, 7889229);

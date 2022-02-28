@@ -5,6 +5,8 @@ namespace EventoImport\import;
 use EventoImport\communication\EventoEventImporter;
 use EventoImport\import\action\EventImportActionDecider;
 use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\db\IliasEventoEventObjectRepository;
+use EventoImport\import\db\model\IliasEventoEvent;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -29,21 +31,25 @@ class EventAndMembershipImport
 {
     private EventoEventImporter $evento_importer;
     private EventImportActionDecider $event_import_action_decider;
+    private IliasEventoEventObjectRepository $evento_event_obj_repo;
     private Logger $logger;
 
     public function __construct(
         EventoEventImporter $evento_importer,
         EventImportActionDecider $event_import_action_decider,
+        IliasEventoEventObjectRepository $evento_event_obj_repo,
         Logger $logger
     ) {
         $this->evento_importer = $evento_importer;
         $this->event_import_action_decider = $event_import_action_decider;
+        $this->evento_event_obj_repo = $evento_event_obj_repo;
         $this->logger = $logger;
     }
 
     public function run() : void
     {
         $this->importEvents();
+        $this->deleteInEventoRemovedEvents();
     }
 
     private function importEvents() : void
@@ -57,13 +63,34 @@ class EventAndMembershipImport
         } while ($this->evento_importer->hasMoreData());
     }
 
+    private function deleteInEventoRemovedEvents()
+    {
+        $list = $this->evento_event_obj_repo->getActiveEventsWithLastImportOlderThanOneWeek();
+
+        /** @var $ilias_evento_event IliasEventoEvent*/
+        foreach ($list as $ilias_evento_event) {
+            try {
+                // Ensure that the user is not being returned by the api right now
+                $result = $this->evento_importer->fetchEventDataRecordById($ilias_evento_event->getEventoEventId());
+
+                if (is_null($result)) {
+                    $action = $this->event_import_action_decider->determineDeleteAction($ilias_evento_event);
+                    $action->executeAction();
+                } else {
+                    $this->evento_event_obj_repo->registerUserAsDelivered($result->getEventoId());
+                }
+            } catch (\Exception $e) {
+            }
+        }
+    }
+
     private function importNextEventPage() : void
     {
         foreach ($this->evento_importer->fetchNextEventDataSet() as $data_set) {
             try {
                 $evento_event = new EventoEvent($data_set);
 
-                $action = $this->event_import_action_decider->determineAction($evento_event);
+                $action = $this->event_import_action_decider->determineImportAction($evento_event);
                 $action->executeAction();
             } catch (\Exception $e) {
                 $this->logger->logException('Importing Event', $e->getMessage());

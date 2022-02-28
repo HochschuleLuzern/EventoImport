@@ -169,20 +169,27 @@ class IliasEventoEventObjectRepository
         $this->db->query($query);
     }
 
-    public function removeParentEventIfItHasNoChildEvent(string $parent_event_key)
+    public function getNumberOfChildEventsForParentEventKey(IliasEventoParentEvent $parent_event) : int
     {
         $query = 'SELECT count(1) as cnt FROM ' . IliasEventoEventsTblDef::TABLE_NAME
-            . " WHERE " . IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY . ' = ' . $this->db->quote($parent_event_key, \ilDBConstants::T_TEXT);
+            . " WHERE " . IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY . ' = ' . $this->db->quote($parent_event->getGroupUniqueKey(), \ilDBConstants::T_TEXT);
         $res = $this->db->query($query);
         $data = $this->db->fetchAssoc($res);
-        if (isset($data['cnt']) && ((int) $data['cnt']) <= 1) {
-            $this->removeParentEvent($parent_event_key);
+
+        return (int) $data['cnt'];
+    }
+
+    public function removeParentEventIfItHasNoChildEvent(IliasEventoParentEvent $parent_event)
+    {
+        if ($this->getNumberOfChildEventsForParentEventKey($parent_event) <= 1) {
+            $this->removeParentEvent($parent_event);
         }
     }
 
-    private function removeParentEvent(string $parent_event_key)
+    private function removeParentEvent(IliasEventoParentEvent $parent_event)
     {
-        $query = 'DELETE FROM ' . IliasParentEventsTblDef::TABLE_NAME . ' WHERE ' . IliasParentEventsTblDef::COL_GROUP_UNIQUE_KEY . ' = ' . $this->db->quote($parent_event_key, \ilDBConstants::T_TEXT);
+        $query = 'DELETE FROM ' . IliasParentEventsTblDef::TABLE_NAME
+            . ' WHERE ' . IliasParentEventsTblDef::COL_GROUP_UNIQUE_KEY . ' = ' . $this->db->quote($parent_event->getGroupUniqueKey(), \ilDBConstants::T_TEXT);
         $this->db->manipulate($query);
     }
 
@@ -237,5 +244,9 @@ class IliasEventoEventObjectRepository
             }
             return $date_time;
         }
+    }
+
+    public function getActiveEventsWithLastImportOlderThanOneWeek() : array
+    {
     }
 }

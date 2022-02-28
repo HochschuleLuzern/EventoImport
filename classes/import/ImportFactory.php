@@ -40,7 +40,8 @@ class ImportFactory
 
     public function buildUserImport(EventoUserImporter $user_importer, EventoUserPhotoImporter $user_photo_importer) : UserImport
     {
-        $ilias_user_service = new IliasUserServices($this->db, $this->rbac);
+        $user_settings = new DefaultUserSettings($this->setting);
+        $ilias_user_service = new IliasUserServices($user_settings, $this->db, $this->rbac);
         $evento_user_repo = new IliasEventoUserRepository($this->db);
 
         return new UserImport(
@@ -51,9 +52,7 @@ class ImportFactory
                 new UserActionFactory(
                     $ilias_user_service,
                     $evento_user_repo,
-                    new DefaultUserSettings(
-                        $this->setting
-                    ),
+                    $user_settings,
                     $user_photo_importer,
                     $this->logger
                 )
@@ -67,15 +66,15 @@ class ImportFactory
     public function buildEventImport(EventoEventImporter $event_importer) : EventAndMembershipImport
     {
         $event_obj_service = new IliasEventObjectService(new DefaultEventSettings($this->setting), $this->db);
-        $event_obj_repo = new IliasEventoEventObjectRepository($this->db);
+        $evento_event_obj_repo = new IliasEventoEventObjectRepository($this->db);
 
         return new EventAndMembershipImport(
             $event_importer,
             new EventImportActionDecider(
                 $event_obj_service,
-                $event_obj_repo,
+                $evento_event_obj_repo,
                 new EventActionFactory(
-                    $event_obj_repo,
+                    $evento_event_obj_repo,
                     $event_obj_service,
                     new MembershipManager(
                         new MembershipablesInTreeSeeker($this->tree),
@@ -89,6 +88,7 @@ class ImportFactory
                 ),
                 new EventLocationsRepository($this->db)
             ),
+            $evento_event_obj_repo,
             $this->logger
         );
     }

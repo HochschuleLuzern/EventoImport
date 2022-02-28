@@ -12,7 +12,7 @@ use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
 
-class CreateEventInParentEvent implements EventAction
+class CreateEventInParentEvent implements EventImportAction
 {
     private EventoEvent $evento_event;
     private IliasEventoParentEvent $parent_event;

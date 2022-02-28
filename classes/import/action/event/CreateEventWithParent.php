@@ -11,7 +11,7 @@ use EventoImport\import\Logger;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 
-class CreateEventWithParent implements EventAction
+class CreateEventWithParent implements EventImportAction
 {
     private EventoEvent $evento_event;
     private int $destination_ref_id;

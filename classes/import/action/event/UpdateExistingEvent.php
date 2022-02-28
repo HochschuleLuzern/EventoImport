@@ -8,7 +8,7 @@ use EventoImport\import\service\IliasEventObjectService;
 use EventoImport\import\service\MembershipManager;
 use EventoImport\import\Logger;
 
-class UpdateExistingEvent implements EventAction
+class UpdateExistingEvent implements EventImportAction
 {
     private EventoEvent $evento_event;
     private IliasEventoEvent $ilias_event;

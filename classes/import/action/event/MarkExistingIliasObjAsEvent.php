@@ -8,7 +8,7 @@ use EventoImport\import\db\IliasEventoEventObjectRepository;
 use EventoImport\import\db\model\IliasEventoEvent;
 use EventoImport\import\Logger;
 
-class MarkExistingIliasObjAsEvent implements EventAction
+class MarkExistingIliasObjAsEvent implements EventImportAction
 {
     private EventoEvent $evento_event;
     private \ilContainer $ilias_object;

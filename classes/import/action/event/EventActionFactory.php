@@ -123,4 +123,44 @@ class EventActionFactory
             $this->logger
         );
     }
+
+    public function deleteSingleCourseEvent(IliasEventoEvent $ilias_evento_event) : DeleteSingleCourseEvent
+    {
+        return new DeleteSingleCourseEvent(
+            $ilias_evento_event,
+            $this->ilias_event_obj_service,
+            $this->evento_event_object_repo,
+            $this->logger
+        );
+    }
+
+    public function deleteGroupEventInCourse(IliasEventoEvent $ilias_evento_event) : DeleteGroupEventInCourse
+    {
+        return new DeleteGroupEventInCourse(
+            $ilias_evento_event,
+            $this->ilias_event_obj_service,
+            $this->evento_event_object_repo,
+            $this->logger
+        );
+    }
+
+    public function deleteEventGroupWithParentEventCourse(IliasEventoEvent $ilias_evento_event, IliasEventoParentEvent $ilias_evento_parent_event) : DeleteEventGroupWithParentEventCourse
+    {
+        return new DeleteEventGroupWithParentEventCourse(
+            $ilias_evento_event,
+            $ilias_evento_parent_event,
+            $this->ilias_event_obj_service,
+            $this->evento_event_object_repo,
+            $this->logger
+        );
+    }
+
+    public function unmarkExistingIliasObjFromEventoEvents(IliasEventoEvent $ilias_evento_event) : UnmarkExistingIliasObjFromEventoEvents
+    {
+        return new UnmarkExistingIliasObjFromEventoEvents(
+            $ilias_evento_event,
+            $this->evento_event_object_repo,
+            $this->logger
+        );
+    }
 }

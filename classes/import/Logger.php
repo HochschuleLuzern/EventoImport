@@ -55,6 +55,12 @@ class Logger
     const CREVENTO_MA_NOTICE_DUPLICATE_IN_ILIAS = 213;
     const CREVENTO_MA_NON_ILIAS_EVENT = 214;
 
+    // Delete event
+    const CREVENTO_MA_UNMARK_EVENT = 220;
+    const CREVENTO_MA_DELETE_SINGLE_EVENT = 221;
+    const CREVENTO_MA_DELETE_SUBGROUP_EVENT = 222;
+    const CREVENTO_MA_DELETE_EVENT_WITH_PARENT = 223;
+
     // Update of existing events
     const CREVENTO_MA_SUBS_UPDATED = 231;
     const CREVENTO_MA_NO_SUBS = 232;
@@ -85,13 +91,17 @@ class Logger
     public function logUserImport($log_info_code, $evento_id, $username, $import_data)
     {
         if ($log_info_code < 300 || $log_info_code >= 400) {
-            $this->logException("log",
-                "Tried to log user import, info code of other import given instead: " . $log_info_code);
+            $this->logException(
+                "log",
+                "Tried to log user import, info code of other import given instead: " . $log_info_code
+            );
             return;
         }
 
-        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_USERS . " WHERE evento_id = " . $this->ilDB->quote($evento_id,
-                \ilDBConstants::T_INTEGER) . ' LIMIT 1');
+        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_USERS . " WHERE evento_id = " . $this->ilDB->quote(
+            $evento_id,
+            \ilDBConstants::T_INTEGER
+        ) . ' LIMIT 1');
 
         if (count($this->ilDB->fetchAll($r)) == 0) {
             $this->ilDB->insert(
@@ -128,13 +138,17 @@ class Logger
     public function logEventImport(int $log_info_code, int $evento_id, ?int $ref_id, array $import_data)
     {
         if ($log_info_code < 200 || $log_info_code >= 300) {
-            $this->logException("log",
-                "Tried to log user import, info code of other import given instead: " . $log_info_code);
+            $this->logException(
+                "log",
+                "Tried to log user import, info code of other import given instead: " . $log_info_code
+            );
             return;
         }
 
-        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_EVENTS . " WHERE evento_id = " . $this->ilDB->quote($evento_id,
-                \ilDBConstants::T_INTEGER) . ' LIMIT 1');
+        $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_EVENTS . " WHERE evento_id = " . $this->ilDB->quote(
+            $evento_id,
+            \ilDBConstants::T_INTEGER
+        ) . ' LIMIT 1');
 
         if (count($this->ilDB->fetchAll($r)) == 0) {
             $this->ilDB->insert(
@@ -166,8 +180,10 @@ class Logger
     public function logEventMembership(int $log_info_code, int $evento_event_id, int $evento_user_id, int $role_type)
     {
         if ($log_info_code < 100 || $log_info_code >= 200) {
-            $this->logException("log",
-                "Tried to log membership import, info code of other import given instead: " . $log_info_code);
+            $this->logException(
+                "log",
+                "Tried to log membership import, info code of other import given instead: " . $log_info_code
+            );
             return;
         }
         try {

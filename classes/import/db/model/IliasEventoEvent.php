@@ -120,4 +120,9 @@ class IliasEventoEvent
     {
         return $this->evento_description;
     }
+
+    public function isSubGroupEvent() : bool
+    {
+        return !is_null($this->getParentEventKey()) && ($this->getIliasType() === 'grp');
+    }
 }

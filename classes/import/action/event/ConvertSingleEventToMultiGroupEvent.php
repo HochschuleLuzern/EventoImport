@@ -10,7 +10,7 @@ use EventoImport\import\db\IliasEventoEventObjectRepository;
 use EventoImport\import\db\model\IliasEventoParentEvent;
 use EventoImport\import\Logger;
 
-class ConvertSingleEventToMultiGroupEvent implements EventAction
+class ConvertSingleEventToMultiGroupEvent implements EventImportAction
 {
     private EventoEvent $evento_event;
     private IliasEventoEvent $ilias_event;
