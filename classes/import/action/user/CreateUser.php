@@ -7,7 +7,7 @@ use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\import\Logger;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 
 class CreateUser implements UserImportAction
 {

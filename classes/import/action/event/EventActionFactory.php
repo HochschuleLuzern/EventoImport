@@ -5,27 +5,25 @@ namespace EventoImport\import\action\event;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\service\IliasEventObjectService;
 use EventoImport\import\IliasEventObjectFactory;
-use EventoImport\import\db\model\IliasEventoParentEvent;
+use EventoImport\import\manager\db\model\IliasEventoParentEvent;
 use EventoImport\import\service\MembershipManager;
-use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\IliasEventoEventObjectRepository;
+use EventoImport\import\manager\db\model\IliasEventoEvent;
+use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
+use EventoImport\import\EventManager;
 
 class EventActionFactory
 {
-    private IliasEventoEventObjectRepository $evento_event_object_repo;
-    private IliasEventObjectService $ilias_event_obj_service;
+    private EventManager $event_manager;
     private MembershipManager $membership_manager;
     private Logger $logger;
 
     public function __construct(
-        IliasEventoEventObjectRepository $evento_event_object_repo,
-        IliasEventObjectService $ilias_event_obj_service,
+        EventManager $event_manager,
         MembershipManager $membership_manager,
         Logger $logger
     ) {
-        $this->evento_event_object_repo = $evento_event_object_repo;
-        $this->ilias_event_obj_service = $ilias_event_obj_service;
+        $this->event_manager = $event_manager;
         $this->membership_manager = $membership_manager;
         $this->logger = $logger;
     }
@@ -34,9 +32,7 @@ class EventActionFactory
     {
         return new CreateSingleEvent(
             $evento_event,
-            $destination_ref_id,
-            $this->ilias_event_obj_service,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->membership_manager,
             $this->logger,
         );
@@ -46,9 +42,7 @@ class EventActionFactory
     {
         return new CreateEventWithParent(
             $evento_event,
-            $destination_ref_id,
-            $this->ilias_event_obj_service,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->membership_manager,
             $this->logger,
         );
@@ -59,8 +53,7 @@ class EventActionFactory
         return new CreateEventInParentEvent(
             $evento_event,
             $parent_event,
-            $this->ilias_event_obj_service,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->membership_manager,
             $this->logger,
         );
@@ -71,7 +64,7 @@ class EventActionFactory
         return new UpdateExistingEvent(
             $evento_event,
             $ilias_event,
-            $this->ilias_event_obj_service,
+            $this->event_manager,
             $this->membership_manager,
             $this->logger,
         );
@@ -82,8 +75,7 @@ class EventActionFactory
         return new ConvertSingleEventToMultiGroupEvent(
             $evento_event,
             $ilias_event,
-            $this->ilias_event_obj_service,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->membership_manager,
             $this->logger
         );
@@ -96,7 +88,7 @@ class EventActionFactory
         return new MarkExistingIliasObjAsEvent(
             $evento_event,
             $ilias_obj,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->membership_manager,
             $this->logger,
         );
@@ -128,8 +120,7 @@ class EventActionFactory
     {
         return new DeleteSingleCourseEvent(
             $ilias_evento_event,
-            $this->ilias_event_obj_service,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->logger
         );
     }
@@ -138,8 +129,7 @@ class EventActionFactory
     {
         return new DeleteGroupEventInCourse(
             $ilias_evento_event,
-            $this->ilias_event_obj_service,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->logger
         );
     }
@@ -149,8 +139,7 @@ class EventActionFactory
         return new DeleteEventGroupWithParentEventCourse(
             $ilias_evento_event,
             $ilias_evento_parent_event,
-            $this->ilias_event_obj_service,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->logger
         );
     }
@@ -159,7 +148,7 @@ class EventActionFactory
     {
         return new UnmarkExistingIliasObjFromEventoEvents(
             $ilias_evento_event,
-            $this->evento_event_object_repo,
+            $this->event_manager,
             $this->logger
         );
     }

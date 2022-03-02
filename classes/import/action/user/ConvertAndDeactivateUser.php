@@ -4,7 +4,7 @@ namespace EventoImport\import\action\user;
 
 use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\Logger;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 
 class ConvertAndDeactivateUser implements UserDeleteAction
 {

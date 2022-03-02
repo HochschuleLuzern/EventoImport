@@ -1,6 +1,6 @@
 <?php
 
-namespace EventoImport\import\db\model;
+namespace EventoImport\import\manager\db\model;
 
 use PHPUnit\Framework\TestCase;
 

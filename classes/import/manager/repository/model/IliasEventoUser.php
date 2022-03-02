@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\db\model;
+namespace EventoImport\import\manager\db\model;
 
 class IliasEventoUser
 {

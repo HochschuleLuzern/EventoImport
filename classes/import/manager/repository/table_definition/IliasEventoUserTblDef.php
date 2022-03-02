@@ -1,6 +1,6 @@
 <?php
 
-namespace EventoImport\import\db\table_definition;
+namespace EventoImport\import\manager\db\table_definition;
 
 class IliasEventoUserTblDef
 {

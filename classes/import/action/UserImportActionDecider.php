@@ -6,7 +6,7 @@ use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 
 class UserImportActionDecider
 {

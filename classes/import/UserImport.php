@@ -5,7 +5,7 @@ namespace EventoImport\import;
 use EventoImport\communication\EventoUserImporter;
 use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\action\UserImportActionDecider;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoUser;
 
 /**

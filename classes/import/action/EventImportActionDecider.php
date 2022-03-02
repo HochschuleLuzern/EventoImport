@@ -4,11 +4,11 @@ namespace EventoImport\import\action;
 
 use EventoImport\import\action\event\EventActionFactory;
 use EventoImport\import\service\IliasEventObjectService;
-use EventoImport\import\db\model\IliasEventoEvent;
+use EventoImport\import\manager\db\model\IliasEventoEvent;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\event\EventImportAction;
-use EventoImport\import\db\IliasEventoEventObjectRepository;
-use EventoImport\import\db\EventLocationsRepository;
+use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
+use EventoImport\import\manager\db\EventLocationsRepository;
 
 class EventImportActionDecider
 {

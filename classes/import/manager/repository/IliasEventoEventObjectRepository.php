@@ -1,11 +1,11 @@
 <?php
 
-namespace EventoImport\import\db;
+namespace EventoImport\import\manager\db;
 
-use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\table_definition\IliasEventoEventsTblDef;
-use EventoImport\import\db\model\IliasEventoParentEvent;
-use EventoImport\import\db\table_definition\IliasParentEventsTblDef;
+use EventoImport\import\manager\db\model\IliasEventoEvent;
+use EventoImport\import\manager\db\table_definition\IliasEventoEventsTblDef;
+use EventoImport\import\manager\db\model\IliasEventoParentEvent;
+use EventoImport\import\manager\db\table_definition\IliasParentEventsTblDef;
 
 class IliasEventoEventObjectRepository
 {
@@ -162,7 +162,7 @@ class IliasEventoEventObjectRepository
         );
     }
 
-    public function removeEventoEvent(IliasEventoEvent $ilias_evento_event)
+    public function removeIliasEventoEvent(IliasEventoEvent $ilias_evento_event)
     {
         $query = 'DELETE FROM ' . IliasEventoEventsTblDef::TABLE_NAME
             . ' WHERE ' . IliasEventoEventsTblDef::COL_EVENTO_ID . ' = ' . $this->db->quote($ilias_evento_event->getEventoEventId(), \ilDBConstants::T_INTEGER);

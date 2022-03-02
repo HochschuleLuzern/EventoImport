@@ -7,7 +7,7 @@ use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\action\user\CreateUser;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\UserImportActionDecider;
 

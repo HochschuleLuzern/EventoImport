@@ -6,7 +6,7 @@ use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 use EventoImport\import\Logger;
 
 class UpdateUser implements UserImportAction

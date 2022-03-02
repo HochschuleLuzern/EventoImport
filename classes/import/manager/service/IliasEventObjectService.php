@@ -2,7 +2,7 @@
 
 namespace EventoImport\import\service;
 
-use EventoImport\import\db\model\IliasEventoEvent;
+use EventoImport\import\manager\db\model\IliasEventoEvent;
 use EventoImport\import\settings\DefaultEventSettings;
 
 /**
@@ -17,13 +17,16 @@ class IliasEventObjectService
 {
     private DefaultEventSettings $default_event_settings;
     private \ilDBInterface $db;
+    private \ilTree $tree;
 
     public function __construct(
         DefaultEventSettings $default_event_settings,
-        \ilDBInterface $db
+        \ilDBInterface $db,
+        \ilTree $tree
     ) {
         $this->default_event_settings = $default_event_settings;
         $this->db = $db;
+        $this->tree = $tree;
     }
 
     public function searchEventableIliasObjectByTitle(string $obj_title, string $filter_for_only_this_type = null) : ?\ilContainer
@@ -39,44 +42,26 @@ class IliasEventObjectService
         }
 
         $result = $this->db->query($query);
+        $found_obj = null;
 
         if ($this->db->numRows($result) == 1) {
             $row = $this->db->fetchAssoc($result);
-            switch ($row['type']) {
-                case 'crs':
-                    return $this->getCourseObjectForRefId((int) $row['ref_id']);
-                case 'grp':
-                    return $this->getGroupObjectForRefId((int) $row['ref_id']);
-                default:
-                    throw new \InvalidArgumentException('Invalid object type given for event object');
+
+            if($row['type'] == 'crs') {
+                $found_obj = $this->getCourseObjectForRefId((int) $row['ref_id']);
+            } else if($row['type'] == 'grp') {
+                $group_obj = $this->getGroupObjectForRefId((int) $row['ref_id']);
+
+                if($this->isGroupObjPartOfACourse($group_obj)) {
+                    $found_obj = $group_obj;
+                }
             }
         }
 
-        return null;
+        return $found_obj;
     }
 
-    private function createContainerObject(\ilContainer $container_object, string $title, string $description, int $destination_ref_id)
-    {
-        $container_object->setTitle($title);
-        $container_object->setDescription($description);
-        $container_object->setOwner($this->default_event_settings->getDefaultObjectOwnerId());
-        $container_object->create();
-
-        $container_object->createReference();
-        $container_object->putInTree($destination_ref_id);
-        $container_object->setPermissions($destination_ref_id);
-
-        $settings = new \ilContainerSortingSettings($container_object->getId());
-        $settings->setSortMode($this->default_event_settings->getDefaultSortMode());
-        $settings->setSortDirection($this->default_event_settings->getDefaultSortDirection());
-
-        $container_object->setOrderType($this->default_event_settings->getDefaultSortMode());
-
-        $settings->update();
-        $container_object->update();
-    }
-
-    public function buildNewCourseObject(string $title, string $description, int $destination_ref_id) : \ilObjCourse
+    public function createNewCourseObject(string $title, string $description, int $destination_ref_id) : \ilObjCourse
     {
         $course_object = new \ilObjCourse();
 
@@ -85,7 +70,7 @@ class IliasEventObjectService
         return $course_object;
     }
 
-    public function buildNewGroupObject(string $title, string $description, int $destination_ref_id)
+    public function createNewGroupObject(string $title, string $description, int $destination_ref_id)
     {
         $group_object = new \ilObjGroup();
 
@@ -115,5 +100,55 @@ class IliasEventObjectService
         }
 
         $ilias_obj->delete();
+    }
+
+    public function isGroupObjPartOfACourse(\ilObjGroup $group_obj) : bool
+    {
+        $current_ref_id = $group_obj->getRefId();
+        do {
+            $current_ref_id = $this->tree->getParentId($current_ref_id);
+            $type = $this->getObjTypeForRefId($current_ref_id);
+
+            if($type == 'crs') {
+                return true;
+            } else if($type == 'cat' || $type == 'root') {
+                return false;
+            }
+
+        } while($current_ref_id > 1);
+
+        return false;
+    }
+
+    private function getObjTypeForRefId(int $current_ref_id)
+    {
+        return \ilObject::_lookupType($current_ref_id, true);
+    }
+
+    private function createContainerObject(\ilContainer $container_object, string $title, string $description, int $destination_ref_id)
+    {
+        $container_object->setTitle($title);
+        $container_object->setDescription($description);
+        $container_object->setOwner($this->default_event_settings->getDefaultObjectOwnerId());
+        $container_object->create();
+
+        $container_object->createReference();
+        $container_object->putInTree($destination_ref_id);
+        $container_object->setPermissions($destination_ref_id);
+
+        $settings = new \ilContainerSortingSettings($container_object->getId());
+        $settings->setSortMode($this->default_event_settings->getDefaultSortMode());
+        $settings->setSortDirection($this->default_event_settings->getDefaultSortDirection());
+
+        $container_object->setOrderType($this->default_event_settings->getDefaultSortMode());
+
+        $settings->update();
+        $container_object->update();
+    }
+
+    public function renameEventObject(\ilContainer $event_obj, string $new_title) : \ilContainer
+    {
+        $event_obj->setTitle($new_title);
+        $event_obj->update();
     }
 }

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\db\query;
+namespace EventoImport\import\manager\db\query;
 
 class MembershipablesInTreeSeeker
 {

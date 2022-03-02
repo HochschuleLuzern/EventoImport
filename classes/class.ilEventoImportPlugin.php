@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-use EventoImport\import\db\table_definition;
+use EventoImport\import\manager\db\table_definition;
 use EventoImport\import\Logger;
 
 /**

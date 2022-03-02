@@ -2,14 +2,14 @@
 
 namespace EventoImport\import\service;
 
-use EventoImport\import\db\IliasEventoEventMembershipRepository;
+use EventoImport\import\manager\db\IliasEventoEventMembershipRepository;
 use ILIAS\DI\RBACServices;
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoUserShort;
-use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\model\IliasEventoUser;
-use EventoImport\import\db\query\MembershipablesInTreeSeeker;
+use EventoImport\import\manager\db\model\IliasEventoEvent;
+use EventoImport\import\manager\db\model\IliasEventoUser;
+use EventoImport\import\manager\db\query\MembershipablesInTreeSeeker;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
 use EventoImport\import\Logger;
 

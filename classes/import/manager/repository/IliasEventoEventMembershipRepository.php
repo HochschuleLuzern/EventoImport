@@ -1,11 +1,11 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\import\db;
+namespace EventoImport\import\manager\db;
 
-use EventoImport\import\db\model\IliasEventoUser;
-use EventoImport\import\db\table_definition\IliasEventoEventsTblDef;
-use EventoImport\import\db\table_definition\IliasEventoEventMembershipsTblDef;
-use EventoImport\import\db\table_definition\IliasEventoUserTblDef;
+use EventoImport\import\manager\db\model\IliasEventoUser;
+use EventoImport\import\manager\db\table_definition\IliasEventoEventsTblDef;
+use EventoImport\import\manager\db\table_definition\IliasEventoEventMembershipsTblDef;
+use EventoImport\import\manager\db\table_definition\IliasEventoUserTblDef;
 
 class IliasEventoEventMembershipRepository
 {

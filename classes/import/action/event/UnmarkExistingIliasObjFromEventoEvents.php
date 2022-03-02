@@ -2,25 +2,26 @@
 
 namespace EventoImport\import\action\event;
 
-use EventoImport\import\db\model\IliasEventoEvent;
-use EventoImport\import\db\IliasEventoEventObjectRepository;
+use EventoImport\import\manager\db\model\IliasEventoEvent;
+use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
+use EventoImport\import\EventManager;
 
 class UnmarkExistingIliasObjFromEventoEvents implements EventDeleteAction
 {
     private IliasEventoEvent $ilias_evento_event;
-    private IliasEventoEventObjectRepository $evento_event_object_repo;
+    private EventManager $event_manager;
     private Logger $logger;
 
     private int $log_info_code;
 
     public function __construct(
         IliasEventoEvent $ilias_evento_event,
-        IliasEventoEventObjectRepository $evento_event_object_repo,
+        EventManager $event_manager,
         Logger $logger
     ) {
         $this->ilias_evento_event = $ilias_evento_event;
-        $this->evento_event_object_repo = $evento_event_object_repo;
+        $this->event_manager = $event_manager;
         $this->logger = $logger;
 
         $this->log_info_code = Logger::CREVENTO_MA_UNMARK_EVENT;
@@ -28,7 +29,7 @@ class UnmarkExistingIliasObjFromEventoEvents implements EventDeleteAction
 
     public function executeAction() : void
     {
-        $this->evento_event_object_repo->removeEventoEvent($this->ilias_evento_event);
+        $this->event_manager->removeIliasEventoEventConnection($this->ilias_evento_event);
 
         $this->logger->logEventImport(
             $this->log_info_code,

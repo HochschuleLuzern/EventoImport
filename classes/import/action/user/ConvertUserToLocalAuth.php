@@ -3,7 +3,7 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\import\service\IliasUserServices;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 use EventoImport\import\Logger;
 
 class ConvertUserToLocalAuth implements UserDeleteAction

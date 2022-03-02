@@ -8,7 +8,7 @@ use EventoImport\import\service\IliasUserServices;
 use EventoImport\import\settings\DefaultUserSettings;
 use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\EventoUserPhotoImporter;
-use EventoImport\import\db\IliasEventoUserRepository;
+use EventoImport\import\manager\db\IliasEventoUserRepository;
 use EventoImport\import\Logger;
 
 class UserActionFactory

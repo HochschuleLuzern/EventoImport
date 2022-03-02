@@ -2,29 +2,27 @@
 
 namespace EventoImport\import\action\event;
 
-use EventoImport\import\db\model\IliasEventoEvent;
+use EventoImport\import\manager\db\model\IliasEventoEvent;
 use EventoImport\import\service\IliasEventObjectService;
-use EventoImport\import\db\IliasEventoEventObjectRepository;
+use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
+use EventoImport\import\EventManager;
 
 class DeleteGroupEventInCourse implements EventDeleteAction
 {
     private IliasEventoEvent $ilias_evento_event;
-    private IliasEventObjectService $ilias_event_obj_service;
-    private IliasEventoEventObjectRepository $evento_event_object_repo;
+    private EventManager $event_manager;
     private Logger $logger;
 
     private int $log_info_code;
 
     public function __construct(
         IliasEventoEvent $ilias_evento_event,
-        IliasEventObjectService $ilias_event_obj_service,
-        IliasEventoEventObjectRepository $evento_event_object_repo,
+        EventManager $event_manager,
         Logger $logger
     ) {
         $this->ilias_evento_event = $ilias_evento_event;
-        $this->ilias_event_obj_service = $ilias_event_obj_service;
-        $this->evento_event_object_repo = $evento_event_object_repo;
+        $this->event_manager = $event_manager;
         $this->logger = $logger;
 
         $this->log_info_code = Logger::CREVENTO_MA_DELETE_SUBGROUP_EVENT;

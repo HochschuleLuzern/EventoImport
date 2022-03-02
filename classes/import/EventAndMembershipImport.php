@@ -5,8 +5,8 @@ namespace EventoImport\import;
 use EventoImport\communication\EventoEventImporter;
 use EventoImport\import\action\EventImportActionDecider;
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\db\IliasEventoEventObjectRepository;
-use EventoImport\import\db\model\IliasEventoEvent;
+use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
+use EventoImport\import\manager\db\model\IliasEventoEvent;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern

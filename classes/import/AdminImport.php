@@ -4,10 +4,10 @@ namespace EventoImport\import;
 
 use EventoImport\import\service\MembershipManager;
 use EventoImport\communication\EventoAdminImporter;
-use EventoImport\import\db\repository\IliasEventoEventsRepository;
+use EventoImport\import\manager\db\repository\IliasEventoEventsRepository;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
 use EventoImport\import\Logger;
-use EventoImport\import\db\IliasEventoEventObjectRepository;
+use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
 
 class AdminImport
 {
