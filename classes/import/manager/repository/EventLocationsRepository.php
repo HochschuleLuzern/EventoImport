@@ -88,7 +88,7 @@ class EventLocationsRepository
         return null;
     }
 
-    public function getAllLocations() : array
+    public function getAllLocationsAsTableRows() : array
     {
         $query = "SELECT " . IliasEventLocationsTblDef::COL_DEPARTMENT_NAME . ", " . IliasEventLocationsTblDef::COL_EVENT_KIND . ", " . IliasEventLocationsTblDef::COL_YEAR . ", " . IliasEventLocationsTblDef::COL_REF_ID
             . " FROM " . IliasEventLocationsTblDef::TABLE_NAME;
@@ -97,6 +97,29 @@ class EventLocationsRepository
         $locations = [];
         while ($row = $this->db->fetchAssoc($result)) {
             $locations[] = $row;
+        }
+
+        return $locations;
+    }
+
+    public function getAllLocationsAsHirarchicalArray() : array
+    {
+        $locations = [];
+        foreach($this->getAllLocationsAsTableRows() as $row) {
+            $dep = $row[IliasEventLocationsTblDef::COL_DEPARTMENT_NAME];
+            $kind = $row[IliasEventLocationsTblDef::COL_EVENT_KIND];
+            $year = $row[IliasEventLocationsTblDef::COL_YEAR];
+            $ref = $row[IliasEventLocationsTblDef::COL_REF_ID];
+
+            if(!isset($locations[$dep])) {
+                $locations[$dep] = [$kind => [$year => [$ref]]];
+            } else if(!isset($locations[$dep][$kind])) {
+                $locations[$dep][$kind] = [$year => [$ref]];
+            } else if(!isset($locations[$dep][$kind][$year])) {
+                $locations[$dep][$kind][$year] = [$ref];
+            } else {
+                $locations[$dep][$kind][$year][] = $ref;
+            }
         }
 
         return $locations;

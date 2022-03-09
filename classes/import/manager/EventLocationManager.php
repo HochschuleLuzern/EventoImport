@@ -3,32 +3,34 @@
 namespace EventoImport\import;
 
 use EventoImport\communication\api_models\EventoEvent;
+use EventoImport\import\manager\db\EventLocationsRepository;
 
 class EventLocationManager
 {
     private array $locations;
 
-    public function __construct()
+    public function __construct(EventLocationsRepository $location_repo)
     {
+        $this->locations = $location_repo->getAllLocationsAsHirarchicalArray();
     }
 
     public function getLocationRefIdForParameters(string $department, string $kind, int $year) : int
     {
-        if (!isset($this->clocationsache[$department])) {
+        if (!isset($this->locations[$department])) {
             throw new \ilEventoImportEventLocationNotFoundException(
                 "Location for department '$department' not found",
                 \ilEventoImportEventLocationNotFoundException::MISSING_DEPARTMENT
             );
         }
 
-        if (!isset($this->clocationsache[$department][$kind])) {
+        if (!isset($this->locations[$department][$kind])) {
             throw new \ilEventoImportEventLocationNotFoundException(
                 "Location for kind '$kind' in department '$department' not found",
                 \ilEventoImportEventLocationNotFoundException::MISSING_KIND
             );
         }
 
-        if (!isset($this->clocationsache[$department][$kind][$year])) {
+        if (!isset($this->locations[$department][$kind][$year])) {
             throw new \ilEventoImportEventLocationNotFoundException(
                 "Location for year '$year' in kind '$kind' in department '$department' not found",
                 \ilEventoImportEventLocationNotFoundException::MISSING_YEAR
