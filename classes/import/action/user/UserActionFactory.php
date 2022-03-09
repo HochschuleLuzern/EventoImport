@@ -10,21 +10,16 @@ use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\import\manager\db\IliasEventoUserRepository;
 use EventoImport\import\Logger;
+use EventoImport\import\UserManager;
 
 class UserActionFactory
 {
-    private IliasUserServices $ilias_user_service;
-    private IliasEventoUserRepository $evento_user_repo;
-    private DefaultUserSettings $default_user_settings;
-    private EventoUserPhotoImporter $photo_importer;
+    private UserManager $user_manager;
     private Logger $logger;
 
-    public function __construct(IliasUserServices $ilias_user_service, IliasEventoUserRepository $evento_user_repo, DefaultUserSettings $default_user_settings, EventoUserPhotoImporter $photo_importer, Logger $logger)
+    public function __construct(UserManager $user_manager, Logger $logger)
     {
-        $this->ilias_user_service = $ilias_user_service;
-        $this->evento_user_repo = $evento_user_repo;
-        $this->default_user_settings = $default_user_settings;
-        $this->photo_importer = $photo_importer;
+        $this->user_manager = $user_manager;
         $this->logger = $logger;
     }
 
@@ -32,10 +27,7 @@ class UserActionFactory
     {
         return new CreateUser(
             $evento_user,
-            $this->ilias_user_service,
-            $this->evento_user_repo,
-            $this->default_user_settings,
-            $this->photo_importer,
+            $this->user_manager,
             $this->logger
         );
     }
@@ -44,11 +36,8 @@ class UserActionFactory
     {
         return new UpdateUser(
             $evento_user,
-            $this->ilias_user_service->getExistingIliasUserObjectById($ilias_user_id),
-            $this->ilias_user_service,
-            $this->evento_user_repo,
-            $this->default_user_settings,
-            $this->photo_importer,
+            $this->user_manager->getExistingIliasUserObjectById($ilias_user_id),
+            $this->user_manager,
             $this->logger
         );
     }
@@ -60,7 +49,6 @@ class UserActionFactory
             $evento_user,
             $old_ilias_user,
             $found_by,
-            $this->ilias_user_service,
             $this->logger
         );
     }
@@ -93,7 +81,7 @@ class UserActionFactory
             $ilias_user_object,
             $evento_id,
             'local',
-            $this->evento_user_repo,
+            $this->user_manager,
             $this->logger
         );
     }
@@ -104,7 +92,7 @@ class UserActionFactory
             $ilias_user_object,
             $evento_id,
             'local',
-            $this->evento_user_repo,
+            $this->user_manager,
             $this->logger
         );
     }

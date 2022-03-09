@@ -12,37 +12,41 @@ use EventoImport\import\manager\db\model\IliasEventoUser;
 use EventoImport\import\manager\db\query\MembershipablesInTreeSeeker;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
 use EventoImport\import\Logger;
+use EventoImport\import\UserManager;
 
 class MembershipManager
 {
+    private UserManager $user_manager;
     private $membership_repo;
-    private $favourites_manager;
-    private $logger;
+    private \ilFavouritesManager $favourites_manager;
+    private Logger $logger;
     private \ilRbacReview $rbac_review;
+
     private \ilRbacAdmin $rbac_admin;
-
     private IliasEventoUserRepository $user_repo;
-    private MembershipablesInTreeSeeker $tree_seeker;
 
+    private MembershipablesInTreeSeeker $tree_seeker;
     /** @var \ilParticipants[]  */
     private array $participant_object_cache;
 
     public function __construct(
         MembershipablesInTreeSeeker $tree_seeker,
         IliasEventoEventMembershipRepository $membership_repo,
-        IliasEventoUserRepository $user_repo,
+        UserManager $user_manager,
         \ilFavouritesManager $favourites_manager,
         Logger $logger,
         RBACServices $rbac_services
     ) {
         $this->membership_repo = $membership_repo;
         $this->tree_seeker = $tree_seeker;
-        $this->user_repo = $user_repo;
+        $this->user_repo;
         $this->favourites_manager = $favourites_manager;
         $this->logger = $logger;
         $this->rbac_review = $rbac_services->review();
         $this->rbac_admin = $rbac_services->admin();
         $this->participant_object_cache = [];
+
+        $this->user_manager = $user_manager;
     }
 
     public function syncMemberships(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
@@ -66,13 +70,16 @@ class MembershipManager
 
     private function addUsersToMembershipableObject(\ilParticipants $participants_object, array $employees, int $admin_role_code, array $students, int $student_role_code) : void
     {
+        /** @var EventoUserShort $employee */
         foreach ($employees as $employee) {
+            $employee_user_id = $this->user_manager->searchUserIdForEventoUserShort($employee);
             $employee_user_id = $this->user_repo->getIliasUserIdByEventoId($employee->getEventoId());
             if (!$participants_object->isAssigned($employee_user_id)) {
                 $participants_object->add($employee_user_id, $admin_role_code);
             }
         }
 
+        /** @var EventoUserShort $student */
         foreach ($students as $student) {
             $student_user_id = $this->user_repo->getIliasUserIdByEventoId($student->getEventoId());
             if (!$participants_object->isAssigned($student_user_id)) {
@@ -83,16 +90,17 @@ class MembershipManager
 
     private function getUsersToRemove(EventoEvent $imported_event) : array
     {
-        $from_import_subscribed_members = $this->membership_repo->fetchIliasEventoUserForEvent($imported_event->getEventoId());
-        $users_to_remove = [];
-        /** @var IliasEventoUser $member */
-        foreach ($from_import_subscribed_members as $member) {
-            if (!$this->isUserInCurrentImport($member, $imported_event)) {
-                $users_to_remove[] = $member;
+        $from_import_subscribed_members = $this->membership_repo->fetchIliasEventoUsersForEvent($imported_event->getEventoId());
+
+        $userevento_ids_to_remove = [];
+
+        foreach ($from_import_subscribed_members as $member_id) {
+            if (!$this->isUserInCurrentImport($member_id, $imported_event)) {
+                $userevento_ids_to_remove[] = $this->user_manager->getIliasUserIdByEventoId($member_id);
             }
         }
 
-        return $users_to_remove;
+        return $userevento_ids_to_remove;
     }
 
     private function syncMembershipsWithoutParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
@@ -225,16 +233,16 @@ class MembershipManager
         }
     }
 
-    private function isUserInCurrentImport(IliasEventoUser $user, EventoEvent $imported_event) : bool
+    private function isUserInCurrentImport(int $user_evento_id, EventoEvent $imported_event) : bool
     {
         foreach ($imported_event->getEmployees() as $evento_user) {
-            if ($evento_user instanceof EventoUserShort && $user->getEventoUserId() == $evento_user->getEventoId()) {
+            if ($evento_user instanceof EventoUserShort && $user_evento_id == $evento_user->getEventoId()) {
                 return true;
             }
         }
 
         foreach ($imported_event->getStudents() as $evento_user) {
-            if ($evento_user instanceof EventoUserShort && $user->getEventoUserId() == $evento_user->getEventoId()) {
+            if ($evento_user instanceof EventoUserShort && $user_evento_id == $evento_user->getEventoId()) {
                 return true;
             }
         }

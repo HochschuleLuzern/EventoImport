@@ -4,9 +4,13 @@ namespace EventoImport\import\manager\db;
 
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\manager\db\table_definition\IliasEventoUserTblDef;
+use EventoImport\import\manager\db\model\IliasEventoUser;
 
 class IliasEventoUserRepository
 {
+    public const TYPE_EDU_ID = 'edu_id';
+    public const TYPE_HSLU_AD = 'hslu_ad';
+
     private \ilDBInterface $db;
 
     public function __construct(\ilDBInterface $db)
@@ -14,7 +18,7 @@ class IliasEventoUserRepository
         $this->db = $db;
     }
 
-    public function addNewEventoIliasUser(EventoUser $evento_user, \ilObjUser $ilias_user) : void
+    public function addNewEventoIliasUser(EventoUser $evento_user, \ilObjUser $ilias_user, string $account_type) : IliasEventoUser
     {
         $this->db->insert(
             // INSERT INTO
@@ -24,9 +28,12 @@ class IliasEventoUserRepository
             array(
                 IliasEventoUserTblDef::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $evento_user->getEventoId()),
                 IliasEventoUserTblDef::COL_ILIAS_USER_ID => array(\ilDBConstants::T_INTEGER, $ilias_user->getId()),
-                IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => array(\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s"))
+                IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => array(\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")),
+                IliasEventoUserTblDef::COL_ACCOUNT_TYPE => array(\ilDBConstants::T_TEXT, $account_type)
             )
         );
+
+        return new IliasEventoUser($evento_user->getEventoId(), $ilias_user->getId(), $account_type);
     }
 
     public function getIliasUserIdByEventoId(int $evento_id) : ?int

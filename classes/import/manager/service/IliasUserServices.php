@@ -57,7 +57,7 @@ class IliasUserServices
     {
         $user_lists = array();
 
-        // For each mail given from the evento import...
+        // For each mail given in the adress array...
         foreach ($email_adresses as $email_adress) {
 
             // ... get all user ids in which a user has this email
@@ -92,6 +92,21 @@ class IliasUserServices
         }
 
         return $list;
+    }
+
+    public function getEduUserByEmail(string $mail_address) : ?int
+    {
+        $user_ids = $this->getUserIdsByEmailAddress($mail_address);
+
+        $found_user_id = null;
+        foreach ($user_ids as $user_id) {
+            $user_obj = $this->getExistingIliasUserObjectById($user_id);
+            if (stristr($user_obj->getExternalAccount(), '@eduid.ch')) {
+                $found_user_id = $user_id;
+            }
+        }
+
+        return $found_user_id;
     }
 
     /*
@@ -129,9 +144,9 @@ class IliasUserServices
      *
      */
 
-    public function userHasPersonalPicture(\ilObjUser $ilias_user) : bool
+    public function userHasPersonalPicture(int $ilias_user_id) : bool
     {
-        $personal_picturpath = \ilObjUser::_getPersonalPicturePath($ilias_user->getId(), "small", false);
+        $personal_picturpath = \ilObjUser::_getPersonalPicturePath($ilias_user_id, "small", false);
 
         return strpos(
             $personal_picturpath,
@@ -139,7 +154,7 @@ class IliasUserServices
         ) !== false;
     }
 
-    public function saveEncodedPersonalPictureToUserProfile(\ilObjUser $user, string $encoded_image_string) : void
+    public function saveEncodedPersonalPictureToUserProfile(int $ilias_user_id, string $encoded_image_string) : void
     {
         try {
             $tmp_file = \ilUtil::ilTempnam();
@@ -152,7 +167,7 @@ class IliasUserServices
                 $tmp_file,
                 0
             );
-            \ilObjUser::_uploadPersonalPicture($tmp_file, $user->getId());
+            \ilObjUser::_uploadPersonalPicture($tmp_file, $ilias_user_id);
         } catch (\Exception $e) {
             global $DIC;
             $DIC->logger()->root()->log('Evento Import: Exception on Photo Upload: ' . print_r($e, true));
@@ -170,14 +185,14 @@ class IliasUserServices
         $mail_options->updateOptions();
     }
 
-    public function sendLoginChangedMail(\ilObjUser $ilias_user, string $old_login, EventoUser $evento_user)
+    public function sendLoginChangedMail(\ilObjUser $ilias_user, string $old_login)
     {
         $mail = new ImportMailNotification();
         $mail->setType(ImportMailNotification::MAIL_TYPE_USER_NAME_CHANGED);
         $mail->setUserInformation(
             $ilias_user->getId(),
             $old_login,
-            $evento_user->getLoginName(),
+            $ilias_user->getLoginName(),
             $ilias_user->getEmail()
         );
         $mail->send();

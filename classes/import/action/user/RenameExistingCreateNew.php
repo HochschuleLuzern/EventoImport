@@ -12,16 +12,14 @@ class RenameExistingCreateNew implements UserImportAction
     private EventoUser $new_evento_user;
     private \ilObjUser $old_user_to_rename;
     private string $found_by;
-    private IliasUserServices $ilias_user_service;
     private Logger $logger;
 
-    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, IliasUserServices $ilias_user_service, Logger $logger)
+    public function __construct(CreateUser $create_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, Logger $logger)
     {
         $this->new_evento_user = $new_evento_user;
         $this->create_action = $create_action;
         $this->old_user_to_rename = $old_user_to_rename;
         $this->found_by = $found_by;
-        $this->ilias_user_service = $ilias_user_service;
         $this->logger = $logger;
     }
 
