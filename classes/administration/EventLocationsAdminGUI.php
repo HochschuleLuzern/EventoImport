@@ -48,7 +48,7 @@ class EventLocationsAdminGUI
         $ui_components[] = $ui_factory->panel()->sub('Reload Locations', $reload_btn);
 
         // Show table of current registered locations
-        $locations = $this->location_repo->getAllLocations();
+        $locations = $this->location_repo->getAllLocationsAsTableRows();
         $locations_table = $ui_factory->legacy($this->locationsToHTMLTable($locations));
         $ui_components[] = $ui_factory->panel()->sub('Current registered lcoations', $locations_table);
 

@@ -35,11 +35,15 @@ class RestClientService implements RequestClientService
      * @param array  $request_params
      * @return bool|string
      */
-    public function sendRequest(string $path, array $request_params)
+    public function sendRequest(string $path, array $request_params) : string
     {
         $uri = $this->buildAndValidateUrl($path, $request_params);
 
         $return_value = $this->fetch($uri);
+
+        if (is_bool($return_value) && $return_value === false) {
+            throw new \ilException('Request failed');
+        }
 
         return $return_value;
     }

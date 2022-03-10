@@ -50,9 +50,11 @@ class ImportFactory
                 $ilias_user_service,
                 $evento_user_repo,
                 new UserActionFactory(
-                    $ilias_user_service,
-                    $evento_user_repo,
-                    $user_settings,
+                    new UserManager(
+                        $ilias_user_service,
+                        $evento_user_repo,
+                        $user_settings
+                    ),
                     $user_photo_importer,
                     $this->logger
                 )
@@ -65,7 +67,7 @@ class ImportFactory
 
     public function buildEventImport(EventoEventImporter $event_importer) : EventAndMembershipImport
     {
-        $event_obj_service = new IliasEventObjectService(new DefaultEventSettings($this->setting), $this->db);
+        $event_obj_service = new IliasEventObjectService(new DefaultEventSettings($this->setting), $this->db, $this->tree);
         $evento_event_obj_repo = new IliasEventoEventObjectRepository($this->db);
 
         return new EventAndMembershipImport(
@@ -74,12 +76,21 @@ class ImportFactory
                 $event_obj_service,
                 $evento_event_obj_repo,
                 new EventActionFactory(
-                    $evento_event_obj_repo,
-                    $event_obj_service,
+                    new EventManager(
+                        $event_obj_service,
+                        $evento_event_obj_repo,
+                        new EventLocationManager(
+                            new EventLocationsRepository($this->db)
+                        )
+                    ),
                     new MembershipManager(
                         new MembershipablesInTreeSeeker($this->tree),
                         new IliasEventoEventMembershipRepository($this->db),
-                        new IliasEventoUserRepository($this->db),
+                        new UserManager(
+                            new IliasUserServices(new DefaultUserSettings($this->setting), $this->db, $this->rbac),
+                            new IliasEventoUserRepository($this->db),
+                            new DefaultUserSettings($this->setting)
+                        ),
                         new \ilFavouritesManager(),
                         $this->logger,
                         $this->rbac
@@ -100,7 +111,11 @@ class ImportFactory
             new MembershipManager(
                 new MembershipablesInTreeSeeker($this->tree),
                 new IliasEventoEventMembershipRepository($this->db),
-                new IliasEventoUserRepository($this->db),
+                new UserManager(
+                    new IliasUserServices(new DefaultUserSettings($this->setting), $this->db, $this->rbac),
+                    new IliasEventoUserRepository($this->db),
+                    new DefaultUserSettings($this->setting)
+                ),
                 new \ilFavouritesManager(),
                 $this->logger,
                 $this->rbac

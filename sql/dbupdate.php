@@ -161,7 +161,13 @@ if (!$ilDB->tableExists($table_name)) {
         \EventoImport\import\manager\db\table_definition\IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => array(
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
-        )
+        ),
+        \EventoImport\import\manager\db\table_definition\IliasEventoUserTblDef::COL_ACCOUNT_TYPE => array(
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 15,
+            'notnull' => true
+        ),
+
     );
 
     $ilDB->createTable($table_name, $fields);

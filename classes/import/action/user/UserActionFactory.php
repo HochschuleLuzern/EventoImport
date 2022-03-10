@@ -17,9 +17,10 @@ class UserActionFactory
     private UserManager $user_manager;
     private Logger $logger;
 
-    public function __construct(UserManager $user_manager, Logger $logger)
+    public function __construct(UserManager $user_manager, EventoUserPhotoImporter $photo_importer, Logger $logger)
     {
         $this->user_manager = $user_manager;
+        $this->photo_importer = $photo_importer;
         $this->logger = $logger;
     }
 
@@ -28,6 +29,7 @@ class UserActionFactory
         return new CreateUser(
             $evento_user,
             $this->user_manager,
+            $this->photo_importer,
             $this->logger
         );
     }
@@ -38,6 +40,7 @@ class UserActionFactory
             $evento_user,
             $this->user_manager->getExistingIliasUserObjectById($ilias_user_id),
             $this->user_manager,
+            $this->photo_importer,
             $this->logger
         );
     }

@@ -16,7 +16,7 @@ class FakeRestClientService extends RestClientService
         $this->has_more = 'false';
     }
 
-    public function sendRequest(string $path, array $request_params)
+    public function sendRequest(string $path, array $request_params) : string
     {
         $take = $request_params["take"];
         $skip = $request_params["skip"];

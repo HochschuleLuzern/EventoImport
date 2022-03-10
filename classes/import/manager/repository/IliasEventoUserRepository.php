@@ -49,6 +49,19 @@ class IliasEventoUserRepository
         return null;
     }
 
+    public function getIliasEventoUserByEventoId(int $evento_id) : ?IliasEventoUser
+    {
+        $query = 'SELECT ' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . ' FROM ' . IliasEventoUserTblDef::TABLE_NAME
+            . ' WHERE ' . IliasEventoUserTblDef::COL_EVENTO_ID . '=' . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
+        $result = $this->db->query($query);
+
+        if ($data = $this->db->fetchAssoc($result)) {
+            return $this->buildIliasEventoUserObjectFromRow($data);
+        }
+
+        return null;
+    }
+
     public function getListOfIliasUserIdsByEventoIds(array $evento_ids) : array
     {
         $query = 'SELECT ' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . ' FROM ' . IliasEventoUserTblDef::TABLE_NAME
@@ -97,5 +110,14 @@ class IliasEventoUserRepository
         $query = "DELETE FROM " . IliasEventoUserTblDef::TABLE_NAME
               . " WHERE " . IliasEventoUserTblDef::COL_EVENTO_ID . " = " . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
         $this->db->manipulate($query);
+    }
+
+    private function buildIliasEventoUserObjectFromRow(array $row) : IliasEventoUser
+    {
+        return new IliasEventoUser(
+            $row[IliasEventoUserTblDef::COL_EVENTO_ID],
+            $row[IliasEventoUserTblDef::COL_ILIAS_USER_ID],
+            $row[IliasEventoUserTblDef::COL_ACCOUNT_TYPE],
+        );
     }
 }

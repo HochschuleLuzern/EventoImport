@@ -39,7 +39,6 @@ class MembershipManager
     ) {
         $this->membership_repo = $membership_repo;
         $this->tree_seeker = $tree_seeker;
-        $this->user_repo;
         $this->favourites_manager = $favourites_manager;
         $this->logger = $logger;
         $this->rbac_review = $rbac_services->review();
@@ -72,7 +71,6 @@ class MembershipManager
     {
         /** @var EventoUserShort $employee */
         foreach ($employees as $employee) {
-            $employee_user_id = $this->user_manager->searchUserIdForEventoUserShort($employee);
             $employee_user_id = $this->user_repo->getIliasUserIdByEventoId($employee->getEventoId());
             if (!$participants_object->isAssigned($employee_user_id)) {
                 $participants_object->add($employee_user_id, $admin_role_code);
@@ -92,15 +90,18 @@ class MembershipManager
     {
         $from_import_subscribed_members = $this->membership_repo->fetchIliasEventoUsersForEvent($imported_event->getEventoId());
 
-        $userevento_ids_to_remove = [];
+        $user_ids_to_remove = [];
 
         foreach ($from_import_subscribed_members as $member_id) {
             if (!$this->isUserInCurrentImport($member_id, $imported_event)) {
-                $userevento_ids_to_remove[] = $this->user_manager->getIliasUserIdByEventoId($member_id);
+                $ilias_evento_user = $this->user_manager->getIliasEventoUserByEventoId($member_id);
+                if (!is_null($ilias_evento_user)) {
+                    $user_ids_to_remove[] = $ilias_evento_user;
+                }
             }
         }
 
-        return $userevento_ids_to_remove;
+        return $user_ids_to_remove;
     }
 
     private function syncMembershipsWithoutParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
@@ -118,12 +119,10 @@ class MembershipManager
             $member_role_code
         );
 
-        $users_to_remove = $this->getUsersToRemove($imported_event);
-
         // Remove from event and sub events
         $sub_membershipable_objs = $this->tree_seeker->getAllSubGroups($ilias_event->getRefId());
         /** @var IliasEventoUser $user_to_remove */
-        foreach ($users_to_remove as $user_to_remove) {
+        foreach ($this->getUsersToRemove($imported_event) as $user_to_remove) {
             if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                 $participants_obj->delete($user_to_remove->getIliasUserId());
                 $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);

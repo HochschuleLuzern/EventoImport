@@ -14,14 +14,12 @@ class UserManager
     private IliasUserServices $ilias_user_service;
     private IliasEventoUserRepository $evento_user_repo;
     private DefaultUserSettings $default_user_settings;
-    private EventoUserPhotoImporter $evento_photo_importer;
 
-    public function __construct(IliasUserServices $ilias_user_service, IliasEventoUserRepository $evento_user_repo, DefaultUserSettings $default_user_settings, EventoUserPhotoImporter $evento_photo_importer)
+    public function __construct(IliasUserServices $ilias_user_service, IliasEventoUserRepository $evento_user_repo, DefaultUserSettings $default_user_settings)
     {
         $this->ilias_user_service = $ilias_user_service;
         $this->evento_user_repo = $evento_user_repo;
         $this->default_user_settings = $default_user_settings;
-        $this->evento_photo_importer = $evento_photo_importer;
     }
 
     public function searchUserIdForEventoUserShort(EventoUserShort $evento_user)
@@ -52,16 +50,14 @@ class UserManager
         return $ilias_user_object;
     }
 
-    public function importAndSetUserPhoto(\ilObjUser $ilias_user, int $evento_id) : void
+    public function importAndSetUserPhoto(\ilObjUser $ilias_user, int $evento_id, EventoUserPhotoImporter $photo_importer) : void
     {
         if ($this->ilias_user_service->userHasPersonalPicture($ilias_user->getId())) {
             return;
         }
 
-        $this->evento_photo_importer;
-
         try {
-            $photo_import = $this->evento_photo_importer->fetchUserPhotoDataById($evento_id);
+            $photo_import = $photo_importer->fetchUserPhotoDataById($evento_id);
 
             if (!is_null($photo_import)
                 && $photo_import->getHasPhoto()
@@ -279,5 +275,10 @@ class UserManager
     public function getExistingIliasUserObjectById(int $ilias_user_id) : \ilObjUser
     {
         return $this->ilias_user_service->getExistingIliasUserObjectById($ilias_user_id);
+    }
+
+    public function getIliasEventoUserByEventoId(int $evento_id) : int
+    {
+        return $this->evento_user_repo->getIliasEventoUserByEventoId($evento_id);// getIliasUserIdByEventoId($evento_id);
     }
 }

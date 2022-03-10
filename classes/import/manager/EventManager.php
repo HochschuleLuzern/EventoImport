@@ -14,7 +14,7 @@ class EventManager
     private IliasEventoEventObjectRepository $event_obj_repo;
     private EventLocationManager $event_locations;
 
-    public function __construct(IliasEventObjectService $ilias_obj_service, IliasEventoEventObjectRepository $event_repo)
+    public function __construct(IliasEventObjectService $ilias_obj_service, IliasEventoEventObjectRepository $event_repo, EventLocationManager $event_locations)
     {
         $this->ilias_obj_service = $ilias_obj_service;
         $this->event_obj_repo = $event_repo;

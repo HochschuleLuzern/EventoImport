@@ -248,5 +248,6 @@ class IliasEventoEventObjectRepository
 
     public function getActiveEventsWithLastImportOlderThanOneWeek() : array
     {
+        return [];
     }
 }

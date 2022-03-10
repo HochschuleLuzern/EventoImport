@@ -192,7 +192,7 @@ class IliasUserServices
         $mail->setUserInformation(
             $ilias_user->getId(),
             $old_login,
-            $ilias_user->getLoginName(),
+            $ilias_user->getLogin(),
             $ilias_user->getEmail()
         );
         $mail->send();

@@ -105,17 +105,17 @@ class EventLocationsRepository
     public function getAllLocationsAsHirarchicalArray() : array
     {
         $locations = [];
-        foreach($this->getAllLocationsAsTableRows() as $row) {
+        foreach ($this->getAllLocationsAsTableRows() as $row) {
             $dep = $row[IliasEventLocationsTblDef::COL_DEPARTMENT_NAME];
             $kind = $row[IliasEventLocationsTblDef::COL_EVENT_KIND];
             $year = $row[IliasEventLocationsTblDef::COL_YEAR];
             $ref = $row[IliasEventLocationsTblDef::COL_REF_ID];
 
-            if(!isset($locations[$dep])) {
+            if (!isset($locations[$dep])) {
                 $locations[$dep] = [$kind => [$year => [$ref]]];
-            } else if(!isset($locations[$dep][$kind])) {
+            } elseif (!isset($locations[$dep][$kind])) {
                 $locations[$dep][$kind] = [$year => [$ref]];
-            } else if(!isset($locations[$dep][$kind][$year])) {
+            } elseif (!isset($locations[$dep][$kind][$year])) {
                 $locations[$dep][$kind][$year] = [$ref];
             } else {
                 $locations[$dep][$kind][$year][] = $ref;
