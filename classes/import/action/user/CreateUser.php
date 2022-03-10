@@ -4,7 +4,7 @@ namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\Logger;
-use EventoImport\import\UserManager;
+use EventoImport\import\data_management\UserManager;
 use EventoImport\communication\EventoUserPhotoImporter;
 
 class CreateUser implements UserImportAction

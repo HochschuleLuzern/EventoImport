@@ -74,7 +74,6 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
                 $api_settings->getApikey(),
                 $api_settings->getApiSecret()
             );
-            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
 
             $import_admins = $this->import_factory->buildAdminImport(
                 new EventoAdminImporter(

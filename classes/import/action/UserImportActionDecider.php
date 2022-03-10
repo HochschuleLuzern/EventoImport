@@ -2,11 +2,11 @@
 
 namespace EventoImport\import\action;
 
-use EventoImport\import\service\IliasUserServices;
+use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\manager\db\IliasEventoUserRepository;
+use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 
 class UserImportActionDecider
 {

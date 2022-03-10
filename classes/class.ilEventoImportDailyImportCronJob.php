@@ -2,6 +2,14 @@
 
 use ILIAS\DI\RBACServices;
 use ILIAS\Refinery\Factory;
+use EventoImport\communication\EventoUserImporter;
+use EventoImport\communication\ImporterIterator;
+use EventoImport\config\ImporterApiSettings;
+use EventoImport\communication\request_services\RestClientService;
+use EventoImport\communication\EventoEventImporter;
+use EventoImport\communication\EventoUserPhotoImporter;
+use EventoImport\import\Logger;
+use EventoImport\import\ImportTaskFactory;
 
 class ilEventoImportDailyImportCronJob extends ilCronJob
 {
@@ -12,6 +20,7 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
     private ilDBInterface $db;
     private Factory $refinery;
     private ilSetting $settings;
+    private ImportTaskFactory $import_factory;
 
     public function __construct(
         \ilEventoImportPlugin $cp,
@@ -27,6 +36,8 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
         $this->db = $db;
         $this->refinery = $refinery;
         $this->settings = $settings;
+
+        $this->import_factory = new ImportTaskFactory($db, $DIC->repositoryTree(), $rbac_services, $settings);
     }
 
     public function getId()
@@ -56,7 +67,51 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
 
     public function run()
     {
-        // TODO: Implement run() method.
+        try {
+            $logger = new Logger($this->db);
+
+            $api_settings = new ImporterApiSettings($this->settings);
+
+            $data_source = new RestClientService(
+                $api_settings->getUrl(),
+                $api_settings->getTimeoutAfterRequest(),
+                $api_settings->getApikey(),
+                $api_settings->getApiSecret()
+            );
+
+            $import_users = $this->import_factory->buildUserImport(
+                new EventoUserImporter(
+                    $data_source,
+                    new ImporterIterator($api_settings->getPageSize()),
+                    $logger,
+                    $api_settings->getTimeoutFailedRequest(),
+                    $api_settings->getMaxRetries()
+                ),
+                new EventoUserPhotoImporter(
+                    $data_source,
+                    $api_settings->getTimeoutFailedRequest(),
+                    $api_settings->getMaxRetries(),
+                    $logger
+                )
+            );
+
+            $import_events = $this->import_factory->buildEventImport(
+                new EventoEventImporter(
+                    $data_source,
+                    new ImporterIterator($api_settings->getPageSize()),
+                    $logger,
+                    $api_settings->getTimeoutFailedRequest(),
+                    $api_settings->getMaxRetries()
+                )
+            );
+
+            $import_users->run();
+            $import_events->run();
+
+            return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
+        } catch (Exception $e) {
+            return new ilEventoImportResult(ilEventoImportResult::STATUS_CRASHED, 'Cron job crashed: ' . $e->getMessage());
+        }
     }
 
     public function getTitle()

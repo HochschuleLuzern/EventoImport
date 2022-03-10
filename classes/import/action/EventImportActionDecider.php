@@ -3,12 +3,12 @@
 namespace EventoImport\import\action;
 
 use EventoImport\import\action\event\EventActionFactory;
-use EventoImport\import\service\IliasEventObjectService;
-use EventoImport\import\manager\db\model\IliasEventoEvent;
+use EventoImport\import\data_management\ilias_core_service\IliasEventObjectService;
+use EventoImport\import\data_management\repository\model\IliasEventoEvent;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\event\EventImportAction;
-use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
-use EventoImport\import\manager\db\EventLocationsRepository;
+use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
+use EventoImport\config\EventLocationsRepository;
 
 class EventImportActionDecider
 {

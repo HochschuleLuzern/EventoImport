@@ -21,25 +21,17 @@
  */
 
 use EventoImport\communication\request_services\RequestClientService;
-use EventoImport\communication\ImporterApiSettings;
+use EventoImport\config\ImporterApiSettings;
 use EventoImport\communication\request_services\RestClientService;
 use EventoImport\communication\EventoUserImporter;
 use EventoImport\communication\EventoEventImporter;
 use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\communication\EventoAdminImporter;
-use EventoImport\import\EventoImportBootstrap;
-use EventoImport\import\action\user\UserActionFactory;
-use EventoImport\import\action\event\EventActionFactory;
-use EventoImport\import\action\UserImportActionDecider;
-use EventoImport\import\action\EventImportActionDecider;
 use ILIAS\DI\RBACServices;
 use ILIAS\Refinery\Factory;
-use EventoImport\import\UserImport;
-use EventoImport\import\AdminImport;
-use EventoImport\import\EventAndMembershipImport;
 use EventoImport\import\Logger;
 use EventoImport\communication\ImporterIterator;
-use EventoImport\import\ImportFactory;
+use EventoImport\import\ImportTaskFactory;
 
 /**
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
@@ -57,7 +49,7 @@ class ilEventoImportImport extends ilCronJob
     private ilSetting $settings;
     private ilEventoImportCronStateChecker $import_state_checker;
 
-    private ImportFactory $import_factory;
+    private ImportTaskFactory $import_factory;
 
     public function __construct(
         \ilEventoImportPlugin $cp,
@@ -75,7 +67,7 @@ class ilEventoImportImport extends ilCronJob
         $this->settings = $settings;
 
         $this->import_state_checker = new ilEventoImportCronStateChecker($this->db);
-        $this->import_factory = new ImportFactory($db, $DIC->repositoryTree(), $rbac_services, $settings);
+        $this->import_factory = new ImportTaskFactory($db, $DIC->repositoryTree(), $rbac_services, $settings);
     }
     
     public function getId() : string
@@ -136,7 +128,6 @@ class ilEventoImportImport extends ilCronJob
                 $api_settings->getApikey(),
                 $api_settings->getApiSecret()
             );
-            $data_source = new \EventoImport\communication\request_services\FakeRestClientService();
 
             if ($this->import_state_checker->wasFullImportAlreadyRunToday()) {
                 $this->runHourlyAdminImport($data_source, $api_settings, $logger);

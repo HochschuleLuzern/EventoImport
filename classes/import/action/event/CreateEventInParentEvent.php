@@ -3,15 +3,15 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\manager\db\model\IliasEventoParentEvent;
-use EventoImport\import\service\IliasEventObjectService;
-use EventoImport\import\service\IliasUserServices;
+use EventoImport\import\data_management\repository\model\IliasEventoParentEvent;
+use EventoImport\import\data_management\ilias_core_service\IliasEventObjectService;
+use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
 use EventoImport\import\IliasEventObjectFactory;
-use EventoImport\import\service\MembershipManager;
-use EventoImport\import\manager\db\model\IliasEventoEvent;
-use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
+use EventoImport\import\data_management\MembershipManager;
+use EventoImport\import\data_management\repository\model\IliasEventoEvent;
+use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
-use EventoImport\import\EventManager;
+use EventoImport\import\data_management\EventManager;
 
 class CreateEventInParentEvent implements EventImportAction
 {

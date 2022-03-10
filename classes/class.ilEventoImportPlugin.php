@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-use EventoImport\import\manager\db\table_definition;
+use EventoImport\db;
 use EventoImport\import\Logger;
 
 /**
@@ -81,7 +81,8 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         }
         
         if (!isset(self::$cron_job_instances)) {
-            self::$cron_job_instances[ilEventoImportImport::ID] = new ilEventoImportImport($this, $rbac, $db, $refinery, new ilSetting('crevento'));
+            self::$cron_job_instances[ilEventoImportDailyImportCronJob::ID] = new ilEventoImportDailyImportCronJob($this, $rbac, $db, $refinery, new ilSetting('crevento'));
+            self::$cron_job_instances[ilEventoImportHourlyImportCronJob::ID] = new ilEventoImportHourlyImportCronJob($this, $rbac, $db, $refinery, new ilSetting('crevento'));
         }
     }
 
@@ -94,11 +95,11 @@ class ilEventoImportPlugin extends ilCronHookPlugin
             'crnhk_crevento_usrs',
             'crnhk_crevento_mas',
             'crnhk_crevento_subs',
-            table_definition\IliasEventoUserTblDef::TABLE_NAME,
-            table_definition\IliasEventoEventsTblDef::TABLE_NAME,
-            table_definition\IliasParentEventsTblDef::TABLE_NAME,
-            table_definition\IliasEventLocationsTblDef::TABLE_NAME,
-            table_definition\IliasEventoEventMembershipsTblDef::TABLE_NAME,
+            db\IliasEventoUserTblDef::TABLE_NAME,
+            db\IliasEventoEventsTblDef::TABLE_NAME,
+            db\IliasParentEventTblDef::TABLE_NAME,
+            \EventoImport\db\IliasEventLocationsTblDef::TABLE_NAME,
+            db\IliasEventoEventMembershipsTblDef::TABLE_NAME,
             Logger::TABLE_LOG_USERS,
             Logger::TABLE_LOG_EVENTS,
             Logger::TABLE_LOG_MEMBERSHIPS

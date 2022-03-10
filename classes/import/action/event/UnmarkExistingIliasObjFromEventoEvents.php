@@ -2,10 +2,10 @@
 
 namespace EventoImport\import\action\event;
 
-use EventoImport\import\manager\db\model\IliasEventoEvent;
-use EventoImport\import\manager\db\IliasEventoEventObjectRepository;
+use EventoImport\import\data_management\repository\model\IliasEventoEvent;
+use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
-use EventoImport\import\EventManager;
+use EventoImport\import\data_management\EventManager;
 
 class UnmarkExistingIliasObjFromEventoEvents implements EventDeleteAction
 {

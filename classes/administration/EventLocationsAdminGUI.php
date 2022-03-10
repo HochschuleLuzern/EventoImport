@@ -2,7 +2,7 @@
 
 namespace EventoImport\administration;
 
-use EventoImport\import\manager\db\EventLocationsRepository;
+use EventoImport\config\EventLocationsRepository;
 use ILIAS\DI\UIServices;
 
 class EventLocationsAdminGUI

@@ -9,7 +9,7 @@ use EventoImport\communication\EventoEventImporter;
 use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\communication\EventoAdminImporter;
 use EventoImport\communication\request_services\RequestClientService;
-use EventoImport\communication\ImporterApiSettings;
+use EventoImport\config\ImporterApiSettings;
 
 class EventoImportApiTester
 {

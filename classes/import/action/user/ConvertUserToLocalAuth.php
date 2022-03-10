@@ -2,10 +2,10 @@
 
 namespace EventoImport\import\action\user;
 
-use EventoImport\import\service\IliasUserServices;
-use EventoImport\import\manager\db\IliasEventoUserRepository;
+use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
+use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\import\Logger;
-use EventoImport\import\UserManager;
+use EventoImport\import\data_management\UserManager;
 
 class ConvertUserToLocalAuth implements UserDeleteAction
 {

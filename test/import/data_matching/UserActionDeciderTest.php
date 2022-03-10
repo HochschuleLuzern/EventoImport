@@ -3,11 +3,11 @@
 namespace EventoImport\import\action_decider;
 
 use PHPUnit\Framework\TestCase;
-use EventoImport\import\service\IliasUserServices;
+use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\action\user\CreateUser;
-use EventoImport\import\manager\db\IliasEventoUserRepository;
+use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\UserImportActionDecider;
 
