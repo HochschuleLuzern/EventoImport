@@ -49,8 +49,8 @@ class UserImportTask
     public function run() : void
     {
         $this->importUsers();
-        $this->convertDeletedAccounts();
-        $this->setUserTimeLimits();
+        //$this->convertDeletedAccounts();
+        //$this->setUserTimeLimits();
     }
 
     private function importUsers() : void

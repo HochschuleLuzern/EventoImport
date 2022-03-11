@@ -49,7 +49,7 @@ class EventAndMembershipImportTask
     public function run() : void
     {
         $this->importEvents();
-        $this->deleteInEventoRemovedEvents();
+        //$this->deleteInEventoRemovedEvents();
     }
 
     private function importEvents() : void
