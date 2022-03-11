@@ -63,6 +63,63 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $this->ctrl->redirect($this, 'configure');
                 break;
 
+            case 'show_missing_repo_locations':
+                $json_settings = $this->settings->get('crevento_location_settings');
+                $locations_settings = json_decode($json_settings, true);
+
+                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\EventLocationsRepository($this->db), $this->tree);
+                $location_lists = $locations_builder->getListOfMissingLocations($locations_settings);
+
+                $f = $this->ui_services->factory();
+
+                if (count($location_lists) > 0) {
+                    $link_create = $this->ctrl->getLinkTarget($this, 'create_repo_locations');
+                    $link_cancel = $this->ctrl->getLinkTarget($this, 'configure');
+
+                    $ui_comps = $f->panel()->standard(
+                        "Missing Locations",
+                        [
+                            $f->listing()->unordered($location_lists),
+                            $f->button()->standard('Create missing locations', $link_create),
+                            $f->button()->standard('Cancel', $link_cancel)
+                        ]
+                    );
+                } else {
+                    $link_cancel = $this->ctrl->getLinkTarget($this, 'configure');
+
+                    $ui_comps = $f->panel()->standard(
+                        "Missing Locations",
+                        [
+                            $f->legacy("All configured location combinations exist in repository tree<br>"),
+                            $f->button()->standard('Go back to config page', $link_cancel)
+                        ]
+                    );
+                }
+
+                $this->tpl->setContent($this->ui_services->renderer()->render($ui_comps));
+                break;
+
+            case 'create_repo_locations':
+                $json_settings = $this->settings->get('crevento_location_settings');
+                $locations_settings = json_decode($json_settings, true);
+
+                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\EventLocationsRepository($this->db), $this->tree);
+                $location_lists = $locations_builder->buildCategoryObjectsForConfiguredKindAndYears($locations_settings);
+
+                $ui_comps = [];
+                foreach ($location_lists as $title => $list) {
+                    $f = $this->ui_services->factory();
+                    $ui_comps[] = $f->legacy(strip_tags($title));
+                    $ui_comps[] = $f->listing()->unordered($list);
+                }
+
+                $locations_builder->rebuildRepositoryLocationsTable($locations_settings);
+
+                \ilUtil::sendSuccess($this->ui_services->renderer()->render($ui_comps), true);
+                $this->ctrl->redirect($this, 'configure');
+
+                break;
+
             case 'fetch_data_set_users':
             case 'fetch_data_set_events':
                 try {

@@ -37,15 +37,18 @@ class EventLocationsAdminGUI
 
         $locations_ui_comp = [];
         foreach ($locations_settings as $location_title => $location_values) {
-            $locations_ui_comp[] = $ui_factory->legacy(htmlspecialchars($location_title));
+            $locations_ui_comp[] = $ui_factory->legacy(strip_tags($location_title));
             $locations_ui_comp[] = $ui_factory->listing()->unordered($location_values);
         }
         $ui_components[] = $ui_factory->panel()->sub('Location Settings', $locations_ui_comp);
 
         // Show action button to reload repository locations
         $link = $this->ctrl->getLinkTarget($this->parent_gui, 'reload_repo_locations');
-        $reload_btn = $ui_factory->button()->standard("Reload Repository Locations", $link);
-        $ui_components[] = $ui_factory->panel()->sub('Reload Locations', $reload_btn);
+        $reload_btn = $ui_factory->button()->standard("Reload Repository Locations DB-Table", $link);
+        $link = $this->ctrl->getLinkTarget($this->parent_gui, 'show_missing_repo_locations');
+        $show_missing_btn = $ui_factory->button()->standard("Missing Event Locations in Repo-Tree", $link);
+
+        $ui_components[] = $ui_factory->panel()->sub('Functions for Event Locations', [$reload_btn, $show_missing_btn]);
 
         // Show table of current registered locations
         $locations = $this->location_repo->getAllLocationsAsTableRows();
