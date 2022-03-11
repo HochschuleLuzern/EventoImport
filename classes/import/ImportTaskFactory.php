@@ -24,26 +24,28 @@ use EventoImport\import\data_management\ilias_core\MembershipablesEventInTreeSee
 use EventoImport\config\EventLocations;
 use EventoImport\import\data_management\EventManager;
 use EventoImport\import\data_management\UserManager;
+use EventoImport\config\ConfigurationManager;
 
 class ImportTaskFactory
 {
+    private ConfigurationManager $config_manager;
     private \ilDBInterface $db;
     private RBACServices $rbac;
-    private \ilSetting $setting;
     private Logger $logger;
+    private \ilTree $tree;
 
-    public function __construct(\ilDBInterface $db, \ilTree $tree, RBACServices $rbac, \ilSetting $setting)
+    public function __construct(ConfigurationManager $config_manager, \ilDBInterface $db, \ilTree $tree, RBACServices $rbac)
     {
+        $this->config_manager = $config_manager;
         $this->db = $db;
         $this->tree = $tree;
         $this->rbac = $rbac;
-        $this->setting = $setting;
         $this->logger = new Logger($db);
     }
 
     public function buildUserImport(EventoUserImporter $user_importer, EventoUserPhotoImporter $user_photo_importer) : UserImportTask
     {
-        $user_settings = new DefaultUserSettings($this->setting);
+        $user_settings = $this->config_manager->getDefaultUserConfiguration();
         $ilias_user_service = new IliasUserServices($user_settings, $this->db, $this->rbac);
         $evento_user_repo = new IliasEventoUserRepository($this->db);
 
@@ -70,7 +72,9 @@ class ImportTaskFactory
 
     public function buildEventImport(EventoEventImporter $event_importer) : EventAndMembershipImportTask
     {
-        $event_obj_service = new IliasEventObjectService(new DefaultEventSettings($this->setting), $this->db, $this->tree);
+        $event_settings = $this->config_manager->getDefaultEventConfiguration();
+        $user_settings = $this->config_manager->getDefaultUserConfiguration();
+        $event_obj_service = new IliasEventObjectService($event_settings, $this->db, $this->tree);
         $evento_event_obj_repo = new IliasEventoEventObjectRepository($this->db);
 
         return new EventAndMembershipImportTask(
@@ -90,9 +94,9 @@ class ImportTaskFactory
                         new MembershipablesEventInTreeSeeker($this->tree),
                         new IliasEventoEventMembershipRepository($this->db),
                         new UserManager(
-                            new IliasUserServices(new DefaultUserSettings($this->setting), $this->db, $this->rbac),
+                            new IliasUserServices($user_settings, $this->db, $this->rbac),
                             new IliasEventoUserRepository($this->db),
-                            new DefaultUserSettings($this->setting)
+                            $user_settings
                         ),
                         new \ilFavouritesManager(),
                         $this->logger,
@@ -109,15 +113,16 @@ class ImportTaskFactory
 
     public function buildAdminImport(EventoAdminImporter $admin_importer) : AdminImportTask
     {
+        $user_settings = $this->config_manager->getDefaultUserConfiguration();
         return new AdminImportTask(
             $admin_importer,
             new MembershipManager(
                 new MembershipablesEventInTreeSeeker($this->tree),
                 new IliasEventoEventMembershipRepository($this->db),
                 new UserManager(
-                    new IliasUserServices(new DefaultUserSettings($this->setting), $this->db, $this->rbac),
+                    new IliasUserServices($user_settings, $this->db, $this->rbac),
                     new IliasEventoUserRepository($this->db),
-                    new DefaultUserSettings($this->setting)
+                    $user_settings
                 ),
                 new \ilFavouritesManager(),
                 $this->logger,

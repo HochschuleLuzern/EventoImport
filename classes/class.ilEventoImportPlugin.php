@@ -85,23 +85,21 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         
         if (!isset(self::$cron_job_instances)) {
             $settings = new ilSetting('crevento');
-            $import_factory = new ImportTaskFactory($db, $tree, $rbac, $settings);
-            $config_manager = new ConfigurationManager($settings, $db);
             $cron_config = new CronConfigForm($settings, $this, $rbac);
+            $config_manager = new ConfigurationManager($cron_config, $settings, $db);
+            $import_factory = new ImportTaskFactory($config_manager, $db, $tree, $rbac);
             $logger = new Logger($db);
 
             self::$cron_job_instances[ilEventoImportDailyImportCronJob::ID] = new ilEventoImportDailyImportCronJob(
                 $this,
                 $import_factory,
                 $config_manager,
-                $cron_config,
                 $logger
             );
             self::$cron_job_instances[ilEventoImportHourlyImportCronJob::ID] = new ilEventoImportHourlyImportCronJob(
                 $this,
                 $import_factory,
                 $config_manager,
-                $cron_config,
                 $logger
             );
         }

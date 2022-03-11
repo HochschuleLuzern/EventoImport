@@ -20,20 +20,17 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
     private ilEventoImportPlugin $cp;
     private ImportTaskFactory $import_factory;
     private ConfigurationManager $config_manager;
-    private CronConfigForm $cron_config;
     private Logger $logger;
 
     public function __construct(
         \ilEventoImportPlugin $cp,
         ImportTaskFactory $import_factory,
         ConfigurationManager $config_manager,
-        CronConfigForm $cron_config,
         Logger $logger
     ) {
         $this->cp = $cp;
         $this->import_factory = $import_factory;
         $this->config_manager = $config_manager;
-        $this->cron_config = $cron_config;
         $this->logger = $logger;
     }
 
@@ -131,17 +128,17 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
 
     public function addCustomSettingsToForm(ilPropertyFormGUI $form) : void
     {
-        $this->cron_config->fillFormWithApiConfig($form);
-        $this->cron_config->fillFormWithUserImportConfig($form);
-        $this->cron_config->fillFormWithEventLocationConfig($form);
-        $this->cron_config->fillFormWithEventConfig($form);
+        $this->config_manager->form()->fillFormWithApiConfig($form);
+        $this->config_manager->form()->fillFormWithUserImportConfig($form);
+        $this->config_manager->form()->fillFormWithEventLocationConfig($form);
+        $this->config_manager->form()->fillFormWithEventConfig($form);
     }
 
     public function saveCustomSettings(ilPropertyFormGUI $form) : bool
     {
-        return $this->cron_config->saveApiConfigFromForm($form)
-            && $this->cron_config->saveUserConfigFromForm($form)
-            && $this->cron_config->saveEventLocationConfigFromForm($form)
-            && $this->cron_config->saveEventConfigFromForm($form);
+        return $this->config_manager->form()->saveApiConfigFromForm($form)
+            && $this->config_manager->form()->saveUserConfigFromForm($form)
+            && $this->config_manager->form()->saveEventLocationConfigFromForm($form)
+            && $this->config_manager->form()->saveEventConfigFromForm($form);
     }
 }

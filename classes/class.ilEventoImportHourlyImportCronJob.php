@@ -17,20 +17,17 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
     private ilEventoImportPlugin $cp;
     private ImportTaskFactory $import_factory;
     private ConfigurationManager $config_manager;
-    private CronConfigForm $cron_config;
     private Logger $logger;
 
     public function __construct(
         \ilEventoImportPlugin $cp,
         ImportTaskFactory $import_factory,
         ConfigurationManager $config_manager,
-        CronConfigForm $cron_config,
         Logger $logger
     ) {
         $this->cp = $cp;
         $this->import_factory = $import_factory;
         $this->config_manager = $config_manager;
-        $this->cron_config = $cron_config;
         $this->logger = $logger;
     }
 
@@ -109,11 +106,11 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
 
     public function addCustomSettingsToForm(ilPropertyFormGUI $form) : void
     {
-        $this->cron_config->fillFormWithApiConfig($form);
+        $this->config_manager->form()->fillFormWithApiConfig($form);
     }
 
     public function saveCustomSettings(ilPropertyFormGUI $form) : bool
     {
-        return $this->cron_config->saveApiConfigFromForm($form);
+        return $this->config_manager->form()->saveApiConfigFromForm($form);
     }
 }
