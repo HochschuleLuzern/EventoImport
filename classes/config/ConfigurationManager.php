@@ -5,7 +5,7 @@ namespace EventoImport\config;
 use EventoImport\config\EventLocationsRepository;
 use EventoImport\config\EventLocations;
 
-class ConfigurationRepository
+class ConfigurationManager
 {
     private \ilSetting $settings;
     private \ilDBInterface $db;

@@ -2,6 +2,11 @@
 / German Language File for Evento Import Cron-Plugin
 **/
 
+daily_import_cj_title#:#Evento Import: Täglich laufender Import
+daily_import_cj_desc#:#Vollständiger Import von Evento Benutzern und Modulanlässen nach ILIAS.
+hourly_import_cj_title#:#Evento Import: Stündlich laufender Import
+hourly_import_cj_desc#:#Importiert in Admin-Rollen eingetragene Benutzer nach ILIAS und trägt sie in die entsprechenden Kurse und Gruppen (gemäss Modulanlass) ein
+
 title#:#Benutzer über Evento-SOAP-Schnittstelle aktualisieren
 description#:#Aktualisiert die ILIAS-Benutzer über die HSLU-SOAP-Schnittstelle zu Evento. Neben den Benutzern werden auch ihre Mitgliedschaften in Kursen und Gruppen aktualisiert.
 ws_user#:#SOAP-Benutzer
@@ -69,6 +74,7 @@ maps_to#:#zugeordnet zu...
 maps_to_desc#:#Erhaltener Rollen-Code von Evento für die Rolle %s hier eingeben. Das Mapping von Evento-Rollen zu ILIAS-Rollen ist 1 zu 1. Die hier eingegebene Zahl kann also bei keiner anderen ILIAS Rolle eingefügt werden.
 event_import_settings#:#Anlassimport Einstellungen
 object_owner#:#Objekt Besitzer
+object_owner_desc#:#Legt fest, welches ILIAS-User-Objekt als Besitzer erstellter Event-Objekte (Kurse und Gruppen) gilt
 owner_root_user#:#Root Benutzer
 owner_custom_user#:#Selber einen Account definieren
 object_owner_id#:#Objekt ID des ILIAS Accounts

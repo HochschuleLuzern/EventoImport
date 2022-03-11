@@ -1,13 +1,28 @@
-<?php declare(strict_types = 1);
+<?php declare(strict_types=1);
+
+namespace EventoImport\config;
 
 use ILIAS\DI\RBACServices;
+use ilSelectInputGUI;
+use ilNumberInputGUI;
+use ilSetting;
+use ilFormSectionHeaderGUI;
+use ilPropertyFormGUI;
+use ilLDAPServer;
+use ilRadioGroupInputGUI;
+use ilTextAreaInputGUI;
+use ilUriInputGUI;
+use ilCheckboxInputGUI;
+use ilTextInputGUI;
+use ilRadioOption;
+use ilAuthUtils;
+use ilObject;
 
 /**
  * Class ilEventoImportCronConfig
- *
  * This class is used to separate the config part for the cron-job from the executing class (ilEventoImportImport)
  */
-class ilEventoImportCronConfig
+class CronConfigForm
 {
     const LANG_HEADER_API_SETTINGS = 'api_settings';
     const LANG_API_URI = 'api_uri';
@@ -48,6 +63,7 @@ class ilEventoImportCronConfig
     const LANG_YEARS = 'location_years';
     const LANG_HEADER_EVENT_SETTINGS = 'event_import_settings';
     const LANG_EVENT_OBJECT_OWNER = 'object_owner';
+    const LANG_EVENT_OBJECT_OWNER_DESC = 'object_owner_desc';
     const LANG_EVENT_OPT_OWNER_ROOT = 'owner_root_user';
     const LANG_EVENT_OPT_OWNER_CUSTOM_USER = 'owner_custom_user';
     const LANG_EVENT_OPT_OWNER_CUSTOM_ID = 'object_owner_id';
@@ -98,25 +114,25 @@ class ilEventoImportCronConfig
     const CONF_EVENT_OWNER_ID = 'crevento_object_owner_id';
     const CONF_EVENT_OBJECT_OWNER = 'crevento_object_owner';
 
-    private $settings;
-    private $cp;
-    private $rbac;
+    private \ilSetting $settings;
+    private \ilEventoImportPlugin $cp;
+    private RBACServices $rbac;
 
-    public function __construct(ilSetting $settings, ilPlugin $plugin, RBACServices $rbac)
+    public function __construct(ilSetting $settings, \ilEventoImportPlugin $plugin, RBACServices $rbac)
     {
         $this->settings = $settings;
         $this->cp = $plugin;
         $this->rbac = $rbac;
     }
 
-    public function fillCronJobSettingsForm(ilPropertyFormGUI $a_form)
+    public function fillFormWithApiConfig(ilPropertyFormGUI $form)
     {
         /***************************
          * API Settings
          ***************************/
         $header = new ilFormSectionHeaderGUI();
         $header->setTitle($this->cp->txt(self::LANG_HEADER_API_SETTINGS));
-        $a_form->addItem($header);
+        $form->addItem($header);
 
         $ws_item = new ilUriInputGUI(
             $this->cp->txt(self::LANG_API_URI),
@@ -125,7 +141,7 @@ class ilEventoImportCronConfig
         $ws_item->setInfo($this->cp->txt(self::LANG_API_URI_DESC));
         $ws_item->setRequired(true);
         $ws_item->setValue($this->settings->get(self::CONF_API_URI, ''));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilTextInputGUI(
             $this->cp->txt(self::LANG_API_AUTH_KEY),
@@ -134,7 +150,7 @@ class ilEventoImportCronConfig
         $ws_item->setInfo($this->cp->txt(self::LANG_API_AUTH_KEY_DESC));
         $ws_item->setRequired(false);
         $ws_item->setValue($this->settings->get(self::CONF_API_AUTH_KEY, ''));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilTextInputGUI(
             $this->cp->txt(self::LANG_API_AUTH_SECRET),
@@ -143,7 +159,7 @@ class ilEventoImportCronConfig
         $ws_item->setInfo($this->cp->txt(self::LANG_API_AUTH_SECRET_DESC));
         $ws_item->setRequired(false);
         $ws_item->setValue($this->settings->get(self::CONF_API_AUTH_SECRET, ''));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_PAGE_SIZE),
@@ -153,7 +169,7 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_API_PAGE_SIZE, '0'));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_MAX_PAGES),
@@ -163,7 +179,7 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_API_MAX_PAGES, '0'));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_TIMEOUT_AFTER_REQUEST),
@@ -173,7 +189,7 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_API_TIMEOUT_AFTER_REQUEST, ''));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_TIMEOUT_FAILED_REQUEST),
@@ -183,7 +199,7 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_API_TIMEOUT_FAILED_REQUEST, ''));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_API_MAX_RETRIES),
@@ -193,14 +209,17 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_API_MAX_RETRIES, ''));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
+    }
 
+    public function fillFormWithUserImportConfig(ilPropertyFormGUI $form)
+    {
         /***************************
          * User Import Settings
          ***************************/
         $header = new ilFormSectionHeaderGUI();
         $header->setTitle($this->cp->txt(self::LANG_HEADER_USER_SETTINGS));
-        $a_form->addItem($header);
+        $form->addItem($header);
 
         $ws_item = new ilSelectInputGUI(
             $this->cp->txt(self::LANG_USER_AUTH_MODE),
@@ -223,7 +242,7 @@ class ilEventoImportCronConfig
         }
         $ws_item->setOptions($options);
         $ws_item->setValue($this->settings->get(self::CONF_USER_AUTH_MODE));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_USER_IMPORT_ACC_DURATION),
@@ -233,7 +252,7 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_USER_IMPORT_ACC_DURATION));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_USER_MAX_ACC_DURATION),
@@ -243,7 +262,7 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_USER_MAX_ACC_DURATION));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilTextInputGUI(
             $this->cp->txt(self::LANG_USER_CHANGED_MAIL_SUBJECT),
@@ -252,7 +271,7 @@ class ilEventoImportCronConfig
         $ws_item->setInfo($this->cp->txt(self::LANG_USER_CHANGED_MAIL_SUBJECT_DESC));
         $ws_item->setRequired(true);
         $ws_item->setValue($this->settings->get(self::CONF_USER_CHANGED_MAIL_SUBJECT, ''));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilTextAreaInputGUI(
             $this->cp->txt(self::LANG_USER_CHANGED_MAIL_BODY),
@@ -262,7 +281,7 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->usePurifier(true);
         $ws_item->setValue($this->settings->get(self::CONF_USER_CHANGED_MAIL_BODY, ''));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_DEFAULT_USER_ROLE),
@@ -272,11 +291,11 @@ class ilEventoImportCronConfig
         $ws_item->setRequired(true);
         $ws_item->allowDecimals(false);
         $ws_item->setValue($this->settings->get(self::CONF_DEFAULT_USER_ROLE));
-        $a_form->addItem($ws_item);
+        $form->addItem($ws_item);
 
         $section = new ilFormSectionHeaderGUI();
         $section->setTitle($this->cp->txt(self::LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING));
-        $a_form->addItem($section);
+        $form->addItem($section);
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
         $globale_roles_settings = $this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, '');
@@ -292,7 +311,6 @@ class ilEventoImportCronConfig
                 self::FORM_USER_GLOBAL_ROLE_ . "$role_id"
             );
             $ws_item->setValue('1');
-
 
             $mapping_input = new ilNumberInputGUI(
                 $this->cp->txt(self::LANG_ROLE_MAPPING_TO),
@@ -311,15 +329,18 @@ class ilEventoImportCronConfig
             }
 
             $ws_item->addSubItem($mapping_input);
-            $a_form->addItem($ws_item);
+            $form->addItem($ws_item);
         }
+    }
 
+    public function fillFormWithEventLocationConfig(ilPropertyFormGUI $form)
+    {
         /***************************
          * Event Location Settings
          ***************************/
         $header = new ilFormSectionHeaderGUI();
         $header->setTitle($this->cp->txt(self::LANG_HEADER_EVENT_LOCATIONS));
-        $a_form->addItem($header);
+        $form->addItem($header);
 
         $json_settings = $this->settings->get(self::CONF_LOCATIONS); //'crevento_location_settings');
         $locations_settings = json_decode($json_settings, true);
@@ -329,33 +350,37 @@ class ilEventoImportCronConfig
         if (isset($locations_settings[self::CONF_KEY_DEPARTMENTS]) && is_array($locations_settings[self::CONF_KEY_DEPARTMENTS])) {
             $departments->setValue($locations_settings[self::CONF_KEY_DEPARTMENTS]);
         }
-        $a_form->addItem($departments);
+        $form->addItem($departments);
 
         $kinds = new ilTextInputGUI($this->cp->txt(self::LANG_KINDS), self::FORM_KINDS);
         $kinds->setMulti(true, false, true);
         if (isset($locations_settings[self::CONF_KEY_KINDS]) && is_array($locations_settings[self::CONF_KEY_KINDS])) {
             $kinds->setValue($locations_settings[self::CONF_KEY_KINDS]);
         }
-        $a_form->addItem($kinds);
+        $form->addItem($kinds);
 
         $years = new ilTextInputGUI($this->cp->txt(self::LANG_YEARS), self::FORM_YEARS);
         $years->setMulti(true, false, true);
         if (isset($locations_settings[self::CONF_KEY_YEARS]) && is_array($locations_settings[self::CONF_KEY_YEARS])) {
             $years->setValue($locations_settings[self::CONF_KEY_YEARS]);
         }
-        $a_form->addItem($years);
+        $form->addItem($years);
+    }
 
+    public function fillFormWithEventConfig(ilPropertyFormGUI $form)
+    {
         /***************************
          * Event Import Settings
          ***************************/
         $header = new ilFormSectionHeaderGUI();
         $header->setTitle($this->cp->txt(self::LANG_HEADER_EVENT_SETTINGS));
-        $a_form->addItem($header);
+        $form->addItem($header);
 
         $radio = new ilRadioGroupInputGUI(
             $this->cp->txt(self::LANG_EVENT_OBJECT_OWNER),
             self::FORM_EVENT_OBJECT_OWNER //'crevento_object_owner'
         );
+        $radio->setInfo($this->cp->txt(self::LANG_EVENT_OBJECT_OWNER_DESC));
 
         $option = new ilRadioOption(
             $this->cp->txt(self::LANG_EVENT_OPT_OWNER_ROOT),
@@ -378,7 +403,116 @@ class ilEventoImportCronConfig
         $radio->addOption($option);
         $radio->setValue($this->settings->get(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT));
 
-        $a_form->addItem($radio);
+        $form->addItem($radio);
+    }
+
+    public function saveApiConfigFromForm(ilPropertyFormGUI $form) : bool
+    {
+        $form_input_correct = true;
+
+        $this->getTextInputAndSaveIfNotNull($form, self::FORM_API_URI, self::CONF_API_URI);
+        $this->getTextInputAndSaveIfNotNull($form, self::FORM_API_AUTH_KEY, self::CONF_API_AUTH_KEY);
+        $this->getTextInputAndSaveIfNotNull($form, self::FORM_API_AUTH_SECRET, self::CONF_API_AUTH_SECRET);
+        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_API_PAGE_SIZE, self::CONF_API_PAGE_SIZE);
+        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_API_MAX_PAGES, self::CONF_API_MAX_PAGES);
+        $this->getIntegerInputAndSaveIfNotNull(
+            $form,
+            self::FORM_API_TIMEOUT_AFTER_REQUEST,
+            self::CONF_API_TIMEOUT_AFTER_REQUEST
+        );
+        $this->getIntegerInputAndSaveIfNotNull(
+            $form,
+            self::FORM_API_TIMEOUT_FAILED_REQUEST,
+            self::CONF_API_TIMEOUT_FAILED_REQUEST
+        );
+        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_API_MAX_RETRIES, self::CONF_API_MAX_RETRIES);
+
+        return $form_input_correct;
+    }
+
+    public function saveUserConfigFromForm(ilPropertyFormGUI $form) : bool
+    {
+        $form_input_correct = true;
+
+        if ($form->getInput(self::FORM_USER_AUTH_MODE) != null) {
+            $this->settings->set(self::CONF_USER_AUTH_MODE, $form->getInput(self::FORM_USER_AUTH_MODE));
+        }
+
+        $this->getIntegerInputAndSaveIfNotNull(
+            $form,
+            self::FORM_USER_IMPORT_ACC_DURATION,
+            self::CONF_USER_IMPORT_ACC_DURATION
+        );
+        $this->getIntegerInputAndSaveIfNotNull(
+            $form,
+            self::FORM_USER_MAX_ACC_DURATION,
+            self::CONF_USER_MAX_ACC_DURATION
+        );
+        $this->getTextInputAndSaveIfNotNull(
+            $form,
+            self::FORM_USER_CHANGED_MAIL_SUBJECT,
+            self::CONF_USER_CHANGED_MAIL_SUBJECT
+        );
+        $this->getTextInputAndSaveIfNotNull(
+            $form,
+            self::FORM_USER_CHANGED_MAIL_BODY,
+            self::CONF_USER_CHANGED_MAIL_BODY
+        );
+
+        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_DEFAULT_USER_ROLE, self::CONF_DEFAULT_USER_ROLE);
+
+        $global_roles = $this->rbac->review()->getGlobalRoles();
+        $role_mapping = [];
+        $save_global_role_mapping = true;
+
+        foreach ($global_roles as $role_id) {
+            $check_box = $form->getInput(self::FORM_USER_GLOBAL_ROLE_ . $role_id);
+            if ($check_box == '1') {
+                $mapped_role_input = (int) $form->getInput(self::FORM_USER_EVENTO_ROLE_MAPPED_TO_ . $role_id);
+                if (!is_null($mapped_role_input) && !in_array($mapped_role_input, $role_mapping)) {
+                    $role_mapping[$role_id] = $mapped_role_input;
+                } elseif (in_array($mapped_role_input, $role_mapping)) {
+                    $form_input_correct = false;
+                    $save_global_role_mapping = false;
+                }
+            }
+        }
+        if ($save_global_role_mapping) {
+            $this->settings->set(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, serialize($role_mapping));
+        }
+
+        return $form_input_correct;
+    }
+
+    public function saveEventLocationConfigFromForm(ilPropertyFormGUI $form) : bool
+    {
+        $form_input_correct = true;
+
+        $location_settings = $this->locationSettingsToJSON($form);
+        $this->settings->set(self::CONF_LOCATIONS, $location_settings);
+
+        return $form_input_correct;
+    }
+
+    public function saveEventConfigFromForm(ilPropertyFormGUI $form) : bool
+    {
+        $form_input_correct = true;
+
+        $input_object_owner = $form->getInput(self::FORM_EVENT_OBJECT_OWNER);
+        switch ($input_object_owner) {
+            case self::FORM_EVENT_OPT_OWNER_ROOT:
+                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT);
+                $this->settings->set(self::CONF_EVENT_OWNER_ID, 6);
+                break;
+
+            case self::FORM_EVENT_OPT_OWNER_CUSTOM_USER:
+                $input_user_id = (int) $form->getInput(self::FORM_EVENT_OPT_OWNER_CUSTOM_ID);
+                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
+                $this->settings->set(self::CONF_EVENT_OWNER_ID, $input_user_id);
+                break;
+        }
+
+        return $form_input_correct;
     }
 
     private function getTextInputAndSaveIfNotNull(ilPropertyFormGUI $form, string $input_field, string $conf_key)
@@ -423,105 +557,5 @@ class ilEventoImportCronConfig
         $settings_list[self::CONF_KEY_YEARS] = $this->purifyLocationSettingsList($a_form->getInput(self::FORM_YEARS));
 
         return json_encode($settings_list);
-    }
-
-    public function saveCustomCronJobSettings(ilPropertyFormGUI $a_form) : bool
-    {
-        $form_input_correct = true;
-
-        /***************************
-         * API Settings
-         ***************************/
-        $this->getTextInputAndSaveIfNotNull($a_form, self::FORM_API_URI, self::CONF_API_URI);
-        $this->getTextInputAndSaveIfNotNull($a_form, self::FORM_API_AUTH_KEY, self::CONF_API_AUTH_KEY);
-        $this->getTextInputAndSaveIfNotNull($a_form, self::FORM_API_AUTH_SECRET, self::CONF_API_AUTH_SECRET);
-        $this->getIntegerInputAndSaveIfNotNull($a_form, self::FORM_API_PAGE_SIZE, self::CONF_API_PAGE_SIZE);
-        $this->getIntegerInputAndSaveIfNotNull($a_form, self::FORM_API_MAX_PAGES, self::CONF_API_MAX_PAGES);
-        $this->getIntegerInputAndSaveIfNotNull(
-            $a_form,
-            self::FORM_API_TIMEOUT_AFTER_REQUEST,
-            self::CONF_API_TIMEOUT_AFTER_REQUEST
-        );
-        $this->getIntegerInputAndSaveIfNotNull(
-            $a_form,
-            self::FORM_API_TIMEOUT_FAILED_REQUEST,
-            self::CONF_API_TIMEOUT_FAILED_REQUEST
-        );
-        $this->getIntegerInputAndSaveIfNotNull($a_form, self::FORM_API_MAX_RETRIES, self::CONF_API_MAX_RETRIES);
-
-        /***************************
-         * User Import Settings
-         ***************************/
-        if ($a_form->getInput(self::FORM_USER_AUTH_MODE) != null) {
-            $this->settings->set(self::CONF_USER_AUTH_MODE, $a_form->getInput(self::FORM_USER_AUTH_MODE));
-        }
-
-        $this->getIntegerInputAndSaveIfNotNull(
-            $a_form,
-            self::FORM_USER_IMPORT_ACC_DURATION,
-            self::CONF_USER_IMPORT_ACC_DURATION
-        );
-        $this->getIntegerInputAndSaveIfNotNull(
-            $a_form,
-            self::FORM_USER_MAX_ACC_DURATION,
-            self::CONF_USER_MAX_ACC_DURATION
-        );
-        $this->getTextInputAndSaveIfNotNull(
-            $a_form,
-            self::FORM_USER_CHANGED_MAIL_SUBJECT,
-            self::CONF_USER_CHANGED_MAIL_SUBJECT
-        );
-        $this->getTextInputAndSaveIfNotNull(
-            $a_form,
-            self::FORM_USER_CHANGED_MAIL_BODY,
-            self::CONF_USER_CHANGED_MAIL_BODY
-        );
-
-        $this->getIntegerInputAndSaveIfNotNull($a_form, self::FORM_DEFAULT_USER_ROLE, self::CONF_DEFAULT_USER_ROLE);
-
-        $global_roles = $this->rbac->review()->getGlobalRoles();
-        $role_mapping = [];
-        $save_global_role_mapping = true;
-
-        foreach ($global_roles as $role_id) {
-            $check_box = $a_form->getInput(self::FORM_USER_GLOBAL_ROLE_ . $role_id);
-            if ($check_box == '1') {
-                $mapped_role_input = (int) $a_form->getInput(self::FORM_USER_EVENTO_ROLE_MAPPED_TO_ . $role_id);
-                if (!is_null($mapped_role_input) && !in_array($mapped_role_input, $role_mapping)) {
-                    $role_mapping[$role_id] = $mapped_role_input;
-                } elseif (in_array($mapped_role_input, $role_mapping)) {
-                    $form_input_correct = false;
-                    $save_global_role_mapping = false;
-                }
-            }
-        }
-        if ($save_global_role_mapping) {
-            $this->settings->set(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, serialize($role_mapping));
-        }
-
-        /***************************
-         * Event Location Settings
-         ***************************/
-        $location_settings = $this->locationSettingsToJSON($a_form);
-        $this->settings->set(self::CONF_LOCATIONS, $location_settings);
-
-        /***************************
-         * Event Import Settings
-         ***************************/
-        $input_object_owner = $a_form->getInput(self::FORM_EVENT_OBJECT_OWNER);
-        switch ($input_object_owner) {
-            case self::FORM_EVENT_OPT_OWNER_ROOT:
-                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT);
-                $this->settings->set(self::CONF_EVENT_OWNER_ID, 6);
-                break;
-
-            case self::FORM_EVENT_OPT_OWNER_CUSTOM_USER:
-                $input_user_id = (int) $a_form->getInput(self::FORM_EVENT_OPT_OWNER_CUSTOM_ID);
-                $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
-                $this->settings->set(self::CONF_EVENT_OWNER_ID, $input_user_id);
-                break;
-        }
-
-        return $form_input_correct;
     }
 }

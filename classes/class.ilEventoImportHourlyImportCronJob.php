@@ -6,34 +6,32 @@ use EventoImport\import\ImportTaskFactory;
 use EventoImport\communication\EventoAdminImporter;
 use EventoImport\import\Logger;
 use EventoImport\config\ImporterApiSettings;
+use EventoImport\communication\request_services\RestClientService;
+use EventoImport\config\ConfigurationManager;
+use EventoImport\config\CronConfigForm;
 
 class ilEventoImportHourlyImportCronJob extends ilCronJob
 {
     public const ID = "crevento_hourly_import";
 
     private ilEventoImportPlugin $cp;
-    private RBACServices $rbac;
-    private ilDBInterface $db;
-    private Factory $refinery;
-    private ilSetting $settings;
     private ImportTaskFactory $import_factory;
+    private ConfigurationManager $config_manager;
+    private CronConfigForm $cron_config;
+    private Logger $logger;
 
     public function __construct(
         \ilEventoImportPlugin $cp,
-        RBACServices $rbac_services,
-        ilDBInterface $db,
-        Factory $refinery,
-        ilSetting $settings
+        ImportTaskFactory $import_factory,
+        ConfigurationManager $config_manager,
+        CronConfigForm $cron_config,
+        Logger $logger
     ) {
-        global $DIC;
-
         $this->cp = $cp;
-        $this->rbac = $rbac_services;
-        $this->db = $db;
-        $this->refinery = $refinery;
-        $this->settings = $settings;
-
-        $this->import_factory = new ImportTaskFactory($db, $DIC->repositoryTree(), $rbac_services, $settings);
+        $this->import_factory = $import_factory;
+        $this->config_manager = $config_manager;
+        $this->cron_config = $cron_config;
+        $this->logger = $logger;
     }
 
     public function getId()
@@ -64,9 +62,7 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
     public function run()
     {
         try {
-            $logger = new Logger($this->db);
-
-            $api_settings = new ImporterApiSettings($this->settings);
+            $api_settings = $this->config_manager->getApiConfiguration();
 
             $data_source = new RestClientService(
                 $api_settings->getUrl(),
@@ -78,7 +74,7 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
             $import_admins = $this->import_factory->buildAdminImport(
                 new EventoAdminImporter(
                     $data_source,
-                    $logger,
+                    $this->logger,
                     $api_settings->getTimeoutFailedRequest(),
                     $api_settings->getMaxRetries()
                 )
@@ -93,12 +89,12 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
 
     public function getTitle()
     {
-        return $this->cp->txt('admin_import_cj_title');
+        return $this->cp->txt('hourly_import_cj_title');
     }
 
     public function getDescription()
     {
-        return $this->cp->txt('admin_import_cj_desc');
+        return $this->cp->txt('hourly_import_cj_desc');
     }
 
     public function isManuallyExecutable() : bool
@@ -111,16 +107,13 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
         return true;
     }
 
-    public function addCustomSettingsToForm(ilPropertyFormGUI $a_form) : void
+    public function addCustomSettingsToForm(ilPropertyFormGUI $form) : void
     {
-        $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
-        $conf->fillCronJobSettingsForm($a_form);
+        $this->cron_config->fillFormWithApiConfig($form);
     }
 
-    public function saveCustomSettings(ilPropertyFormGUI $a_form) : bool
+    public function saveCustomSettings(ilPropertyFormGUI $form) : bool
     {
-        $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
-
-        return $conf->saveCustomCronJobSettings($a_form);
+        return $this->cron_config->saveApiConfigFromForm($form);
     }
 }

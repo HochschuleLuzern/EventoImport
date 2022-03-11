@@ -10,34 +10,31 @@ use EventoImport\communication\EventoEventImporter;
 use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\import\Logger;
 use EventoImport\import\ImportTaskFactory;
+use EventoImport\config\ConfigurationManager;
+use EventoImport\config\CronConfigForm;
 
 class ilEventoImportDailyImportCronJob extends ilCronJob
 {
     public const ID = "crevento_daily_import";
 
     private ilEventoImportPlugin $cp;
-    private RBACServices $rbac;
-    private ilDBInterface $db;
-    private Factory $refinery;
-    private ilSetting $settings;
     private ImportTaskFactory $import_factory;
+    private ConfigurationManager $config_manager;
+    private CronConfigForm $cron_config;
+    private Logger $logger;
 
     public function __construct(
         \ilEventoImportPlugin $cp,
-        RBACServices $rbac_services,
-        ilDBInterface $db,
-        Factory $refinery,
-        ilSetting $settings
+        ImportTaskFactory $import_factory,
+        ConfigurationManager $config_manager,
+        CronConfigForm $cron_config,
+        Logger $logger
     ) {
-        global $DIC;
-
         $this->cp = $cp;
-        $this->rbac = $rbac_services;
-        $this->db = $db;
-        $this->refinery = $refinery;
-        $this->settings = $settings;
-
-        $this->import_factory = new ImportTaskFactory($db, $DIC->repositoryTree(), $rbac_services, $settings);
+        $this->import_factory = $import_factory;
+        $this->config_manager = $config_manager;
+        $this->cron_config = $cron_config;
+        $this->logger = $logger;
     }
 
     public function getId()
@@ -68,9 +65,7 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
     public function run()
     {
         try {
-            $logger = new Logger($this->db);
-
-            $api_settings = new ImporterApiSettings($this->settings);
+            $api_settings = $this->config_manager->getApiConfiguration();
 
             $data_source = new RestClientService(
                 $api_settings->getUrl(),
@@ -83,7 +78,7 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
                 new EventoUserImporter(
                     $data_source,
                     new ImporterIterator($api_settings->getPageSize()),
-                    $logger,
+                    $this->logger,
                     $api_settings->getTimeoutFailedRequest(),
                     $api_settings->getMaxRetries()
                 ),
@@ -91,7 +86,7 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
                     $data_source,
                     $api_settings->getTimeoutFailedRequest(),
                     $api_settings->getMaxRetries(),
-                    $logger
+                    $this->logger
                 )
             );
 
@@ -99,7 +94,7 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
                 new EventoEventImporter(
                     $data_source,
                     new ImporterIterator($api_settings->getPageSize()),
-                    $logger,
+                    $this->logger,
                     $api_settings->getTimeoutFailedRequest(),
                     $api_settings->getMaxRetries()
                 )
@@ -116,12 +111,12 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
 
     public function getTitle()
     {
-        return $this->cp->txt('full_import_cj_title');
+        return $this->cp->txt('daily_import_cj_title');
     }
 
     public function getDescription()
     {
-        return $this->cp->txt('full_import_cj_desc');
+        return $this->cp->txt('daily_import_cj_desc');
     }
 
     public function isManuallyExecutable() : bool
@@ -134,16 +129,19 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
         return true;
     }
 
-    public function addCustomSettingsToForm(ilPropertyFormGUI $a_form) : void
+    public function addCustomSettingsToForm(ilPropertyFormGUI $form) : void
     {
-        $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
-        $conf->fillCronJobSettingsForm($a_form);
+        $this->cron_config->fillFormWithApiConfig($form);
+        $this->cron_config->fillFormWithUserImportConfig($form);
+        $this->cron_config->fillFormWithEventLocationConfig($form);
+        $this->cron_config->fillFormWithEventConfig($form);
     }
 
-    public function saveCustomSettings(ilPropertyFormGUI $a_form) : bool
+    public function saveCustomSettings(ilPropertyFormGUI $form) : bool
     {
-        $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
-
-        return $conf->saveCustomCronJobSettings($a_form);
+        return $this->cron_config->saveApiConfigFromForm($form)
+            && $this->cron_config->saveUserConfigFromForm($form)
+            && $this->cron_config->saveEventLocationConfigFromForm($form)
+            && $this->cron_config->saveEventConfigFromForm($form);
     }
 }

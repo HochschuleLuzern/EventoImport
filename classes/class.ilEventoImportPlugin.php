@@ -2,6 +2,9 @@
 
 use EventoImport\db;
 use EventoImport\import\Logger;
+use EventoImport\import\ImportTaskFactory;
+use EventoImport\config\ConfigurationManager;
+use EventoImport\config\CronConfigForm;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -72,8 +75,8 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         global $DIC;
         $db = $DIC->database();
         $rbac = $DIC->rbac();
-        $refinery = $DIC->refinery();
-        
+        $tree = $DIC->repositoryTree();
+
         //This is a workaround to avoid problems with missing templates
         if (!method_exists($DIC, 'ui') || !method_exists($DIC->ui(), 'factory') || !isset($DIC['ui.factory'])) {
             ilInitialisation::initUIFramework($DIC);
@@ -81,8 +84,26 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         }
         
         if (!isset(self::$cron_job_instances)) {
-            self::$cron_job_instances[ilEventoImportDailyImportCronJob::ID] = new ilEventoImportDailyImportCronJob($this, $rbac, $db, $refinery, new ilSetting('crevento'));
-            self::$cron_job_instances[ilEventoImportHourlyImportCronJob::ID] = new ilEventoImportHourlyImportCronJob($this, $rbac, $db, $refinery, new ilSetting('crevento'));
+            $settings = new ilSetting('crevento');
+            $import_factory = new ImportTaskFactory($db, $tree, $rbac, $settings);
+            $config_manager = new ConfigurationManager($settings, $db);
+            $cron_config = new CronConfigForm($settings, $this, $rbac);
+            $logger = new Logger($db);
+
+            self::$cron_job_instances[ilEventoImportDailyImportCronJob::ID] = new ilEventoImportDailyImportCronJob(
+                $this,
+                $import_factory,
+                $config_manager,
+                $cron_config,
+                $logger
+            );
+            self::$cron_job_instances[ilEventoImportHourlyImportCronJob::ID] = new ilEventoImportHourlyImportCronJob(
+                $this,
+                $import_factory,
+                $config_manager,
+                $cron_config,
+                $logger
+            );
         }
     }
 

@@ -32,6 +32,7 @@ use ILIAS\Refinery\Factory;
 use EventoImport\import\Logger;
 use EventoImport\communication\ImporterIterator;
 use EventoImport\import\ImportTaskFactory;
+use EventoImport\config\CronConfigForm;
 
 /**
  * @author Stephan Winiker <stephan.winiker@hslu.ch>
@@ -188,13 +189,13 @@ class ilEventoImportImport extends ilCronJob
 
     public function addCustomSettingsToForm(ilPropertyFormGUI $a_form) : void
     {
-        $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
+        $conf = new CronConfigForm($this->settings, $this->cp, $this->rbac);
         $conf->fillCronJobSettingsForm($a_form);
     }
     
     public function saveCustomSettings(ilPropertyFormGUI $a_form) : bool
     {
-        $conf = new ilEventoImportCronConfig($this->settings, $this->cp, $this->rbac);
+        $conf = new CronConfigForm($this->settings, $this->cp, $this->rbac);
 
         return $conf->saveCustomCronJobSettings($a_form);
     }
