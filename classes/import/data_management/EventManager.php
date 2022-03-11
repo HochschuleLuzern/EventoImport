@@ -103,6 +103,11 @@ class EventManager
         $this->event_obj_repo->removeIliasEventoEvent($ilias_evento_event);
     }
 
+    public function registerEventoEventAsDelivered(EventoEvent $evento_event)
+    {
+        $this->event_obj_repo->registerEventAsDelivered($evento_event->getEventoId());
+    }
+
     private function checkIfIliasObjCanBeMarkedAsIliasEventoEvent(\ilContainer $ilias_obj) : bool
     {
         $is_markable_obj = false;

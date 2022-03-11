@@ -19,4 +19,5 @@ class IliasEventoEventsTblDef
     public const COL_START_DATE = 'start_date';
     public const COL_END_DATE = 'end_date';
     public const COL_ILIAS_TYPE = 'ilias_type';
+    public const COL_LAST_TIME_DELIVERED = 'last_time_delivered';
 }

@@ -30,6 +30,8 @@ class UpdateExistingEvent implements EventImportAction
 
     public function executeAction() : void
     {
+        $this->event_manager->registerEventoEventAsDelivered($this->evento_event);
+
         $this->membership_manager->syncMemberships($this->evento_event, $this->ilias_event);
 
         $this->logger->logEventImport(

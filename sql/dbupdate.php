@@ -217,6 +217,10 @@ if (!$ilDB->tableExists($table_name)) {
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => false
         ),
+        \EventoImport\db\IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => array(
+            'type' => ilDBConstants::T_TIMESTAMP,
+            'notnull' => true
+        ),
         \EventoImport\db\IliasEventoEventsTblDef::COL_ILIAS_TYPE => array(
             'type' => ilDBConstants::T_TEXT,
             'length' => 4,

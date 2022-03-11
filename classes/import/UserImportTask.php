@@ -7,6 +7,7 @@ use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
 use EventoImport\import\action\UserImportActionDecider;
 use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoUser;
+use EventoImport\import\data_management\repository\model\IliasEventoUser;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -85,7 +86,7 @@ class UserImportTask
      */
     private function convertDeletedAccounts()
     {
-        $list = $this->evento_user_repo->getUsersWithLastImportOlderThanOneWeek();
+        $list = $this->evento_user_repo->getUsersWithLastImportOlderThanOneWeek(IliasEventoUserRepository::TYPE_HSLU_AD);
 
         foreach ($list as $evento_id => $ilias_user_id) {
             try {

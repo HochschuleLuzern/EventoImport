@@ -48,6 +48,7 @@ class IliasEventoEventObjectRepository
                 IliasEventoEventsTblDef::COL_END_DATE => array(\ilDBConstants::T_TIMESTAMP,
                                                                $this->dateTimeToDBFormatOrNull($ilias_evento_event->getEndDate())
                 ),
+                IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => array(\ilDBConstants::T_TIMESTAMP, date("Y-m-d H:i:s")),
                 IliasEventoEventsTblDef::COL_ILIAS_TYPE => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getIliasType()),
 
                 // foreign keys
@@ -248,6 +249,31 @@ class IliasEventoEventObjectRepository
 
     public function getActiveEventsWithLastImportOlderThanOneWeek() : array
     {
-        return [];
+        $query = "SELECT " . IliasEventoEventsTblDef::COL_EVENTO_ID
+            . " FROM " . IliasEventoEventsTblDef::TABLE_NAME
+            . " WHERE " . IliasEventoEventsTblDef::COL_END_DATE . " > " . $this->db->quote(date("Y-m-d"), \ilDBConstants::T_DATETIME)
+            . " AND " . IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED . " < " . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME);
+
+        $result = $this->db->query($query);
+
+        $data = [];
+        while ($row = $this->db->fetchAssoc($result)) {
+            $data[] = $row[IliasEventoEventsTblDef::COL_EVENTO_ID];
+        }
+
+        return $data;
+    }
+
+    public function registerEventAsDelivered(int $event_id)
+    {
+        $this->db->update(
+            IliasEventoEventsTblDef::TABLE_NAME,
+            [
+                IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED
+            ],
+            [
+                IliasEventoEventsTblDef::COL_EVENTO_ID => $this->db->quote($event_id, \ilDBConstants::T_INTEGER)
+            ]
+        );
     }
 }
