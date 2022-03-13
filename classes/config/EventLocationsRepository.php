@@ -109,16 +109,16 @@ class EventLocationsRepository
             $dep = $row[IliasEventLocationsTblDef::COL_DEPARTMENT_NAME];
             $kind = $row[IliasEventLocationsTblDef::COL_EVENT_KIND];
             $year = $row[IliasEventLocationsTblDef::COL_YEAR];
-            $ref = $row[IliasEventLocationsTblDef::COL_REF_ID];
+            $ref = (int) $row[IliasEventLocationsTblDef::COL_REF_ID];
 
             if (!isset($locations[$dep])) {
-                $locations[$dep] = [$kind => [$year => [$ref]]];
+                $locations[$dep] = [$kind => [$year => $ref]];
             } elseif (!isset($locations[$dep][$kind])) {
-                $locations[$dep][$kind] = [$year => [$ref]];
+                $locations[$dep][$kind] = [$year => $ref];
             } elseif (!isset($locations[$dep][$kind][$year])) {
-                $locations[$dep][$kind][$year] = [$ref];
+                $locations[$dep][$kind][$year] = $ref;
             } else {
-                $locations[$dep][$kind][$year][] = $ref;
+                $locations[$dep][$kind][$year] = $ref;
             }
         }
 
