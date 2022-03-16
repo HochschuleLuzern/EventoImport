@@ -23,7 +23,6 @@ class MembershipManager
     private \ilRbacReview $rbac_review;
 
     private \ilRbacAdmin $rbac_admin;
-    private IliasEventoUserRepository $user_repo;
 
     private MembershipablesEventInTreeSeeker $tree_seeker;
     /** @var \ilParticipants[]  */
@@ -67,21 +66,35 @@ class MembershipManager
         }
     }
 
-    private function addUsersToMembershipableObject(\ilParticipants $participants_object, array $employees, int $admin_role_code, array $students, int $student_role_code) : void
+    private function addUsersToMembershipableObject(\ilParticipants $participants_object, EventoEvent $evento_event, int $admin_role_code, int $student_role_code) : void
     {
         /** @var EventoUserShort $employee */
-        foreach ($employees as $employee) {
-            $employee_user_id = $this->user_repo->getIliasUserIdByEventoId($employee->getEventoId());
-            if (!$participants_object->isAssigned($employee_user_id)) {
-                $participants_object->add($employee_user_id, $admin_role_code);
+        foreach ($evento_event->getEmployees() as $employee) {
+            $employee_user_id = $this->user_manager->getIliasUserIdByEventoId($employee->getEventoId());
+            if (!is_null($employee_user_id)) {
+                if (!$participants_object->isAssigned($employee_user_id)) {
+                    $participants_object->add($employee_user_id, $admin_role_code);
+                    $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
+                } else {
+                    $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
+                }
+                $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $employee_user_id, $admin_role_code);
+                $this->membership_repo->addMembershipIfNotExist($evento_event->getEventoId(), $employee->getEventoId(), $admin_role_code);
             }
         }
 
         /** @var EventoUserShort $student */
-        foreach ($students as $student) {
-            $student_user_id = $this->user_repo->getIliasUserIdByEventoId($student->getEventoId());
-            if (!$participants_object->isAssigned($student_user_id)) {
-                $participants_object->add($student_user_id, $student_role_code);
+        foreach ($evento_event->getStudents() as $student) {
+            $student_user_id = $this->user_manager->getIliasUserIdByEventoId($student->getEventoId());
+            if (!is_null($student_user_id)) {
+                if (!$participants_object->isAssigned($student_user_id)) {
+                    $participants_object->add($student_user_id, $student_role_code);
+                    $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
+                } else {
+                    $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
+                }
+                $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $student_user_id, $student_role_code);
+                $this->membership_repo->addMembershipIfNotExist($evento_event->getEventoId(), $student->getEventoId(), $student_role_code);
             }
         }
     }
@@ -93,7 +106,7 @@ class MembershipManager
         $user_ids_to_remove = [];
 
         foreach ($from_import_subscribed_members as $member_id) {
-            if (!$this->isUserInCurrentImport($member_id, $imported_event)) {
+            if (!$this->isUserInCurrentImport((int) $member_id, $imported_event)) {
                 $ilias_evento_user = $this->user_manager->getIliasEventoUserByEventoId($member_id);
                 if (!is_null($ilias_evento_user)) {
                     $user_ids_to_remove[] = $ilias_evento_user;
@@ -111,13 +124,7 @@ class MembershipManager
         $admin_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN;
         $member_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_MEMBER : IL_GRP_MEMBER;
 
-        $this->addUsersToMembershipableObject(
-            $participants_obj,
-            $imported_event->getEmployees(),
-            $admin_role_code,
-            $imported_event->getStudents(),
-            $member_role_code
-        );
+        $this->addUsersToMembershipableObject($participants_obj, $imported_event, $admin_role_code, $member_role_code);
 
         // Remove from event and sub events
         $sub_membershipable_objs = $this->tree_seeker->getAllSubGroups($ilias_event->getRefId());
@@ -143,13 +150,7 @@ class MembershipManager
     {
         // Add users to main event
         $participants_obj = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
-        $this->addUsersToMembershipableObject(
-            $participants_obj,
-            $imported_event->getEmployees(),
-            IL_GRP_ADMIN,
-            $imported_event->getStudents(),
-            IL_GRP_MEMBER
-        );
+        $this->addUsersToMembershipableObject($participants_obj, $imported_event, IL_GRP_ADMIN, IL_GRP_MEMBER);
 
         // Add users to all parent membershipable objects
         foreach ($parent_events as $parent_event) {
@@ -158,17 +159,15 @@ class MembershipManager
             if ($participants_obj instanceof \ilCourseParticipants) {
                 $this->addUsersToMembershipableObject(
                     $participants_obj,
-                    $imported_event->getEmployees(),
+                    $imported_event,
                     IL_CRS_ADMIN,
-                    $imported_event->getStudents(),
                     IL_CRS_MEMBER
                 );
             } elseif ($participants_obj instanceof \ilGroupParticipants) {
                 $this->addUsersToMembershipableObject(
                     $participants_obj,
-                    $imported_event->getEmployees(),
+                    $imported_event,
                     IL_GRP_ADMIN,
-                    $imported_event->getStudents(),
                     IL_GRP_MEMBER
                 );
             }
@@ -193,6 +192,7 @@ class MembershipManager
                     0
                 );
             }
+            $this->membership_repo->removeMembershipIfItExists($imported_event->getEventoId(), $user_to_remove->getEventoUserId());
 
             // Remove from sub events
             $this->removeUserFromSubMembershipables($user_to_remove, $sub_membershipable_objs);
@@ -281,8 +281,8 @@ class MembershipManager
     private function addAdminListToObject(\ilParticipants $participants_object, array $admin_list, int $admin_role_code) : void
     {
         foreach ($admin_list as $admin) {
-            $employee_user_id = $this->user_repo->getIliasUserIdByEventoId($admin->getEventoId());
-            if (!$participants_object->isAssigned($employee_user_id)) {
+            $employee_user_id = $this->user_manager->getIliasUserIdByEventoId($admin->getEventoId());
+            if (!is_null($employee_user_id) && !$participants_object->isAssigned($employee_user_id)) {
                 $participants_object->add($employee_user_id, $admin_role_code);
             }
         }
@@ -295,5 +295,13 @@ class MembershipManager
         }
 
         return $this->participant_object_cache[$ref_id];
+    }
+
+    private function addAndLogUserToParticipantObject(\ilParticipants $participants_object, int $user_id, int $role_code)
+    {
+        if (!$participants_object->isAssigned($user_id)) {
+            $participants_object->add($user_id, $role_code);
+            $this->logger->logEventMembership();
+        }
     }
 }

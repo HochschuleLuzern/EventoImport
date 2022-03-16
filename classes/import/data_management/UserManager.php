@@ -8,6 +8,7 @@ use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoUserShort;
 use EventoImport\config\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
+use EventoImport\import\data_management\repository\model\IliasEventoUser;
 
 class UserManager
 {
@@ -277,8 +278,13 @@ class UserManager
         return $this->ilias_user_service->getExistingIliasUserObjectById($ilias_user_id);
     }
 
-    public function getIliasEventoUserByEventoId(int $evento_id) : int
+    public function getIliasEventoUserByEventoId(int $evento_id) : IliasEventoUser
     {
-        return $this->evento_user_repo->getIliasEventoUserByEventoId($evento_id);// getIliasUserIdByEventoId($evento_id);
+        return $this->evento_user_repo->getIliasEventoUserByEventoId($evento_id);
+    }
+
+    public function getIliasUserIdByEventoId(int $evento_id) : ?int
+    {
+        return $this->evento_user_repo->getIliasUserIdByEventoId($evento_id);
     }
 }
