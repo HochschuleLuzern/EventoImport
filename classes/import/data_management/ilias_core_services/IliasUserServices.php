@@ -92,19 +92,19 @@ class IliasUserServices
         return $list;
     }
 
-    public function getEduUserByEmail(string $mail_address) : ?int
+    public function searchEduUserByEmail(string $mail_address) : ?\ilObjUser
     {
         $user_ids = $this->getUserIdsByEmailAddress($mail_address);
 
-        $found_user_id = null;
+        $found_user_obj = null;
         foreach ($user_ids as $user_id) {
             $user_obj = $this->getExistingIliasUserObjectById($user_id);
             if (stristr($user_obj->getExternalAccount(), '@eduid.ch')) {
-                $found_user_id = $user_id;
+                $found_user_obj = $user_id;
             }
         }
 
-        return $found_user_id;
+        return $found_user_obj;
     }
 
     /*

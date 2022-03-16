@@ -70,7 +70,7 @@ class MembershipManager
     {
         /** @var EventoUserShort $employee */
         foreach ($evento_event->getEmployees() as $employee) {
-            $employee_user_id = $this->user_manager->getIliasUserIdByEventoId($employee->getEventoId());
+            $employee_user_id = $this->user_manager->getIliasUserIdByEventoUserShort($employee);
             if (!is_null($employee_user_id)) {
                 if (!$participants_object->isAssigned($employee_user_id)) {
                     $participants_object->add($employee_user_id, $admin_role_code);
@@ -85,7 +85,7 @@ class MembershipManager
 
         /** @var EventoUserShort $student */
         foreach ($evento_event->getStudents() as $student) {
-            $student_user_id = $this->user_manager->getIliasUserIdByEventoId($student->getEventoId());
+            $student_user_id = $this->user_manager->getIliasUserIdByEventoUserShort($student);
             if (!is_null($student_user_id)) {
                 if (!$participants_object->isAssigned($student_user_id)) {
                     $participants_object->add($student_user_id, $student_role_code);
@@ -295,13 +295,5 @@ class MembershipManager
         }
 
         return $this->participant_object_cache[$ref_id];
-    }
-
-    private function addAndLogUserToParticipantObject(\ilParticipants $participants_object, int $user_id, int $role_code)
-    {
-        if (!$participants_object->isAssigned($user_id)) {
-            $participants_object->add($user_id, $role_code);
-            $this->logger->logEventMembership();
-        }
     }
 }

@@ -26,7 +26,7 @@ class UserImportActionDecider
         int $ilias_user_id
     ) {
         $ilias_user = $this->ilias_user_service->getExistingIliasUserObjectById($ilias_user_id);
-        $this->evento_user_repo->addNewEventoIliasUser($evento_user, $ilias_user);
+        $this->evento_user_repo->addNewEventoIliasUserByEventoUser($evento_user, $ilias_user, IliasEventoUserRepository::TYPE_HSLU_AD);
     }
 
     public function determineImportAction(EventoUser $evento_user) : EventoImportAction

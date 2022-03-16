@@ -5,6 +5,7 @@ namespace EventoImport\import\data_management\repository;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\db\IliasEventoUserTblDef;
 use EventoImport\import\data_management\repository\model\IliasEventoUser;
+use EventoImport\communication\api_models\EventoUserShort;
 
 class IliasEventoUserRepository
 {
@@ -18,22 +19,36 @@ class IliasEventoUserRepository
         $this->db = $db;
     }
 
-    public function addNewEventoIliasUser(EventoUser $evento_user, \ilObjUser $ilias_user, string $account_type) : IliasEventoUser
+    public function addNewEventoIliasUserByEventoUser(EventoUser $evento_user, \ilObjUser $ilias_user, string $account_type) : IliasEventoUser
+    {
+        return $this->addNewEventoIliasUser($evento_user->getEventoId(), (int) $ilias_user->getId(), $account_type);
+    }
+
+    public function addNewEventoIliasUserByEventoUserShort(
+        EventoUserShort $evento_user,
+        \ilObjUser $ilias_user,
+        string $account_type
+    ) : IliasEventoUser
+    {
+        return $this->addNewEventoIliasUser($evento_user->getEventoId(), (int) $ilias_user->getId(), $account_type);
+    }
+
+    private function addNewEventoIliasUser(int $evento_id, int $ilias_user_id, string $account_type) : IliasEventoUser
     {
         $this->db->insert(
-            // INSERT INTO
+        // INSERT INTO
             IliasEventoUserTblDef::TABLE_NAME,
 
             // VALUES
             array(
-                IliasEventoUserTblDef::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $evento_user->getEventoId()),
-                IliasEventoUserTblDef::COL_ILIAS_USER_ID => array(\ilDBConstants::T_INTEGER, $ilias_user->getId()),
+                IliasEventoUserTblDef::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $evento_id),
+                IliasEventoUserTblDef::COL_ILIAS_USER_ID => array(\ilDBConstants::T_INTEGER, $ilias_user_id),
                 IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => array(\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")),
                 IliasEventoUserTblDef::COL_ACCOUNT_TYPE => array(\ilDBConstants::T_TEXT, $account_type)
             )
         );
 
-        return new IliasEventoUser($evento_user->getEventoId(), $ilias_user->getId(), $account_type);
+        return new IliasEventoUser($evento_id, $ilias_user_id, $account_type);
     }
 
     public function getIliasUserIdByEventoId(int $evento_id) : ?int

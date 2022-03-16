@@ -23,17 +23,6 @@ class UserManager
         $this->default_user_settings = $default_user_settings;
     }
 
-    public function searchUserIdForEventoUserShort(EventoUserShort $evento_user)
-    {
-        $ilias_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
-
-        if (is_null($ilias_user_id)) {
-            $ilias_user_id = $this->ilias_user_service->getEduUserByEmail($evento_user->getEmailAddress());
-        }
-
-        return $ilias_user_id;
-    }
-
     public function createAndSetupNewIliasUser(EventoUser $evento_user) : \ilObjUser
     {
         $ilias_user_object = $this->ilias_user_service->createNewIliasUserObject();
@@ -46,7 +35,7 @@ class UserManager
         $this->setForcedUserSettings($ilias_user_object, $this->default_user_settings);
         $this->setUserDefaultSettings($ilias_user_object, $this->default_user_settings);
 
-        $this->evento_user_repo->addNewEventoIliasUser($evento_user, $ilias_user_object, IliasEventoUserRepository::TYPE_HSLU_AD);
+        $this->evento_user_repo->addNewEventoIliasUserByEventoUser($evento_user, $ilias_user_object, IliasEventoUserRepository::TYPE_HSLU_AD);
 
         return $ilias_user_object;
     }
@@ -286,5 +275,19 @@ class UserManager
     public function getIliasUserIdByEventoId(int $evento_id) : ?int
     {
         return $this->evento_user_repo->getIliasUserIdByEventoId($evento_id);
+    }
+
+    public function getIliasUserIdByEventoUserShort(EventoUserShort $evento_user) : ?int
+    {
+        $ilias_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
+        if (is_null($ilias_user_id)) {
+            $edu_user = $this->ilias_user_service->searchEduUserByEmail($evento_user->getEmailAddress());
+            if(!is_null($edu_user)) {
+                $ilias_user_id = (int) $edu_user->getId();
+                $this->evento_user_repo->addNewEventoIliasUserByEventoUserShort($evento_user, $edu_user, IliasEventoUserRepository::TYPE_EDU_ID);
+            }
+        }
+
+        return $ilias_user_id;
     }
 }
