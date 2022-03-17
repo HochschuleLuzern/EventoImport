@@ -7,7 +7,6 @@ use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
 use EventoImport\import\action\UserImportActionDecider;
 use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\data_management\repository\model\IliasEventoUser;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -58,6 +57,8 @@ class UserImportTask
         do {
             try {
                 $this->importNextUserPage();
+            } catch (\ilEventoImportCommunicationException $e) {
+                throw $e;
             } catch (\Exception $e) {
                 $this->evento_logger->logException('User Import', $e->getMessage());
             }

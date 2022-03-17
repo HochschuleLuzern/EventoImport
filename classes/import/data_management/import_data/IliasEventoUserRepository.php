@@ -28,8 +28,7 @@ class IliasEventoUserRepository
         EventoUserShort $evento_user,
         \ilObjUser $ilias_user,
         string $account_type
-    ) : IliasEventoUser
-    {
+    ) : IliasEventoUser {
         return $this->addNewEventoIliasUser($evento_user->getEventoId(), (int) $ilias_user->getId(), $account_type);
     }
 

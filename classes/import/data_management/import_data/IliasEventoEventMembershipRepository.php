@@ -12,7 +12,7 @@ class IliasEventoEventMembershipRepository
     public const ROLE_ADMIN = 1;
     public const ROLE_MEMBER = 2;
 
-    private $db;
+    private \ilDBInterface $db;
 
     public function __construct(\ilDBInterface $db)
     {
@@ -36,7 +36,7 @@ class IliasEventoEventMembershipRepository
 
     public function fetchIliasEventoUsersForEventAndRole(int $evento_event_id, int $role_of_event) : array
     {
-        $query = 'SELECT usr.' . IliasEventoUserTblDef::COL_EVENTO_ID . ' AS evento_user_id, usr.' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . ' AS ilias_user_id'
+        $query = 'SELECT usr.' . IliasEventoUserTblDef::COL_EVENTO_ID . ' AS evento_user_id, usr.' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . ' AS ilias_user_id, usr.' . IliasEventoUserTblDef::COL_ACCOUNT_TYPE . ' AS account_type'
             . ' FROM ' . IliasEventoEventMembershipsTblDef::TABLE_NAME . ' AS mem'
             . ' JOIN ' . IliasEventoUserTblDef::TABLE_NAME . ' AS usr ON usr.' . IliasEventoUserTblDef::COL_EVENTO_ID . ' = mem.' . IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID
             . ' WHERE mem.' . IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID . ' = ' . $this->db->quote($evento_event_id, \ilDBConstants::T_INTEGER)
@@ -46,7 +46,7 @@ class IliasEventoEventMembershipRepository
 
         $users = [];
         while ($row = $this->db->fetchAssoc($result)) {
-            $users[] = new IliasEventoUser($row['evento_user_id'], $row['ilias_user_id']);
+            $users[] = new IliasEventoUser($row['evento_user_id'], $row['ilias_user_id'], $row['account_type']);
         }
 
         return $users;

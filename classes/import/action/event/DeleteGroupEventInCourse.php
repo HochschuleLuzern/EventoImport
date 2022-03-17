@@ -3,8 +3,6 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\import\data_management\repository\model\IliasEventoEvent;
-use EventoImport\import\data_management\ilias_core_service\IliasEventObjectService;
-use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
 use EventoImport\import\data_management\EventManager;
 
@@ -32,7 +30,7 @@ class DeleteGroupEventInCourse implements EventDeleteAction
     {
         throw new \Exception("This action is not implemented yet");
 
-        $this->logger->logEventImport($this->log_info_code, $this->ilias_evento_event->getEventoEventId());
+        $this->logger->logEventImport($this->log_info_code, $this->ilias_evento_event->getEventoEventId(), $this->ilias_evento_event->getRefId(), []);
         // TODO: Implement executeAction() method.
     }
 }

@@ -4,7 +4,6 @@ namespace EventoImport\import\action\event;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\data_management\repository\model\IliasEventoEvent;
-use EventoImport\import\data_management\ilias_core_service\IliasEventObjectService;
 use EventoImport\import\data_management\MembershipManager;
 use EventoImport\import\Logger;
 use EventoImport\import\data_management\EventManager;

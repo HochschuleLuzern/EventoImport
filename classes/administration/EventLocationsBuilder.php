@@ -35,9 +35,7 @@ class EventLocationsBuilder
         $this->fillRepositoryLocationsTable($locations_settings);
         $new_locations = $this->locations_repository->getAllLocationsAsTableRows();
 
-        $diff = count($new_locations) - count($old_locations);
-
-        return $diff;
+        return count($new_locations) - count($old_locations);
     }
 
     public function buildCategoryObjectsForConfiguredKindAndYears(array $locations_settings) : array

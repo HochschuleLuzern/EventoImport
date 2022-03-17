@@ -4,9 +4,7 @@ namespace EventoImport\import;
 
 use EventoImport\import\data_management\MembershipManager;
 use EventoImport\communication\EventoAdminImporter;
-use EventoImport\import\data_management\repository\repository\IliasEventoEventsRepository;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
-use EventoImport\import\Logger;
 use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
 
 class AdminImportTask

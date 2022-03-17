@@ -269,10 +269,10 @@ class IliasEventoEventObjectRepository
         $this->db->update(
             IliasEventoEventsTblDef::TABLE_NAME,
             [
-                IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED
+                IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")]
             ],
             [
-                IliasEventoEventsTblDef::COL_EVENTO_ID => $this->db->quote($event_id, \ilDBConstants::T_INTEGER)
+                IliasEventoEventsTblDef::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER, $event_id]
             ]
         );
     }

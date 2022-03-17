@@ -3,10 +3,7 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
-use EventoImport\config\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
-use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\import\Logger;
 use EventoImport\import\data_management\UserManager;
 

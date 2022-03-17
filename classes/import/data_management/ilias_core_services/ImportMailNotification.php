@@ -23,10 +23,10 @@ namespace EventoImport\import\data_management\ilias_core_service;
  */
 class ImportMailNotification extends \ilMailNotification
 {
-    private $settings;
-    private $oldLogin;
-    private $newLogin;
-    private $email;
+    private \ilSetting $settings;
+    private string $oldLogin;
+    private string $newLogin;
+    private string $email;
 
     const MAIL_TYPE_USER_NAME_CHANGED = 101;
 
@@ -37,7 +37,7 @@ class ImportMailNotification extends \ilMailNotification
         parent::__construct();
     }
 
-    public function setUserInformation($recipient, $oldLogin, $newLogin, $email)
+    public function setUserInformation(int $recipient, string $oldLogin, string $newLogin, string $email)
     {
         $this->setRecipients([$recipient]);
         $this->oldLogin = $oldLogin;

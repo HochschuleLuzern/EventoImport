@@ -28,7 +28,14 @@ trait SingleDataRecordImport
                 if ($nr_of_tries < $max_retries) {
                     sleep($seconds_before_retry);
                 } else {
-                    throw new \Exception("After $nr_of_tries there was still no successful call to API");
+                    throw new \ilEventoImportCommunicationException(
+                        self::class,
+                        [
+                            'method_name' => $method_name,
+                            'request_params' => ['id' => $id]
+                        ],
+                        "After $nr_of_tries tries, there was still no successful call to the API"
+                    );
                 }
             }
         } while (!$request_was_successful);

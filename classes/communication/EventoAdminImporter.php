@@ -13,8 +13,8 @@ class EventoAdminImporter extends EventoImporterBase
     use SingleDataRecordImport;
     use DataSetImport;
 
-    private $fetch_single_record;
-    private $fetch_all_admins;
+    private string $fetch_single_record;
+    private string $fetch_all_admins;
 
     public function __construct(
         RequestClientService $data_source,

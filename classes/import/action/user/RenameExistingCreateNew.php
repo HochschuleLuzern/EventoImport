@@ -3,7 +3,6 @@
 namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
-use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
 use EventoImport\import\Logger;
 
 class RenameExistingCreateNew implements UserImportAction

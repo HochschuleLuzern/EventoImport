@@ -187,8 +187,9 @@ class IliasUserServices
     {
         $mail = new ImportMailNotification();
         $mail->setType(ImportMailNotification::MAIL_TYPE_USER_NAME_CHANGED);
-        $mail->setUserInformation(
-            $ilias_user->getId(),
+        $mail->
+        setUserInformation(
+            (int) $ilias_user->getId(),
             $old_login,
             $ilias_user->getLogin(),
             $ilias_user->getEmail()

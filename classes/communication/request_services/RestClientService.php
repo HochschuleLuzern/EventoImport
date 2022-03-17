@@ -8,10 +8,10 @@ namespace EventoImport\communication\request_services;
  */
 class RestClientService implements RequestClientService
 {
-    private $base_uri;
-    private $timeout_after_request_seconds;
-    private $api_key;
-    private $api_secret;
+    private string $base_uri;
+    private int $timeout_after_request_seconds;
+    private string $api_key;
+    private string $api_secret;
 
     public function __construct(
         string $base_uri,

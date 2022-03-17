@@ -20,6 +20,10 @@ trait DataSetImport
             } catch (\ilEventoImportApiDataException $e) {
                 throw $e;
             } catch (\JsonException $e) {
+                if (!isset($json_response)) {
+                    $json_response = '';
+                }
+
                 throw new \ilEventoImportApiDataException(
                     'API-Data-String to JSON',
                     'Conversion of API response from JSON-String to JSON-Array failed',
@@ -44,7 +48,7 @@ trait DataSetImport
                             'method_name' => $method_name,
                             'request_params' => $request_params
                         ],
-                        "After $nr_of_tries there was still no successful call to API"
+                        "After $nr_of_tries tries, there was still no successful call to the API"
                     );
                 }
             }

@@ -110,7 +110,7 @@ class EventoImportApiTesterGUI
         } catch (\ilEventoImportCommunicationException $e) {
             \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
         } catch (\Exception $e) {
-            \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd, Skip = $skip, Take = $take", true);
+            \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd", true);
         }
 
         return '';
@@ -151,8 +151,6 @@ class EventoImportApiTesterGUI
 
     private function buildMessageForNextPage(string $infos, string $output) : string
     {
-        $message = "$infos<br><br>Output from request:<br><pre>$output</pre></div></div>";
-
-        return $message;
+        return "$infos<br><br>Output from request:<br><pre>$output</pre></div></div>";
     }
 }

@@ -3,7 +3,6 @@
 namespace EventoImport\import\action\event;
 
 use EventoImport\import\data_management\repository\model\IliasEventoEvent;
-use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
 use EventoImport\import\Logger;
 use EventoImport\import\data_management\EventManager;
 

@@ -105,9 +105,5 @@ class EventImportActionDecider
         }
 
         return $this->event_action_factory->deleteSingleCourseEvent($ilias_evento_event);
-
-        throw new \Exception('Error while removing in Evento deleted event from ILIAS: Given event was created
-         automatically. It is not a course object but also is not part of an automatically created parent event. 
-         This scenario should not be possible!');
     }
 }

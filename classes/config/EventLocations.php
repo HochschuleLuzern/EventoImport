@@ -3,7 +3,6 @@
 namespace EventoImport\config;
 
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\config\EventLocationsRepository;
 
 class EventLocations
 {

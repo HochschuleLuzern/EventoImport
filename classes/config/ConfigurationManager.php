@@ -2,9 +2,6 @@
 
 namespace EventoImport\config;
 
-use EventoImport\config\EventLocationsRepository;
-use EventoImport\config\EventLocations;
-
 class ConfigurationManager
 {
     private CronConfigForm $cron_config_form;

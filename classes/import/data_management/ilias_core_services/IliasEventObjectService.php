@@ -47,12 +47,12 @@ class IliasEventObjectService
         if ($this->db->numRows($result) == 1) {
             $row = $this->db->fetchAssoc($result);
 
-            if($row['type'] == 'crs') {
+            if ($row['type'] == 'crs') {
                 $found_obj = $this->getCourseObjectForRefId((int) $row['ref_id']);
-            } else if($row['type'] == 'grp') {
+            } elseif ($row['type'] == 'grp') {
                 $group_obj = $this->getGroupObjectForRefId((int) $row['ref_id']);
 
-                if($this->isGroupObjPartOfACourse($group_obj)) {
+                if ($this->isGroupObjPartOfACourse($group_obj)) {
                     $found_obj = $group_obj;
                 }
             }
@@ -109,13 +109,12 @@ class IliasEventObjectService
             $current_ref_id = $this->tree->getParentId($current_ref_id);
             $type = $this->getObjTypeForRefId($current_ref_id);
 
-            if($type == 'crs') {
+            if ($type == 'crs') {
                 return true;
-            } else if($type == 'cat' || $type == 'root') {
+            } elseif ($type == 'cat' || $type == 'root') {
                 return false;
             }
-
-        } while($current_ref_id > 1);
+        } while ($current_ref_id > 1);
 
         return false;
     }
@@ -150,5 +149,6 @@ class IliasEventObjectService
     {
         $event_obj->setTitle($new_title);
         $event_obj->update();
+        return $event_obj;
     }
 }

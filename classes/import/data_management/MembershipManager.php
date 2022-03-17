@@ -5,19 +5,17 @@ namespace EventoImport\import\data_management;
 use EventoImport\import\data_management\repository\IliasEventoEventMembershipRepository;
 use ILIAS\DI\RBACServices;
 use EventoImport\communication\api_models\EventoEvent;
-use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoUserShort;
 use EventoImport\import\data_management\repository\model\IliasEventoEvent;
 use EventoImport\import\data_management\repository\model\IliasEventoUser;
 use EventoImport\import\data_management\ilias_core\MembershipablesEventInTreeSeeker;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
 use EventoImport\import\Logger;
-use EventoImport\import\data_management\UserManager;
 
 class MembershipManager
 {
     private UserManager $user_manager;
-    private $membership_repo;
+    private IliasEventoEventMembershipRepository $membership_repo;
     private \ilFavouritesManager $favourites_manager;
     private Logger $logger;
     private \ilRbacReview $rbac_review;

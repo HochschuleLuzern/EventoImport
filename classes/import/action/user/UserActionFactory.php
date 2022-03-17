@@ -4,17 +4,15 @@ namespace EventoImport\import\action\user;
 
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\action\ReportDatasetWithoutAction;
-use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
-use EventoImport\config\DefaultUserSettings;
 use EventoImport\import\action\EventoImportAction;
 use EventoImport\communication\EventoUserPhotoImporter;
-use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\import\Logger;
 use EventoImport\import\data_management\UserManager;
 
 class UserActionFactory
 {
     private UserManager $user_manager;
+    private EventoUserPhotoImporter $photo_importer;
     private Logger $logger;
 
     public function __construct(UserManager $user_manager, EventoUserPhotoImporter $photo_importer, Logger $logger)

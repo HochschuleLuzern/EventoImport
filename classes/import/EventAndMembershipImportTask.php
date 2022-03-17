@@ -57,6 +57,8 @@ class EventAndMembershipImportTask
         do {
             try {
                 $this->importNextEventPage();
+            } catch (\ilEventoImportCommunicationException $e) {
+                throw $e;
             } catch (\Exception $e) {
                 $this->logger->logException('Importing Event Page', $e->getMessage());
             }
@@ -77,7 +79,7 @@ class EventAndMembershipImportTask
                     $action = $this->event_import_action_decider->determineDeleteAction($ilias_evento_event);
                     $action->executeAction();
                 } else {
-                    $this->evento_event_obj_repo->registerUserAsDelivered($result->getEventoId());
+                    $this->evento_event_obj_repo->registerEventAsDelivered($result->getEventoId());
                 }
             } catch (\Exception $e) {
             }

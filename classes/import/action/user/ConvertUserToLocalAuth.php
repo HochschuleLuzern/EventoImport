@@ -2,8 +2,6 @@
 
 namespace EventoImport\import\action\user;
 
-use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
-use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\import\Logger;
 use EventoImport\import\data_management\UserManager;
 

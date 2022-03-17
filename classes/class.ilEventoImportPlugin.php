@@ -1,6 +1,5 @@
 <?php declare(strict_types = 1);
 
-use EventoImport\db;
 use EventoImport\import\Logger;
 use EventoImport\import\ImportTaskFactory;
 use EventoImport\config\ConfigurationManager;
@@ -42,13 +41,12 @@ class ilEventoImportPlugin extends ilCronHookPlugin
     }
     
     /**
-     *
-     * @var ilEventoImportImport[]
+     * @var ilCronJob[]
      */
     protected static $cron_job_instances;
     
     /**
-     * @return  ilEventoImportImport[]
+     * @return  ilCronJob[]
      */
     public function getCronJobInstances() : array
     {
@@ -58,7 +56,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
     }
     
     /**
-     * @return  ilEventoImportImport or false on failure
+     * @return  ilCronJob or false on failure
      */
     public function getCronJobInstance($a_job_id)
     {

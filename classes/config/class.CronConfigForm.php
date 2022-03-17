@@ -397,7 +397,7 @@ class CronConfigForm
             self::FORM_EVENT_OPT_OWNER_CUSTOM_ID// 'crevento_object_owner_id'
         );
         $custom_user_id->allowDecimals(false);
-        $custom_user_id->setValue($this->settings->get(self::CONF_EVENT_OWNER_ID), '');
+        $custom_user_id->setValue($this->settings->get(self::CONF_EVENT_OWNER_ID, ''));
         $option->addSubItem($custom_user_id);
 
         $radio->addOption($option);

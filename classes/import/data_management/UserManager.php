@@ -282,7 +282,7 @@ class UserManager
         $ilias_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
         if (is_null($ilias_user_id)) {
             $edu_user = $this->ilias_user_service->searchEduUserByEmail($evento_user->getEmailAddress());
-            if(!is_null($edu_user)) {
+            if (!is_null($edu_user)) {
                 $ilias_user_id = (int) $edu_user->getId();
                 $this->evento_user_repo->addNewEventoIliasUserByEventoUserShort($evento_user, $edu_user, IliasEventoUserRepository::TYPE_EDU_ID);
             }

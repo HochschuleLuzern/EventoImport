@@ -1,17 +1,13 @@
 <?php declare(strict_type=1);
 
-use ILIAS\DI\RBACServices;
-use ILIAS\Refinery\Factory;
 use EventoImport\communication\EventoUserImporter;
 use EventoImport\communication\ImporterIterator;
-use EventoImport\config\ImporterApiSettings;
 use EventoImport\communication\request_services\RestClientService;
 use EventoImport\communication\EventoEventImporter;
 use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\import\Logger;
 use EventoImport\import\ImportTaskFactory;
 use EventoImport\config\ConfigurationManager;
-use EventoImport\config\CronConfigForm;
 
 class ilEventoImportDailyImportCronJob extends ilCronJob
 {

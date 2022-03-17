@@ -26,7 +26,7 @@ use ilLoggerFactory;
  */
 class Logger
 {
-    private $ilDB;
+    private \ilDBInterface $ilDB;
 
     #const CREVENTO_SUB_CREATED = 101;
     #const CREVENTO_SUB_UPDATED = 102;
