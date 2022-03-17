@@ -104,9 +104,9 @@ class IliasEventObjectService
 
     public function isGroupObjPartOfACourse(\ilObjGroup $group_obj) : bool
     {
-        $current_ref_id = $group_obj->getRefId();
+        $current_ref_id = (int) $group_obj->getRefId();
         do {
-            $current_ref_id = $this->tree->getParentId($current_ref_id);
+            $current_ref_id = (int) $this->tree->getParentId($current_ref_id);
             $type = $this->getObjTypeForRefId($current_ref_id);
 
             if ($type == 'crs') {
