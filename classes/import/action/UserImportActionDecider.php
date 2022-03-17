@@ -83,7 +83,7 @@ class UserImportActionDecider
                         );
                         $this->addUserToEventoIliasMappingTable($evento_user, $data['id_by_login']);
                     } else {
-                        if (strlen($user_obj_by_login->getMatriculation()) != 0) {
+                        if (strlen($user_obj_by_login->getMatriculation() ?? '') != 0) {
                             // The user account by login has a matriculation of some kind
                             // --> Bail
                             $result = $this->action_factory->buildReportConflict($evento_user);
@@ -117,7 +117,7 @@ class UserImportActionDecider
                             'mail'
                         );
                     } else {
-                        if (strlen($user_obj_by_mail->getMatriculation()) != 0) {
+                        if (strlen($user_obj_by_mail->getMatriculation() ?? '') != 0) {
                             // The user account by login has a matriculation of some kind
                             // --> Bail
                             $result = $this->action_factory->buildReportConflict($evento_user);
