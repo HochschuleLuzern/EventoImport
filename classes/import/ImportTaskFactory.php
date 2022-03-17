@@ -74,6 +74,7 @@ class ImportTaskFactory
         $user_settings = $this->config_manager->getDefaultUserConfiguration();
         $event_obj_service = new IliasEventObjectService($event_settings, $this->db, $this->tree);
         $evento_event_obj_repo = new IliasEventoEventObjectRepository($this->db);
+        $event_locations = new EventLocations(new EventLocationsRepository($this->db));
 
         return new EventAndMembershipImportTask(
             $event_importer,
@@ -84,9 +85,7 @@ class ImportTaskFactory
                     new EventManager(
                         $event_obj_service,
                         $evento_event_obj_repo,
-                        new EventLocations(
-                            new EventLocationsRepository($this->db)
-                        )
+                        $event_locations
                     ),
                     new MembershipManager(
                         new MembershipablesEventInTreeSeeker($this->tree),
@@ -102,7 +101,7 @@ class ImportTaskFactory
                     ),
                     $this->logger
                 ),
-                new EventLocationsRepository($this->db)
+                $event_locations
             ),
             $evento_event_obj_repo,
             $this->logger

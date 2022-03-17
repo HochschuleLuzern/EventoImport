@@ -9,20 +9,21 @@ use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\event\EventImportAction;
 use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
 use EventoImport\config\EventLocationsRepository;
+use EventoImport\config\EventLocations;
 
 class EventImportActionDecider
 {
     private IliasEventObjectService $ilias_event_obj_service;
     private EventActionFactory $event_action_factory;
     private IliasEventoEventObjectRepository $evento_event_object_repo;
-    private EventLocationsRepository $location_repository;
+    private EventLocations $event_locations;
 
-    public function __construct(IliasEventObjectService $ilias_event_obj_service, IliasEventoEventObjectRepository $evento_event_object_repo, EventActionFactory $event_action_factory, EventLocationsRepository $location_repo)
+    public function __construct(IliasEventObjectService $ilias_event_obj_service, IliasEventoEventObjectRepository $evento_event_object_repo, EventActionFactory $event_action_factory, EventLocations $event_locations)
     {
         $this->ilias_event_obj_service = $ilias_event_obj_service;
         $this->evento_event_object_repo = $evento_event_object_repo;
         $this->event_action_factory = $event_action_factory;
-        $this->location_repository = $location_repo;
+        $this->event_locations = $event_locations;
     }
 
     public function determineImportAction(EventoEvent $evento_event) : EventImportAction
@@ -54,9 +55,9 @@ class EventImportActionDecider
 
     protected function determineActionForNewEventsWithCreateFlag(EventoEvent $evento_event) : EventImportAction
     {
-        $destination_ref_id = $this->location_repository->getRefIdForEventoObject($evento_event);
+        $destination_ref_id = $this->event_locations->getLocationRefIdForEventoEvent($evento_event);
 
-        if ($destination_ref_id === null) {
+        if (is_null($destination_ref_id)) {
             return $this->event_action_factory->reportUnknownLocationForEvent($evento_event);
         }
 
@@ -66,7 +67,7 @@ class EventImportActionDecider
         }
 
         // Is MultiGroup
-        $parent_event = $this->evento_event_object_repo->getParentEventForName($evento_event->getGroupUniqueKey());
+        $parent_event = $this->evento_event_object_repo->getParentEventbyGroupUniqueKey($evento_event->getGroupUniqueKey());
         if (!is_null($parent_event)) {
             // Parent event in multi group exists
             return $this->event_action_factory->createEventInParentEvent($evento_event, $parent_event);
