@@ -61,7 +61,7 @@ class IliasUserServices
             // ... get all user ids in which a user has this email
             foreach ($this->getUserIdsByEmailAddress($email_adress) as $ilias_id_by_mail) {
                 if (!in_array($ilias_id_by_mail, $user_lists)) {
-                    $user_lists[] = $ilias_id_by_mail;
+                    $user_lists[] = (int) $ilias_id_by_mail;
                 }
             }
         }
