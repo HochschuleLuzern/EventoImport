@@ -64,7 +64,7 @@ class UserImportActionDecider
 
                 $user_obj_by_login = $this->ilias_user_service->getExistingIliasUserObjectById($data['id_by_login']);
 
-                if (substr($user_obj_by_login->getMatriculation(), 0, 7) == 'Evento:') {
+                if (substr($user_obj_by_login->getMatriculation() ?? '', 0, 7) == 'Evento:') {
                     // The user account by login has a different evento number.
                     // --> Rename and deactivate conflicting account
                     //     and then insert new user account.
@@ -107,7 +107,7 @@ class UserImportActionDecider
                     // one by e-mail.
                     $user_obj_by_mail = $this->ilias_user_service->getExistingIliasUserObjectById($data['ids_by_email'][0]);
 
-                    if (substr($user_obj_by_mail->getMatriculation(), 0, 7) == 'Evento:') {
+                    if (substr($user_obj_by_mail->getMatriculation() ?? '', 0, 7) == 'Evento:') {
                         // The user account by e-mail has a different evento number.
                         // --> Rename and deactivate conflicting account
                         //     and then insert new user account.

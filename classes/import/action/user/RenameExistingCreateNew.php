@@ -30,7 +30,7 @@ class RenameExistingCreateNew implements UserImportAction
 
     private function renameExistingUser(\ilObjUser $old_user) : void
     {
-        $old_user_evento_id = trim(substr($old_user->getMatriculation(), 8));
+        $old_user_evento_id = trim(substr($old_user->getMatriculation() ?? '', 8));
         $changed_user_data['user_id'] = $old_user->getId();
         $changed_user_data['EvtID'] = $old_user_evento_id;
         $changed_user_data['new_user_info'] = $this->new_evento_user->getEventoId();
