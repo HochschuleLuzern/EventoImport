@@ -465,3 +465,18 @@ if (!$ilDB->tableExists($table_name)) {
     $ilDB->addPrimaryKey($table_name, array("evento_id"));
 }
 ?>
+<#8>
+<?php
+
+if ($ilDB->tableExists('crnhk_crevento_subs')) {
+    $ilDB->dropTable('crnhk_crevento_subs');
+}
+
+if ($ilDB->tableExists('crnhk_crevento_mas')) {
+    $ilDB->dropTable('crnhk_crevento_mas');
+}
+
+if ($ilDB->tableExists('crnhk_crevento_usrs')) {
+    $ilDB->dropTable('crnhk_crevento_usrs');
+}
+?>
