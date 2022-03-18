@@ -71,7 +71,15 @@ class IliasUserServices
 
     public function getUserIdsByEmailAddress(string $mail_address) : array
     {
-        return \ilObjUser::getUserIdsByEmail($mail_address);
+        /* The user ids from ilObjUser::getUserIdsByEmail() are returned as string instead of int. Since we use strict_type
+        int his plugin, this throws a TypeError when ever an id from this array is passed to a method which expects an argument
+        with the type of int. */
+        $ids = [];
+        foreach (\ilObjUser::getUserIdsByEmail($mail_address) as $user_id) {
+            $ids[] = (int) $user_id;
+        }
+
+        return $ids;
     }
 
     public function getUserIdByLogin(string $login_name)
