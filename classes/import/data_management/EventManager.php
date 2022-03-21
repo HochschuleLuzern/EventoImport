@@ -153,4 +153,16 @@ class EventManager
             (int) $course_object->getDefaultMemberRole()
         );
     }
+
+    public function deleteIliasEventoEvent(IliasEventoEvent $ilias_evento_event)
+    {
+        $this->event_obj_repo->removeIliasEventoEvent($ilias_evento_event);
+        $this->ilias_obj_service->removeIliasEventObject($ilias_evento_event);
+    }
+
+    public function deleteIliasParentEvent(IliasEventoParentEvent $ilias_evento_parent_event)
+    {
+        $this->event_obj_repo->removeParentEventIfItHasNoChildEvent($ilias_evento_parent_event);
+        $this->ilias_obj_service->removeIliasParentEventObject($ilias_evento_parent_event);
+    }
 }

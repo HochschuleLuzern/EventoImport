@@ -49,7 +49,7 @@ class EventAndMembershipImportTask
     public function run() : void
     {
         $this->importEvents();
-        //$this->deleteInEventoRemovedEvents();
+        $this->deleteInEventoRemovedEvents();
     }
 
     private function importEvents() : void
@@ -82,6 +82,8 @@ class EventAndMembershipImportTask
                     $this->evento_event_obj_repo->registerEventAsDelivered($result->getEventoId());
                 }
             } catch (\Exception $e) {
+                $this->logger->logException('Deleting Event', 'Exception on deleting event with evento_id ' . $ilias_evento_event->getEventoEventId()
+                    . ', exception message: ' . $e->getMessage());
             }
         }
     }

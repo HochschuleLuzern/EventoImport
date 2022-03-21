@@ -96,14 +96,14 @@ class IliasEventoEvent
         return $this->was_automatically_created;
     }
 
-    public function getStartDate()
+    public function getStartDate() : ?\DateTime
     {
-        return $this->start_date;// ? $this->start_date->getTimestamp() : null;
+        return $this->start_date;
     }
 
-    public function getEndDate()
+    public function getEndDate() : ?\DateTime
     {
-        return $this->end_date;// ? $this->start_date->getTimestamp() : null;
+        return $this->end_date;
     }
 
     public function getIliasType() : string
@@ -123,6 +123,6 @@ class IliasEventoEvent
 
     public function isSubGroupEvent() : bool
     {
-        return !is_null($this->getParentEventKey()) && ($this->getIliasType() === 'grp');
+        return !is_null($this->getParentEventKey()) && strlen($this->getParentEventKey()) > 0 && ($this->getIliasType() === 'grp');
     }
 }

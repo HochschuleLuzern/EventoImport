@@ -98,7 +98,7 @@ class EventImportActionDecider
         if ($ilias_evento_event->isSubGroupEvent()) {
             $parent_event = $this->evento_event_object_repo->getParentEventbyGroupUniqueKey($ilias_evento_event->getParentEventKey());
 
-            if (!is_null($parent_event) || $this->evento_event_object_repo->getNumberOfChildEventsForParentEventKey($parent_event) <= 1) {
+            if (!is_null($parent_event) && $this->evento_event_object_repo->getNumberOfChildEventsForParentEventKey($parent_event) <= 1) {
                 return $this->event_action_factory->deleteEventGroupWithParentEventCourse($ilias_evento_event, $parent_event);
             }
 

@@ -249,10 +249,11 @@ class IliasEventoEventObjectRepository
 
     public function getActiveEventsWithLastImportOlderThanOneWeek() : array
     {
-        $query = "SELECT " . IliasEventoEventsTblDef::COL_EVENTO_ID
+        $query = "SELECT " . IliasEventoEventsTblDef::COL_EVENTO_ID . ", " . IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED
             . " FROM " . IliasEventoEventsTblDef::TABLE_NAME
             . " WHERE " . IliasEventoEventsTblDef::COL_END_DATE . " > " . $this->db->quote(date("Y-m-d"), \ilDBConstants::T_DATETIME)
-            . " AND " . IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED . " < " . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME);
+            . " AND " . IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED . " < " . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME)
+            . " AND " . IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED . " = 1";
 
         $result = $this->db->query($query);
 
@@ -275,5 +276,19 @@ class IliasEventoEventObjectRepository
                 IliasEventoEventsTblDef::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER, $event_id]
             ]
         );
+    }
+
+    public function iliasEventoEventHasParentEvent(IliasEventoEvent $ilias_evento_event) : bool
+    {
+        $query = "SELECT " . IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY
+            . " FROM " . IliasParentEventTblDef::TABLE_NAME
+            . " WHERE " . IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY . " = " . $this->db->quote($ilias_evento_event->getParentEventKey(), \ilDBConstants::T_TEXT);
+        $result = $this->db->query($query);
+
+        if ($row = $this->db->fetchAssoc($result)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

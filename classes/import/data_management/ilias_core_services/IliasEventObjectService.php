@@ -4,6 +4,7 @@ namespace EventoImport\import\data_management\ilias_core_service;
 
 use EventoImport\import\data_management\repository\model\IliasEventoEvent;
 use EventoImport\config\DefaultEventSettings;
+use EventoImport\import\data_management\repository\model\IliasEventoParentEvent;
 
 /**
  * Class IliasEventObjectService
@@ -99,6 +100,12 @@ class IliasEventObjectService
             throw new \InvalidArgumentException('Invalid type to remove ilias event object given. Type should be "crs" or "grp". Evento ID of DB-Entry = ' . $ilias_event_to_remove->getEventoEventId());
         }
 
+        $ilias_obj->delete();
+    }
+
+    public function removeIliasParentEventObject(IliasEventoParentEvent $ilias_evento_parent_event)
+    {
+        $ilias_obj = $this->getCourseObjectForRefId($ilias_evento_parent_event->getRefId());
         $ilias_obj->delete();
     }
 

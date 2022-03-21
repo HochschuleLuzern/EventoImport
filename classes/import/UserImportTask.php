@@ -48,8 +48,8 @@ class UserImportTask
     public function run() : void
     {
         $this->importUsers();
-        //$this->convertDeletedAccounts();
-        //$this->setUserTimeLimits();
+        $this->convertDeletedAccounts();
+        $this->setUserTimeLimits();
     }
 
     private function importUsers() : void
@@ -101,6 +101,8 @@ class UserImportTask
                     $this->evento_user_repo->registerUserAsDelivered($result->getEventoId());
                 }
             } catch (\Exception $e) {
+                $this->evento_logger->logException('Deleting Event', "Exception on deleting use with evento_id $ilias_user_id"
+                    . ', exception message: ' . $e->getMessage());
             }
         }
     }

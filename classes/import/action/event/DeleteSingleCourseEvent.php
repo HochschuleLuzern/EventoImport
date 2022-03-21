@@ -28,7 +28,7 @@ class DeleteSingleCourseEvent implements EventDeleteAction
 
     public function executeAction() : void
     {
-        throw new \Exception("This action is not implemented yet");
+        $this->event_manager->deleteIliasEventoEvent($this->ilias_evento_event);
 
         $this->logger->logEventImport(
             $this->log_info_code,
