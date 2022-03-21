@@ -342,8 +342,12 @@ class CronConfigForm
         $header->setTitle($this->cp->txt(self::LANG_HEADER_EVENT_LOCATIONS));
         $form->addItem($header);
 
-        $json_settings = $this->settings->get(self::CONF_LOCATIONS); //'crevento_location_settings');
-        $locations_settings = json_decode($json_settings, true);
+        $json_settings = $this->settings->get(self::CONF_LOCATIONS, null);
+        if (!is_null($json_settings)) {
+            $locations_settings = json_decode($json_settings, true);
+        } else {
+            $locations_settings = [];
+        }
 
         $departments = new ilTextInputGUI($this->cp->txt(self::LANG_DEPARTMENTS), self::FORM_DEPARTEMTNS);
         $departments->setMulti(true, false, true);

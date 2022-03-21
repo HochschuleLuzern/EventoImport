@@ -15,7 +15,7 @@ class ImporterApiSettings
 
     public function __construct(\ilSetting $settings)
     {
-        $this->url = $settings->get(CronConfigForm::CONF_API_URI);
+        $this->url = $settings->get(CronConfigForm::CONF_API_URI, '');
         $this->api_key = $settings->get(CronConfigForm::CONF_API_AUTH_KEY, '');
         $this->api_secret = $settings->get(CronConfigForm::CONF_API_AUTH_SECRET, '');
         $this->page_size = (int) $settings->get(CronConfigForm::CONF_API_PAGE_SIZE, 500);

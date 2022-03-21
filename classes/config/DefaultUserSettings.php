@@ -45,7 +45,7 @@ class DefaultUserSettings
         $this->is_mail_public = true;
         $this->mail_incoming_type = 2;
 
-        $role_mapping = $settings->get(CronConfigForm::CONF_ROLES_ILIAS_EVENTO_MAPPING);
+        $role_mapping = $settings->get(CronConfigForm::CONF_ROLES_ILIAS_EVENTO_MAPPING, null);
         $this->evento_to_ilias_role_mapping = [];
         if (!is_null($role_mapping)) {
             $role_mapping = unserialize($role_mapping);
