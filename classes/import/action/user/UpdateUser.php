@@ -66,17 +66,15 @@ class UpdateUser implements UserImportAction
                 );
             }
         } else {
-            if (count($changed_user_data) > 0) {
-                $this->logger->logUserImport(
-                    Logger::CREVENTO_USR_UPDATED,
-                    $this->evento_user->getEventoId(),
-                    $this->evento_user->getLoginName(),
-                    [
-                        'api_data' => $this->evento_user->getDecodedApiData(),
-                        'changed_user_data' => $changed_user_data
-                    ]
-                );
-            }
+            $this->logger->logUserImport(
+                Logger::CREVENTO_USR_UPDATED,
+                $this->evento_user->getEventoId(),
+                $this->evento_user->getLoginName(),
+                [
+                    'api_data' => $this->evento_user->getDecodedApiData(),
+                    'changed_user_data' => $changed_user_data
+                ]
+            );
         }
     }
 }
