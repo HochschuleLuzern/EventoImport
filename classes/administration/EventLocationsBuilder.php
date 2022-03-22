@@ -2,7 +2,7 @@
 
 namespace EventoImport\administration;
 
-use EventoImport\config\EventLocationsRepository;
+use EventoImport\config\locations\EventLocationsRepository;
 
 class EventLocationsBuilder
 {
@@ -38,7 +38,7 @@ class EventLocationsBuilder
         return count($new_locations) - count($old_locations);
     }
 
-    public function buildCategoryObjectsForConfiguredKindAndYears(array $locations_settings) : array
+    public function buildCategoryObjectsForConfiguredKinds(array $locations_settings) : array
     {
         $repository_root_ref_id = 1;
 
@@ -51,23 +51,8 @@ class EventLocationsBuilder
                 foreach ($locations_settings['kinds'] as $kind) {
                     $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
                     if (is_null($kind_ref_id)) {
-                        $kind_ref_id = $this->createCategoryObject($department_ref_id, $kind);
+                        $this->createCategoryObject($department_ref_id, $kind);
                         $newly_created_locations[] = strip_tags("$department/$kind");
-
-                        foreach ($locations_settings['years'] as $year) {
-                            $this->createCategoryObject($kind_ref_id, $year);
-                            $newly_created_locations[] = strip_tags("$department/$kind/$year");
-                        }
-                    } else {
-                        foreach ($locations_settings['years'] as $year) {
-                            $destination_ref_id = $this->fetchRefIdForObjTitle($kind_ref_id, $year);
-                            if (is_null($destination_ref_id)) {
-                                $this->createCategoryObject($kind_ref_id, $year);
-                                $newly_created_locations[] = strip_tags("$department/$kind/$year");
-                            } else {
-                                $existing_locations[] = strip_tags("$department/$kind/$year");
-                            }
-                        }
                     }
                 }
             }
@@ -76,7 +61,7 @@ class EventLocationsBuilder
         return ['existing' => $existing_locations, 'new' => $newly_created_locations];
     }
 
-    public function getListOfMissingLocations(array $locations_settings) : array
+    public function getListOfMissingKindCategories(array $locations_settings) : array
     {
         $repository_root_ref_id = 1;
 
@@ -86,14 +71,7 @@ class EventLocationsBuilder
             if (!is_null($department_ref_id)) {
                 foreach ($locations_settings['kinds'] as $kind) {
                     $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
-                    if (!is_null($kind_ref_id)) {
-                        foreach ($locations_settings['years'] as $year) {
-                            $destination_ref_id = $this->fetchRefIdForObjTitle($kind_ref_id, $year);
-                            if (is_null($destination_ref_id)) {
-                                $missing_locations[] = strip_tags("/$department/$kind/$year");
-                            }
-                        }
-                    } else {
+                    if (is_null($kind_ref_id)) {
                         $missing_locations[] = strip_tags("/$department/$kind/*");
                     }
                 }
@@ -178,15 +156,25 @@ class EventLocationsBuilder
                 foreach ($locations_settings['kinds'] as $kind) {
                     $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
                     if ($kind_ref_id) {
-                        foreach ($locations_settings['years'] as $year) {
-                            $destination_ref_id = $this->fetchRefIdForObjTitle($kind_ref_id, $year);
-                            if ($destination_ref_id) {
-                                $this->locations_repository->addNewLocation($this->getMappedDepartmentName($department), $kind, (int) $year, $destination_ref_id);
+                        foreach ($this->tree->getChildsByType($kind_ref_id, 'cat') as $child_node) {
+                            if ($this->isPossibleYearCategory($child_node)) {
+                                $this->locations_repository->addNewLocation(
+                                    $this->getMappedDepartmentName($department),
+                                    $kind,
+                                    (int) $child_node['title'],
+                                    (int) $child_node['ref_id']
+                                );
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    private function isPossibleYearCategory(array $child_node) : bool
+    {
+        $title_as_year = (int) $child_node['title'];
+        return $child_node['type'] == 'cat' && $title_as_year > 2020 && $title_as_year < 2050;
     }
 }

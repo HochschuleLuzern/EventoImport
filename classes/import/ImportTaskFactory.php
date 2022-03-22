@@ -16,13 +16,15 @@ use EventoImport\import\data_management\ilias_core_service\IliasEventObjectServi
 use EventoImport\import\data_management\MembershipManager;
 use EventoImport\import\data_management\repository\IliasEventoEventMembershipRepository;
 use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
-use EventoImport\config\EventLocationsRepository;
+use EventoImport\config\locations\EventLocationsRepository;
 use EventoImport\communication\EventoAdminImporter;
 use EventoImport\import\data_management\ilias_core\MembershipablesEventInTreeSeeker;
 use EventoImport\config\EventLocations;
 use EventoImport\import\data_management\EventManager;
 use EventoImport\import\data_management\UserManager;
 use EventoImport\config\ConfigurationManager;
+use EventoImport\config\locations\RepositoryLocationSeeker;
+use EventoImport\config\locations\EventLocationCategoryBuilder;
 
 class ImportTaskFactory
 {
@@ -74,7 +76,11 @@ class ImportTaskFactory
         $user_settings = $this->config_manager->getDefaultUserConfiguration();
         $event_obj_service = new IliasEventObjectService($event_settings, $this->db, $this->tree);
         $evento_event_obj_repo = new IliasEventoEventObjectRepository($this->db);
-        $event_locations = new EventLocations(new EventLocationsRepository($this->db));
+        $event_locations = new EventLocations(
+            new EventLocationsRepository($this->db),
+            new RepositoryLocationSeeker($this->tree, 1),
+            new EventLocationCategoryBuilder()
+        );
 
         return new EventAndMembershipImportTask(
             $event_importer,

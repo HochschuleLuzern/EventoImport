@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace EventoImport\config;
+namespace EventoImport\config\locations;
 
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\db\IliasEventLocationsTblDef;

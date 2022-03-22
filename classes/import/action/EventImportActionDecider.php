@@ -8,7 +8,7 @@ use EventoImport\import\data_management\repository\model\IliasEventoEvent;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\event\EventImportAction;
 use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
-use EventoImport\config\EventLocationsRepository;
+use EventoImport\config\locations\EventLocationsRepository;
 use EventoImport\config\EventLocations;
 
 class EventImportActionDecider
@@ -55,7 +55,7 @@ class EventImportActionDecider
 
     protected function determineActionForNewEventsWithCreateFlag(EventoEvent $evento_event) : EventImportAction
     {
-        $destination_ref_id = $this->event_locations->getLocationRefIdForEventoEvent($evento_event);
+        $destination_ref_id = $this->event_locations->getLocationRefIdForEventoEvent($evento_event, true);
 
         if (is_null($destination_ref_id)) {
             return $this->event_action_factory->reportUnknownLocationForEvent($evento_event);

@@ -362,13 +362,6 @@ class CronConfigForm
             $kinds->setValue($locations_settings[self::CONF_KEY_KINDS]);
         }
         $form->addItem($kinds);
-
-        $years = new ilTextInputGUI($this->cp->txt(self::LANG_YEARS), self::FORM_YEARS);
-        $years->setMulti(true, false, true);
-        if (isset($locations_settings[self::CONF_KEY_YEARS]) && is_array($locations_settings[self::CONF_KEY_YEARS])) {
-            $years->setValue($locations_settings[self::CONF_KEY_YEARS]);
-        }
-        $form->addItem($years);
     }
 
     public function fillFormWithEventConfig(ilPropertyFormGUI $form)
@@ -552,13 +545,11 @@ class CronConfigForm
     {
         $settings_list = array(
             self::CONF_KEY_DEPARTMENTS => [],
-            self::CONF_KEY_KINDS => [],
-            self::CONF_KEY_YEARS => []
+            self::CONF_KEY_KINDS => []
         );
 
         $settings_list[self::CONF_KEY_DEPARTMENTS] = $this->purifyLocationSettingsList($a_form->getInput(self::FORM_DEPARTEMTNS));
         $settings_list[self::CONF_KEY_KINDS] = $this->purifyLocationSettingsList($a_form->getInput(self::FORM_KINDS));
-        $settings_list[self::CONF_KEY_YEARS] = $this->purifyLocationSettingsList($a_form->getInput(self::FORM_YEARS));
 
         return json_encode($settings_list);
     }

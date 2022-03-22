@@ -46,7 +46,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 );
                 $api_tester_html = $api_tester_gui->getApiTesterFormAsString();
 
-                $locations_gui = new EventLocationsAdminGUI($this, $this->settings, new \EventoImport\config\EventLocationsRepository($this->db), $this->ctrl, $this->ui_services);
+                $locations_gui = new EventLocationsAdminGUI($this, $this->settings, new \EventoImport\config\locations\EventLocationsRepository($this->db), $this->ctrl, $this->ui_services);
                 $locations_html = $locations_gui->getEventLocationsPanelHTML();
 
                 $this->tpl->setContent($api_tester_html . $locations_html);
@@ -56,7 +56,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $json_settings = $this->settings->get('crevento_location_settings');
                 $locations_settings = json_decode($json_settings, true);
 
-                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\EventLocationsRepository($this->db), $this->tree);
+                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\locations\EventLocationsRepository($this->db), $this->tree);
                 $diff = $locations_builder->rebuildRepositoryLocationsTable($locations_settings);
 
                 \ilUtil::sendSuccess("Event Locats reloaded successfully. Added $diff new locations", true);
@@ -67,8 +67,8 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $json_settings = $this->settings->get('crevento_location_settings');
                 $locations_settings = json_decode($json_settings, true);
 
-                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\EventLocationsRepository($this->db), $this->tree);
-                $location_lists = $locations_builder->getListOfMissingLocations($locations_settings);
+                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\locations\EventLocationsRepository($this->db), $this->tree);
+                $location_lists = $locations_builder->getListOfMissingKindCategories($locations_settings);
 
                 $f = $this->ui_services->factory();
 
@@ -103,8 +103,8 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $json_settings = $this->settings->get('crevento_location_settings');
                 $locations_settings = json_decode($json_settings, true);
 
-                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\EventLocationsRepository($this->db), $this->tree);
-                $location_lists = $locations_builder->buildCategoryObjectsForConfiguredKindAndYears($locations_settings);
+                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\locations\EventLocationsRepository($this->db), $this->tree);
+                $location_lists = $locations_builder->buildCategoryObjectsForConfiguredKinds($locations_settings);
 
                 $ui_comps = [];
                 foreach ($location_lists as $title => $list) {

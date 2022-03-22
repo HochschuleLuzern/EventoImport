@@ -84,7 +84,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         if (!isset(self::$cron_job_instances)) {
             $settings = new ilSetting('crevento');
             $cron_config = new CronConfigForm($settings, $this, $rbac);
-            $config_manager = new ConfigurationManager($cron_config, $settings, $db);
+            $config_manager = new ConfigurationManager($cron_config, $settings, $db, $tree);
             $import_factory = new ImportTaskFactory($config_manager, $db, $tree, $rbac);
             $logger = new Logger($db);
 

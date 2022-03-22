@@ -2,6 +2,10 @@
 
 namespace EventoImport\config;
 
+use EventoImport\config\locations\EventLocationsRepository;
+use EventoImport\config\locations\RepositoryLocationSeeker;
+use EventoImport\config\locations\EventLocationCategoryBuilder;
+
 class ConfigurationManager
 {
     private CronConfigForm $cron_config_form;
@@ -13,7 +17,7 @@ class ConfigurationManager
     private DefaultUserSettings $default_user_settings;
     private EventLocations $event_locations;
 
-    public function __construct(CronConfigForm $cron_config_form, \ilSetting $settings, \ilDBInterface $db)
+    public function __construct(CronConfigForm $cron_config_form, \ilSetting $settings, \ilDBInterface $db, \ilTree $tree)
     {
         $this->cron_config_form = $cron_config_form;
         $this->settings = $settings;
@@ -23,7 +27,9 @@ class ConfigurationManager
         $this->default_event_settings = new DefaultEventSettings($this->settings);
         $this->default_user_settings = new DefaultUserSettings($this->settings);
         $this->event_locations = new EventLocations(
-            new EventLocationsRepository($this->db)
+            new EventLocationsRepository($this->db),
+            new RepositoryLocationSeeker($tree, 1),
+            new EventLocationCategoryBuilder()
         );
     }
 

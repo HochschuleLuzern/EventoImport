@@ -27,7 +27,7 @@ class EventManager
         $course_object = $this->ilias_obj_service->createNewCourseObject(
             $evento_event->getName(),
             $evento_event->getDescription(),
-            $this->event_locations->getLocationRefIdForEventoEvent($evento_event),
+            $this->event_locations->getLocationRefIdForEventoEvent($evento_event, false),
         );
 
         $ilias_evento_event = $this->eventoEventAndIliasObjToIliasEventoEvent($evento_event, $course_object);
@@ -42,7 +42,7 @@ class EventManager
         $course_object = $this->ilias_obj_service->createNewCourseObject(
             $evento_event->getGroupName(),
             $evento_event->getDescription(),
-            $this->event_locations->getLocationRefIdForEventoEvent($evento_event)
+            $this->event_locations->getLocationRefIdForEventoEvent($evento_event, false)
         );
 
         $parent_event = $this->eventoEventAndIliasObjToParentEvent($evento_event, $course_object);
