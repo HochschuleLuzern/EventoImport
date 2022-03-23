@@ -73,6 +73,15 @@ class UserImportTask
 
                 $action = $this->user_import_action_decider->determineImportAction($evento_user);
                 $action->executeAction();
+            } catch (\ilEventoImportApiDataException $e) {
+                $data = $e->getApiData();
+                if (isset($data[EventoUser::JSON_ID])) {
+                    $id = $data[EventoUser::JSON_ID];
+                    $evento_id_msg = "Evento ID: $id";
+                } else {
+                    $evento_id_msg = "Evento ID not given";
+                }
+                $this->evento_logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());
             } catch (\Exception $e) {
                 $this->evento_logger->logException('User Import', $e->getMessage());
             }

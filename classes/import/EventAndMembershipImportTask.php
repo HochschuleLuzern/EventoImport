@@ -96,8 +96,18 @@ class EventAndMembershipImportTask
 
                 $action = $this->event_import_action_decider->determineImportAction($evento_event);
                 $action->executeAction();
+            } catch (\ilEventoImportApiDataException $e) {
+                $data = $e->getApiData();
+                if (isset($data[EventoEvent::JSON_ID])) {
+                    $id = $data[EventoEvent::JSON_ID];
+                    $evento_id_msg = "Evento ID: $id";
+                } else {
+                    $evento_id_msg = "Evento ID not given";
+                }
+
+                $this->logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());
             } catch (\Exception $e) {
-                $this->logger->logException('Importing Event', $e->getMessage());
+                $this->logger->logException(get_class($e) . ' - Importing Event', $e->getMessage());
             }
         }
     }

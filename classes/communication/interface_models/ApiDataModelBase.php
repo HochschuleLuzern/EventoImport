@@ -6,7 +6,7 @@ abstract class ApiDataModelBase
 {
     use JSONDataValidator;
 
-    protected array $decoded_api_data;
+    protected array $decoded_api_data = [];
 
     protected function checkErrorsAndMaybeThrowException()
     {
