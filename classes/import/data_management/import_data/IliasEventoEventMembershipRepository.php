@@ -46,13 +46,13 @@ class IliasEventoEventMembershipRepository
 
         $users = [];
         while ($row = $this->db->fetchAssoc($result)) {
-            $users[] = new IliasEventoUser($row['evento_user_id'], $row['ilias_user_id'], $row['account_type']);
+            $users[] = new IliasEventoUser((int) $row['evento_user_id'], (int) $row['ilias_user_id'], $row['account_type']);
         }
 
         return $users;
     }
 
-    public function fetchIliasEventoUsersForEvent(int $evento_event_id) : array
+    public function fetchIliasEventoUserIdsForEvent(int $evento_event_id) : array
     {
         $query = 'SELECT usr.' . IliasEventoUserTblDef::COL_EVENTO_ID . ' AS evento_user_id, usr.' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . ' AS ilias_user_id'
             . ' FROM ' . IliasEventoEventMembershipsTblDef::TABLE_NAME . ' AS mem'
@@ -63,7 +63,7 @@ class IliasEventoEventMembershipRepository
 
         $users = [];
         while ($row = $this->db->fetchAssoc($result)) {
-            $users[] = $row['evento_user_id'];// new IliasEventoUser($row['evento_user_id'], $row['ilias_user_id']);
+            $users[] = (int) $row['evento_user_id'];// new IliasEventoUser($row['evento_user_id'], $row['ilias_user_id']);
         }
 
         return $users;

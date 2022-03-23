@@ -99,13 +99,13 @@ class MembershipManager
 
     private function getUsersToRemove(EventoEvent $imported_event) : array
     {
-        $from_import_subscribed_members = $this->membership_repo->fetchIliasEventoUsersForEvent($imported_event->getEventoId());
+        $from_import_subscribed_members = $this->membership_repo->fetchIliasEventoUserIdsForEvent($imported_event->getEventoId());
 
         $user_ids_to_remove = [];
 
         foreach ($from_import_subscribed_members as $member_id) {
             if (!$this->isUserInCurrentImport((int) $member_id, $imported_event)) {
-                $ilias_evento_user = $this->user_manager->getIliasEventoUserByEventoId($member_id);
+                $ilias_evento_user = $this->user_manager->getIliasEventoUserByEventoId((int) $member_id);
                 if (!is_null($ilias_evento_user)) {
                     $user_ids_to_remove[] = $ilias_evento_user;
                 }
