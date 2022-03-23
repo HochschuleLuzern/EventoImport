@@ -16,7 +16,7 @@ class MembershipablesEventInTreeSeeker
     public function recursiveSearchSubGroups(int $parent_ref_id, array $sub_group_list, bool $search_below_groups) : array
     {
         foreach ($this->tree->getChilds($parent_ref_id) as $child_node) {
-            $child_ref_id = $child_node['ref_id'];
+            $child_ref_id = (int) $child_node['ref_id'];
             $type = $child_node['type'];
             if ($type == 'grp') {
                 $sub_group_list[$child_ref_id] = $child_ref_id;
@@ -86,10 +86,10 @@ class MembershipablesEventInTreeSeeker
         foreach ($this->tree->getChilds($parent_ref_id) as $child) {
             $type = $child['type'];
             if ($type == 'grp') {
-                $sub_objects[] = $child['ref_id'];
+                $sub_objects[] = (int) $child['ref_id'];
             }
 
-            $sub_objects = $this->getRefIdsOfSubMembershipables($child['ref_id'], $sub_objects, $current_depth);
+            $sub_objects = $this->getRefIdsOfSubMembershipables((int) $child['ref_id'], $sub_objects, $current_depth);
         }
 
         return $sub_objects;
