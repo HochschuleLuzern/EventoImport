@@ -65,16 +65,15 @@ class MembershipablesEventInTreeSeeker
                 $parent_membershipable_objs[] = $current_obj_ref;
             } elseif ($type == 'cat' || $type == 'root') {
                 $has_found_super_parent = true;
-            } else if($type == "") {
+            } elseif ($type == "") {
                 throw new \ilException("Parent event of $src_ref_id, which has the ref id $current_obj_ref seems not to have a type declared");
             }
 
             if ($deadlock_prevention++ > 15) {
                 throw new \ilException("Event with the ref_id of " . $src_ref_id . " seems to have either over 15 parent objects or there is a circular connection in the Repository-Tree");
-            } else if($current_obj_ref <= 1) {
+            } elseif ($current_obj_ref <= 1) {
                 throw new \ilException("Event with the ref_id of $src_ref_id seems to be either in root or has no category above it");
             }
-
         } while (!$has_found_super_parent);
 
         return $parent_membershipable_objs;

@@ -19,6 +19,7 @@ namespace EventoImport\import;
 
 use ilDBInterface;
 use ilLoggerFactory;
+use EventoImport\communication\api_models\EventoEvent;
 
 /**
  * Class ilEventoImportLogger
@@ -145,6 +146,25 @@ class Logger
             return;
         }
 
+        /*
+         * Split away the employee-list and student-list from imported_data if the array key is set.
+         * This is necessary, since the serialization of imported_data can be over 4000 chars (max. string length) with long user lists.
+         * The alternative would be to convert the column from varchar to clob. But this approach should work pretty good as well.
+         */
+        if (isset($import_data[EventoEvent::JSON_EMPLOYEES])) {
+            $employees_list = $import_data[EventoEvent::JSON_EMPLOYEES];
+            unset($import_data[EventoEvent::JSON_EMPLOYEES]);
+        } else {
+            $employees_list = [];
+        }
+
+        if (isset($import_data[EventoEvent::JSON_STUDENTS])) {
+            $students_list = $import_data[EventoEvent::JSON_STUDENTS];
+            unset($import_data[EventoEvent::JSON_STUDENTS]);
+        } else {
+            $students_list = [];
+        }
+
         $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_EVENTS . " WHERE evento_id = " . $this->ilDB->quote(
             $evento_id,
             \ilDBConstants::T_INTEGER
@@ -159,6 +179,8 @@ class Logger
                     'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                    'last_import_employees' => [\ilDBConstants::T_TEXT, serialize($employees_list)],
+                    'last_import_students' => [\ilDBConstants::T_TEXT, serialize($students_list)]
                 ]
             );
         } else {
@@ -169,6 +191,8 @@ class Logger
                     'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                    'last_import_employees' => [\ilDBConstants::T_TEXT, serialize($employees_list)],
+                    'last_import_students' => [\ilDBConstants::T_TEXT, serialize($students_list)]
                 ],
                 [
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]

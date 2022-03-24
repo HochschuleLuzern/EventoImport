@@ -480,3 +480,29 @@ if ($ilDB->tableExists('crnhk_crevento_usrs')) {
     $ilDB->dropTable('crnhk_crevento_usrs');
 }
 ?>
+<#9>
+<?php
+if (!$ilDB->tableColumnExists('crevento_log_events', 'last_import_employees')) {
+    $ilDB->addTableColumn(
+        'crevento_log_events',
+        'last_import_employees',
+        array(
+            'type' => 'text',
+            'length' => 4000,
+            'notnull' => false
+        )
+    );
+}
+
+if (!$ilDB->tableColumnExists('crevento_log_events', 'last_import_students')) {
+    $ilDB->addTableColumn(
+        'crevento_log_events',
+        'last_import_students',
+        array(
+            'type' => 'text',
+            'length' => 4000,
+            'notnull' => false
+        )
+    );
+}
+?>

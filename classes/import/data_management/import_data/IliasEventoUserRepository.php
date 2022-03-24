@@ -65,7 +65,7 @@ class IliasEventoUserRepository
 
     public function getIliasEventoUserByEventoId(int $evento_id) : ?IliasEventoUser
     {
-        $query = 'SELECT ' . IliasEventoUserTblDef::COL_EVENTO_ID . ', ' .  IliasEventoUserTblDef::COL_ILIAS_USER_ID . ', ' . IliasEventoUserTblDef::COL_ACCOUNT_TYPE
+        $query = 'SELECT ' . IliasEventoUserTblDef::COL_EVENTO_ID . ', ' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . ', ' . IliasEventoUserTblDef::COL_ACCOUNT_TYPE
             . ' FROM ' . IliasEventoUserTblDef::TABLE_NAME
             . ' WHERE ' . IliasEventoUserTblDef::COL_EVENTO_ID . '=' . $this->db->quote($evento_id, \ilDBConstants::T_INTEGER);
         $result = $this->db->query($query);
