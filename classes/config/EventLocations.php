@@ -59,7 +59,7 @@ class EventLocations
                 $event_year
             );
         } catch (\ilEventoImportEventLocationNotFoundException $e) {
-            if ($e->getCode() == \ilEventoImportEventLocationNotFoundException::MISSING_YEAR && $create_year_cat_if_not_existing) {
+            if ($create_year_cat_if_not_existing) {
                 $ref_id = $this->tryToCreateLocationForEventoEvent(
                     $evento_event->getDepartment(),
                     $evento_event->getKind(),

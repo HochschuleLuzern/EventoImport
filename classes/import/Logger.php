@@ -67,7 +67,7 @@ class Logger
     const CREVENTO_MA_SINGLE_EVENT_TO_MULTI_GROUP_CONVERTED = 233;
 
     // Errors
-    const CREVENTO_MA_EVENT_LOCATION_UNKNOWN = 233; // New code
+    const CREVENTO_MA_EVENT_LOCATION_UNKNOWN = 240; // New code
 
     /**************************
      * User Codes

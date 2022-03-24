@@ -46,7 +46,7 @@ class EventImportActionDecider
     protected function determineActionForExistingIliasEventoEvent(EventoEvent $evento_event, IliasEventoEvent $ilias_event) : EventImportAction
     {
         // In this case, there were suddenly added similar events (at least 1) in Evento which made this event to a multi group event
-        if ($evento_event->hasGroupMemberFlag() && is_null($ilias_event->getParentEventKey())) {
+        if ($ilias_event->wasAutomaticallyCreated() && $evento_event->hasGroupMemberFlag() && is_null($ilias_event->getParentEventKey())) {
             return $this->event_action_factory->convertSingleEventToMultiGroupEvent($evento_event, $ilias_event);
         }
         
