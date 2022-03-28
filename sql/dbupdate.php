@@ -436,8 +436,8 @@ $table_name = 'crevento_log_events';
 if (!$ilDB->tableExists($table_name)) {
     $fields = array(
         'evento_id' => array(
-            'type' => 'text',
-            'length' => 50,
+            'type' => 'integer',
+            'length' => 8,
             'notnull' => true
         ),
         'ref_id' => array(
