@@ -298,10 +298,10 @@ class CronConfigForm
         $form->addItem($section);
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
-        $globale_roles_settings = $this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, '');
-        $role_mapping = [];
-        if ($globale_roles_settings) {
-            $role_mapping = unserialize($globale_roles_settings);
+        $globale_roles_settings = $this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, null);
+        $role_mapping = !is_null($globale_roles_settings) ? json_decode($globale_roles_settings, true) : null;
+        if(is_null($role_mapping) || !is_array($role_mapping)) {
+            $role_mapping = [];
         }
 
         foreach ($global_roles as $role_id) {
@@ -475,7 +475,7 @@ class CronConfigForm
             }
         }
         if ($save_global_role_mapping) {
-            $this->settings->set(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, serialize($role_mapping));
+            $this->settings->set(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, json_encode($role_mapping));
         }
 
         return $form_input_correct;

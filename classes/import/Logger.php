@@ -110,7 +110,7 @@ class Logger
                 [
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id],
                     'usrname' => [\ilDBConstants::T_TEXT, $username],
-                    'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
+                    'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
                 ]
@@ -120,7 +120,7 @@ class Logger
                 self::TABLE_LOG_USERS,
                 [
                     'usrname' => [\ilDBConstants::T_TEXT, $username],
-                    'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
+                    'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
                 ],
@@ -176,11 +176,11 @@ class Logger
                 [
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id],
                     'ref_id' => [\ilDBConstants::T_INTEGER, $ref_id],
-                    'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
+                    'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                    'last_import_employees' => [\ilDBConstants::T_TEXT, serialize($employees_list)],
-                    'last_import_students' => [\ilDBConstants::T_TEXT, serialize($students_list)]
+                    'last_import_employees' => [\ilDBConstants::T_TEXT, json_encode($employees_list)],
+                    'last_import_students' => [\ilDBConstants::T_TEXT, json_encode($students_list)]
                 ]
             );
         } else {
@@ -188,11 +188,11 @@ class Logger
                 self::TABLE_LOG_EVENTS,
                 [
                     'ref_id' => [\ilDBConstants::T_INTEGER, $ref_id],
-                    'last_import_data' => [\ilDBConstants::T_TEXT, serialize($import_data)],
+                    'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                    'last_import_employees' => [\ilDBConstants::T_TEXT, serialize($employees_list)],
-                    'last_import_students' => [\ilDBConstants::T_TEXT, serialize($students_list)]
+                    'last_import_employees' => [\ilDBConstants::T_TEXT, json_encode($employees_list)],
+                    'last_import_students' => [\ilDBConstants::T_TEXT, json_encode($students_list)]
                 ],
                 [
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
