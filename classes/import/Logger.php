@@ -151,16 +151,16 @@ class Logger
          * This is necessary, since the serialization of imported_data can be over 4000 chars (max. string length) with long user lists.
          * The alternative would be to convert the column from varchar to clob. But this approach should work pretty good as well.
          */
-        if (isset($import_data[EventoEvent::JSON_EMPLOYEES])) {
-            $employees_list = $import_data[EventoEvent::JSON_EMPLOYEES];
-            unset($import_data[EventoEvent::JSON_EMPLOYEES]);
+        if (isset($import_data['api_data']) && isset($import_data['api_data'][EventoEvent::JSON_EMPLOYEES])) {
+            $employees_list = $import_data['api_data'][EventoEvent::JSON_EMPLOYEES];
+            unset($import_data['api_data'][EventoEvent::JSON_EMPLOYEES]);
         } else {
             $employees_list = [];
         }
 
-        if (isset($import_data[EventoEvent::JSON_STUDENTS])) {
-            $students_list = $import_data[EventoEvent::JSON_STUDENTS];
-            unset($import_data[EventoEvent::JSON_STUDENTS]);
+        if (isset($import_data['api_data']) && isset($import_data['api_data'][EventoEvent::JSON_STUDENTS])) {
+            $students_list = $import_data['api_data'][EventoEvent::JSON_STUDENTS];
+            unset($import_data['api_data'][EventoEvent::JSON_STUDENTS]);
         } else {
             $students_list = [];
         }

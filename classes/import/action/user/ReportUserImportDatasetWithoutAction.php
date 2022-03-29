@@ -22,7 +22,7 @@ class ReportUserImportDatasetWithoutAction extends ReportDatasetWithoutAction im
             $this->log_info_code,
             $this->evento_id,
             $this->user_name,
-            $this->log_data
+            ['api_data' => $this->log_data]
         );
     }
 }
