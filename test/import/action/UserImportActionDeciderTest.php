@@ -11,7 +11,7 @@ use EventoImport\import\data_management\repository\IliasEventoUserRepository;
 use EventoImport\communication\api_models\EventoEvent;
 use EventoImport\import\action\UserImportActionDecider;
 
-class UserActionDeciderTest extends TestCase
+class UserImportActionDeciderTest extends TestCase
 {
     /**
      * @test
