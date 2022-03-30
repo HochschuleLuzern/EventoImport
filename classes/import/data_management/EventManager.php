@@ -165,4 +165,29 @@ class EventManager
         $this->event_obj_repo->removeParentEventIfItHasNoChildEvent($ilias_evento_parent_event);
         $this->ilias_obj_service->removeIliasParentEventObject($ilias_evento_parent_event);
     }
+
+    public function searchEventableObjectForEventoEvent(EventoEvent $evento_event) : ?\ilContainer
+    {
+        return $this->ilias_obj_service->searchEventableIliasObjectByTitle($evento_event->getName());
+    }
+
+    public function searchIliasEventoEventByEventoEvent(EventoEvent $evento_event) : ?IliasEventoEvent
+    {
+        return $this->event_obj_repo->getEventByEventoId($evento_event->getEventoId());
+    }
+
+    public function searchParentEventForEventoEvent(EventoEvent $evento_event) : ?IliasEventoParentEvent
+    {
+        return $this->event_obj_repo->getParentEventbyGroupUniqueKey($evento_event->getGroupUniqueKey());
+    }
+
+    public function getParentEventForIliasEventoEvent(IliasEventoEvent $ilias_evento_event)
+    {
+        return $this->event_obj_repo->getParentEventbyGroupUniqueKey($ilias_evento_event->getParentEventKey());
+    }
+
+    public function getNumberOfChildEventsForParentEvent(IliasEventoParentEvent $parent_event) : int
+    {
+        return $this->event_obj_repo->getNumberOfChildEventsForParentEventKey($parent_event);
+    }
 }

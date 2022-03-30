@@ -81,18 +81,18 @@ class ImportTaskFactory
             new RepositoryLocationSeeker($this->tree, 1),
             new EventLocationCategoryBuilder()
         );
+        $event_manager = new EventManager(
+            $event_obj_service,
+            $evento_event_obj_repo,
+            $event_locations
+        );
 
         return new EventAndMembershipImportTask(
             $event_importer,
             new EventImportActionDecider(
-                $event_obj_service,
-                $evento_event_obj_repo,
+                $event_manager,
                 new EventActionFactory(
-                    new EventManager(
-                        $event_obj_service,
-                        $evento_event_obj_repo,
-                        $event_locations
-                    ),
+                    $event_manager,
                     new MembershipManager(
                         new MembershipablesEventInTreeSeeker($this->tree),
                         new IliasEventoEventMembershipRepository($this->db),

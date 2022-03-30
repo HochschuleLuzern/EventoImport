@@ -24,10 +24,10 @@ class EventImportActionDeciderTest extends TestCase
             ]
         );
 
-        $obj_repo = $this->createMock(IliasEventoEventObjectRepository::class);
-        $obj_repo->expects($this->once())
-                      ->method('getEventByEventoId')
-                      ->with($this->equalTo($evento_id))
+        $event_manager = $this->createMock(EventManager::class);
+        $event_manager->expects($this->once())
+                      ->method('searchIliasEventoEventByEventoEvent')
+                      ->with($this->equalTo($evento_event))
                       ->willReturn(null);
 
         $create_action = $this->createMock(CreateSingleEvent::class);
@@ -41,8 +41,7 @@ class EventImportActionDeciderTest extends TestCase
             ->willReturn(123);
 
         $sut = new EventImportActionDecider(
-            $this->createMock(IliasEventObjectService::class),
-            $obj_repo,
+            $event_manager,
             $factory,
             $locations
         );
@@ -56,6 +55,7 @@ class EventImportActionDeciderTest extends TestCase
 
     public function testDetermineImportAction_createEventInParentEvent()
     {
+        // Arrange
         $evento_event = new \MockEventoEvent(
             [
                 \MockEventoEvent::JSON_IS_CREATE_COURSE_FLAG => true,
