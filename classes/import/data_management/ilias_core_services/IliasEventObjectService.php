@@ -77,6 +77,8 @@ class IliasEventObjectService
 
         $this->createContainerObject($group_object, $title, $description, $destination_ref_id);
 
+        $group_object->updateGroupType(GRP_TYPE_CLOSED);
+
         return $group_object;
     }
 
