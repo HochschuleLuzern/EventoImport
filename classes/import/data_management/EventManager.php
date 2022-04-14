@@ -14,12 +14,14 @@ class EventManager
     private IliasEventObjectService $ilias_obj_service;
     private IliasEventoEventObjectRepository $event_obj_repo;
     private EventLocations $event_locations;
+    private MembershipManager $membership_manager;
 
-    public function __construct(IliasEventObjectService $ilias_obj_service, IliasEventoEventObjectRepository $event_repo, EventLocations $event_locations)
+    public function __construct(IliasEventObjectService $ilias_obj_service, IliasEventoEventObjectRepository $event_repo, EventLocations $event_locations, MembershipManager $membership_manager)
     {
         $this->ilias_obj_service = $ilias_obj_service;
         $this->event_obj_repo = $event_repo;
         $this->event_locations = $event_locations;
+        $this->membership_manager = $membership_manager;
     }
 
     public function createNewSingleCourseEvent(EventoEvent $evento_event) : IliasEventoEvent
@@ -181,7 +183,7 @@ class EventManager
         return $this->event_obj_repo->getParentEventbyGroupUniqueKey($evento_event->getGroupUniqueKey());
     }
 
-    public function getParentEventForIliasEventoEvent(IliasEventoEvent $ilias_evento_event)
+    public function getParentEventForIliasEventoEvent(IliasEventoEvent $ilias_evento_event) : ?IliasEventoParentEvent
     {
         return $this->event_obj_repo->getParentEventbyGroupUniqueKey($ilias_evento_event->getParentEventKey());
     }
@@ -189,5 +191,10 @@ class EventManager
     public function getNumberOfChildEventsForParentEvent(IliasEventoParentEvent $parent_event) : int
     {
         return $this->event_obj_repo->getNumberOfChildEventsForParentEventKey($parent_event);
+    }
+
+    public function isIliasObjectToIliasEventoEventStillExisting(IliasEventoEvent $ilias_evento_event) : bool
+    {
+        return \ilObject::_exists($ilias_evento_event->getRefId(), $ilias_evento_event->getIliasType());
     }
 }

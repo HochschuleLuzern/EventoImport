@@ -111,4 +111,11 @@ class IliasEventoEventMembershipRepository
             . " AND " . IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID . " = " . $this->db->quote($evento_user_id, \ilDBConstants::T_INTEGER);
         $this->db->manipulate($query);
     }
+
+    public function removeAllMembershipsForEventoId(int $event_id)
+    {
+        $query = "DELETE FROM " . IliasEventoEventMembershipsTblDef::TABLE_NAME
+            . " WHERE " . IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID . " = " . $this->db->quote($event_id, \ilDBConstants::T_INTEGER);
+        $this->db->manipulate($query);
+    }
 }

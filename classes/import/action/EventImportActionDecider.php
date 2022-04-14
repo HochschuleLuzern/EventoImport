@@ -49,6 +49,10 @@ class EventImportActionDecider
             return $this->event_action_factory->convertSingleEventToMultiGroupEvent($evento_event, $ilias_event);
         }
 
+        if (!$this->event_manager->isIliasObjectToIliasEventoEventStillExisting($ilias_event)) {
+            return $this->event_action_factory->unmarkDeletedIliasObject($evento_event, $ilias_event);
+        }
+
         return $this->event_action_factory->updateExistingEvent($evento_event, $ilias_event);
     }
 

@@ -294,4 +294,9 @@ class MembershipManager
 
         return $this->participant_object_cache[$ref_id];
     }
+
+    public function removeEventoIliasMembershipConnectionsForEvent(IliasEventoEvent $ilias_event)
+    {
+        $this->membership_repo->removeAllMembershipsForEventoId($ilias_event->getEventoEventId());
+    }
 }

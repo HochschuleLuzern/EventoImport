@@ -91,6 +91,17 @@ class EventActionFactory
         );
     }
 
+    public function unmarkDeletedIliasObject(EventoEvent $evento_event, IliasEventoEvent $ilias_event) : UnmarkDeletedIliasObject
+    {
+        return new UnmarkDeletedIliasObject(
+            $evento_event,
+            $ilias_event,
+            $this->event_manager,
+            $this->membership_manager,
+            $this->logger
+        );
+    }
+
     public function reportNonIliasEvent(EventoEvent $evento_event) : ReportEventImportDatasetWithoutAction
     {
         return new ReportEventImportDatasetWithoutAction(
