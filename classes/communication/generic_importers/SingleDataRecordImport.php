@@ -13,11 +13,13 @@ trait SingleDataRecordImport
         );
 
         $nr_of_tries = 0;
+        $plain_response = null;
         do {
             try {
                 $plain_response = $data_source->sendRequest($method_name, $params);
 
-                $request_was_successful = $this->requestWasSuccessful($plain_response);
+                // If request for a specific data record was not successful, an exception will be thrown
+                $request_was_successful = true;
             } catch (\Exception $e) {
                 $request_was_successful = false;
             } finally {

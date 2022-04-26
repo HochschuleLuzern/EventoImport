@@ -18,7 +18,8 @@ trait DataSetImport
                 $response = new EventoImportDataSetResponse($json_response_decoded);
                 $request_was_successful = $response->getSuccess();
             } catch (\ilEventoImportApiDataException $e) {
-                throw $e;
+                global $DIC;
+                $DIC->logger()->root()->log('Error in API-Response for requested data set: ' . $e->getMessage());
             } catch (\JsonException $e) {
                 if (!isset($json_response)) {
                     $json_response = '';

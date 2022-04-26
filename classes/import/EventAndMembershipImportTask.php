@@ -48,7 +48,7 @@ class EventAndMembershipImportTask
 
     public function run() : void
     {
-        //$this->importEvents();
+        $this->importEvents();
         $this->deleteInEventoRemovedEvents();
     }
 
