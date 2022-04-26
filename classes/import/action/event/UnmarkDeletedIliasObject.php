@@ -1,4 +1,4 @@
-<?php declare(strict_type=1);
+<?php declare(strict_types=1);
 
 namespace EventoImport\import\action\event;
 
@@ -24,8 +24,7 @@ class UnmarkDeletedIliasObject implements EventImportAction
         EventManager $event_manager,
         MembershipManager $membership_manager,
         Logger $logger
-    )
-    {
+    ) {
         $this->evento_event = $evento_event;
         $this->ilias_event = $ilias_event;
         $this->event_manager = $event_manager;
