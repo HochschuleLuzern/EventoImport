@@ -80,6 +80,7 @@ class EventAndMembershipImportTask
                     $action->executeAction();
                 } else {
                     $this->evento_event_obj_repo->registerEventAsDelivered($result->getEventoId());
+                    $this->logger->logException('Deleting Event', 'Event which was not delivered during "Import Events" can be requested by ID. Therefore it still exsits. Evento ID = ' . $ilias_evento_event->getEventoEventId());
                 }
             } catch (\Exception $e) {
                 $this->logger->logException('Deleting Event', 'Exception on deleting event with evento_id ' . $ilias_evento_event->getEventoEventId()

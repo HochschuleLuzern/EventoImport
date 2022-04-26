@@ -139,6 +139,7 @@ class MembershipManager
                     0
                 );
             }
+            $this->membership_repo->removeMembershipIfItExists($imported_event->getEventoId(), $user_to_remove->getEventoUserId());
 
             $this->removeUserFromSubMembershipables($user_to_remove, $sub_membershipable_objs);
         }
@@ -147,23 +148,23 @@ class MembershipManager
     private function syncMembershipsWithParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event, array $parent_events) : void
     {
         // Add users to main event
-        $participants_obj = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
-        $this->addUsersToMembershipableObject($participants_obj, $imported_event, IL_GRP_ADMIN, IL_GRP_MEMBER);
+        $participants_obj_of_event = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
+        $this->addUsersToMembershipableObject($participants_obj_of_event, $imported_event, IL_GRP_ADMIN, IL_GRP_MEMBER);
 
         // Add users to all parent membershipable objects
         foreach ($parent_events as $parent_event) {
-            $participants_obj = $this->getParticipantsObjectForRefId($parent_event);
+            $participants_obj_of_parent = $this->getParticipantsObjectForRefId($parent_event);
 
-            if ($participants_obj instanceof \ilCourseParticipants) {
+            if ($participants_obj_of_parent instanceof \ilCourseParticipants) {
                 $this->addUsersToMembershipableObject(
-                    $participants_obj,
+                    $participants_obj_of_parent,
                     $imported_event,
                     IL_CRS_ADMIN,
                     IL_CRS_MEMBER
                 );
-            } elseif ($participants_obj instanceof \ilGroupParticipants) {
+            } elseif ($participants_obj_of_parent instanceof \ilGroupParticipants) {
                 $this->addUsersToMembershipableObject(
-                    $participants_obj,
+                    $participants_obj_of_parent,
                     $imported_event,
                     IL_GRP_ADMIN,
                     IL_GRP_MEMBER
@@ -179,8 +180,8 @@ class MembershipManager
         foreach ($users_to_remove as $user_to_remove) {
 
             // Remove from main event
-            if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
-                $participants_obj->delete($user_to_remove->getIliasUserId());
+            if ($participants_obj_of_event->isAssigned($user_to_remove->getIliasUserId())) {
+                $participants_obj_of_event->delete($user_to_remove->getIliasUserId());
                 $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
             } else {
                 $this->logger->logEventMembership(

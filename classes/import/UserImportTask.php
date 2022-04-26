@@ -108,9 +108,10 @@ class UserImportTask
                     $action->executeAction();
                 } else {
                     $this->evento_user_repo->registerUserAsDelivered($result->getEventoId());
+                    $this->evento_logger->logException('Deleting User', 'User which was not delivered during "Import Users" can be requested by ID. Therefore it still exsits. Evento ID = ' . $evento_id);
                 }
             } catch (\Exception $e) {
-                $this->evento_logger->logException('Deleting Event', "Exception on deleting user with evento_id $ilias_user_id"
+                $this->evento_logger->logException('Convert Deleted User Accounts', "Exception on deleting user with evento_id $ilias_user_id"
                     . ', exception message: ' . $e->getMessage());
             }
         }

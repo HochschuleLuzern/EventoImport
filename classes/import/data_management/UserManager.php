@@ -139,6 +139,10 @@ class UserManager
             $ilias_user->setActive(true);
         }
 
+        if (count($changed_user_data) > 0) {
+            $ilias_user->update();
+        }
+
         return $changed_user_data;
     }
 
@@ -154,6 +158,7 @@ class UserManager
         $ilias_user->setDescription($ilias_user->getEmail());
         $ilias_user->setMatriculation('Evento:' . $evento_user->getEventoId());
         $ilias_user->setExternalAccount($evento_user->getEventoId() . '@hslu.ch');
+        $ilias_user->setAuthMode($this->default_user_settings->getAuthMode());
 
         return $ilias_user;
     }

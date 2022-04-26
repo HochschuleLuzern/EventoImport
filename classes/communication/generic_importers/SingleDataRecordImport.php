@@ -48,9 +48,4 @@ trait SingleDataRecordImport
             return null;
         }
     }
-
-    private function requestWasSuccessful(string $json_response) : bool
-    {
-        return !(is_null($json_response) || $json_response == '');
-    }
 }

@@ -249,7 +249,7 @@ class IliasEventoEventObjectRepository
 
     public function getActiveEventsWithLastImportOlderThanOneWeek() : array
     {
-        $query = "SELECT " . IliasEventoEventsTblDef::COL_EVENTO_ID . ", " . IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED
+        $query = "SELECT * "
             . " FROM " . IliasEventoEventsTblDef::TABLE_NAME
             . " WHERE " . IliasEventoEventsTblDef::COL_END_DATE . " > " . $this->db->quote(date("Y-m-d"), \ilDBConstants::T_DATETIME)
             . " AND " . IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED . " < " . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME)
@@ -259,7 +259,7 @@ class IliasEventoEventObjectRepository
 
         $data = [];
         while ($row = $this->db->fetchAssoc($result)) {
-            $data[] = $row[IliasEventoEventsTblDef::COL_EVENTO_ID];
+            $data[] = $this->buildIliasEventoEventFromRow($row);
         }
 
         return $data;
