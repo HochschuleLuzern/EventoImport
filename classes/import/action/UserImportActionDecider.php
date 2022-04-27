@@ -30,10 +30,26 @@ class UserImportActionDecider
 
     public function determineImportAction(EventoUser $evento_user) : EventoImportAction
     {
-        $user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
+        $matched_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
 
-        if (!is_null($user_id)) {
-            return $this->action_factory->buildUpdateAction($evento_user, $user_id);
+        if (!is_null($matched_user_id)) {
+            $current_login_of_matched_user = $this->ilias_user_service->getLoginByUserId($matched_user_id);
+
+            // Check if login of delivered user has changed AND the changed login name is already taken
+            if ($current_login_of_matched_user != $evento_user->getLoginName()
+                && $this->ilias_user_service->getUserIdByLogin($evento_user->getLoginName()) > 0
+            ) {
+                $id_of_user_to_rename = $this->ilias_user_service->getUserIdByLogin($evento_user->getLoginName());
+                $user_to_rename = $this->ilias_user_service->getExistingIliasUserObjectById($id_of_user_to_rename);
+                return $this->action_factory->buildRenameExistingAndUpdateDeliveredAction(
+                    $evento_user,
+                    $matched_user_id,
+                    $user_to_rename,
+                    'login'
+                );
+            }
+
+            return $this->action_factory->buildUpdateAction($evento_user, $matched_user_id);
         }
 
         return $this->matchToIliasUsersAndDetermineAction($evento_user);
@@ -164,8 +180,9 @@ class UserImportActionDecider
                                 // login. The login is taken by another user account.
                                 // --> Rename and deactivate conflicting account, then update user account.
                                 $user_obj_by_login = $this->ilias_user_service->getExistingIliasUserObjectById($data['id_by_login']);
-                                $result = $this->action_factory->buildRenameExistingAndCreateNewAction(
+                                $result = $this->action_factory->buildRenameExistingAndUpdateDeliveredAction(
                                     $evento_user,
+                                    $data['ids_by_matriculation'][0],
                                     $user_obj_by_login,
                                     'login'
                                 );

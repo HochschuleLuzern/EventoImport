@@ -43,10 +43,28 @@ class UserActionFactory
         );
     }
 
-    public function buildRenameExistingAndCreateNewAction(EventoUser $evento_user, \ilObjUser $old_ilias_user, string $found_by) : RenameExistingCreateNew
-    {
-        return new RenameExistingCreateNew(
+    public function buildRenameExistingAndCreateNewAction(
+        EventoUser $evento_user,
+        \ilObjUser $old_ilias_user,
+        string $found_by
+    ) : RenameExistingUserExecuteNextImportAction {
+        return new RenameExistingUserExecuteNextImportAction(
             $this->buildCreateAction($evento_user),
+            $evento_user,
+            $old_ilias_user,
+            $found_by,
+            $this->logger
+        );
+    }
+
+    public function buildRenameExistingAndUpdateDeliveredAction(
+        EventoUser $evento_user,
+        int $user_id_of_found_delivered_user,
+        \ilObjUser $old_ilias_user,
+        string $found_by
+    ) {
+        return new RenameExistingUserExecuteNextImportAction(
+            $this->buildUpdateAction($evento_user, $user_id_of_found_delivered_user),
             $evento_user,
             $old_ilias_user,
             $found_by,
@@ -87,8 +105,10 @@ class UserActionFactory
         );
     }
 
-    public function buildConvertAuthAndDeactivateUser(\ilObjUser $ilias_user_object, int $evento_id) : EventoImportAction
-    {
+    public function buildConvertAuthAndDeactivateUser(
+        \ilObjUser $ilias_user_object,
+        int $evento_id
+    ) : EventoImportAction {
         return new ConvertAndDeactivateUser(
             $ilias_user_object,
             $evento_id,

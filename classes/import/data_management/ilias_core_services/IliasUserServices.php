@@ -87,6 +87,11 @@ class IliasUserServices
         return \ilObjUser::getUserIdByLogin($login_name);
     }
 
+    public function getLoginByUserId(int $user_id)
+    {
+        return \ilObjUser::_lookupLogin($user_id);
+    }
+
     public function getUserIdsByEventoId(int $evento_id) : array
     {
         $list = array();
@@ -107,7 +112,7 @@ class IliasUserServices
         $found_user_obj = null;
         foreach ($user_ids as $user_id) {
             $user_obj = $this->getExistingIliasUserObjectById($user_id);
-            if (stristr($user_obj->getExternalAccount(), '@eduid.ch')) {
+            if (stristr($user_obj->getExternalAccount(), '@eduid.ch') !== false) {
                 $found_user_obj = $user_id;
             }
         }
@@ -119,7 +124,7 @@ class IliasUserServices
      * User and role specific methods
      */
 
-    public function assignUserToRole(int $user_id, int $role_id)
+    public function assignUserToRole(int $user_id, int $role_id) : void
     {
         if (!$this->rbac_review->isAssigned($user_id, $role_id)) {
             $this->rbac_admin->assignUser($role_id, $user_id);
