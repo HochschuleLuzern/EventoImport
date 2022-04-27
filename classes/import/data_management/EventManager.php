@@ -102,6 +102,7 @@ class EventManager
 
     public function removeIliasEventoEventConnection(IliasEventoEvent $ilias_evento_event)
     {
+        $this->membership_manager->removeEventoIliasMembershipConnectionsForEvent($ilias_evento_event);
         $this->event_obj_repo->removeIliasEventoEvent($ilias_evento_event);
     }
 
@@ -158,8 +159,9 @@ class EventManager
 
     public function deleteIliasEventoEvent(IliasEventoEvent $ilias_evento_event)
     {
+        $this->membership_manager->removeEventoIliasMembershipConnectionsForEvent($ilias_evento_event);
         $this->event_obj_repo->removeIliasEventoEvent($ilias_evento_event);
-        $this->ilias_obj_service->removeIliasEventObject($ilias_evento_event);
+        $this->ilias_obj_service->removeIliasEventObjectWithSubObjects($ilias_evento_event);
     }
 
     public function deleteIliasParentEvent(IliasEventoParentEvent $ilias_evento_parent_event)

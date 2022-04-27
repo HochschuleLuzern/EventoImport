@@ -92,23 +92,14 @@ class IliasEventObjectService
         return new \ilObjGroup($ref_id, true);
     }
 
-    public function removeIliasEventObject(IliasEventoEvent $ilias_event_to_remove)
+    public function removeIliasEventObjectWithSubObjects(IliasEventoEvent $ilias_event_to_remove)
     {
-        if ($ilias_event_to_remove->getIliasType() == 'crs') {
-            $ilias_obj = $this->getCourseObjectForRefId($ilias_event_to_remove->getRefId());
-        } elseif ($ilias_event_to_remove->getIliasType() == 'grp') {
-            $ilias_obj = $this->getGroupObjectForRefId($ilias_event_to_remove->getRefId());
-        } else {
-            throw new \InvalidArgumentException('Invalid type to remove ilias event object given. Type should be "crs" or "grp". Evento ID of DB-Entry = ' . $ilias_event_to_remove->getEventoEventId());
-        }
-
-        $ilias_obj->delete();
+        \ilRepUtil::deleteObjects($this->tree->getParentId($ilias_event_to_remove->getRefId()), [$ilias_event_to_remove->getRefId()]);
     }
 
     public function removeIliasParentEventObject(IliasEventoParentEvent $ilias_evento_parent_event)
     {
-        $ilias_obj = $this->getCourseObjectForRefId($ilias_evento_parent_event->getRefId());
-        $ilias_obj->delete();
+        \ilRepUtil::deleteObjects($this->tree->getParentId($ilias_evento_parent_event->getRefId()), [$ilias_evento_parent_event->getRefId()]);
     }
 
     public function isGroupObjPartOfACourse(\ilObjGroup $group_obj) : bool

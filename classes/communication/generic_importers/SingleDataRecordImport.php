@@ -42,7 +42,7 @@ trait SingleDataRecordImport
             }
         } while (!$request_was_successful);
 
-        if (!is_null($plain_response)) {
+        if (!is_null($plain_response) && $plain_response != '') {
             return json_decode($plain_response, true, 10, JSON_THROW_ON_ERROR);
         } else {
             return null;
