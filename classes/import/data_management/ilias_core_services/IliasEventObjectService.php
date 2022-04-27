@@ -94,12 +94,24 @@ class IliasEventObjectService
 
     public function removeIliasEventObjectWithSubObjects(IliasEventoEvent $ilias_event_to_remove)
     {
-        \ilRepUtil::deleteObjects($this->tree->getParentId($ilias_event_to_remove->getRefId()), [$ilias_event_to_remove->getRefId()]);
+        $ref_id = $ilias_event_to_remove->getRefId();
+        $type = $this->getObjTypeForRefId($ref_id);
+        if ($type == 'crs' || $type == 'grp') {
+            \ilRepUtil::deleteObjects($this->tree->getParentId($ref_id), [$ref_id]);
+        } else {
+            throw new \ilException("Failed deleting Parent Event with ref_id = $ref_id. The ILIAS Object had type $type instead of crs");
+        }
     }
 
     public function removeIliasParentEventObject(IliasEventoParentEvent $ilias_evento_parent_event)
     {
-        \ilRepUtil::deleteObjects($this->tree->getParentId($ilias_evento_parent_event->getRefId()), [$ilias_evento_parent_event->getRefId()]);
+        $ref_id = $ilias_evento_parent_event->getRefId();
+        $type = $this->getObjTypeForRefId($ref_id);
+        if ($type == 'crs') {
+            \ilRepUtil::deleteObjects($this->tree->getParentId($ref_id), [$ref_id]);
+        } else {
+            throw new \ilException("Failed deleting Parent Event with ref_id = $ref_id. The ILIAS Object had type $type instead of crs");
+        }
     }
 
     public function isGroupObjPartOfACourse(\ilObjGroup $group_obj) : bool
