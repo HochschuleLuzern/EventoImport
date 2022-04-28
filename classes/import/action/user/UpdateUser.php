@@ -34,6 +34,7 @@ class UpdateUser implements UserImportAction
         $this->user_manager->registerEventoUserAsDelivered($this->evento_user);
 
         $changed_user_data = $this->user_manager->updateIliasUserFromEventoUser($this->ilias_user, $this->evento_user);
+        $this->user_manager->updateSettingsForExistingUser($this->ilias_user);
         $this->user_manager->synchronizeIliasUserWithEventoRoles($this->ilias_user, $this->evento_user->getRoles());
         $this->user_manager->importAndSetUserPhoto($this->ilias_user, $this->evento_user->getEventoId(), $this->photo_importer);
 

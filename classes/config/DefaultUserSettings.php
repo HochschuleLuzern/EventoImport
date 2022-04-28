@@ -6,15 +6,15 @@ class DefaultUserSettings
 {
     private \ilSetting $settings;
 
-    private \DateTime $now;
+    private \DateTimeImmutable $now;
     private $auth_mode;
     private bool $is_auth_mode_ldap;
     private bool $is_profile_public;
     private bool $is_profile_picture_public;
     private bool $is_mail_public;
     private int $default_user_role_id;
-    private \DateTime $acc_duration_after_import;
-    private \DateTime $max_acc_duration;
+    private \DateTimeImmutable $acc_duration_after_import;
+    private \DateTimeImmutable $max_acc_duration;
     private int $default_hits_per_page;
     private string $default_show_users_online;
     private int $mail_incoming_type;
@@ -32,7 +32,7 @@ class DefaultUserSettings
         $this->default_hits_per_page = 100;
         $this->default_show_users_online = 'associated';
 
-        $this->now = new \DateTime();
+        $this->now = new \DateTimeImmutable();
         $import_acc_duration_in_months = (int) $settings->get(CronConfigForm::CONF_USER_IMPORT_ACC_DURATION, 12);
         $this->acc_duration_after_import = $this->addMonthsToCurrent($import_acc_duration_in_months);
         $max_acc_duration_in_months = (int) $settings->get(CronConfigForm::CONF_USER_MAX_ACC_DURATION, 24);
@@ -56,22 +56,22 @@ class DefaultUserSettings
         }
     }
 
-    private function addMonthsToCurrent(int $import_acc_duration_in_months) : \DateTime
+    private function addMonthsToCurrent(int $import_acc_duration_in_months) : \DateTimeImmutable
     {
-        return $this->now->add(new \DateInterval('P' . $import_acc_duration_in_months . 'M'));
+        return $this->getNow()->add(new \DateInterval('P' . $import_acc_duration_in_months . 'M'));
     }
 
-    public function getNow() : \DateTime
+    public function getNow() : \DateTimeImmutable
     {
         return $this->now;
     }
 
-    public function getAccDurationAfterImport() : \DateTime
+    public function getAccDurationAfterImport() : \DateTimeImmutable
     {
         return $this->acc_duration_after_import;
     }
 
-    public function getMaxDurationOfAccounts() : \DateTime
+    public function getMaxDurationOfAccounts() : \DateTimeImmutable
     {
         return $this->max_acc_duration;
     }

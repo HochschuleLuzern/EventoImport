@@ -247,8 +247,8 @@ if (!$ilDB->tableExists($table_name)) {
             'notnull' => true
         ),
         \EventoImport\db\IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => array(
-            'type' => ilDBConstants::T_INTEGER,
-            'length' => 8,
+            'type' => ilDBConstants::T_TEXT,
+            'length' => 100,
             'notnull' => false
         )
     );

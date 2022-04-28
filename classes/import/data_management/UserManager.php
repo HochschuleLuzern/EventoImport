@@ -9,18 +9,21 @@ use EventoImport\communication\api_models\EventoUserShort;
 use EventoImport\config\DefaultUserSettings;
 use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\import\data_management\repository\model\IliasEventoUser;
+use EventoImport\import\Logger;
 
 class UserManager
 {
     private IliasUserServices $ilias_user_service;
     private IliasEventoUserRepository $evento_user_repo;
     private DefaultUserSettings $default_user_settings;
+    private Logger $logger;
 
-    public function __construct(IliasUserServices $ilias_user_service, IliasEventoUserRepository $evento_user_repo, DefaultUserSettings $default_user_settings)
+    public function __construct(IliasUserServices $ilias_user_service, IliasEventoUserRepository $evento_user_repo, DefaultUserSettings $default_user_settings, Logger $logger)
     {
         $this->ilias_user_service = $ilias_user_service;
         $this->evento_user_repo = $evento_user_repo;
         $this->default_user_settings = $default_user_settings;
+        $this->logger = $logger;
     }
 
     public function createAndSetupNewIliasUser(EventoUser $evento_user) : \ilObjUser
@@ -32,12 +35,17 @@ class UserManager
         $ilias_user_object->create();
         $ilias_user_object->saveAsNew(false);
 
-        $this->setForcedUserSettings($ilias_user_object, $this->default_user_settings);
         $this->setUserDefaultSettings($ilias_user_object, $this->default_user_settings);
+        $this->setForcedUserSettings($ilias_user_object, $this->default_user_settings);
 
         $this->evento_user_repo->addNewEventoIliasUserByEventoUser($evento_user, $ilias_user_object, IliasEventoUserRepository::TYPE_HSLU_AD);
 
         return $ilias_user_object;
+    }
+
+    public function updateSettingsForExistingUser(\ilObjUser $ilias_user)
+    {
+        $this->setForcedUserSettings($ilias_user, $this->default_user_settings);
     }
 
     public function importAndSetUserPhoto(\ilObjUser $ilias_user, int $evento_id, EventoUserPhotoImporter $photo_importer) : void
@@ -57,6 +65,8 @@ class UserManager
                 $this->ilias_user_service->saveEncodedPersonalPictureToUserProfile($ilias_user->getId(), $photo_import->getImgData());
             }
         } catch (\Exception $e) {
+            $this->logger->logException('Photo Import', 'Exception on importing User Photo. EventoID = ' . $evento_id
+                . ', IliasUserId = ' . $ilias_user->getId() . ', Exception Message = ' . $e->getMessage());
         }
     }
 
@@ -108,11 +118,20 @@ class UserManager
 
         $received_gender_char = $this->convertEventoToIliasGenderChar($evento_user->getGender());
         if ($ilias_user->getGender() != $received_gender_char) {
-            $changed_user_data['last_name'] = [
+            $changed_user_data['gender'] = [
                 'old' => $ilias_user->getGender(),
                 'new' => $received_gender_char
             ];
             $ilias_user->setGender($received_gender_char);
+        }
+
+        $mail_list = $evento_user->getEmailList();
+        if (isset($mail_list[0]) && ($ilias_user->getSecondEmail() != $mail_list[0])) {
+            $changed_user_data['second_mail'] = [
+                'old' => $ilias_user->getSecondEmail(),
+                'new' => $mail_list[0]
+            ];
+            $ilias_user->setSecondEmail($mail_list[0]);
         }
 
         if ($ilias_user->getMatriculation() != ('Evento:' . $evento_user->getEventoId())) {
@@ -165,17 +184,6 @@ class UserManager
 
     private function setForcedUserSettings(\ilObjUser $ilias_user, DefaultUserSettings $user_settings)
     {
-        /*
-            The old import had the $user->setPasswd method two times called. One time within an if-statement and another time without
-            Code snipped of if-statement below:
-                if ($user_settings->isAuthModeLDAP()) {
-                    $user->setPasswd('');
-                }
-
-            Since the second call without an if-statement makes this block useless, it is not in the code anymore
-        */
-        $ilias_user->setPasswd('');
-
         $ilias_user->setActive(true);
 
         // Reset login attempts over night -> needed since login attempts are limited to 8
@@ -194,6 +202,17 @@ class UserManager
 
             $ilias_user->setTimeLimitUntil($user_settings->getAccDurationAfterImport()->getTimestamp());
         }
+
+        /*
+            The old import had the $user->setPasswd method two times called. One time within an if-statement and another time without
+            Code snipped of if-statement below:
+                if ($user_settings->isAuthModeLDAP()) {
+                    $user->setPasswd('');
+                }
+
+            Since the second call without an if-statement makes this block useless, it is not in the code anymore
+        */
+        $ilias_user->setPasswd('', IL_PASSWD_PLAIN);
 
         // profil is always public for registered users
         $ilias_user->setPref(

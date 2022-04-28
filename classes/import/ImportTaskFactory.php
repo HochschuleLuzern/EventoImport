@@ -58,7 +58,8 @@ class ImportTaskFactory
                     new UserManager(
                         $ilias_user_service,
                         $evento_user_repo,
-                        $user_settings
+                        $user_settings,
+                        $this->logger
                     ),
                     $user_photo_importer,
                     $this->logger
@@ -87,7 +88,8 @@ class ImportTaskFactory
             new UserManager(
                 new IliasUserServices($user_settings, $this->db, $this->rbac),
                 new IliasEventoUserRepository($this->db),
-                $user_settings
+                $user_settings,
+                $this->logger
             ),
             new \ilFavouritesManager(),
             $this->logger,
@@ -128,7 +130,8 @@ class ImportTaskFactory
                 new UserManager(
                     new IliasUserServices($user_settings, $this->db, $this->rbac),
                     new IliasEventoUserRepository($this->db),
-                    $user_settings
+                    $user_settings,
+                    $this->logger
                 ),
                 new \ilFavouritesManager(),
                 $this->logger,
