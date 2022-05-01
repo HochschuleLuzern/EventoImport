@@ -1,33 +1,32 @@
 <?php
-	/**
-	 * Copyright (c) 2017 Hochschule Luzern
-	 * 
-	 * This file is part of the EventoImport-Plugin for ILIAS.
+    /**
+     * Copyright (c) 2017 Hochschule Luzern
+     *
+     * This file is part of the EventoImport-Plugin for ILIAS.
 
-     * EventoImport-Plugin for ILIAS is free software: you can redistribute 
+     * EventoImport-Plugin for ILIAS is free software: you can redistribute
      * it and/or modify it under the terms of the GNU General Public License
-     * as published by the Free Software Foundation, either version 3 of the 
+     * as published by the Free Software Foundation, either version 3 of the
      * License, or (at your option) any later version.
 
-     * EventoImport-Plugin for ILIAS is distributed in the hope that 
-     * it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
+     * EventoImport-Plugin for ILIAS is distributed in the hope that
+     * it will be useful, but WITHOUT ANY WARRANTY; without even the implied
      * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
 
      * You should have received a copy of the GNU General Public License
-     * along with EventoImport-Plugin for ILIAS.  If not, 
+     * along with EventoImport-Plugin for ILIAS.  If not,
      * see <http://www.gnu.org/licenses/>.
-	 */
+     */
 
-	// Alphanumerical ID of the plugin; never change this
-	$id = 'crevento';
+    // Alphanumerical ID of the plugin; never change this
+    $id = 'crevento';
 
-	// Version Information of Plugin & compatible versions of ILIAS
-	$version = '0.9';
-	$ilias_min_version = '7.0';
-	$ilias_max_version = '7.999';
+    // Version Information of Plugin & compatible versions of ILIAS
+    $version = '0.98';
+    $ilias_min_version = '7.0';
+    $ilias_max_version = '7.999';
 
-	// Please contact this person if you have questions
-	$responsible = 'Stephan Winiker';
-	$responsible_mail = 'stephan.winiker@hslu.ch';
-?>
+    // Please contact this person if you have questions
+    $responsible = 'Stephan Winiker';
+    $responsible_mail = 'stephan.winiker@hslu.ch';

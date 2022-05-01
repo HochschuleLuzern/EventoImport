@@ -1,4 +1,10 @@
-<?php
+<?php declare(strict_types = 1);
+
+use EventoImport\import\Logger;
+use EventoImport\import\ImportTaskFactory;
+use EventoImport\config\ConfigurationManager;
+use EventoImport\config\CronConfigForm;
+
 /**
  * Copyright (c) 2017 Hochschule Luzern
  *
@@ -27,59 +33,101 @@
 
 class ilEventoImportPlugin extends ilCronHookPlugin
 {
-	
-	const PLUGIN_NAME = "EventoImport";
-	
-	/**
-	 * @var ilEventoImportPlugin
-	 */
-	protected static $instance;
-	
-	/**
-	 * @return ilEventoImportPlugin
-	 */
-	public static function getInstance() {
-		if (! isset(self::$instance)) {
-			self::$instance = new self();
-		}
-		
-		return self::$instance;
-	}
-	
-	public function getPluginName() {
-		return self::PLUGIN_NAME;
-	}
-	
-	/**
-	 * @var  ilEventoImportImport
-	 */
-	protected static $cron_job_instances;
-	
-	/**
-	 * @return  ilEventoImportJobInstances[]
-	 */
-	public function getCronJobInstances() {
-		$this->loadCronJobInstance();
-		
-		return array_values(self::$cron_job_instances);
-	}
-	
-	/**
-	 * @return  ilEventoImportJobInstance or false on failure
-	 */
-	public function getCronJobInstance($a_job_id) {
-		$this->loadCronJobInstance();		
-		if (isset(self::$cron_job_instances[$a_job_id])) {
-			return self::$cron_job_instances[$a_job_id];
-		} else {
-			return false;
-		}
-	}
-	
-	protected function loadCronJobInstance() {
-		if (!isset(self::$cron_job_instances)) {
-			self::$cron_job_instances[ilEventoImportImport::ID] = new ilEventoImportImport();
-		}
-	}
-	
+    const PLUGIN_NAME = "EventoImport";
+    
+    public function getPluginName()
+    {
+        return self::PLUGIN_NAME;
+    }
+    
+    /**
+     * @var ilCronJob[]
+     */
+    protected static $cron_job_instances;
+    
+    /**
+     * @return  ilCronJob[]
+     */
+    public function getCronJobInstances() : array
+    {
+        $this->loadCronJobInstance();
+        
+        return array_values(self::$cron_job_instances);
+    }
+    
+    /**
+     * @return  ilCronJob or false on failure
+     */
+    public function getCronJobInstance($a_job_id)
+    {
+        $this->loadCronJobInstance();
+        if (isset(self::$cron_job_instances[$a_job_id])) {
+            return self::$cron_job_instances[$a_job_id];
+        } else {
+            return false;
+        }
+    }
+    
+    protected function loadCronJobInstance()
+    {
+        global $DIC;
+        $db = $DIC->database();
+        $rbac = $DIC->rbac();
+        $tree = $DIC->repositoryTree();
+
+        //This is a workaround to avoid problems with missing templates
+        if (!method_exists($DIC, 'ui') || !method_exists($DIC->ui(), 'factory') || !isset($DIC['ui.factory'])) {
+            ilInitialisation::initUIFramework($DIC);
+            ilStyleDefinition::setCurrentStyle('Desktop');
+        }
+        
+        if (!isset(self::$cron_job_instances)) {
+            $settings = new ilSetting('crevento');
+            $cron_config = new CronConfigForm($settings, $this, $rbac);
+            $config_manager = new ConfigurationManager($cron_config, $settings, $db, $tree);
+            $import_factory = new ImportTaskFactory($config_manager, $db, $tree, $rbac);
+            $logger = new Logger($db);
+
+            self::$cron_job_instances[ilEventoImportDailyImportCronJob::ID] = new ilEventoImportDailyImportCronJob(
+                $this,
+                $import_factory,
+                $config_manager,
+                $logger
+            );
+            self::$cron_job_instances[ilEventoImportHourlyImportCronJob::ID] = new ilEventoImportHourlyImportCronJob(
+                $this,
+                $import_factory,
+                $config_manager,
+                $logger
+            );
+        }
+    }
+
+    protected function beforeUninstall()
+    {
+        global $DIC;
+        $db = $DIC->database();
+        
+        $drop_table_list = [
+            'crnhk_crevento_usrs',
+            'crnhk_crevento_mas',
+            'crnhk_crevento_subs',
+            \EventoImport\db\IliasEventoUserTblDef::TABLE_NAME,
+            \EventoImport\db\IliasEventoEventsTblDef::TABLE_NAME,
+            \EventoImport\db\IliasParentEventTblDef::TABLE_NAME,
+            \EventoImport\db\IliasEventLocationsTblDef::TABLE_NAME,
+            \EventoImport\db\IliasEventoEventMembershipsTblDef::TABLE_NAME,
+            Logger::TABLE_LOG_USERS,
+            Logger::TABLE_LOG_EVENTS,
+            Logger::TABLE_LOG_MEMBERSHIPS
+        ];
+
+        foreach ($drop_table_list as $key => $table) {
+            if ($db->tableExists($table)) {
+                $db->dropTable($table);
+            }
+        }
+
+        return true;
+    }
 }

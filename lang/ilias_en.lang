@@ -2,6 +2,11 @@
 / English Language File for Evento Import Cron-Plugin
 **/
 
+daily_import_cj_title#:#Evento Import: Daily import
+daily_import_cj_desc#:#Import of Evento users und events to ILIAS.
+hourly_import_cj_title#:#Evento Import: Hourly Import
+hourly_import_cj_desc#:#Imports users registered in admin roles to ILIAS and enters them in the corresponding courses and groups (according to given events)
+
 title#:#Update Users from Evento-Soap Interface
 description#:#Updates all ILIAS-Users by querying the HSLU Soap interface to Evento. Users and Course-Memberships are updated
 ws_user#:#SOAP User
@@ -48,3 +53,47 @@ convert_deactivate_desc#:#Should the user accounts of the members of group '%s' 
 additional_roles_header#:#Additional global roles for '%s'
 additional_roles_info#:#Additional global roles
 additional_roles_desc#:#Users imported through the operation '%s' will additionally be added to the chosen global roles.
+
+location_settings#:#Settings for repository locations
+location_departments#:#Departement
+location_kinds#:#Kind
+location_years#:#Year
+api_settings#:#API Settings
+api_uri#:#URI
+api_uri_desc#:#URI of the API. E.g.: https://evento.hslu.ch:443/services/evento_import
+auth_key#:#API Key
+auth_key_desc#:#Interface API Key
+auth_secret#:#API Secret
+auth_secret_desc#:#Used to authenticate on the API
+api_page_size#:#Page size
+api_page_size_desc#:#Number of data sets which are read per request. A large page size increases the import speed but on the other hand uses more RAM
+api_max_pages#:#Max amount of pages
+api_max_pages_desc#:#How many pages should be request? Use -1 to request all pages
+api_max_retries#:#Max retries
+api_max_retries_desc#:#Maximum amount of retries to retrieve data after failed requests.
+api_timeout_after_request#:#Request timeout
+api_timeout_after_request_desc#:#Time to wait till a request is declared as failed
+api_timeout_failed_request#:#Failed request timeout
+api_timeout_failed_request_desc#:#Time to wait after a failed request till a new one is sent
+user_auth_mode#:#Authmode of new users
+user_auth_mode_desc#:#Newly created ILIAS-Users will use this authentication mode
+user_import_settings#:#User Import settings
+user_import_account_duration#:#Account duration for imported users
+user_import_account_duration_desc#:#Number of moths for which the user accounts created by the import will be accessible
+user_max_account_duration#:#Max account duration
+user_max_account_duration_desc#:#Maximum validity period for an account in months. If unlimited accounts or accounts with longer validity are created, they will be limited to this duration. 0 means that there are no restrictions.
+user_changed_mail_subject#:#Mail subject
+user_changed_mail_subject_desc#:#Please enter here the subject for the e-mail that will be sent to the user when the username is changed.
+user_changed_mail_body#:#Mail body
+user_changed_mail_body_desc#:#Please enter here the text for the email that will be sent to the user when the user name is changed (without salutation). The placeholders [oldlogin], [newlogin] and [email] will be replaced by the corresponding information of the user.
+default_user_role#:#Default user role
+default_user_role_desc#:#ID of the default user role. This role will be assigned to all imported users.
+additional_user_roles_mapping#:#Assignment of addintional global ILIAS roles to given roles by Evento
+maps_to#:#assign_to...
+maps_to_desc#:#Enter the received role-code from Evento for the ILIAS-role %s here. The mapping of Evento-Roles to ILIAS-Roles is 1 to 1. The number in this field cannot be assigned to another ILIAS-Role.
+event_import_settings#:#Event import settings
+object_owner#:#Object owner
+object_owner_desc#:#Define which ILIAS-User-Object should be the owner of newly created Event-Objects (Courses and Groups)
+owner_root_user#:#Root user
+owner_custom_user#:#Define an account by yourself
+object_owner_id#:#Object ID of the ILIAS account
