@@ -217,17 +217,17 @@ class UserManager
         // profil is always public for registered users
         $ilias_user->setPref(
             'public_profile',
-            $user_settings->isProfilePublic()
+            $user_settings->isProfilePublic()  ? 'y' : 'n'
         );
 
         // profil picture is always public for registered users, but it can be changed by the profile owner
         $ilias_user->setPref(
             'public_upload',
-            $user_settings->isProfilePicturePublic()
+            $user_settings->isProfilePicturePublic()  ? 'y' : 'n'
         );
 
         // email is always public for registered users, but it can be changed by the profile owner
-        $ilias_user->setPref('public_email', $user_settings->isMailPublic());
+        $ilias_user->setPref('public_email', $user_settings->isMailPublic() ? 'y' : 'n');
 
         $ilias_user->update();
         $ilias_user->writePrefs();

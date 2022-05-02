@@ -181,7 +181,7 @@ class IliasUserServices
             \ilObjUser::_uploadPersonalPicture($tmp_file, $ilias_user_id);
         } catch (\Exception $e) {
             global $DIC;
-            $DIC->logger()->root()->log('Evento Import: Exception on Photo Upload: ' . print_r($e, true));
+            $DIC->logger()->root()->log('Evento Import: Exception on Photo Upload: ' . print_r($e, true), \ilLogLevel::ERROR);
         } finally {
             if (isset($tmp_file)) {
                 unlink($tmp_file);
