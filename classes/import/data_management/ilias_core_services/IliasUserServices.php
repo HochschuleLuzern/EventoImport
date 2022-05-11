@@ -230,7 +230,7 @@ class IliasUserServices
         }
 
         //no unlimited users
-        $q = "UPDATE usr_data set time_limit_unlimited=0, time_limit_until='" . $this->db->quote($new_time_limit_ts, \ilDBConstants::T_INTEGER) . "' WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous')";
+        $q = "UPDATE usr_data set time_limit_unlimited=0, time_limit_until='" . $this->db->quote($new_time_limit_ts, \ilDBConstants::T_INTEGER) . "' WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous') AND ext_account NOT LIKE '%@eduid.ch'";
         $this->db->manipulate($q);
     }
 
