@@ -159,10 +159,7 @@ class IliasUserServices
     {
         $personal_picturpath = \ilObjUser::_getPersonalPicturePath($ilias_user_id, "small", false);
 
-        return strpos(
-            $personal_picturpath,
-            'data:image/svg+xml'
-        ) !== false;
+        return strpos($personal_picturpath, 'data:image/svg+xml') === false;
     }
 
     public function saveEncodedPersonalPictureToUserProfile(int $ilias_user_id, string $encoded_image_string) : void
