@@ -29,7 +29,7 @@ class EventoUser extends ApiDataModelBase
         $this->first_name = $this->validateAndReturnString($data_set, self::JSON_FIRST_NAME);
         $this->gender = $this->validateAndReturnString($data_set, self::JSON_GENDER);
         $this->login_name = $this->validateAndReturnString($data_set, self::JSON_LOGIN_NAME);
-        $this->email_list = $this->validateCombineAndReturnListOfValues($data_set, [self::JSON_EMAIL, self::JSON_EMAIL_2, self::JSON_EMAIL_3], false);
+        $this->email_list = $this->validateCombineAndReturnListOfNonEmptyStrings($data_set, [self::JSON_EMAIL, self::JSON_EMAIL_2, self::JSON_EMAIL_3], false);
         $this->roles = $this->validateAndReturnArray($data_set, self::JSON_ROLES);
 
         $this->decoded_api_data = $data_set;

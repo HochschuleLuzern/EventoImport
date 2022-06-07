@@ -114,6 +114,35 @@ trait JSONDataValidator
     }
 
     /**
+     * @param array $data_array
+     * @param array $key_list
+     * @param bool  $is_empty_list_allowed
+     * @return array|null
+     */
+    protected function validateCombineAndReturnListOfNonEmptyStrings(array $data_array, array $key_list, bool $is_empty_list_allowed = false) : ?array
+    {
+        $list_of_values = array();
+
+        foreach ($key_list as $key) {
+            if (
+                isset($data_array[$key])
+                && is_string($data_array[$key])
+                && strlen($data_array[$key]) > 0
+                && !in_array($data_array[$key], $list_of_values)
+            ) {
+                $list_of_values[] = $data_array[$key];
+            }
+        }
+
+        if ($is_empty_list_allowed && count($list_of_values) == 0) {
+            $this->key_errors[implode(', ', $key_list)] = 'None of the keys are set in the array';
+            return null;
+        }
+
+        return $list_of_values;
+    }
+
+    /**
      * @param array  $data_array
      * @param string $key
      * @return \DateTime|null
