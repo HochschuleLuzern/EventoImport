@@ -197,6 +197,6 @@ class EventManager
 
     public function isIliasObjectToIliasEventoEventStillExisting(IliasEventoEvent $ilias_evento_event) : bool
     {
-        return \ilObject::_exists($ilias_evento_event->getRefId(), $ilias_evento_event->getIliasType());
+        return \ilObject::_exists($ilias_evento_event->getRefId(), true, $ilias_evento_event->getIliasType());
     }
 }
