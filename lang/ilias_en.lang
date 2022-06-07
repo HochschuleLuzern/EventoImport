@@ -86,6 +86,8 @@ user_changed_mail_subject#:#Mail subject
 user_changed_mail_subject_desc#:#Please enter here the subject for the e-mail that will be sent to the user when the username is changed.
 user_changed_mail_body#:#Mail body
 user_changed_mail_body_desc#:#Please enter here the text for the email that will be sent to the user when the user name is changed (without salutation). The placeholders [oldlogin], [newlogin] and [email] will be replaced by the corresponding information of the user.
+user_student_role_id#:#Student Role ID
+user_student_role_id_desc#:#ID of the student role. Accounts with this role, which are marked as deleted by the import, are still valid for 1 year as local accounts.
 default_user_role#:#Default user role
 default_user_role_desc#:#ID of the default user role. This role will be assigned to all imported users.
 additional_user_roles_mapping#:#Assignment of addintional global ILIAS roles to given roles by Evento

@@ -67,6 +67,8 @@ user_changed_mail_subject#:#Mail Betreff
 user_changed_mail_subject_desc#:#Bitte hier den Betreff für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wird.
 user_changed_mail_body#:#Mail Text
 user_changed_mail_body_desc#:#Bitte hier den Text für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wir (ohne Anrede). Die Platzhalter [oldlogin], [newlogin] und [email] werden durch die entsprechenden Angaben des Benutzers ersetzt.
+user_student_role_id#:#Studierenden Rollen ID
+user_student_role_id_desc#:#Rollen ID der Studierenden Rolle. Accounts in dieser Rolle, welche vom Import als gelöscht markiert werden, sind noch 1 Jahr lang als lokale Accounts gültig.
 default_user_role#:#Standard Benutzerrolle
 default_user_role_desc#:#ID der standard Benutzerrolle, die allen importierten Accounts zugeteilt werden soll.
 additional_user_roles_mapping#:#Zuordnung zusätzlicher ILIAS-Rollen zu erhaltenen Evento-Rollen

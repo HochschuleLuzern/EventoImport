@@ -142,7 +142,7 @@ class IliasUserServices
     {
         // TODO: Implement config for this
         if (is_null($this->student_role_id)) {
-            $this->student_role_id = \ilObjRole::_lookupTitle('Studierende');
+            $this->student_role_id = $this->user_settings->getStudentRoleId();
             if (is_null($this->student_role_id)) {
                 return false;
             }

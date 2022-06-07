@@ -20,6 +20,7 @@ class DefaultUserSettings
     private int $mail_incoming_type;
     private array $evento_to_ilias_role_mapping;
     private array $assignable_roles;
+    private int $student_role_id;
 
     public function __construct(\ilSetting $settings)
     {
@@ -31,6 +32,7 @@ class DefaultUserSettings
         $this->assignable_roles[] = $this->default_user_role_id;
         $this->default_hits_per_page = 100;
         $this->default_show_users_online = 'associated';
+        $this->student_role_id = (int) $settings->get(CronConfigForm::CONF_USER_STUDENT_ROLE_ID);
 
         $this->now = new \DateTimeImmutable();
         $import_acc_duration_in_months = (int) $settings->get(CronConfigForm::CONF_USER_IMPORT_ACC_DURATION, 12);
@@ -124,5 +126,10 @@ class DefaultUserSettings
     public function getEventoCodeToIliasRoleMapping() : array
     {
         return $this->evento_to_ilias_role_mapping;
+    }
+
+    public function getStudentRoleId() : int
+    {
+        return $this->student_role_id;
     }
 }

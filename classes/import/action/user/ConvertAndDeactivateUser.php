@@ -28,8 +28,9 @@ class ConvertAndDeactivateUser implements UserDeleteAction
 
     public function executeAction() : void
     {
+        $limit_until = new \DateTime();
         $this->ilias_user->setAuthMode('local');
-        $this->ilias_user->setTimeLimitUntil(date("Y-m-d H:i:s"));
+        $this->ilias_user->setTimeLimitUntil($limit_until->getTimestamp());
         $this->ilias_user->update();
 
         $this->user_manager->deleteEventoUserToIliasUserConnection($this->evento_id);

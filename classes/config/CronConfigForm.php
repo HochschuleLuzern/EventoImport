@@ -52,6 +52,8 @@ class CronConfigForm
     const LANG_USER_CHANGED_MAIL_SUBJECT_DESC = 'user_changed_mail_subject_desc';
     const LANG_USER_CHANGED_MAIL_BODY = 'user_changed_mail_body';
     const LANG_USER_CHANGED_MAIL_BODY_DESC = 'user_changed_mail_body_desc';
+    const LANG_STUDENT_ROLE_ID = 'user_student_role_id';
+    const LANG_STUDENT_ROLE_ID_DESC = 'user_student_role_id_desc';
     const LANG_DEFAULT_USER_ROLE = 'default_user_role';
     const LANG_DEFAULT_USER_ROLE_DESC = 'default_user_role_desc';
     const LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING = 'additional_user_roles_mapping';
@@ -81,6 +83,7 @@ class CronConfigForm
     const FORM_USER_MAX_ACC_DURATION = 'crevento_user_max_acc_duration';
     const FORM_USER_CHANGED_MAIL_SUBJECT = 'crevento_user_changed_mail_subject';
     const FORM_USER_CHANGED_MAIL_BODY = 'crevento_user_changed_mail_body';
+    const FORM_USER_STUDENT_ROLE_ID = 'crevento_student_role_id';
     const FORM_DEFAULT_USER_ROLE = 'crevento_default_user_role';
     const FORM_USER_GLOBAL_ROLE_ = 'crevento_global_role_';
     const FORM_USER_EVENTO_ROLE_MAPPED_TO_ = 'crevento_map_from_';
@@ -105,6 +108,7 @@ class CronConfigForm
     const CONF_USER_MAX_ACC_DURATION = 'crevento_user_max_acc_duration';
     const CONF_USER_CHANGED_MAIL_SUBJECT = 'crevento_email_account_changed_subject';
     const CONF_USER_CHANGED_MAIL_BODY = 'crevento_email_account_changed_body';
+    const CONF_USER_STUDENT_ROLE_ID = 'crevento_student_role_id';
     const CONF_DEFAULT_USER_ROLE = 'crevento_default_user_role';
     const CONF_ROLES_ILIAS_EVENTO_MAPPING = 'crevento_roles_ilias_evento_mapping';
     const CONF_LOCATIONS = 'crevento_location_settings';
@@ -284,6 +288,16 @@ class CronConfigForm
         $form->addItem($ws_item);
 
         $ws_item = new ilNumberInputGUI(
+            $this->cp->txt(self::LANG_STUDENT_ROLE_ID),
+            self::FORM_USER_STUDENT_ROLE_ID
+        );
+        $ws_item->setInfo($this->cp->txt(self::LANG_STUDENT_ROLE_ID_DESC));
+        $ws_item->setRequired(true);
+        $ws_item->allowDecimals(false);
+        $ws_item->setValue($this->settings->get(self::CONF_USER_STUDENT_ROLE_ID));
+        $form->addItem($ws_item);
+
+        $ws_item = new ilNumberInputGUI(
             $this->cp->txt(self::LANG_DEFAULT_USER_ROLE),
             self::FORM_DEFAULT_USER_ROLE
         );
@@ -456,6 +470,7 @@ class CronConfigForm
             self::CONF_USER_CHANGED_MAIL_BODY
         );
 
+        $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_USER_STUDENT_ROLE_ID, self::CONF_USER_STUDENT_ROLE_ID);
         $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_DEFAULT_USER_ROLE, self::CONF_DEFAULT_USER_ROLE);
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
