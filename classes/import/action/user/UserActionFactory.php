@@ -83,13 +83,16 @@ class UserActionFactory
         );
     }
 
-    public function buildReportError(EventoUser $evento_user)
+    public function buildReportError(EventoUser $evento_user, array $found_user_data)
     {
         return new ReportUserImportDatasetWithoutAction(
             Logger::CREVENTO_USR_ERROR_ERROR,
             $evento_user->getEventoId(),
             $evento_user->getLoginName(),
-            $evento_user->getDecodedApiData(),
+            [
+                'actual_api_data' => $evento_user->getDecodedApiData(),
+                'found_ilias_user_data' => $found_user_data
+            ],
             $this->logger
         );
     }

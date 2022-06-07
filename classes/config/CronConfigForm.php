@@ -314,7 +314,7 @@ class CronConfigForm
         $global_roles = $this->rbac->review()->getGlobalRoles();
         $globale_roles_settings = $this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, null);
         $role_mapping = !is_null($globale_roles_settings) ? json_decode($globale_roles_settings, true) : null;
-        if(is_null($role_mapping) || !is_array($role_mapping)) {
+        if (is_null($role_mapping) || !is_array($role_mapping)) {
             $role_mapping = [];
         }
 

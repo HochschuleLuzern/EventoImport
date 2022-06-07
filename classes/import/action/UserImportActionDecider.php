@@ -187,7 +187,10 @@ class UserImportActionDecider
                                     'login'
                                 );
                             } else {
-                                $result = $this->action_factory->buildReportError($evento_user);
+                                $result = $this->action_factory->buildReportError(
+                                    $evento_user,
+                                    $data
+                                );
                             }
                         }
                     }
