@@ -19,8 +19,8 @@ class MembershipManager
     private \ilFavouritesManager $favourites_manager;
     private Logger $logger;
     private \ilRbacReview $rbac_review;
-
     private \ilRbacAdmin $rbac_admin;
+    private \DateTimeImmutable $now;
 
     private MembershipablesEventInTreeSeeker $tree_seeker;
     /** @var \ilParticipants[]  */
@@ -32,7 +32,8 @@ class MembershipManager
         UserManager $user_manager,
         \ilFavouritesManager $favourites_manager,
         Logger $logger,
-        RBACServices $rbac_services
+        RBACServices $rbac_services,
+        \DateTimeImmutable $now = null
     ) {
         $this->membership_repo = $membership_repo;
         $this->tree_seeker = $tree_seeker;
@@ -43,13 +44,21 @@ class MembershipManager
         $this->participant_object_cache = [];
 
         $this->user_manager = $user_manager;
+
+        $this->now = $now ?? new \DateTimeImmutable();
     }
 
     public function syncMemberships(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
     {
+        if(is_null($imported_event->getEndDate()) || $imported_event->getEndDate() <= $this->now) {
+            $delete_not_delivered_members = false;
+        } else {
+            $delete_not_delivered_members = true;
+        }
+
         // If Ilias Event is already a course -> no need to find parent membershipables
         if ($ilias_event->getIliasType() == 'crs') {
-            $this->syncMembershipsWithoutParentObjects($imported_event, $ilias_event);
+            $this->syncMembershipsWithoutParentObjects($imported_event, $ilias_event, $delete_not_delivered_members);
         } else {
 
             // Else -> search for parent membershipable objects
@@ -57,9 +66,9 @@ class MembershipManager
 
             // Check if any parent membershipables were found
             if (count($parent_events) > 0) {
-                $this->syncMembershipsWithParentObjects($imported_event, $ilias_event, $parent_events);
+                $this->syncMembershipsWithParentObjects($imported_event, $ilias_event, $parent_events, $delete_not_delivered_members);
             } else {
-                $this->syncMembershipsWithoutParentObjects($imported_event, $ilias_event);
+                $this->syncMembershipsWithoutParentObjects($imported_event, $ilias_event, $delete_not_delivered_members);
             }
         }
     }
@@ -115,7 +124,7 @@ class MembershipManager
         return $user_ids_to_remove;
     }
 
-    private function syncMembershipsWithoutParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
+    private function syncMembershipsWithoutParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event, bool $delete_not_delivered_members) : void
     {
         $participants_obj = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
 
@@ -123,6 +132,11 @@ class MembershipManager
         $member_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_MEMBER : IL_GRP_MEMBER;
 
         $this->addUsersToMembershipableObject($participants_obj, $imported_event, $admin_role_code, $member_role_code);
+
+        // TODO: Refactor. This was just a quick fix to stop removing members from events which reached their end date
+        if(!$delete_not_delivered_members) {
+            return;
+        }
 
         // Remove from event and sub events
         $sub_membershipable_objs = $this->tree_seeker->getAllSubGroups($ilias_event->getRefId());
@@ -145,7 +159,7 @@ class MembershipManager
         }
     }
 
-    private function syncMembershipsWithParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event, array $parent_events) : void
+    private function syncMembershipsWithParentObjects(EventoEvent $imported_event, IliasEventoEvent $ilias_event, array $parent_events, bool $delete_not_delivered_members) : void
     {
         // Add users to main event
         $participants_obj_of_event = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
@@ -170,6 +184,11 @@ class MembershipManager
                     IL_GRP_MEMBER
                 );
             }
+        }
+
+        // TODO: Refactor. This was just a quick fix to stop removing members from events which reached their end date
+        if(!$delete_not_delivered_members) {
+            return;
         }
 
         $users_to_remove = $this->getUsersToRemove($imported_event);
