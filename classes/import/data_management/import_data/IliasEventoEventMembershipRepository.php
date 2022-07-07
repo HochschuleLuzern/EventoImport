@@ -19,7 +19,7 @@ class IliasEventoEventMembershipRepository
         $this->db = $db;
     }
 
-    public function fetchUserIdFromMembership($evento_event_id, $user_id) : ?int
+    public function fetchUserIdFromMembership(int $evento_event_id, int $user_id) : ?int
     {
         $query = "SELECT usr." . IliasEventoUserTblDef::COL_ILIAS_USER_ID . " AS user_id FROM " . IliasEventoEventMembershipsTblDef::TABLE_NAME . " AS memb"
             . " JOIN " . IliasEventoUserTblDef::TABLE_NAME . " AS usr ON memb." . IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID . " = usr" . IliasEventoUserTblDef::COL_ILIAS_USER_ID

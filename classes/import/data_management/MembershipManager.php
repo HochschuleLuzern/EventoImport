@@ -50,7 +50,7 @@ class MembershipManager
 
     public function syncMemberships(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
     {
-        if(is_null($imported_event->getEndDate()) || $imported_event->getEndDate() <= $this->now) {
+        if (is_null($imported_event->getEndDate()) || $imported_event->getEndDate() <= $this->now) {
             $delete_not_delivered_members = false;
         } else {
             $delete_not_delivered_members = true;
@@ -134,7 +134,7 @@ class MembershipManager
         $this->addUsersToMembershipableObject($participants_obj, $imported_event, $admin_role_code, $member_role_code);
 
         // TODO: Refactor. This was just a quick fix to stop removing members from events which reached their end date
-        if(!$delete_not_delivered_members) {
+        if (!$delete_not_delivered_members) {
             return;
         }
 
@@ -187,7 +187,7 @@ class MembershipManager
         }
 
         // TODO: Refactor. This was just a quick fix to stop removing members from events which reached their end date
-        if(!$delete_not_delivered_members) {
+        if (!$delete_not_delivered_members) {
             return;
         }
 
