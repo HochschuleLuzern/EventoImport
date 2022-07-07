@@ -42,8 +42,6 @@ class UpdateUser implements UserImportAction
         if ($old_login != $this->evento_user->getLoginName()) {
             $login_change_successful = $this->ilias_user->updateLogin($this->evento_user->getLoginName());
             if ($login_change_successful) {
-                $this->user_manager->sendLoginChangedMail($this->ilias_user, $old_login);
-
                 $this->logger->logUserImport(
                     Logger::CREVENTO_USR_RENAMED,
                     $this->evento_user->getEventoId(),

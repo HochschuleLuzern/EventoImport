@@ -276,11 +276,6 @@ class UserManager
         }
     }
 
-    public function sendLoginChangedMail(\ilObjUser $ilias_user, $old_login)
-    {
-        $this->ilias_user_service->sendLoginChangedMail($ilias_user, $old_login);
-    }
-
     public function deleteEventoUserToIliasUserConnection(int $evento_id)
     {
         $this->evento_user_repo->deleteEventoIliasUserConnectionByEventoId($evento_id);

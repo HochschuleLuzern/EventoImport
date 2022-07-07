@@ -193,20 +193,6 @@ class IliasUserServices
         $mail_options->updateOptions();
     }
 
-    public function sendLoginChangedMail(\ilObjUser $ilias_user, string $old_login)
-    {
-        $mail = new ImportMailNotification();
-        $mail->setType(ImportMailNotification::MAIL_TYPE_USER_NAME_CHANGED);
-        $mail->
-        setUserInformation(
-            (int) $ilias_user->getId(),
-            $old_login,
-            $ilias_user->getLogin(),
-            $ilias_user->getEmail()
-        );
-        $mail->send();
-    }
-
     /*
      * Set values for multiple users
      */
