@@ -1,101 +1,98 @@
 /**
 / English Language File for Evento Import Cron-Plugin
 **/
-
-daily_import_cj_title#:#Evento Import: Daily import
-daily_import_cj_desc#:#Import of Evento users und events to ILIAS.
-hourly_import_cj_title#:#Evento Import: Hourly Import
-hourly_import_cj_desc#:#Imports users registered in admin roles to ILIAS and enters them in the corresponding courses and groups (according to given events)
-
-title#:#Update Users from Evento-Soap Interface
-description#:#Updates all ILIAS-Users by querying the HSLU Soap interface to Evento. Users and Course-Memberships are updated
-ws_user#:#SOAP User
-ws_user_desc#:#Username to access the SOAP Interface
-ws_password#:#SOAP Password
-ws_password_desc#:#Password to access the SOAP Interface
-wsdl#:#SOAP Server URL
-wsdl_desc#:#URL of the SOAP Server
-ilias_auth_mode#:#Authmode of new users
-ilias_auth_mode_desc#:#New users will be assigned this authentication mode in ILIAS
-ws_send_emails_to_users#:#Send e-mails to users
-ws_send_emails_to_users_desc#:#Should Users be notified about changes
-pagesize#:#Pagesize
-pagesize_desc#:#How many Records should be fetched at once. A bigger number is quicker, but needs more RAM.
-max_pages#:#Max Pages
-max_pages_desc#:#The maximum number of pages that should be fetch. -1 means no limit.
-max_retries#:#Max Retries
-max_retries_desc#:#Max number of retries that should be made to fetch the data.
-seconds_before_retry#:#Wait Time
-seconds_before_retry_desc#:#How many seconds should be waited before retrying to fetch the data.
-mail_account_changed_subject#:#Subject
-email_account_changed_subject_desc#:#Please enter a subject-line for the e-mail sent out to users who's login-name needed to be changed.
-email_account_changed_body#:#Text
-email_account_changed_body_desc#:#Please enter a text for the e-mail sent out to users who's login-name needed to be changed (without salutation). The following tags will be replaced by the corresponding user-information: [oldlogin], [newlogin] and [email].
+<!-- language file start -->
 account_duration#:#Validity of imported Accounts
 account_duration_desc#:#Accounts created by this cron job have this validity (in months).
-max_account_duration#:#Maximal Account Validity
-max_account_duration_desc#:#Max validity of accounts in months. If accounts with unlimited or longer validity are created, they are reduced to this duration. 0 means unlimited duration.
-standard_user_role_id#:#Default User Role
-standard_user_role_id_desc#:#ID of the default user role assigned to all users.
-user_type_specific_settings_header#:#Settings for the user group '%s'
-settings_for_operation_header#:#Settings for the '%s' operation
-import_operation_subject#:#Operation to fetch the members of the group '%s'
-import_operation_desc#:#This string will be sent to the service in order to fetch all members of the group '%s'.
-import_selector_subject#:#Operation to select the members of the group '%s'
-import_selector_desc#:#This string will be used to select the members of the group '%s' in the answer array.
-import_additional_roles_subject#:#Additional Roles
-import_additional_roles_desc#:#All members of the group '%s' will be added to this group.
-convert_operation_subject#:#Operation to convert the members '%s'
-convert_operation_desc#:#This string will be sent to the service in order to fethc the members of the '%s', that are not active anymore.
-convert_deactivate_subject#:#Deactivate user accounts of member of '%s'?
-convert_deactivate_desc#:#Should the user accounts of the members of group '%s' be deactivated instead of converted them once the account is not current anymore?
-
+additional_roles_desc#:#Users imported through the operation '%s' will additionally be added to the chosen global roles.
 additional_roles_header#:#Additional global roles for '%s'
 additional_roles_info#:#Additional global roles
-additional_roles_desc#:#Users imported through the operation '%s' will additionally be added to the chosen global roles.
-
-location_settings#:#Settings for repository locations
-location_departments#:#Departement
-location_kinds#:#Kind
-location_years#:#Year
+additional_user_roles_mapping#:#Assignment of addintional global ILIAS roles to given roles by Evento
+api_max_pages#:#Max amount of pages
+api_max_pages_desc#:#How many pages should be request? Use -1 to request all pages
+api_max_retries#:#Max retries
+api_max_retries_desc#:#Maximum amount of retries to retrieve data after failed requests.
+api_page_size#:#Page size
+api_page_size_desc#:#Number of data sets which are read per request. A large page size increases the import speed but on the other hand uses more RAM
 api_settings#:#API Settings
+api_timeout_after_request#:#Request timeout
+api_timeout_after_request_desc#:#Time to wait till a request is declared as failed
+api_timeout_failed_request#:#Failed request timeout
+api_timeout_failed_request_desc#:#Time to wait after a failed request till a new one is sent
 api_uri#:#URI
 api_uri_desc#:#URI of the API. E.g.: https://evento.hslu.ch:443/services/evento_import
 auth_key#:#API Key
 auth_key_desc#:#Interface API Key
 auth_secret#:#API Secret
 auth_secret_desc#:#Used to authenticate on the API
-api_page_size#:#Page size
-api_page_size_desc#:#Number of data sets which are read per request. A large page size increases the import speed but on the other hand uses more RAM
-api_max_pages#:#Max amount of pages
-api_max_pages_desc#:#How many pages should be request? Use -1 to request all pages
-api_max_retries#:#Max retries
-api_max_retries_desc#:#Maximum amount of retries to retrieve data after failed requests.
-api_timeout_after_request#:#Request timeout
-api_timeout_after_request_desc#:#Time to wait till a request is declared as failed
-api_timeout_failed_request#:#Failed request timeout
-api_timeout_failed_request_desc#:#Time to wait after a failed request till a new one is sent
-user_auth_mode#:#Authmode of new users
-user_auth_mode_desc#:#Newly created ILIAS-Users will use this authentication mode
-user_import_settings#:#User Import settings
-user_import_account_duration#:#Account duration for imported users
-user_import_account_duration_desc#:#Number of moths for which the user accounts created by the import will be accessible
-user_max_account_duration#:#Max account duration
-user_max_account_duration_desc#:#Maximum validity period for an account in months. If unlimited accounts or accounts with longer validity are created, they will be limited to this duration. 0 means that there are no restrictions.
-user_changed_mail_subject#:#Mail subject
-user_changed_mail_subject_desc#:#Please enter here the subject for the e-mail that will be sent to the user when the username is changed.
-user_changed_mail_body#:#Mail body
-user_changed_mail_body_desc#:#Please enter here the text for the email that will be sent to the user when the user name is changed (without salutation). The placeholders [oldlogin], [newlogin] and [email] will be replaced by the corresponding information of the user.
-user_student_role_id#:#Student Role ID
-user_student_role_id_desc#:#ID of the student role. Accounts with this role, which are marked as deleted by the import, are still valid for 1 year as local accounts.
+convert_deactivate_desc#:#Should the user accounts of the members of group '%s' be deactivated instead of converted them once the account is not current anymore?
+convert_deactivate_subject#:#Deactivate user accounts of member of '%s'?
+convert_operation_desc#:#This string will be sent to the service in order to fethc the members of the '%s', that are not active anymore.
+convert_operation_subject#:#Operation to convert the members '%s'
+daily_import_cj_desc#:#Import of Evento users und events to ILIAS.
+daily_import_cj_title#:#Evento Import: Daily import
 default_user_role#:#Default user role
 default_user_role_desc#:#ID of the default user role. This role will be assigned to all imported users.
-additional_user_roles_mapping#:#Assignment of addintional global ILIAS roles to given roles by Evento
+description#:#Updates all ILIAS-Users by querying the HSLU Soap interface to Evento. Users and Course-Memberships are updated
+email_account_changed_body#:#Text
+email_account_changed_body_desc#:#Please enter a text for the e-mail sent out to users who's login-name needed to be changed (without salutation). The following tags will be replaced by the corresponding user-information: [oldlogin], [newlogin] and [email].
+email_account_changed_subject_desc#:#Please enter a subject-line for the e-mail sent out to users who's login-name needed to be changed.
+event_import_settings#:#Event import settings
+hourly_import_cj_desc#:#Imports users registered in admin roles to ILIAS and enters them in the corresponding courses and groups (according to given events)
+hourly_import_cj_title#:#Evento Import: Hourly Import
+ilias_auth_mode#:#Authmode of new users
+ilias_auth_mode_desc#:#New users will be assigned this authentication mode in ILIAS
+import_additional_roles_desc#:#All members of the group '%s' will be added to this group.
+import_additional_roles_subject#:#Additional Roles
+import_operation_desc#:#This string will be sent to the service in order to fetch all members of the group '%s'.
+import_operation_subject#:#Operation to fetch the members of the group '%s'
+import_selector_desc#:#This string will be used to select the members of the group '%s' in the answer array.
+import_selector_subject#:#Operation to select the members of the group '%s'
+location_departments#:#Departement
+location_kinds#:#Kind
+location_settings#:#Settings for repository locations
+location_years#:#Year
+mail_account_changed_subject#:#Subject
 maps_to#:#assign_to...
 maps_to_desc#:#Enter the received role-code from Evento for the ILIAS-role %s here. The mapping of Evento-Roles to ILIAS-Roles is 1 to 1. The number in this field cannot be assigned to another ILIAS-Role.
-event_import_settings#:#Event import settings
+max_account_duration#:#Maximal Account Validity
+max_account_duration_desc#:#Max validity of accounts in months. If accounts with unlimited or longer validity are created, they are reduced to this duration. 0 means unlimited duration.
+max_pages#:#Max Pages
+max_pages_desc#:#The maximum number of pages that should be fetch. -1 means no limit.
+max_retries#:#Max Retries
+max_retries_desc#:#Max number of retries that should be made to fetch the data.
 object_owner#:#Object owner
 object_owner_desc#:#Define which ILIAS-User-Object should be the owner of newly created Event-Objects (Courses and Groups)
-owner_root_user#:#Root user
-owner_custom_user#:#Define an account by yourself
 object_owner_id#:#Object ID of the ILIAS account
+owner_custom_user#:#Define an account by yourself
+owner_root_user#:#Root user
+pagesize#:#Pagesize
+pagesize_desc#:#How many Records should be fetched at once. A bigger number is quicker, but needs more RAM.
+seconds_before_retry#:#Wait Time
+seconds_before_retry_desc#:#How many seconds should be waited before retrying to fetch the data.
+settings_for_operation_header#:#Settings for the '%s' operation
+standard_user_role_id#:#Default User Role
+standard_user_role_id_desc#:#ID of the default user role assigned to all users.
+title#:#Update Users from Evento-Soap Interface
+user_auth_mode#:#Authmode of new users
+user_auth_mode_desc#:#Newly created ILIAS-Users will use this authentication mode
+user_changed_mail_body#:#Mail body
+user_changed_mail_body_desc#:#Please enter here the text for the email that will be sent to the user when the user name is changed (without salutation). The placeholders [oldlogin], [newlogin] and [email] will be replaced by the corresponding information of the user.
+user_changed_mail_subject#:#Mail subject
+user_changed_mail_subject_desc#:#Please enter here the subject for the e-mail that will be sent to the user when the username is changed.
+user_import_account_duration#:#Account duration for imported users
+user_import_account_duration_desc#:#Number of moths for which the user accounts created by the import will be accessible
+user_import_settings#:#User Import settings
+user_max_account_duration#:#Max account duration
+user_max_account_duration_desc#:#Maximum validity period for an account in months. If unlimited accounts or accounts with longer validity are created, they will be limited to this duration. 0 means that there are no restrictions.
+user_student_role_id#:#Student Role ID
+user_student_role_id_desc#:#ID of the student role. Accounts with this role, which are marked as deleted by the import, are still valid for 1 year as local accounts.
+user_type_specific_settings_header#:#Settings for the user group '%s'
+ws_password#:#SOAP Password
+ws_password_desc#:#Password to access the SOAP Interface
+ws_send_emails_to_users#:#Send e-mails to users
+ws_send_emails_to_users_desc#:#Should Users be notified about changes
+ws_user#:#SOAP User
+ws_user_desc#:#Username to access the SOAP Interface
+wsdl#:#SOAP Server URL
+wsdl_desc#:#URL of the SOAP Server
