@@ -82,7 +82,7 @@ class EventoImportApiTesterGUI
                 $cmd = htmlspecialchars($cmd);
                 return $this->buildMessageForNextPage("CMD = $cmd, Skip = $skip, Take = $take", $data);
             } catch (\ilEventoImportApiDataException $e) {
-                \ ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+                \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
             } catch (\ilEventoImportCommunicationException $e) {
                 \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
             } catch (\Exception $e) {
