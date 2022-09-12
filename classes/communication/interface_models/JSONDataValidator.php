@@ -38,7 +38,7 @@ trait JSONDataValidator
             return null;
         }
 
-        return $data_array[$key];
+        return (string) $data_array[$key];
     }
 
     /**
