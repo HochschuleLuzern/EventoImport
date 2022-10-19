@@ -35,8 +35,6 @@ class AdminImportTask
 
                 if (!is_null($ilias_evento_event)) {
                     $this->membership_manager->addEventAdmins($event_admin_list, $ilias_evento_event);
-                } else {
-                    $this->logger->logException('Admin Import', 'Evento Event with EventoId "' . $event_admin_list->getEventoId() . '" is not mapped ILIAS. Either it was deleted, never import or there is no ILIAS object for this event.');
                 }
             } catch (\Exception $e) {
                 $this->logger->logException('Admin Import', $e->getMessage());
