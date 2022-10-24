@@ -128,6 +128,7 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
         $this->config_manager->form()->fillFormWithUserImportConfig($form);
         $this->config_manager->form()->fillFormWithEventLocationConfig($form);
         $this->config_manager->form()->fillFormWithEventConfig($form);
+        $this->config_manager->form()->fillFormWithVisitorConfig($form);
     }
 
     public function saveCustomSettings(ilPropertyFormGUI $form) : bool

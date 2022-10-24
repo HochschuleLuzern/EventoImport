@@ -78,3 +78,13 @@ ws_user#:#SOAP-Benutzer
 ws_user_desc#:#Benutzername zum Zugriff auf die SOAP-Schnittstelle
 wsdl#:#SOAP-Server URL
 wsdl_desc#:#URL des SOAP-Servers
+
+visitor_dep_api_name#:#API Bezeichnung Department
+visitor_dep_api_name_desc#:#Bezeichnung des Departements auf der API. Beispielsweise wird "Technik & Architektur" über das Kürzel TA identifiziert
+visitor_role_cb#:#Bereich:
+visitor_roles_settings#:#Lokale Besucherrolle für Kursbereich:
+visitor_cat_ref_id#:#Ref ID der Kategorie
+visitor_cat_ref_id_desc#:#Link zur Kategorie, in welcher die "Visitor"-Rolle Lesezugriff hat:
+visitor_role_id#:#Obj ID der Rolle
+visitor_role_id_desc#:#Sollte die Checkbox für diesen Breich deaktiviert und gespeichert werden, so wird die geschützte Rolle gelöscht.
+visitor_no_role_desc#:#Bisher wurde noch keine Rolle für diesen Breich angelegt. Wenn die Einstellungen gespeichert werden, dann wird für diesen Breich eine neue Rolle angelegt.

@@ -17,6 +17,7 @@ use ilTextInputGUI;
 use ilRadioOption;
 use ilAuthUtils;
 use ilObject;
+use EventoImport\config\locations\RepositoryLocationSeeker;
 
 /**
  * Class ilEventoImportCronConfig
@@ -69,6 +70,20 @@ class CronConfigForm
     const LANG_EVENT_OPT_OWNER_ROOT = 'owner_root_user';
     const LANG_EVENT_OPT_OWNER_CUSTOM_USER = 'owner_custom_user';
     const LANG_EVENT_OPT_OWNER_CUSTOM_ID = 'object_owner_id';
+
+    const LANG_HEADER_VISITOR_ROLES = 'visitor_roles_settings';
+    const LANG_VISITOR_ROLE_CB = 'visitor_role_cb';
+    const LANG_VISITOR_DEP_API_NAME = 'visitor_dep_api_name';
+    const LANG_VISITOR_DEP_API_NAME_DESC = 'visitor_dep_api_name_desc';
+    const LANG_VISITOR_REF_ID = 'visitor_cat_ref_id';
+    const LANG_VISITOR_REF_ID_DESC = 'visitor_cat_ref_id_desc';
+    const LANG_VISITOR_ROLE_ID = 'visitor_role_id';
+    const LANG_VISITOR_ROLE_ID_DESC = 'visitor_role_id_desc';
+    const LANG_VISITOR_NO_ROLE_DESC = 'visitor_no_role_desc';
+    //const LANG_VISITOR_ = '';
+    //const LANG_VISITOR_ = '';
+
+
 
     const FORM_API_URI = 'crevento_api_uri';
     const FORM_API_AUTH_KEY = 'crevento_api_auth_key';
@@ -415,6 +430,79 @@ class CronConfigForm
         $radio->setValue($this->settings->get(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT));
 
         $form->addItem($radio);
+    }
+
+    public function fillFormWithVisitorConfig(ilPropertyFormGUI $form)
+    {
+        /***************************
+         * Visitors Import Settings
+         ***************************/
+
+
+        $header = new ilFormSectionHeaderGUI();
+        $header->setTitle(self::LANG_HEADER_VISITOR_ROLES);
+        $form->addItem($header);
+
+        $global_roles = $this->rbac->review()->getGlobalRoles();
+        $globale_roles_settings = $this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, null);
+        $role_mapping = !is_null($globale_roles_settings) ? json_decode($globale_roles_settings, true) : null;
+        if (is_null($role_mapping) || !is_array($role_mapping)) {
+            $role_mapping = [];
+        }
+
+        $json_settings = $this->settings->get(self::CONF_LOCATIONS, null);
+        if (!is_null($json_settings)) {
+            $locations_settings = json_decode($json_settings, true);
+        } else {
+            $locations_settings = [];
+        }
+
+        global $DIC;
+        $tree = $DIC->repositoryTree();
+
+        $location_seeker = new RepositoryLocationSeeker($tree, 1);
+
+        foreach($locations_settings[self::CONF_KEY_DEPARTMENTS] as $department_name) {
+            foreach($locations_settings[self::CONF_KEY_KINDS] as $kind_name) {
+                $ref_id = $location_seeker->searchRefIdOfKindCategory($department_name, $kind_name);
+                if(!is_null($ref_id)) {
+
+                    $title = htmlspecialchars("$department_name/$kind_name");
+                    $title = $this->cp->txt(self::LANG_VISITOR_ROLE_CB) . " \"$title\"";
+                    $post_var = str_replace(' ', '_',strtolower("visitors-{$department_name}-{$kind_name}"));
+
+                    $ws_item = new ilCheckboxInputGUI(
+                        $title,
+                        $post_var
+                    );
+                    $ws_item->setValue('1');
+                    $ws_item->setChecked(false);
+
+                    $txt_item = new \ilNonEditableValueGUI($this->cp->txt(self::LANG_VISITOR_REF_ID));
+                    $txt_item->setValue($ref_id);
+                    $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_REF_ID_DESC) . ' ' . \ilLink::_getLink($ref_id, 'cat'));
+                    $ws_item->addSubItem($txt_item);
+
+                    $txt_item = new \ilNonEditableValueGUI($this->cp->txt(self::LANG_VISITOR_ROLE_ID));
+                    $role_id = NULL;
+                    if(is_null($role_id)) {
+                        $txt_item->setValue("-");
+                        $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_NO_ROLE_DESC));
+                    } else {
+                        $txt_item->setValue($role_id);
+                        $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_ROLE_ID_DESC));
+                    }
+
+                    $ws_item->addSubItem($txt_item);
+
+                    $txt_item = new ilTextInputGUI($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME));
+                    $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME_DESC));
+                    $ws_item->addSubItem($txt_item);
+
+                    $form->addItem($ws_item);
+                }
+            }
+        }
     }
 
     public function saveApiConfigFromForm(ilPropertyFormGUI $form) : bool
