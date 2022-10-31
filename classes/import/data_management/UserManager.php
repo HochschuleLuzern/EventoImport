@@ -309,4 +309,9 @@ class UserManager
 
         return $ilias_user_id;
     }
+
+    public function getIliasEventoUserForEventoUser(EventoUserShort $evento_user) : IliasEventoUser
+    {
+        return $this->evento_user_repo->getIliasEventoUserByEventoId($evento_user->getEventoId());
+    }
 }

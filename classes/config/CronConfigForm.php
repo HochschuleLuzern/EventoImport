@@ -70,7 +70,6 @@ class CronConfigForm
     const LANG_EVENT_OPT_OWNER_ROOT = 'owner_root_user';
     const LANG_EVENT_OPT_OWNER_CUSTOM_USER = 'owner_custom_user';
     const LANG_EVENT_OPT_OWNER_CUSTOM_ID = 'object_owner_id';
-
     const LANG_HEADER_VISITOR_ROLES = 'visitor_roles_settings';
     const LANG_VISITOR_ROLE_CB = 'visitor_role_cb';
     const LANG_VISITOR_DEP_API_NAME = 'visitor_dep_api_name';
@@ -80,10 +79,6 @@ class CronConfigForm
     const LANG_VISITOR_ROLE_ID = 'visitor_role_id';
     const LANG_VISITOR_ROLE_ID_DESC = 'visitor_role_id_desc';
     const LANG_VISITOR_NO_ROLE_DESC = 'visitor_no_role_desc';
-    //const LANG_VISITOR_ = '';
-    //const LANG_VISITOR_ = '';
-
-
 
     const FORM_API_URI = 'crevento_api_uri';
     const FORM_API_AUTH_KEY = 'crevento_api_auth_key';
@@ -443,13 +438,6 @@ class CronConfigForm
         $header->setTitle(self::LANG_HEADER_VISITOR_ROLES);
         $form->addItem($header);
 
-        $global_roles = $this->rbac->review()->getGlobalRoles();
-        $globale_roles_settings = $this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, null);
-        $role_mapping = !is_null($globale_roles_settings) ? json_decode($globale_roles_settings, true) : null;
-        if (is_null($role_mapping) || !is_array($role_mapping)) {
-            $role_mapping = [];
-        }
-
         $json_settings = $this->settings->get(self::CONF_LOCATIONS, null);
         if (!is_null($json_settings)) {
             $locations_settings = json_decode($json_settings, true);
@@ -470,7 +458,6 @@ class CronConfigForm
                     $title = htmlspecialchars("$department_name/$kind_name");
                     $title = $this->cp->txt(self::LANG_VISITOR_ROLE_CB) . " \"$title\"";
                     $post_var = str_replace(' ', '_',strtolower("visitors-{$department_name}-{$kind_name}"));
-
                     $ws_item = new ilCheckboxInputGUI(
                         $title,
                         $post_var
@@ -495,7 +482,8 @@ class CronConfigForm
 
                     $ws_item->addSubItem($txt_item);
 
-                    $txt_item = new ilTextInputGUI($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME));
+                    $post_var = str_replace(' ', '_',strtolower("shortname_{$department_name}-{$kind_name}"));
+                    $txt_item = new ilTextInputGUI($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME), $post_var);
                     $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME_DESC));
                     $ws_item->addSubItem($txt_item);
 

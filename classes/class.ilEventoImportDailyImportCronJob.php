@@ -8,6 +8,7 @@ use EventoImport\communication\EventoUserPhotoImporter;
 use EventoImport\import\Logger;
 use EventoImport\import\ImportTaskFactory;
 use EventoImport\config\ConfigurationManager;
+use EventoImport\communication\EventoEmployeeImporter;
 
 class ilEventoImportDailyImportCronJob extends ilCronJob
 {
@@ -93,8 +94,18 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
                 )
             );
 
-            $import_users->run();
-            $import_events->run();
+            $import_local_visitors = $this->import_factory->buildLocalVisitorImport(
+                new EventoEmployeeImporter(
+                    $data_source,
+                    $this->logger,
+                    $api_settings->getTimeoutAfterRequest(),
+                    $api_settings->getMaxRetries()
+                )
+            );
+
+            //$import_users->run();
+            //$import_events->run();
+            $import_local_visitors->run();
 
             return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
         } catch (Exception $e) {

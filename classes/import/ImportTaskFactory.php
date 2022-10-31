@@ -25,6 +25,8 @@ use EventoImport\import\data_management\UserManager;
 use EventoImport\config\ConfigurationManager;
 use EventoImport\config\locations\RepositoryLocationSeeker;
 use EventoImport\config\locations\EventLocationCategoryBuilder;
+use EventoImport\communication\EventoEmployeeImporter;
+use EventoImport\config\local_roles\LocalVisitorRoleRepository;
 
 class ImportTaskFactory
 {
@@ -138,6 +140,22 @@ class ImportTaskFactory
                 $this->rbac
             ),
             new IliasEventoEventObjectRepository($this->db),
+            $this->logger
+        );
+    }
+
+    public function buildLocalVisitorImport(EventoEmployeeImporter $employee_import) : LocalVisitorImport
+    {
+        $user_settings = $this->config_manager->getDefaultUserConfiguration();
+        return new LocalVisitorImport(
+            $employee_import,
+            new LocalVisitorRoleRepository($this->db),
+            new UserManager(
+                new IliasUserServices($user_settings, $this->db, $this->rbac),
+                new IliasEventoUserRepository($this->db),
+                $user_settings,
+                $this->logger
+            ),
             $this->logger
         );
     }
