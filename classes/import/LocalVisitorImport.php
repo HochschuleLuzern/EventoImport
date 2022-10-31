@@ -39,7 +39,7 @@ class LocalVisitorImport
     private function fetchEmployeesAndSyncWithVisitorRole(LocalVisitorRole $visitor_role)
     {
         $ilias_evento_user_list = [];
-        foreach ($this->evento_importer->fetchEmployees($visitor_role->getDepartment(), $visitor_role->getKind()) as $data_set) {
+        foreach ($this->evento_importer->fetchEmployees($visitor_role->getDepartmentApiName(), $visitor_role->getKindLocationName()) as $data_set) {
             try {
                 $evento_user = new EventoUserShort($data_set);
                 $ilias_evento_user = $this->user_manager->getIliasEventoUserForEventoUser($evento_user);

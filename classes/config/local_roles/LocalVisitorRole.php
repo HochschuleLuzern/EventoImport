@@ -8,19 +8,26 @@ class LocalVisitorRole
 {
     private \ilObjRole $role;
     private int $location_ref_id;
-    private string $department;
-    private string $kind;
+    private string $department_location_name;
+    private string $kind_location_name;
+    private string $department_api_name;
     private \ilRbacReview $rbac_review;
     private \ilRbacAdmin $rbac_admin;
 
-    public function __construct(\ilObjRole $role, int $location_ref_id, string $department, string $kind, RBACServices $rbac)
+    public function __construct(\ilObjRole $role, int $location_ref_id, string $department_location_name, string $kind_location_name, string $department_api_name, RBACServices $rbac)
     {
         $this->role = $role;
         $this->location_ref_id = $location_ref_id;
-        $this->department = $department;
-        $this->kind = $kind;
+        $this->department_location_name = $department_location_name;
+        $this->kind_location_name = $kind_location_name;
+        $this->department_api_name = $department_api_name;
         $this->rbac_review = $rbac->review();
         $this->rbac_admin = $rbac->admin();
+    }
+
+    public function getRoleId() : int
+    {
+        return $this->role->getId();
     }
 
     public function getLocationRefId() : int
@@ -28,14 +35,19 @@ class LocalVisitorRole
         return $this->location_ref_id;
     }
 
-    public function getDepartment() : string
+    public function getDepartmentLocationName() : string
     {
-        return $this->department;
+        return $this->department_location_name;
     }
 
-    public function getKind() : string
+    public function getKindLocationName() : string
     {
-        return $this->kind;
+        return $this->kind_location_name;
+    }
+
+    public function getDepartmentApiName() : string
+    {
+        return $this->department_api_name;
     }
 
     public function synchronizeWithIliasEventoUserList(array $ilias_evento_user_list)
@@ -54,7 +66,7 @@ class LocalVisitorRole
     private function removeUsersNotInListFromRole(array $ilias_evento_user_list)
     {
         foreach ($this->rbac_review->assignedUsers($this->role->getId()) as $assigned_user) {
-            if (!$this->isUserInEventoIliasUserList($assigned_user, $ilias_evento_user_list)) {
+            if (!$this->isUserInEventoIliasUserList((int) $assigned_user, $ilias_evento_user_list)) {
                 $this->rbac_admin->deassignUser($this->role->getId(), $assigned_user);
             }
         }

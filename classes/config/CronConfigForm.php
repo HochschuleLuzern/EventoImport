@@ -18,6 +18,9 @@ use ilRadioOption;
 use ilAuthUtils;
 use ilObject;
 use EventoImport\config\locations\RepositoryLocationSeeker;
+use EventoImport\config\local_roles\LocalVisitorRoleManager;
+use EventoImport\config\local_roles\LocalVisitorRoleRepository;
+use EventoImport\config\local_roles\LocalVisitorRoleFactory;
 
 /**
  * Class ilEventoImportCronConfig
@@ -448,13 +451,13 @@ class CronConfigForm
         global $DIC;
         $tree = $DIC->repositoryTree();
 
+        $local_role_manager = new LocalVisitorRoleManager(new LocalVisitorRoleRepository($DIC->database()),new LocalVisitorRoleFactory($DIC->rbac()),$DIC->rbac());
         $location_seeker = new RepositoryLocationSeeker($tree, 1);
-
         foreach($locations_settings[self::CONF_KEY_DEPARTMENTS] as $department_name) {
             foreach($locations_settings[self::CONF_KEY_KINDS] as $kind_name) {
                 $ref_id = $location_seeker->searchRefIdOfKindCategory($department_name, $kind_name);
                 if(!is_null($ref_id)) {
-
+                    $role = $local_role_manager->getLocalVisitorRoleByDepartmentAndKind($department_name, $kind_name);
                     $title = htmlspecialchars("$department_name/$kind_name");
                     $title = $this->cp->txt(self::LANG_VISITOR_ROLE_CB) . " \"$title\"";
                     $post_var = str_replace(' ', '_',strtolower("visitors-{$department_name}-{$kind_name}"));
@@ -463,7 +466,7 @@ class CronConfigForm
                         $post_var
                     );
                     $ws_item->setValue('1');
-                    $ws_item->setChecked(false);
+                    $ws_item->setChecked(!is_null($role));
 
                     $txt_item = new \ilNonEditableValueGUI($this->cp->txt(self::LANG_VISITOR_REF_ID));
                     $txt_item->setValue($ref_id);
@@ -471,12 +474,11 @@ class CronConfigForm
                     $ws_item->addSubItem($txt_item);
 
                     $txt_item = new \ilNonEditableValueGUI($this->cp->txt(self::LANG_VISITOR_ROLE_ID));
-                    $role_id = NULL;
-                    if(is_null($role_id)) {
+                    if(is_null($role)) {
                         $txt_item->setValue("-");
                         $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_NO_ROLE_DESC));
                     } else {
-                        $txt_item->setValue($role_id);
+                        $txt_item->setValue($role->getRoleId());
                         $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_ROLE_ID_DESC));
                     }
 
@@ -485,6 +487,9 @@ class CronConfigForm
                     $post_var = str_replace(' ', '_',strtolower("shortname_{$department_name}-{$kind_name}"));
                     $txt_item = new ilTextInputGUI($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME), $post_var);
                     $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME_DESC));
+                    if(!is_null($role)) {
+                        $txt_item->setValue($role->getDepartmentApiName());
+                    }
                     $ws_item->addSubItem($txt_item);
 
                     $form->addItem($ws_item);
@@ -598,6 +603,46 @@ class CronConfigForm
                 $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
                 $this->settings->set(self::CONF_EVENT_OWNER_ID, $input_user_id);
                 break;
+        }
+
+        return $form_input_correct;
+    }
+
+    public function saveVisitorRolesConfigForm(ilPropertyFormGUI $form) : bool
+    {
+        $form_input_correct = true;
+
+        $json_settings = $this->settings->get(self::CONF_LOCATIONS, null);
+        if (!is_null($json_settings)) {
+            $locations_settings = json_decode($json_settings, true);
+        } else {
+            $locations_settings = [];
+        }
+
+        global $DIC;
+        $tree = $DIC->repositoryTree();
+
+        $location_seeker = new RepositoryLocationSeeker($tree, 1);
+        $local_role_manager = new LocalVisitorRoleManager(new LocalVisitorRoleRepository($DIC->database()),new LocalVisitorRoleFactory($DIC->rbac()),$DIC->rbac());
+        foreach($locations_settings[self::CONF_KEY_DEPARTMENTS] as $department_name) {
+            foreach($locations_settings[self::CONF_KEY_KINDS] as $kind_name) {
+                $ref_id = $location_seeker->searchRefIdOfKindCategory($department_name, $kind_name);
+                if(!is_null($ref_id)) {
+
+                    $post_var = str_replace(' ', '_',strtolower("visitors-{$department_name}-{$kind_name}"));
+                    $check_box = $form->getInput($post_var);
+                    if($check_box == '1') {
+                        $post_var = str_replace(' ', '_',strtolower("shortname_{$department_name}-{$kind_name}"));
+                        $dep_api_name = $form->getInput($post_var);
+                        if($dep_api_name == '' || $dep_api_name == null) {
+                            $dep_api_name = $department_name;
+                        }
+                        $local_role_manager->configLocalRoleByDepartmentAndKind($department_name, $kind_name, $ref_id, $dep_api_name);
+                    } else {
+                        $local_role_manager->unconfigLocalRoleByDepartmentAndKind($department_name, $kind_name, $ref_id);
+                    }
+                }
+            }
         }
 
         return $form_input_correct;

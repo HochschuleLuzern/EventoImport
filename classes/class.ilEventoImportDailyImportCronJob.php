@@ -147,6 +147,7 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
         return $this->config_manager->form()->saveApiConfigFromForm($form)
             && $this->config_manager->form()->saveUserConfigFromForm($form)
             && $this->config_manager->form()->saveEventLocationConfigFromForm($form)
-            && $this->config_manager->form()->saveEventConfigFromForm($form);
+            && $this->config_manager->form()->saveEventConfigFromForm($form)
+            && $this->config_manager->form()->saveVisitorRolesConfigForm($form);
     }
 }
