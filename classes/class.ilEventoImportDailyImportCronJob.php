@@ -103,8 +103,8 @@ class ilEventoImportDailyImportCronJob extends ilCronJob
                 )
             );
 
-            //$import_users->run();
-            //$import_events->run();
+            $import_users->run();
+            $import_events->run();
             $import_local_visitors->run();
 
             return new ilEventoImportResult(ilEventoImportResult::STATUS_OK, 'Cron job terminated successfully.');
