@@ -27,7 +27,7 @@ class EventoEmployeeImporter extends EventoImporterBase
     public function fetchEmployees(string $department_name, string $kind) : array
     {
         $request_params = [
-            "dep" => $department_name,
+            "dept" => $department_name,
             "kind" => $kind
         ];
 
