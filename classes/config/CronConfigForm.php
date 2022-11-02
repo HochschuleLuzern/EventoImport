@@ -21,6 +21,7 @@ use EventoImport\config\locations\RepositoryLocationSeeker;
 use EventoImport\config\local_roles\LocalVisitorRoleManager;
 use EventoImport\config\local_roles\LocalVisitorRoleRepository;
 use EventoImport\config\local_roles\LocalVisitorRoleFactory;
+use EventoImport\config\locations\BaseLocationConfiguration;
 
 /**
  * Class ilEventoImportCronConfig
@@ -66,7 +67,6 @@ class CronConfigForm
     const LANG_HEADER_EVENT_LOCATIONS = 'location_settings';
     const LANG_DEPARTMENTS = 'location_departments';
     const LANG_KINDS = 'location_kinds';
-    const LANG_YEARS = 'location_years';
     const LANG_HEADER_EVENT_SETTINGS = 'event_import_settings';
     const LANG_EVENT_OBJECT_OWNER = 'object_owner';
     const LANG_EVENT_OBJECT_OWNER_DESC = 'object_owner_desc';
@@ -102,7 +102,6 @@ class CronConfigForm
     const FORM_USER_EVENTO_ROLE_MAPPED_TO_ = 'crevento_map_from_';
     const FORM_DEPARTEMTNS = 'crevento_departments';
     const FORM_KINDS = 'crevento_kinds';
-    const FORM_YEARS = 'crevento_years';
     const FORM_EVENT_OBJECT_OWNER = 'crevento_object_owner';
     const FORM_EVENT_OPT_OWNER_ROOT = 'crevento_object_owner_root';
     const FORM_EVENT_OPT_OWNER_CUSTOM_USER = 'crevento_object_owner_custom';
@@ -124,10 +123,6 @@ class CronConfigForm
     const CONF_USER_STUDENT_ROLE_ID = 'crevento_student_role_id';
     const CONF_DEFAULT_USER_ROLE = 'crevento_default_user_role';
     const CONF_ROLES_ILIAS_EVENTO_MAPPING = 'crevento_roles_ilias_evento_mapping';
-    const CONF_LOCATIONS = 'crevento_location_settings';
-    const CONF_KEY_DEPARTMENTS = 'departments';
-    const CONF_KEY_KINDS = 'kinds';
-    const CONF_KEY_YEARS = 'years';
     const CONF_EVENT_OWNER_ID = 'crevento_object_owner_id';
     const CONF_EVENT_OBJECT_OWNER = 'crevento_object_owner';
 
@@ -369,25 +364,16 @@ class CronConfigForm
         $header->setTitle($this->cp->txt(self::LANG_HEADER_EVENT_LOCATIONS));
         $form->addItem($header);
 
-        $json_settings = $this->settings->get(self::CONF_LOCATIONS, null);
-        if (!is_null($json_settings)) {
-            $locations_settings = json_decode($json_settings, true);
-        } else {
-            $locations_settings = [];
-        }
+        $locations = new BaseLocationConfiguration($this->settings);
 
         $departments = new ilTextInputGUI($this->cp->txt(self::LANG_DEPARTMENTS), self::FORM_DEPARTEMTNS);
         $departments->setMulti(true, false, true);
-        if (isset($locations_settings[self::CONF_KEY_DEPARTMENTS]) && is_array($locations_settings[self::CONF_KEY_DEPARTMENTS])) {
-            $departments->setValue($locations_settings[self::CONF_KEY_DEPARTMENTS]);
-        }
+        $departments->setValue($locations->getDepartmentLocationList());
         $form->addItem($departments);
 
         $kinds = new ilTextInputGUI($this->cp->txt(self::LANG_KINDS), self::FORM_KINDS);
         $kinds->setMulti(true, false, true);
-        if (isset($locations_settings[self::CONF_KEY_KINDS]) && is_array($locations_settings[self::CONF_KEY_KINDS])) {
-            $kinds->setValue($locations_settings[self::CONF_KEY_KINDS]);
-        }
+        $kinds->setValue($locations->getKindLocationList());
         $form->addItem($kinds);
     }
 
@@ -441,20 +427,15 @@ class CronConfigForm
         $header->setTitle(self::LANG_HEADER_VISITOR_ROLES);
         $form->addItem($header);
 
-        $json_settings = $this->settings->get(self::CONF_LOCATIONS, null);
-        if (!is_null($json_settings)) {
-            $locations_settings = json_decode($json_settings, true);
-        } else {
-            $locations_settings = [];
-        }
+        $locations = new BaseLocationConfiguration($this->settings);
 
         global $DIC;
         $tree = $DIC->repositoryTree();
 
         $local_role_manager = new LocalVisitorRoleManager(new LocalVisitorRoleRepository($DIC->database()),new LocalVisitorRoleFactory($DIC->rbac()),$DIC->rbac());
         $location_seeker = new RepositoryLocationSeeker($tree, 1);
-        foreach($locations_settings[self::CONF_KEY_DEPARTMENTS] as $department_name) {
-            foreach($locations_settings[self::CONF_KEY_KINDS] as $kind_name) {
+        foreach($locations->getDepartmentLocationList() as $department_name) {
+            foreach($locations->getKindLocationList() as $kind_name) {
                 $ref_id = $location_seeker->searchRefIdOfKindCategory($department_name, $kind_name);
                 if(!is_null($ref_id)) {
                     $role = $local_role_manager->getLocalVisitorRoleByDepartmentAndKind($department_name, $kind_name);
@@ -581,8 +562,12 @@ class CronConfigForm
     {
         $form_input_correct = true;
 
-        $location_settings = $this->locationSettingsToJSON($form);
-        $this->settings->set(self::CONF_LOCATIONS, $location_settings);
+        $location_settings = new BaseLocationConfiguration($this->settings);
+
+        $location_settings->setDepartmentLocationList($form->getInput(self::FORM_DEPARTEMTNS));
+        $location_settings->setKindLocationList($form->getInput(self::FORM_KINDS));
+
+        $location_settings->saveCurrentConfigurationToSettings();
 
         return $form_input_correct;
     }
@@ -612,20 +597,15 @@ class CronConfigForm
     {
         $form_input_correct = true;
 
-        $json_settings = $this->settings->get(self::CONF_LOCATIONS, null);
-        if (!is_null($json_settings)) {
-            $locations_settings = json_decode($json_settings, true);
-        } else {
-            $locations_settings = [];
-        }
+        $locations = new BaseLocationConfiguration($this->settings);
 
         global $DIC;
         $tree = $DIC->repositoryTree();
 
         $location_seeker = new RepositoryLocationSeeker($tree, 1);
         $local_role_manager = new LocalVisitorRoleManager(new LocalVisitorRoleRepository($DIC->database()),new LocalVisitorRoleFactory($DIC->rbac()),$DIC->rbac());
-        foreach($locations_settings[self::CONF_KEY_DEPARTMENTS] as $department_name) {
-            foreach($locations_settings[self::CONF_KEY_KINDS] as $kind_name) {
+        foreach($locations->getDepartmentLocationList() as $department_name) {
+            foreach($locations->getKindLocationList() as $kind_name) {
                 $ref_id = $location_seeker->searchRefIdOfKindCategory($department_name, $kind_name);
                 if(!is_null($ref_id)) {
 
@@ -662,31 +642,5 @@ class CronConfigForm
         if (!is_null($value)) {
             $this->settings->set($conf_key, $value);
         }
-    }
-
-    private function purifyLocationSettingsList(array $given_list)
-    {
-        $list_to_save = [];
-
-        foreach ($given_list as $item_string) {
-            if ($item_string != '') {
-                $list_to_save[] = trim($item_string);
-            }
-        }
-
-        return $list_to_save;
-    }
-
-    private function locationSettingsToJSON(ilPropertyFormGUI $a_form)
-    {
-        $settings_list = array(
-            self::CONF_KEY_DEPARTMENTS => [],
-            self::CONF_KEY_KINDS => []
-        );
-
-        $settings_list[self::CONF_KEY_DEPARTMENTS] = $this->purifyLocationSettingsList($a_form->getInput(self::FORM_DEPARTEMTNS));
-        $settings_list[self::CONF_KEY_KINDS] = $this->purifyLocationSettingsList($a_form->getInput(self::FORM_KINDS));
-
-        return json_encode($settings_list);
     }
 }
