@@ -5,6 +5,9 @@ use EventoImport\administration\EventLocationsBuilder;
 use EventoImport\administration\EventLocationsAdminGUI;
 use ILIAS\DI\UIServices;
 use EventoImport\administration\EventoImportApiTester;
+use EventoImport\administration\AdminScriptPageGUI;
+use EventoImport\config\locations\EventLocationsRepository;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class ilEventoImportConfigGUI
@@ -13,12 +16,17 @@ use EventoImport\administration\EventoImportApiTester;
  */
 class ilEventoImportConfigGUI extends ilPluginConfigGUI
 {
+    const TAB_MAIN = 'main';
+
+
     private ilSetting $settings;
     private ilTree $tree;
     private ilGlobalPageTemplate $tpl;
     private ilCtrl $ctrl;
     private UIServices $ui_services;
     private ilDBInterface $db;
+    private ilTabsGUI $tabs;
+    private ServerRequestInterface $request;
 
     public function __construct()
     {
@@ -30,12 +38,32 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $this->ctrl = $DIC->ctrl();
         $this->ui_services = $DIC->ui();
         $this->db = $DIC->database();
+        $this->tabs = $DIC->tabs();
+        $this->request = $DIC->http()->request();
+    }
+
+    private function addPageTabs()
+    {
+        $query_params = $this->request->getQueryParams();
+
+        $link = $this->ctrl->getLinkTargetByClass(ilEventoImportConfigGUI::class, ilObjComponentSettingsGUI::CMD_CONFIGURE);
+        $this->tabs->addTab(self::TAB_MAIN, $this->plugin_object->txt('confpage_tab_main'), $link);
+
+        if (isset($query_params['ref_id'])) {
+            $this->ctrl->setParameter($this, 'ref_id', $query_params['ref_id']);
+        }
+        $link = $this->ctrl->getLinkTargetByClass(AdminScriptPageGUI::CTRL_UI_ROUTE, AdminScriptPageGUI::SHOW_SCRIPT);
+        $this->tabs->addTab(AdminScriptPageGUI::TAB_ADMIN_SCRIPTS, $this->plugin_object->txt('confpage_tab_admin_scripts'), $link);
+
+        $this->tabs->activateTab(self::TAB_MAIN);
     }
 
     public function performCommand($cmd)
     {
+        $this->addPageTabs();
+
         switch ($cmd) {
-            case 'configure':
+            case ilObjComponentSettingsGUI::CMD_CONFIGURE:
                 $api_tester_gui = new EventoImportApiTesterGUI(
                     $this,
                     new EventoImportApiTester($this->settings, $this->db),
@@ -46,7 +74,8 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 );
                 $api_tester_html = $api_tester_gui->getApiTesterFormAsString();
 
-                $locations_gui = new EventLocationsAdminGUI($this, $this->settings, new \EventoImport\config\locations\EventLocationsRepository($this->db), $this->ctrl, $this->ui_services);
+                $locations_gui = new EventLocationsAdminGUI($this, $this->settings, new EventLocationsRepository($this->db), $this->ctrl, $this->ui_services);
+
                 $locations_html = $locations_gui->getEventLocationsPanelHTML();
 
                 $this->tpl->setContent($api_tester_html . $locations_html);
@@ -56,7 +85,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $json_settings = $this->settings->get('crevento_location_settings');
                 $locations_settings = json_decode($json_settings, true);
 
-                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\locations\EventLocationsRepository($this->db), $this->tree);
+                $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
                 $diff = $locations_builder->rebuildRepositoryLocationsTable($locations_settings);
 
                 \ilUtil::sendSuccess("Event Locats reloaded successfully. Added $diff new locations", true);
@@ -67,7 +96,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $json_settings = $this->settings->get('crevento_location_settings');
                 $locations_settings = json_decode($json_settings, true);
 
-                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\locations\EventLocationsRepository($this->db), $this->tree);
+                $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
                 $location_lists = $locations_builder->getListOfMissingKindCategories($locations_settings);
 
                 $f = $this->ui_services->factory();
@@ -103,7 +132,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $json_settings = $this->settings->get('crevento_location_settings');
                 $locations_settings = json_decode($json_settings, true);
 
-                $locations_builder = new EventLocationsBuilder(new \EventoImport\config\locations\EventLocationsRepository($this->db), $this->tree);
+                $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
                 $location_lists = $locations_builder->buildCategoryObjectsForConfiguredKinds($locations_settings);
 
                 $ui_comps = [];
