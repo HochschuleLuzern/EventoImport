@@ -6,6 +6,8 @@ use ILIAS\DI\UIServices;
 use EventoImport\administration\scripts\AdminScriptInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use EventoImport\administration\scripts\LookupEventByEventoTitle;
+use EventoImport\administration\scripts\ReAddRemovedEventParticipants;
+use EventoImport\import\data_management\ilias_core\MembershipablesEventInTreeSeeker;
 
 /**
  * Class AdminScriptPageGUI
@@ -28,8 +30,9 @@ class AdminScriptPageGUI
     private \ilLocatorGUI $locator;
     private \ilDBInterface $db;
     private ServerRequestInterface $request;
+    private \ilTree $tree;
 
-    public function __construct(\ilEventoImportPlugin $plugin_object, \ilGlobalPageTemplate $tpl, UIServices $ui_services, \ilCtrl $ctrl, \ilTabsGUI $tabs, \ilLocatorGUI $locator, \ilDBInterface $db, ServerRequestInterface $request)
+    public function __construct(\ilEventoImportPlugin $plugin_object, \ilGlobalPageTemplate $tpl, UIServices $ui_services, \ilCtrl $ctrl, \ilTabsGUI $tabs, \ilLocatorGUI $locator, \ilDBInterface $db, ServerRequestInterface $request, \ilTree $tree)
     {
         $this->plugin_object = $plugin_object;
         $this->tpl = $tpl;
@@ -39,9 +42,11 @@ class AdminScriptPageGUI
         $this->locator = $locator;
         $this->db = $db;
         $this->request = $request;
+        $this->tree = $tree;
 
         $this->scripts = [
-            new LookupEventByEventoTitle($this->db, $this->ctrl)
+            new LookupEventByEventoTitle($this->db, $this->ctrl),
+            new ReAddRemovedEventParticipants($this->db, $this->ctrl, $this->request, new MembershipablesEventInTreeSeeker($this->tree))
         ];
     }
 

@@ -292,4 +292,21 @@ class IliasEventoEventObjectRepository
             return false;
         }
     }
+
+    public function getIliasEventoEventsByTitle(string $title, bool $like_search)
+    {
+        $query = "SELECT * " . " FROM " . IliasEventoEventsTblDef::TABLE_NAME . " WHERE ";
+        $query .= $like_search
+            ? $this->db->like('evento_title', \ilDBConstants::T_TEXT, $title . '%')
+            : IliasEventoEventsTblDef::COL_EVENTO_ID . " = " . $this->db->quote($title, \ilDBConstants::T_TEXT);
+
+        $result = $this->db->query($query);
+
+        $events = [];
+        while ($row = $this->db->fetchAssoc($result)) {
+            $events[] = $this->buildIliasEventoEventFromRow($row);
+        }
+
+        return $events;
+    }
 }

@@ -14,15 +14,19 @@ use EventoImport\config\ImporterApiSettings;
 use EventoImport\communication\ImporterIterator;
 use EventoImport\import\Logger;
 use ILIAS\UI\Component\Modal\Modal;
+use EventoImport\import\data_management\repository\model\IliasEventoEvent;
 
 class LookupEventByEventoTitle implements AdminScriptInterface
 {
+    use AdminScriptCommonMethods;
+
     private const FORM_TITLE = 'evento_title';
 
     private const CMD_LOOKUP_IN_DB = 'lookup_title';
     private const CMD_LOOKUP_ON_API = 'lookup_on_api';
 
     private \ilDBInterface $db;
+    private \ilCtrl $ctrl;
 
     public function __construct(\ilDBInterface $db, \ilCtrl $ctrl)
     {
@@ -68,80 +72,51 @@ class LookupEventByEventoTitle implements AdminScriptInterface
 
         switch($cmd) {
             case self::CMD_LOOKUP_IN_DB:
-                $evento_ids = $this->getEventoIdsByTitle($title);
+                $repo = new IliasEventoEventObjectRepository($this->db);
+                $events = $repo->getIliasEventoEventsByTitle($title, true);
 
-                if (count($evento_ids) > 0) {
-                    $display_string = "Evento IDs found in DB:<br>";
-                    foreach ($evento_ids as $title => $id) {
-                        $display_string .= "$title -> $id<br>";
+                if (count($events) > 0) {
+                    $display_api_responses = "<b>Following Events found in DB:</b><br>";
+                    /** @var IliasEventoEvent $ilias_evento_event */
+                    foreach ($events as $ilias_evento_event) {
+                        $id = $ilias_evento_event->getEventoEventId();
+                        $title = htmlspecialchars($ilias_evento_event->getEventoTitle());
+                        $display_api_responses .= "$title -> $id<br>";
                     }
 
-                    return $this->buildModal($this->getTitle() . ': '.htmlspecialchars($title), $display_string, $f);
+                    return $this->buildModal($this->getTitle() . ': '.htmlspecialchars($title), $display_api_responses, $f);
                 } else {
                     return $this->buildModal($this->getTitle() . ': '.htmlspecialchars($title), "No ID found for title " . htmlspecialchars($title), $f);
                 }
 
             case self::CMD_LOOKUP_ON_API:
-                $evento_ids = $this->getEventoIdsByTitle($title);
+                $repo = new IliasEventoEventObjectRepository($this->db);
+                $events = $repo->getIliasEventoEventsByTitle($title, true);
 
-                $importer = $this->buildEventImporter();
+                $importer = $this->buildEventImporter($this->db);
 
-                $display_string = "API Response to the following IDs: ";
-                foreach ($evento_ids as $title => $id) {
-                    $id = (int)$id;
-                    $display_string .= '<a href=#crevento_' . $id . '>' . $id . '</a>, ';
-                }
+                $display_top = "API Response to the following IDs: ";
+                $display_api_responses = '<br>';
+                /** @var IliasEventoEvent $ilias_evento_event */
+                foreach ($events as $ilias_evento_event) {
+                    $id = $ilias_evento_event->getEventoEventId();
+                    $title = $ilias_evento_event->getEventoTitle();
 
-                foreach ($evento_ids as $title => $id) {
-                    $id = (int)$id;
+                    $display_top .= '<a href=#crevento_' . $id . '>' . $title . ' ('. $id . ')</a>, ';
+
                     $response = $importer->fetchEventDataRecordById($id);
 
                     if (is_null($response)) {
-                        $display_string .= 'No Event found for Title='.htmlspecialchars($title).' and ID='.$id.'<br>';
+                        $display_api_responses .= 'No Event found for Title='.htmlspecialchars($title).' and ID='.$id.'<br>';
                     } else {
-                        $display_string .= '<pre id="crevento_'.$id.'">' . htmlspecialchars(print_r($response->getDecodedApiData(), true)) . '</pre>';
+                        $display_api_responses .= '<pre id="crevento_'.$id.'">' . htmlspecialchars(print_r($response->getDecodedApiData(), true)) . '</pre>';
                     }
                 }
 
-                return $this->buildModal($this->getTitle() . ': '.htmlspecialchars($title), $display_string, $f);
+                return $this->buildModal($this->getTitle() . ': '.htmlspecialchars($title), $display_top . $display_api_responses, $f);
 
             default:
                 return $this->buildModal($this->getTitle() . ': '.htmlspecialchars($title), "Unknown Command", $f);
         }
-    }
-
-    private function getEventoIdsByTitle(string $title) : array
-    {
-        $sql = "SELECT evento_id, evento_title FROM crevento_evnto_events WHERE " . $this->db->like('evento_title', \ilDBConstants::T_TEXT, $title . '%');
-        $result = $this->db->query($sql);
-
-        $events = [];
-        while ($row = $this->db->fetchAssoc($result)) {
-            $events[$row['evento_title']] = $row['evento_id'];
-        }
-
-        return $events;
-    }
-
-    private function buildEventImporter()
-    {
-        $api_settings = new ImporterApiSettings(new \ilSetting('crevento'));
-        return new EventoEventImporter(
-            new RestClientService(
-                $api_settings->getUrl(),
-                $api_settings->getTimeoutFailedRequest(),
-                $api_settings->getApikey(),
-                $api_settings->getApiSecret()
-            ),
-            new ImporterIterator(500),
-            new Logger($this->db),
-            $api_settings->getTimeoutAfterRequest(),
-            $api_settings->getMaxRetries()
-        );
-    }
-
-    private function buildModal(string $title, string $content, Factory $f) : Modal
-    {
-        return $f->modal()->lightbox($f->modal()->lightboxTextPage($content, $title));
     }
 }

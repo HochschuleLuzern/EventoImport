@@ -16,6 +16,12 @@ class ilEventoImportUIRoutingGUI
     private ServerRequestInterface $request;
 
     private array $gui_classes;
+    private ilEventoImportPlugin $plugin;
+    private \ILIAS\DI\UIServices $ui_services;
+    private $locator;
+    private ilDBInterface $db;
+    private ilTabsGUI $tabs;
+    private ilTree $tree;
 
     public function __construct()
     {
@@ -28,6 +34,7 @@ class ilEventoImportUIRoutingGUI
         $this->locator = $DIC["ilLocator"];
         $this->db = $DIC->database();
         $this->tabs = $DIC->tabs();
+        $this->tree = $DIC->repositoryTree();
 
         $this->gui_classes = [];
         $this->gui_classes[self::GUI_ADMIN_SCRIPTS] = function () {
@@ -39,7 +46,8 @@ class ilEventoImportUIRoutingGUI
                 $this->tabs,
                 $this->locator,
                 $this->db,
-                $this->request
+                $this->request,
+                $this->tree
             );
         };
     }
