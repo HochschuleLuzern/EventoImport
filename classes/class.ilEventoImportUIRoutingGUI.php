@@ -18,10 +18,12 @@ class ilEventoImportUIRoutingGUI
     private array $gui_classes;
     private ilEventoImportPlugin $plugin;
     private \ILIAS\DI\UIServices $ui_services;
-    private $locator;
     private ilDBInterface $db;
     private ilTabsGUI $tabs;
     private ilTree $tree;
+    private \ILIAS\DI\RBACServices $rbac_services;
+    private ilObjUser $user;
+    private $error;
 
     public function __construct()
     {
@@ -31,10 +33,12 @@ class ilEventoImportUIRoutingGUI
         $this->ctrl = $DIC->ctrl();
         $this->request = $DIC->http()->request();
         $this->ui_services = $DIC->ui();
-        $this->locator = $DIC["ilLocator"];
         $this->db = $DIC->database();
         $this->tabs = $DIC->tabs();
         $this->tree = $DIC->repositoryTree();
+        $this->rbac_services = $DIC->rbac();
+        $this->user = $DIC->user();
+        $this->error = $DIC["ilErr"];
 
         $this->gui_classes = [];
         $this->gui_classes[self::GUI_ADMIN_SCRIPTS] = function () {
@@ -44,10 +48,12 @@ class ilEventoImportUIRoutingGUI
                 $this->ui_services,
                 $this->ctrl,
                 $this->tabs,
-                $this->locator,
                 $this->db,
                 $this->request,
-                $this->tree
+                $this->tree,
+                $this->rbac_services,
+                $this->user,
+                $this->error
             );
         };
     }

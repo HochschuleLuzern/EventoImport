@@ -9,6 +9,7 @@ use EventoImport\administration\scripts\LookupEventByEventoTitle;
 use EventoImport\administration\scripts\ReAddRemovedEventParticipants;
 use EventoImport\import\data_management\ilias_core\MembershipablesEventInTreeSeeker;
 use EventoImport\administration\scripts\SwitchIliasObjectForEventoEvent;
+use ILIAS\DI\RBACServices;
 
 /**
  * Class AdminScriptPageGUI
@@ -28,22 +29,33 @@ class AdminScriptPageGUI
     private UIServices $ui_services;
     private \ilCtrl $ctrl;
     private \ilTabsGUI $tabs;
-    private \ilLocatorGUI $locator;
     private \ilDBInterface $db;
     private ServerRequestInterface $request;
     private \ilTree $tree;
+    private RBACServices $rbac_services;
+    private \ilObjUser $user;
+    private $error;
+    private int $ref_id;
 
-    public function __construct(\ilEventoImportPlugin $plugin_object, \ilGlobalPageTemplate $tpl, UIServices $ui_services, \ilCtrl $ctrl, \ilTabsGUI $tabs, \ilLocatorGUI $locator, \ilDBInterface $db, ServerRequestInterface $request, \ilTree $tree)
+    public function __construct(\ilEventoImportPlugin $plugin_object, \ilGlobalPageTemplate $tpl, UIServices $ui_services, \ilCtrl $ctrl, \ilTabsGUI $tabs, \ilDBInterface $db, ServerRequestInterface $request, \ilTree $tree, RBACServices $rbac_services, \ilObjUser $user, $error)
     {
         $this->plugin_object = $plugin_object;
         $this->tpl = $tpl;
         $this->ui_services = $ui_services;
         $this->ctrl = $ctrl;
         $this->tabs = $tabs;
-        $this->locator = $locator;
         $this->db = $db;
         $this->request = $request;
         $this->tree = $tree;
+        $this->rbac_services = $rbac_services;
+        $this->user = $user;
+        $this->error = $error;
+
+        if (isset($query_params['ref_id'])) {
+            $this->ref_id = (int) $query_params['ref_id'];
+        } else {
+            $this->ref_id = 31;
+        }
 
         $this->scripts = [
             new LookupEventByEventoTitle($this->db, $this->ctrl),
@@ -52,22 +64,25 @@ class AdminScriptPageGUI
         ];
     }
 
+    private function checkAccessAndRedirectOnFailure()
+    {
+        if (SYSTEM_ROLE_ID === null
+            || \ilObject::_lookupType(SYSTEM_ROLE_ID) != 'role'
+            || !$this->rbac_services->review()->isAssigned($this->user->getId(), SYSTEM_ROLE_ID)
+        ) {
+            $this->error->raiseError('Permission denied');
+            exit;
+        }
+    }
+
     private function initHeaderGUI()
     {
-        global $DIC, $ilLocator, $lng, $ilDB;
-
         /* Add breadcrumbs */
-        //$ilLocator->addRepositoryItems($this->ref_id);
         $this->tpl->setLocator();
 
         $this->tpl->setTitle("Plugin: EventoImport");
-        if (isset($query_params['ref_id'])) {
-            $ref_id = $query_params['ref_id'];
-        } else {
-            $ref_id = 31;
-        }
 
-        $this->tpl->setTitleIcon(\ilObject::_getIcon("", "big", \ilObject::_lookupType($ref_id, true)));
+        $this->tpl->setTitleIcon(\ilObject::_getIcon("", "big", \ilObject::_lookupType($this->ref_id, true)));
 
         $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_CTYPE, $this->plugin_object->getComponentType());
         $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_CNAME, $this->plugin_object->getComponentName());
@@ -88,6 +103,8 @@ class AdminScriptPageGUI
 
     public function executeCommandAndRenderGUI()
     {
+        $this->checkAccessAndRedirectOnFailure();
+
         $this->initHeaderGUI();
 
         $params = $this->request->getQueryParams();
@@ -112,7 +129,7 @@ class AdminScriptPageGUI
                     );
                     $comps[] = $modal->withOnLoad($modal->getShowSignal());
                 } catch (\InvalidArgumentException $e) {
-                    \ilUtil::sendFailure('Script failed becauses of invalid Argument(s) with following message: ' . $e->getMessage());
+                    \ilUtil::sendFailure('Script failed because of invalid Argument(s) with following message: ' . $e->getMessage());
                 }
             }
         }
