@@ -125,4 +125,20 @@ class IliasEventoEvent
     {
         return !is_null($this->getParentEventKey()) && strlen($this->getParentEventKey()) > 0 && ($this->getIliasType() === 'grp');
     }
+
+    public function switchToAnotherIliasObejct(\ilObject $new_object, bool $was_automatically_created = false, string $new_parent_event_key = '')
+    {
+        $clone = clone $this;
+        $clone->obj_id = $new_object->getId();
+        $clone->ref_id = $new_object->getRefId();
+        $clone->ilias_type = $new_object->getType();
+        if($new_object instanceof \ilObjCourse || $new_object instanceof \ilObjGroup) {
+            $clone->student_role_id = (int) $new_object->getDefaultMemberRole();
+            $clone->admin_role_id = (int) $new_object->getDefaultAdminRole();
+        }
+        $clone->was_automatically_created = $was_automatically_created;
+        $clone->parent_event_key = $new_parent_event_key;
+
+        return $clone;
+    }
 }

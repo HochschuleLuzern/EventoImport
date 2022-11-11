@@ -8,6 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use EventoImport\administration\scripts\LookupEventByEventoTitle;
 use EventoImport\administration\scripts\ReAddRemovedEventParticipants;
 use EventoImport\import\data_management\ilias_core\MembershipablesEventInTreeSeeker;
+use EventoImport\administration\scripts\SwitchIliasObjectForEventoEvent;
 
 /**
  * Class AdminScriptPageGUI
@@ -46,7 +47,8 @@ class AdminScriptPageGUI
 
         $this->scripts = [
             new LookupEventByEventoTitle($this->db, $this->ctrl),
-            new ReAddRemovedEventParticipants($this->db, $this->ctrl, $this->request, new MembershipablesEventInTreeSeeker($this->tree))
+            new ReAddRemovedEventParticipants($this->db, $this->ctrl, $this->request, new MembershipablesEventInTreeSeeker($this->tree)),
+            new SwitchIliasObjectForEventoEvent($this->db, $this->ctrl, $this->request, $this->tree)
         ];
     }
 
@@ -103,11 +105,15 @@ class AdminScriptPageGUI
             );
 
             if(!is_null($executed_script) && $script->getScriptId() == $executed_script) {
-                $modal = $script->getResultModalFromRequest(
-                            $this->ctrl->getCmd(),
-                            $f
-                        );
-                $comps[] = $modal->withOnLoad($modal->getShowSignal());
+                try {
+                    $modal = $script->getResultModalFromRequest(
+                        $this->ctrl->getCmd(),
+                        $f
+                    );
+                    $comps[] = $modal->withOnLoad($modal->getShowSignal());
+                } catch (\InvalidArgumentException $e) {
+                    \ilUtil::sendFailure('Script failed becauses of invalid Argument(s) with following message: ' . $e->getMessage());
+                }
             }
         }
 

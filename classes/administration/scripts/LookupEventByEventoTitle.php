@@ -65,7 +65,7 @@ class LookupEventByEventoTitle implements AdminScriptInterface
     {
         $form = $this->getParameterFormUI();
         if(!$form->checkInput()) {
-            return $this->buildModal($this->getTitle(), "Invalid Form Input!", $f);
+            throw new \InvalidArgumentException("Invalid Form Input!");
         }
 
         $title = $form->getInput(self::FORM_TITLE);
@@ -116,7 +116,7 @@ class LookupEventByEventoTitle implements AdminScriptInterface
                 return $this->buildModal($this->getTitle() . ': '.htmlspecialchars($title), $display_top . $display_api_responses, $f);
 
             default:
-                return $this->buildModal($this->getTitle() . ': '.htmlspecialchars($title), "Unknown Command", $f);
+                throw new \InvalidArgumentException("Unknown Command");
         }
     }
 }

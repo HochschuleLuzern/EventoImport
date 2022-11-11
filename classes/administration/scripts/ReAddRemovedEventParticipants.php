@@ -45,8 +45,6 @@ class ReAddRemovedEventParticipants implements AdminScriptInterface
         $this->repo = new IliasEventoEventObjectRepository($this->db);
     }
 
-
-
     public function getTitle() : string
     {
         return 'Re Add removed Participants';
@@ -93,7 +91,7 @@ class ReAddRemovedEventParticipants implements AdminScriptInterface
 
         }
 
-        return $this->buildModal($this->getTitle(), '', $f);
+        throw new \InvalidArgumentException('Invalid command for script given: ' . htmlspecialchars($cmd));
     }
 
     private function listParticipantsInModal(Factory $f) : Modal
@@ -102,7 +100,7 @@ class ReAddRemovedEventParticipants implements AdminScriptInterface
 
         $form = $this->getParameterFormUI();
         if(!$form->checkInput()) {
-            return $this->buildModal($this->getTitle(), 'Invalid Input', $f);
+            throw new \InvalidArgumentException('Invalid form input');
         }
 
         $radio_val = $form->getInput(self::FORM_RADIO_POSTVAR);
@@ -111,12 +109,23 @@ class ReAddRemovedEventParticipants implements AdminScriptInterface
             $title = $form->getInput(self::FORM_INPUT_EVENTO_TITLE);
             $events = $repo->getIliasEventoEventsByTitle($title, false);
             if (count($events) != 1) {
-                return $this->buildModal($this->getTitle(), 'Error! Duplicate in searched Evento Title', $f);
+                throw new \InvalidArgumentException(
+                    'Error in searching Event by title! ' .
+                        (
+                            count($events) > 1
+                            ? 'Duplicate in searched Evento Title'
+                            : 'No Event found'
+                        )
+                );
             }
 
             $event = array_pop($events);
         } else if ($radio_val == self::FORM_RADIO_BY_EVENTO_ID) {
             $event = $repo->getEventByEventoId((int) $form->getInput(self::FORM_INPUT_EVENTO_ID));
+        }
+
+        if (is_null($event)) {
+            throw new \InvalidArgumentException('No event found for given arguments');
         }
 
         $readd_form = $this->getFormWithRemovedUsers($event);
@@ -128,13 +137,13 @@ class ReAddRemovedEventParticipants implements AdminScriptInterface
     {
         $query_params = $this->request->getQueryParams();
         if(!isset($query_params['readd_to_event'])) {
-            return $this->buildModal($this->getTitle(), 'No Event ID to readd participants', $f);
+            throw new \InvalidArgumentException('No Event ID to readd participants');
         }
         $event = $this->repo->getEventByEventoId((int) $query_params['readd_to_event']);
 
         $readd_form = $this->getFormWithRemovedUsers($event);
         if(!$readd_form->checkInput()) {
-            return $this->buildModal($this->getTitle(), '', $f);
+            throw new \InvalidArgumentException('Invalid form input');
         }
 
         $role = $readd_form->getInput(self::READD_FORM_ROLE);
