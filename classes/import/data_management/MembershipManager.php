@@ -60,7 +60,6 @@ class MembershipManager
         if ($ilias_event->getIliasType() == 'crs') {
             $this->syncMembershipsWithoutParentObjects($imported_event, $ilias_event, $delete_not_delivered_members);
         } else {
-
             // Else -> search for parent membershipable objects
             $parent_events = $this->tree_seeker->getRefIdsOfParentMembershipables($ilias_event->getRefId());
 
@@ -85,7 +84,7 @@ class MembershipManager
                 } else {
                     $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
                 }
-                $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $employee_user_id, $admin_role_code);
+                $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $employee->getEventoId(), $admin_role_code);
                 $this->membership_repo->addMembershipIfNotExist($evento_event->getEventoId(), $employee->getEventoId(), $admin_role_code);
             }
         }
@@ -100,7 +99,7 @@ class MembershipManager
                 } else {
                     $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
                 }
-                $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $student_user_id, $student_role_code);
+                $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $student->getEventoId(), $student_role_code);
                 $this->membership_repo->addMembershipIfNotExist($evento_event->getEventoId(), $student->getEventoId(), $student_role_code);
             }
         }
@@ -144,13 +143,12 @@ class MembershipManager
         foreach ($this->getUsersToRemove($imported_event) as $user_to_remove) {
             if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                 $participants_obj->delete($user_to_remove->getIliasUserId());
-                $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
+                $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId());
             } else {
                 $this->logger->logEventMembership(
                     Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
                     $imported_event->getEventoId(),
-                    $user_to_remove->getEventoUserId(),
-                    0
+                    $user_to_remove->getEventoUserId()
                 );
             }
             $this->membership_repo->removeMembershipIfItExists($imported_event->getEventoId(), $user_to_remove->getEventoUserId());
@@ -201,13 +199,12 @@ class MembershipManager
             // Remove from main event
             if ($participants_obj_of_event->isAssigned($user_to_remove->getIliasUserId())) {
                 $participants_obj_of_event->delete($user_to_remove->getIliasUserId());
-                $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId(), 0);
+                $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId());
             } else {
                 $this->logger->logEventMembership(
                     Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
                     $imported_event->getEventoId(),
-                    $user_to_remove->getEventoUserId(),
-                    0
+                    $user_to_remove->getEventoUserId()
                 );
             }
             $this->membership_repo->removeMembershipIfItExists($imported_event->getEventoId(), $user_to_remove->getEventoUserId());

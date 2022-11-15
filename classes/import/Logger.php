@@ -203,7 +203,7 @@ class Logger
         }
     }
 
-    public function logEventMembership(int $log_info_code, int $evento_event_id, int $evento_user_id, int $role_type)
+    public function logEventMembership(int $log_info_code, int $evento_event_id, int $evento_user_id, int $role_type = -1)
     {
         if ($log_info_code < 100 || $log_info_code >= 200) {
             $this->logException(
@@ -230,13 +230,18 @@ class Logger
                     ]
                 );
             } else {
+                $values = [
+                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                ];
+
+                if ($role_type != -1) {
+                    $values = ['role_type' => [\ilDBConstants::T_INTEGER, $role_type]];
+                }
+
                 $this->ilDB->update(
                     self::TABLE_LOG_MEMBERSHIPS,
-                    [
-                        'role_type' => [\ilDBConstants::T_INTEGER, $role_type],
-                        'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
-                        'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                    ],
+                    $values,
                     [
                         'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
                         'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id]
