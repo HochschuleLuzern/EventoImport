@@ -293,7 +293,7 @@ class IliasEventoEventObjectRepository
         }
     }
 
-    public function getIliasEventoEventsByTitle(string $title, bool $like_search)
+    public function getIliasEventoEventsByTitle(string $title, bool $like_search) : array
     {
         $query = "SELECT * " . " FROM " . IliasEventoEventsTblDef::TABLE_NAME . " WHERE ";
         $query .= $like_search

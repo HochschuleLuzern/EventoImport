@@ -10,6 +10,7 @@ use EventoImport\administration\scripts\ReAddRemovedEventParticipants;
 use EventoImport\import\data_management\ilias_core\MembershipablesEventInTreeSeeker;
 use EventoImport\administration\scripts\SwitchIliasObjectForEventoEvent;
 use ILIAS\DI\RBACServices;
+use EventoImport\administration\scripts\RepairMembershipLogDB;
 
 /**
  * Class AdminScriptPageGUI
@@ -60,7 +61,8 @@ class AdminScriptPageGUI
         $this->scripts = [
             new LookupEventByEventoTitle($this->db, $this->ctrl),
             new ReAddRemovedEventParticipants($this->db, $this->ctrl, $this->request, new MembershipablesEventInTreeSeeker($this->tree)),
-            new SwitchIliasObjectForEventoEvent($this->db, $this->ctrl, $this->request, $this->tree)
+            new SwitchIliasObjectForEventoEvent($this->db, $this->ctrl, $this->request, $this->tree),
+            new RepairMembershipLogDB($this->db, $this->ctrl)
         ];
     }
 

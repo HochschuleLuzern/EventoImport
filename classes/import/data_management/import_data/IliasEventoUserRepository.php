@@ -77,6 +77,20 @@ class IliasEventoUserRepository
         return null;
     }
 
+    public function getIliasEventoUserByIliasUserId(int $ilias_user_id) : ?IliasEventoUser
+    {
+        $query = 'SELECT ' . IliasEventoUserTblDef::COL_EVENTO_ID . ', ' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . ', ' . IliasEventoUserTblDef::COL_ACCOUNT_TYPE
+            . ' FROM ' . IliasEventoUserTblDef::TABLE_NAME
+            . ' WHERE ' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . '=' . $this->db->quote($ilias_user_id, \ilDBConstants::T_INTEGER);
+        $result = $this->db->query($query);
+
+        if ($data = $this->db->fetchAssoc($result)) {
+            return $this->buildIliasEventoUserObjectFromRow($data);
+        }
+
+        return null;
+    }
+
     public function getListOfIliasUserIdsByEventoIds(array $evento_ids) : array
     {
         $query = 'SELECT ' . IliasEventoUserTblDef::COL_ILIAS_USER_ID . ' FROM ' . IliasEventoUserTblDef::TABLE_NAME
