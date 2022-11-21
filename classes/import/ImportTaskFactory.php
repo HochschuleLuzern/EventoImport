@@ -77,7 +77,7 @@ class ImportTaskFactory
     {
         $event_settings = $this->config_manager->getDefaultEventConfiguration();
         $user_settings = $this->config_manager->getDefaultUserConfiguration();
-        $event_obj_service = new IliasEventObjectService($event_settings, $this->db, $this->tree);
+        $event_obj_service = new IliasEventObjectService($event_settings, $this->db, $this->tree, $this->rbac);
         $evento_event_obj_repo = new IliasEventoEventObjectRepository($this->db);
         $event_locations = new EventLocations(
             new EventLocationsRepository($this->db),

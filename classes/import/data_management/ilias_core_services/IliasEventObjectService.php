@@ -5,6 +5,7 @@ namespace EventoImport\import\data_management\ilias_core_service;
 use EventoImport\import\data_management\repository\model\IliasEventoEvent;
 use EventoImport\config\DefaultEventSettings;
 use EventoImport\import\data_management\repository\model\IliasEventoParentEvent;
+use ILIAS\DI\RBACServices;
 
 /**
  * Class IliasEventObjectService
@@ -19,15 +20,18 @@ class IliasEventObjectService
     private DefaultEventSettings $default_event_settings;
     private \ilDBInterface $db;
     private \ilTree $tree;
+    private RBACServices $rbac;
 
     public function __construct(
         DefaultEventSettings $default_event_settings,
         \ilDBInterface $db,
-        \ilTree $tree
+        \ilTree $tree,
+        RBACServices $rbac
     ) {
         $this->default_event_settings = $default_event_settings;
         $this->db = $db;
         $this->tree = $tree;
+        $this->rbac = $rbac;
     }
 
     public function searchEventableIliasObjectByTitle(string $obj_title, string $filter_for_only_this_type = null) : ?\ilContainer
@@ -67,6 +71,7 @@ class IliasEventObjectService
         $course_object = new \ilObjCourse();
 
         $this->createContainerObject($course_object, $title, $description, $destination_ref_id);
+        $this->removeDeletePermissionsFromAdminRole($course_object);
 
         return $course_object;
     }
@@ -78,6 +83,7 @@ class IliasEventObjectService
         $this->createContainerObject($group_object, $title, $description, $destination_ref_id);
 
         $group_object->updateGroupType(GRP_TYPE_CLOSED);
+        $this->removeDeletePermissionsFromAdminRole($group_object);
 
         return $group_object;
     }
@@ -162,5 +168,30 @@ class IliasEventObjectService
         $event_obj->setTitle($new_title);
         $event_obj->update();
         return $event_obj;
+    }
+
+    private function removeDeletePermissionsFromAdminRole(\ilObject $obj)
+    {
+        if ($obj instanceof \ilObjCourse) {
+            $admin_role = $obj->getDefaultAdminRole();
+        } else if ($obj instanceof \ilObjGroup) {
+            $admin_role = $obj->getDefaultAdminRole();
+        } else {
+            return;
+        }
+
+        $ref_id = $obj->getRefId();
+        $rbac_admin = $this->rbac->admin();
+
+        $ops = $this->rbac->review()->getRoleOperationsOnObject(
+            $admin_role,
+            $ref_id
+        );
+        if (($key = array_search(6, $ops)) !== false){
+            unset($ops[$key]);
+        }
+        $rbac_admin->revokePermission($ref_id, $admin_role);
+        $rbac_admin->grantPermission($admin_role, $ops, $ref_id);
+
     }
 }

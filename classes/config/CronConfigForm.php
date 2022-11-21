@@ -421,8 +421,6 @@ class CronConfigForm
         /***************************
          * Visitors Import Settings
          ***************************/
-
-
         $header = new ilFormSectionHeaderGUI();
         $header->setTitle(self::LANG_HEADER_VISITOR_ROLES);
         $form->addItem($header);
