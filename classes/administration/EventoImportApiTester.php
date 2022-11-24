@@ -30,7 +30,7 @@ class EventoImportApiTester
 
         $request_client = $this->buildDataSource($api_importer_settings);
 
-        if ($cmd == 'fetch_record_user') {
+        if ($cmd == 'user') {
             $importer = new EventoUserImporter(
                 $request_client,
                 $iterator,
@@ -40,7 +40,7 @@ class EventoImportApiTester
             );
             return $importer->fetchUserDataRecordById($id);
         } else {
-            if ($cmd == 'fetch_record_event') {
+            if ($cmd == 'event') {
                 $importer = new EventoEventImporter(
                     $request_client,
                     $iterator,
@@ -50,7 +50,7 @@ class EventoImportApiTester
                 );
                 return $importer->fetchEventDataRecordById($id);
             } else {
-                if ($cmd == 'fetch_user_photo') {
+                if ($cmd == 'photo') {
                     $importer = new EventoUserPhotoImporter(
                         $request_client,
                         $api_importer_settings->getTimeoutAfterRequest(),
@@ -59,7 +59,7 @@ class EventoImportApiTester
                     );
                     return $importer->fetchUserPhotoDataById($id);
                 } else {
-                    if ($cmd == 'fetch_ilias_admins_for_event') {
+                    if ($cmd == 'admin') {
                         $importer = new EventoAdminImporter(
                             $request_client,
                             $logger,
@@ -81,7 +81,7 @@ class EventoImportApiTester
 
         $request_client = $this->buildDataSource($api_importer_settings);
 
-        if ($cmd == 'fetch_data_set_users') {
+        if ($cmd == 'user') {
             $importer = new EventoUserImporter(
                 $request_client,
                 $iterator,
@@ -91,7 +91,7 @@ class EventoImportApiTester
             );
             return $importer->fetchSpecificUserDataSet($skip, $take);
         } else {
-            if ($cmd == 'fetch_data_set_events') {
+            if ($cmd == 'event') {
                 $importer = new EventoEventImporter(
                     $request_client,
                     $iterator,
@@ -104,22 +104,20 @@ class EventoImportApiTester
         }
     }
 
-    public function fetchParameterlessDataset(string $cmd) : array
+    public function fetchParameterlessDataset() : array
     {
         $api_importer_settings = new ImporterApiSettings($this->settings);
         $logger = new \EventoImport\import\Logger($this->db);
 
         $data_source = $this->buildDataSource($api_importer_settings);
 
-        if ($cmd == 'fetch_all_ilias_admins') {
-            $importer = new EventoAdminImporter(
-                $data_source,
-                $logger,
-                $api_importer_settings->getTimeoutAfterRequest(),
-                $api_importer_settings->getMaxRetries()
-            );
-            return $importer->fetchAllIliasAdmins();
-        }
+        $importer = new EventoAdminImporter(
+            $data_source,
+            $logger,
+            $api_importer_settings->getTimeoutAfterRequest(),
+            $api_importer_settings->getMaxRetries()
+        );
+        return $importer->fetchAllIliasAdmins();
     }
 
     private function buildDataSource(ImporterApiSettings $api_importer_settings) : RequestClientService

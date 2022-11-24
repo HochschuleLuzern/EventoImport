@@ -3,6 +3,9 @@
 namespace EventoImport\administration;
 
 use ILIAS\DI\UIServices;
+use ILIAS\UI\Component\Input\Container\Form\Form;
+use Psr\Http\Message\ServerRequestInterface;
+use ILIAS\Refinery\Factory;
 
 class EventoImportApiTesterGUI
 {
@@ -14,6 +17,8 @@ class EventoImportApiTesterGUI
     private \ILIAS\UI\Factory $ui_factory;
     private \ILIAS\UI\Renderer $ui_renderer;
     private EventoImportApiTester $api_tester;
+    private ServerRequestInterface $request;
+    private Factory $refinery;
 
     public function __construct(
         \ilEventoImportConfigGUI $parent_gui,
@@ -21,7 +26,9 @@ class EventoImportApiTesterGUI
         \ilSetting $settings,
         UIServices $ui_services,
         \ilCtrl $ctrl,
-        \ilTree $tree
+        \ilTree $tree,
+        ServerRequestInterface $request,
+        Factory $refinery
     ) {
         $this->parent_gui = $parent_gui;
         $this->ui_services = $ui_services;
@@ -30,80 +37,70 @@ class EventoImportApiTesterGUI
         $this->settings = $settings;
         $this->tree = $tree;
         $this->ctrl = $ctrl;
+        $this->request = $request;
+        $this->refinery = $refinery;
         $this->api_tester = $api_tester;
     }
 
     public function getApiTesterFormAsString() : string
     {
-        $link = $this->ctrl->getLinkTarget($this->parent_gui, 'fetch_all_ilias_admins');
+        $link = $this->ctrl->getLinkTarget($this->parent_gui, 'parameterless');
         $ui_components[] = $this->ui_services->factory()->button()->standard("Fetch all ILIAS Admins", $link);
+        $ui_components[] = $this->initDataRecordForm();
+        $ui_components[] = $this->initDataSetForm();
 
-        return $this->ui_renderer->render($ui_components) . $this->initDataRecordForm()->getHTML() . $this->initDataSetForm()->getHTML();
+        return $this->ui_renderer->render($ui_components);
     }
 
-    public function fetchDataRecordFromFormInput(string $cmd) : string
+    public function fetchDataRecordFromFormInput(string $type, int $id) : string
     {
-        $form = $this->initDataRecordForm();
-        if ($form->checkInput()) {
-            $id_from_form = (int) $form->getInput('record_id');
-
-            try {
-                $model = $this->api_tester->fetchDataRecord($cmd, $id_from_form);
-                $cmd = htmlspecialchars($cmd);
-                $data = htmlspecialchars(print_r($model->getDecodedApiData(), true));
-                return $this->buildMessageForNextPage("CMD = $cmd, ID = $id_from_form", $data);
-            } catch (\ilEventoImportApiDataException $e) {
-                \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
-            } catch (\ilEventoImportCommunicationException $e) {
-                \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
-            } catch (\Exception $e) {
-                \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd and ID = $id_from_form", true);
-            }
-        } else {
-            throw new \InvalidArgumentException('Error in form input');
+        try {
+            $model = $this->api_tester->fetchDataRecord($type, $id);
+            $cmd = htmlspecialchars('Fetch record by ID');
+            $data = $model ? htmlspecialchars(print_r($model->getDecodedApiData(), true)) : 'No object received from API';
+            return $this->buildMessageForNextPage("CMD = $cmd", $data);
+        } catch (\ilEventoImportApiDataException $e) {
+            \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+        } catch (\ilEventoImportCommunicationException $e) {
+            \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
+        } catch (\Exception $e) {
+            \ilUtil::sendFailure("Error occured for paramerers: ", true);
         }
 
         return '';
     }
 
-    public function fetchDataSetFromFormInput(string $cmd) : string
+    public function fetchDataSetFromFormInput(string $type, int $skip, int $take) : string
     {
-        $form = $this->initDataSetForm();
-        if ($form->checkInput()) {
-            $skip = (int) $form->getInput('skip');
-            $take = (int) $form->getInput('take');
-
-            try {
-                $data = '';
-                foreach ($this->api_tester->fetchDataSet($cmd, $skip, $take) as $data_record) {
-                    $data = htmlspecialchars(print_r($data_record, true));
-                }
-
-                $cmd = htmlspecialchars($cmd);
-                return $this->buildMessageForNextPage("CMD = $cmd, Skip = $skip, Take = $take", $data);
-            } catch (\ilEventoImportApiDataException $e) {
-                \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
-            } catch (\ilEventoImportCommunicationException $e) {
-                \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
-            } catch (\Exception $e) {
-                \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd, Skip = $skip, Take = $take", true);
+        try {
+            $cmd = 'Fetch Data Set';
+            $ret = '';
+            foreach ($this->api_tester->fetchDataSet($type, $skip, $take) as $data_record) {
+                $ret .= htmlspecialchars(print_r($data_record, true));
             }
-        } else {
-            \ilUtil::sendFailure('Invalid form input for cmd fetch data set', true);
+
+            return $this->buildMessageForNextPage("CMD = $cmd, Skip = $skip, Take = $take", $ret);
+        } catch (\ilEventoImportApiDataException $e) {
+            \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+        } catch (\ilEventoImportCommunicationException $e) {
+            \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
+        } catch (\Exception $e) {
+            \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd, Skip = $skip, Take = $take", true);
         }
 
         return '';
     }
 
-    public function fetchParameterlessDataset(string $cmd) : string
+    public function fetchParameterlessDataset() : string
     {
         try {
             $data = '';
-            foreach ($this->api_tester->fetchParameterlessDataset($cmd) as $data_record) {
+            $cmd = 'Fetch parameterless Data Set';
+
+            foreach ($this->api_tester->fetchParameterlessDataset() as $data_record) {
                 $data .= htmlspecialchars(print_r($data_record, true));
             }
 
-            $cmd = htmlspecialchars($cmd);
             return $this->buildMessageForNextPage("CMD = $cmd", $data);
         } catch (\ilEventoImportApiDataException $e) {
             \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
@@ -116,41 +113,100 @@ class EventoImportApiTesterGUI
         return '';
     }
 
-    private function initDataRecordForm() : \ilPropertyFormGUI
+    private function initDataRecordForm() : Form
     {
-        $form = new \ilPropertyFormGUI();
-        $form->setTitle('Fetch Data Record');
-        $form->setFormAction($this->ctrl->getFormAction($this->parent_gui));
-        $form->addCommandButton('fetch_record_user', 'Fetch User');
-        $form->addCommandButton('fetch_record_event', 'Fetch Event');
-        $form->addCommandButton('fetch_user_photo', 'Fetch Photo');
-        $form->addCommandButton('fetch_ilias_admins_for_event', 'Fetch Admins for Event');
+        $f = $this->ui_services->factory();
+        $field = $f->input()->field();
 
-        $take = new \ilNumberInputGUI('Id', 'record_id');
-        $form->addItem($take);
+        $inputs = [];
+        $fetch_methods = [
+            'user' => 'Fetch User by ID',
+            'event' => 'Fetch Event by ID',
+            'photo' => 'Fetch Photo by ID',
+            'admin' => 'Fetch Admins for Event by Event ID'
+        ];
 
-        return $form;
+        $inputs[] = $field->select(
+            'Fetch Data Record',
+            $fetch_methods
+        )->withRequired(true)
+         ->withAdditionalTransformation(
+             $this->refinery->custom()->constraint(
+                 function($v) use ($fetch_methods){
+                     return isset($fetch_methods[$v]);
+                 },
+                 'Fetch Method not supported'
+             )
+         );
+
+        $inputs[] = $field->numeric('ID')->withRequired(true);
+        $section = $field->section($inputs, 'Fetch from Evento API by ID');
+
+        return $f->input()->container()->form()->standard($this->ctrl->getFormAction($this->parent_gui, 'by_id'), [$section]);
     }
 
-    private function initDataSetForm() : \ilPropertyFormGUI
+    private function initDataSetForm() : Form
     {
-        $form = new \ilPropertyFormGUI();
-        $form->setTitle('Fetch Data Set');
-        $form->setFormAction($this->ctrl->getFormAction($this->parent_gui, 'fetch_data_set'));
-        $form->addCommandButton('fetch_data_set_users', 'Fetch Users');
-        $form->addCommandButton('fetch_data_set_events', 'Fetch Events');
+        $f = $this->ui_services->factory();
+        $field = $f->input()->field();
 
-        $take = new \ilNumberInputGUI('Take', 'take');
-        $form->addItem($take);
+        $inputs = [];
+        $fetch_methods = [
+            'user' => 'Fetch Users',
+            'event' => 'Fetch Events'
+        ];
 
-        $skip = new \ilNumberInputGUI('Skip', 'skip');
-        $form->addItem($skip);
+        $valid_number = $this->refinery->int()->isGreaterThan(0);
 
-        return $form;
+        $inputs[] = $field->select(
+            'Fetch Data Set',
+            $fetch_methods
+        )->withRequired(true)
+         ->withAdditionalTransformation(
+             $this->refinery->custom()->constraint(
+                 function($v) use ($fetch_methods){
+                     return isset($fetch_methods[$v]);
+                 },
+                 'Fetch Method not supported'
+             )
+         );
+
+        $inputs[] = $field->numeric('Take')->withRequired(true)->withAdditionalTransformation($valid_number);
+        $inputs[] = $field->numeric('Skip')->withRequired(true)->withAdditionalTransformation($valid_number);;
+        $section = $field->section($inputs, 'Fetch data set from Evento API');
+
+        return $f->input()->container()->form()->standard($this->ctrl->getFormAction($this->parent_gui, 'data_set'), [$section]);
     }
 
     private function buildMessageForNextPage(string $infos, string $output) : string
     {
-        return "$infos<br><br>Output from request:<br><pre>$output</pre></div></div>";
+        return "$infos<br><br>Result from request:<br><pre>$output</pre></div></div>";
+    }
+
+    public function getApiDataAsString($cmd) : string
+    {
+        if ($cmd == 'by_id') {
+            $form = $this->initDataRecordForm()->withRequest($this->request);
+            $data = $form->getData();
+
+            if ($data) {
+                return $this->fetchDataRecordFromFormInput(...$data[0]);
+            } else {
+                return "Form data Invalid";
+            }
+        } else if ($cmd == 'data_set') {
+            $form = $this->initDataSetForm()->withRequest($this->request);
+            $data = $form->getData();
+
+            if ($data) {
+                return $this->fetchDataSetFromFormInput(...$data[0]);
+            } else {
+                return "Form data Invalid";
+            }
+        } else if ($cmd == 'parameterless') {
+            return $this->fetchParameterlessDataset();
+        }
+
+        return "Invalid command given: " . htmlspecialchars($cmd);
     }
 }

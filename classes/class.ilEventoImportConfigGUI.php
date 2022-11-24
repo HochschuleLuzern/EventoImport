@@ -27,6 +27,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
     private ilDBInterface $db;
     private ilTabsGUI $tabs;
     private ServerRequestInterface $request;
+    private ILIAS\Refinery\Factory $refinery;
 
     public function __construct()
     {
@@ -40,6 +41,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $this->db = $DIC->database();
         $this->tabs = $DIC->tabs();
         $this->request = $DIC->http()->request();
+        $this->refinery = $DIC->refinery();
     }
 
     private function addPageTabs()
@@ -70,7 +72,9 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                     $this->settings,
                     $this->ui_services,
                     $this->ctrl,
-                    $this->tree
+                    $this->tree,
+                    $this->request,
+                    $this->refinery
                 );
                 $api_tester_html = $api_tester_gui->getApiTesterFormAsString();
 
@@ -79,6 +83,33 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $locations_html = $locations_gui->getEventLocationsPanelHTML();
 
                 $this->tpl->setContent($api_tester_html . $locations_html);
+                break;
+
+            case 'by_id':
+            case 'data_set':
+            case 'parameterless':
+                try {
+                    $api_tester_gui = new EventoImportApiTesterGUI(
+                        $this,
+                        new EventoImportApiTester($this->settings, $this->db),
+                        $this->settings,
+                        $this->ui_services,
+                        $this->ctrl,
+                        $this->tree,
+                        $this->request,
+                        $this->refinery
+                    );
+
+                    $output = $api_tester_gui->getApiDataAsString($cmd);
+
+                    if (strlen($output) > 0) {
+                        ilUtil::sendSuccess($output, true);
+                    }
+                } catch (Exception $e) {
+                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
+                }
+
+                $this->ctrl->redirect($this, 'configure');
                 break;
 
             case 'reload_repo_locations':
@@ -147,77 +178,6 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 \ilUtil::sendSuccess($this->ui_services->renderer()->render($ui_comps), true);
                 $this->ctrl->redirect($this, 'configure');
 
-                break;
-
-            case 'fetch_data_set_users':
-            case 'fetch_data_set_events':
-                try {
-                    $api_tester_gui = new EventoImportApiTesterGUI(
-                        $this,
-                        new EventoImportApiTester($this->settings, $this->db),
-                        $this->settings,
-                        $this->ui_services,
-                        $this->ctrl,
-                        $this->tree
-                    );
-                    $output = $api_tester_gui->fetchDataSetFromFormInput($cmd);
-
-                    if (strlen($output) > 0) {
-                        ilUtil::sendSuccess($output, true);
-                    }
-                } catch (Exception $e) {
-                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
-                }
-
-                $this->ctrl->redirect($this, 'configure');
-                break;
-
-            case 'fetch_record_user':
-            case 'fetch_record_event':
-            case 'fetch_user_photo':
-            case 'fetch_ilias_admins_for_event':
-
-                try {
-                    $api_tester_gui = new EventoImportApiTesterGUI(
-                        $this,
-                        new EventoImportApiTester($this->settings, $this->db),
-                        $this->settings,
-                        $this->ui_services,
-                        $this->ctrl,
-                        $this->tree
-                    );
-                    $output = $api_tester_gui->fetchDataRecordFromFormInput($cmd);
-
-                    if (strlen($output) > 0) {
-                        ilUtil::sendSuccess($output, true);
-                    }
-                } catch (Exception $e) {
-                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
-                }
-
-                $this->ctrl->redirect($this, 'configure');
-                break;
-
-            case 'fetch_all_ilias_admins':
-                try {
-                    $api_tester_gui = new EventoImportApiTesterGUI(
-                        $this,
-                        new EventoImportApiTester($this->settings, $this->db),
-                        $this->settings,
-                        $this->ui_services,
-                        $this->ctrl,
-                        $this->tree
-                    );
-                    $output = $api_tester_gui->fetchParameterlessDataset($cmd);
-
-                    if (strlen($output) > 0) {
-                        ilUtil::sendSuccess($output, true);
-                    }
-                } catch (Exception $e) {
-                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
-                }
-
-                $this->ctrl->redirect($this, 'configure');
                 break;
 
             default:
