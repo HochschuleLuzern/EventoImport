@@ -113,7 +113,7 @@ class IliasUserServices
         foreach ($user_ids as $user_id) {
             $user_obj = $this->getExistingIliasUserObjectById($user_id);
             if (stristr($user_obj->getExternalAccount(), '@eduid.ch') !== false) {
-                $found_user_obj = $user_id;
+                $found_user_obj = $this->getExistingIliasUserObjectById($user_id);
             }
         }
 
