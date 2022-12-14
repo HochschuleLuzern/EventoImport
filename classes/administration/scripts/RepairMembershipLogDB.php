@@ -89,7 +89,10 @@ class RepairMembershipLogDB implements AdminScriptInterface
                         if (\ilObject::_lookupType($ilias_user_id) == 'usr') {
                             $user_obj = new \ilObjUser($ilias_user_id);
                             $mat_nr = (int) trim(str_replace('Evento:', '', $user_obj->getMatriculation()));
-                            $ext_acc = (int) trim(str_replace('@hslu.ch', '', $user_obj->getExternalAccount()));
+                            $ext_acc = strstr($user_obj->getExternalAccount(), '@hslu.ch')
+                                ? (int) trim(str_replace('@hslu.ch', '', $user_obj->getExternalAccount()))
+                                : 0;
+
                             if($mat_nr == $ext_acc && $mat_nr > 0) {
                                 $this->evaluatePossibleDuplicateAndTryToSwitch($evento_event_id, $mat_nr, $ilias_user_id, $row['last_import_date']);
                                 $cache[$ilias_user_id] = $mat_nr;
