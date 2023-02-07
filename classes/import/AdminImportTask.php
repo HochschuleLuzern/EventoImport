@@ -6,22 +6,23 @@ use EventoImport\import\data_management\MembershipManager;
 use EventoImport\communication\EventoAdminImporter;
 use EventoImport\communication\api_models\EventoEventIliasAdmins;
 use EventoImport\import\data_management\repository\IliasEventoEventObjectRepository;
+use EventoImport\import\data_management\HiddenAdminManager;
 
 class AdminImportTask
 {
     private EventoAdminImporter $evento_importer;
-    private MembershipManager $membership_manager;
+    private HiddenAdminManager $hidden_admin_manager;
     private IliasEventoEventObjectRepository $ilias_event_repo;
     private \EventoImport\import\Logger $logger;
 
     public function __construct(
         EventoAdminImporter $evento_importer,
-        MembershipManager $membership_manager,
+        HiddenAdminManager $hidden_admin_manager,
         IliasEventoEventObjectRepository $ilias_event_repo,
         Logger $logger
     ) {
         $this->evento_importer = $evento_importer;
-        $this->membership_manager = $membership_manager;
+        $this->hidden_admin_manager = $hidden_admin_manager;
         $this->ilias_event_repo = $ilias_event_repo;
         $this->logger = $logger;
     }
@@ -34,7 +35,7 @@ class AdminImportTask
                 $ilias_evento_event = $this->ilias_event_repo->getEventByEventoId($event_admin_list->getEventoId());
 
                 if (!is_null($ilias_evento_event)) {
-                    $this->membership_manager->addEventAdmins($event_admin_list, $ilias_evento_event);
+                    $this->hidden_admin_manager->synchronizeEventAdmins($event_admin_list, $ilias_evento_event);
                 }
             } catch (\Exception $e) {
                 $this->logger->logException('Admin Import', $e->getMessage());

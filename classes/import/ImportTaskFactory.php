@@ -27,6 +27,8 @@ use EventoImport\config\locations\RepositoryLocationSeeker;
 use EventoImport\config\locations\EventLocationCategoryBuilder;
 use EventoImport\communication\EventoEmployeeImporter;
 use EventoImport\config\local_roles\LocalVisitorRoleRepository;
+use EventoImport\import\data_management\HiddenAdminManager;
+use EventoImport\import\data_management\repository\HiddenAdminRepository;
 
 class ImportTaskFactory
 {
@@ -126,17 +128,15 @@ class ImportTaskFactory
         $user_settings = $this->config_manager->getDefaultUserConfiguration();
         return new AdminImportTask(
             $admin_importer,
-            new MembershipManager(
+            new HiddenAdminManager(
+                new HiddenAdminRepository($this->db),
                 new MembershipablesEventInTreeSeeker($this->tree),
-                new IliasEventoEventMembershipRepository($this->db),
                 new UserManager(
                     new IliasUserServices($user_settings, $this->db, $this->rbac),
                     new IliasEventoUserRepository($this->db),
                     $user_settings,
                     $this->logger
                 ),
-                new \ilFavouritesManager(),
-                $this->logger,
                 $this->rbac
             ),
             new IliasEventoEventObjectRepository($this->db),

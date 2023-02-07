@@ -543,3 +543,25 @@ if (!$ilDB->tableExists($table_name)) {
     $ilDB->addPrimaryKey($table_name, array(\EventoImport\db\LocalVisitorRolesTblDef::COL_LOCAL_ROLE_ID));
 }
 ?>
+<#11>
+<?php
+$table_name = \EventoImport\db\HiddenAdminsTableDef::TABLE_NAME;
+if (!$ilDB->tableExists($table_name)) {
+    $fields = array(
+        \EventoImport\db\HiddenAdminsTableDef::COL_OBJECT_REF_ID => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => true
+        ),
+
+        \EventoImport\db\HiddenAdminsTableDef::COL_HIDDEN_ADMIN_ROLE_ID => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => true
+        )
+    );
+
+    $ilDB->createTable($table_name, $fields);
+    $ilDB->addPrimaryKey($table_name, array(\EventoImport\db\HiddenAdminsTableDef::COL_OBJECT_REF_ID));
+}
+?>
