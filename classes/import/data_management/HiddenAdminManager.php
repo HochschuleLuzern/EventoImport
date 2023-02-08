@@ -11,8 +11,8 @@ class HiddenAdminManager
     private const ROLE_DESCRIPTION = "Hidden admin of ref_id = ";
     private HiddenAdminRepository $hidden_admin_repo;
 
-    private const ROLE_TITLE_CRS = "Versteckte Kursadministration";
-    private const ROLE_TITLE_GRP = "Versteckte Gruppenadministration";
+    private const ROLE_TITLE_CRS = "Kursadministrator (versteckt)";
+    private const ROLE_TITLE_GRP = "Gruppenadministrator (versteckt)";
     private UserManager $user_manager;
     private \ilRbacReview $rbac_review;
 
