@@ -41,16 +41,12 @@ trait JSONDataValidator
         return (string) $data_array[$key];
     }
 
-    /**
-     * @param array  $data_array
-     * @param string $key
-     * @param bool   $as_string_possible
-     * @return bool|null
-     */
-    protected function validateAndReturnBoolean(array $data_array, string $key, bool $as_string_possible = false) : ?bool
+    protected function validateAndReturnBoolean(array $data_array, string $key, bool $as_string_possible = false, bool $is_mandatory = true) : ?bool
     {
         if (!isset($data_array[$key])) {
-            $this->key_errors[$key] = 'Value not set';
+            if ($is_mandatory) {
+                $this->key_errors[$key] = 'Value not set';
+            }
             return null;
         }
 

@@ -13,6 +13,7 @@ class EventoUser extends ApiDataModelBase
     const JSON_EMAIL_2 = 'email2';
     const JSON_EMAIL_3 = 'email3';
     const JSON_ROLES = 'roles';
+    const JSON_IS_LOCKDOWN_ACCOUNT = 'isLockdownAccount';
 
     private ?int $evento_id;
     private ?string $last_name;
@@ -21,6 +22,7 @@ class EventoUser extends ApiDataModelBase
     private ?string $login_name;
     private ?array $email_list;
     private ?array $roles;
+    private ?bool $is_lockdown_account;
 
     public function __construct(array $data_set)
     {
@@ -31,6 +33,7 @@ class EventoUser extends ApiDataModelBase
         $this->login_name = $this->validateAndReturnString($data_set, self::JSON_LOGIN_NAME);
         $this->email_list = $this->validateCombineAndReturnListOfNonEmptyStrings($data_set, [self::JSON_EMAIL, self::JSON_EMAIL_2, self::JSON_EMAIL_3], false);
         $this->roles = $this->validateAndReturnArray($data_set, self::JSON_ROLES);
+        $this->is_lockdown_account = $this->validateAndReturnBoolean($data_set, self::JSON_IS_LOCKDOWN_ACCOUNT, false, false) ?? false;
 
         $this->decoded_api_data = $data_set;
         $this->checkErrorsAndMaybeThrowException();
@@ -69,6 +72,11 @@ class EventoUser extends ApiDataModelBase
     public function getRoles() : array
     {
         return $this->roles;
+    }
+
+    public function isLockdownAccount() : bool
+    {
+        return $this->is_lockdown_account;
     }
 
     public function getDecodedApiData() : array
