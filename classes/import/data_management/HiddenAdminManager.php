@@ -74,6 +74,12 @@ class HiddenAdminManager
             $ref_id
         );
 
+        $role_obj->changeExistingObjects(
+            $ref_id,
+            \ilObjRole::MODE_UNPROTECTED_KEEP_LOCAL_POLICIES,
+            array('all')
+        );
+
         $this->hidden_admin_repo->addNewIliasObjectWithHiddenAdmin($ref_id, $role_obj->getId());
         return $role_obj->getId();
     }
