@@ -62,7 +62,6 @@ class AdminScriptPageGUI
             new LookupEventByEventoTitle($this->db, $this->ctrl),
             new ReAddRemovedEventParticipants($this->db, $this->ctrl, $this->request, new MembershipablesEventInTreeSeeker($this->tree)),
             new SwitchIliasObjectForEventoEvent($this->db, $this->ctrl, $this->request, $this->tree),
-            //new RepairMembershipLogDB($this->db, $this->ctrl)
         ];
     }
 
