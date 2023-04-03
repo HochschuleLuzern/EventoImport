@@ -85,16 +85,18 @@ class AdminScriptPageGUI
 
         $this->tpl->setTitle("Plugin: EventoImport");
 
-        $this->tpl->setTitleIcon(\ilObject::_getIcon("", "big", \ilObject::_lookupType($this->ref_id, true)));
+        $this->tpl->setTitleIcon(\ilObject::_getIcon(0, "big", \ilObject::_lookupType($this->ref_id, true)));
 
-        $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_CTYPE, $this->plugin_object->getComponentType());
-        $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_CNAME, $this->plugin_object->getComponentName());
-        $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_SLOT_ID, $this->plugin_object->getSlotId());
-        $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_PLUGIN_NAME, $this->plugin_object->getPluginName());
+        $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_CTYPE, $this->plugin_object->getComponentInfo()->getType());
+        $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_CNAME, $this->plugin_object->getComponentInfo()->getName());
+        $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_SLOT_ID, $this->plugin_object->getPluginSlotInfo()->getId());
+        $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, \ilObjComponentSettingsGUI::P_PLUGIN_NAME, $this->plugin_object->getPluginInfo()->getName());
         $this->ctrl->setParameterByClass(\ilObjComponentSettingsGUI::class, 'ref_id', 31);
 
         $this->tabs->setBackTarget('Plugins', $this->ctrl->getLinkTargetByClass([\ilAdministrationGUI::class, \ilObjComponentSettingsGUI::class], 'listPlugins'));
         $link = $this->ctrl->getLinkTargetByClass([\ilAdministrationGUI::class, \ilObjComponentSettingsGUI::class, \ilEventoImportConfigGUI::class], \ilObjComponentSettingsGUI::CMD_CONFIGURE);
+
+        $link =  $link . '&plugin_id=crevento';
 
         $this->tabs->addTab(\ilEventoImportConfigGUI::TAB_MAIN, $this->plugin_object->txt('confpage_tab_main'), $link);
 
@@ -132,7 +134,7 @@ class AdminScriptPageGUI
                     );
                     $comps[] = $modal->withOnLoad($modal->getShowSignal());
                 } catch (\InvalidArgumentException $e) {
-                    \ilUtil::sendFailure('Script failed because of invalid Argument(s) with following message: ' . $e->getMessage());
+                    \ilEventoImportPlugin::sendFailure('Script failed because of invalid Argument(s) with following message: ' . $e->getMessage());
                 }
             }
         }

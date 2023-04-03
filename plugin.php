@@ -23,10 +23,10 @@
     $id = 'crevento';
 
     // Version Information of Plugin & compatible versions of ILIAS
-    $version = '1.3.0';
+    $version = '1.4.0';
     $ilias_min_version = '7.0';
-    $ilias_max_version = '7.999';
+    $ilias_max_version = '8.999';
 
     // Please contact this person if you have questions
-    $responsible = 'Stephan Winiker';
-    $responsible_mail = 'stephan.winiker@hslu.ch';
+    $responsible = 'Mark Salter';
+    $responsible_mail = 'mark.salter@hslu.ch';

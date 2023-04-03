@@ -13,6 +13,7 @@ use Psr\Http\Message\ServerRequestInterface;
  * Class ilEventoImportConfigGUI
  *
  * This class currently does not contain any configuration in it
+ *  * @ilCtrl_isCalledBy    ilEventoImportConfigGUI: ilObjComponentSettingsGUI
  */
 class ilEventoImportConfigGUI extends ilPluginConfigGUI
 {
@@ -60,7 +61,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
         $this->tabs->activateTab(self::TAB_MAIN);
     }
 
-    public function performCommand($cmd)
+    public function performCommand($cmd): void
     {
         $this->addPageTabs();
 

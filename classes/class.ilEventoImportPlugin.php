@@ -33,9 +33,17 @@ use EventoImport\config\CronConfigForm;
 
 class ilEventoImportPlugin extends ilCronHookPlugin
 {
+    const ID = 'crevento';
     const PLUGIN_NAME = "EventoImport";
-    
-    public function getPluginName()
+
+    public function __construct()
+    {
+        global $DIC;
+        $this->db = $DIC->database();
+        parent::__construct($this->db, $DIC["component.repository"], self::ID);
+    }
+
+    public function getPluginName(): string
     {
         return self::PLUGIN_NAME;
     }
@@ -56,16 +64,12 @@ class ilEventoImportPlugin extends ilCronHookPlugin
     }
     
     /**
-     * @return  ilCronJob or false on failure
+     * @return  ilCronJob or throw exception
      */
-    public function getCronJobInstance($a_job_id)
+    public function getCronJobInstance($a_job_id): \ilCronJob
     {
         $this->loadCronJobInstance();
-        if (isset(self::$cron_job_instances[$a_job_id])) {
-            return self::$cron_job_instances[$a_job_id];
-        } else {
-            return false;
-        }
+        return self::$cron_job_instances[$a_job_id];
     }
     
     protected function loadCronJobInstance()
@@ -103,7 +107,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         }
     }
 
-    protected function beforeUninstall()
+    protected function beforeUninstall(): bool
     {
         global $DIC;
         $db = $DIC->database();
@@ -129,5 +133,91 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         }
 
         return true;
+    }
+
+    public function getPluginInfo(): ilPluginInfo
+    {
+        return parent::getPluginInfo();
+    }
+
+    public function getComponentInfo(): ilComponentInfo
+    {
+        return $this->getPluginInfo()->getComponent();
+    }
+
+    public function getPluginSlotInfo(): ilPluginSlotInfo
+    {
+        return $this->getPluginInfo()->getPluginSlot();
+    }
+
+    /**
+     * Send Info Message to Screen.
+     *
+     * @param	string	message
+     * @param	boolean	if true message is kept in session
+     * @static
+     *
+     */
+    public static function sendInfo($a_info = "", $a_keep = false)
+    {
+        global $DIC;
+
+        if(isset($DIC["tpl"])) {
+            $tpl = $DIC["tpl"];
+            $tpl->setOnScreenMessage("info", $a_info, $a_keep);
+        }
+    }
+
+    /**
+     * Send Failure Message to Screen.
+     *
+     * @param	string	message
+     * @param	boolean	if true message is kept in session
+     * @static
+     *
+     */
+    public static function sendFailure($a_info = "", $a_keep = false)
+    {
+        global $DIC;
+
+        if (isset($DIC["tpl"])) {
+            $tpl = $DIC["tpl"];
+            $tpl->setOnScreenMessage("failure", $a_info, $a_keep);
+        }
+    }
+
+    /**
+     * Send Question to Screen.
+     *
+     * @param	string	message
+     * @param	boolean	if true message is kept in session
+     * @static	*/
+    public static function sendQuestion($a_info = "", $a_keep = false)
+    {
+        global $DIC;
+
+        if(isset($DIC["tpl"])) {
+            $tpl = $DIC["tpl"];
+            $tpl->setOnScreenMessage("question", $a_info, $a_keep);
+        }
+    }
+
+    /**
+     * Send Success Message to Screen.
+     *
+     * @param	string	message
+     * @param	boolean	if true message is kept in session
+     * @static
+     *
+     */
+    public static function sendSuccess($a_info = "", $a_keep = false)
+    {
+        global $DIC;
+
+        /** @var ilTemplate $tpl */
+        if(isset($DIC["tpl"])) {
+            $tpl = $DIC["tpl"];
+            $tpl->setOnScreenMessage("success", $a_info, $a_keep);
+        }
     }
 }

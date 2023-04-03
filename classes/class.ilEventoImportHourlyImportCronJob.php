@@ -27,32 +27,32 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
         $this->logger = $logger;
     }
 
-    public function getId()
+    public function getId(): string
     {
         return self::ID;
     }
 
-    public function hasAutoActivation()
+    public function hasAutoActivation(): bool
     {
         return false;
     }
 
-    public function hasFlexibleSchedule()
+    public function hasFlexibleSchedule(): bool
     {
         return true;
     }
 
-    public function getDefaultScheduleType()
+    public function getDefaultScheduleType(): int
     {
         return self::SCHEDULE_TYPE_IN_MINUTES;
     }
 
-    public function getDefaultScheduleValue()
+    public function getDefaultScheduleValue(): ?int
     {
         return 30;
     }
 
-    public function run()
+    public function run() : \ilCronJobResult
     {
         try {
             $api_settings = $this->config_manager->getApiConfiguration();
@@ -80,12 +80,12 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
         }
     }
 
-    public function getTitle()
+    public function getTitle(): string
     {
         return $this->cp->txt('hourly_import_cj_title');
     }
 
-    public function getDescription()
+    public function getDescription(): string
     {
         return $this->cp->txt('hourly_import_cj_desc');
     }

@@ -30,7 +30,7 @@ class EventLocationsAdminGUI
 
         // Show Location settings from the cron-job
         $json_settings = $this->settings->get('crevento_location_settings');
-        $locations_settings = json_decode($json_settings, true);
+        $locations_settings = $json_settings ? json_decode($json_settings, true) : [];
         if (!is_array($locations_settings)) {
             $locations_settings = [];
         }
