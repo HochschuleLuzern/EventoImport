@@ -72,7 +72,13 @@ class MembershipManager
         }
     }
 
-    private function addUsersToMembershipableObject(\ilParticipants $participants_object, EventoEvent $evento_event, int $admin_role_code, int $student_role_code) : void
+    private function addUsersToMembershipableObject(
+        \ilParticipants $participants_object,
+        EventoEvent $evento_event,
+        int $admin_role_code,
+        int $student_role_code,
+        int $membershipable_ref_id
+    ) : void
     {
         /** @var EventoUserShort $employee */
         foreach ($evento_event->getEmployees() as $employee) {
@@ -81,6 +87,7 @@ class MembershipManager
                 if (!$participants_object->isAssigned($employee_user_id)) {
                     $participants_object->add($employee_user_id, $admin_role_code);
                     $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
+                    \ilForumNotification::checkForumsExistsInsert($membershipable_ref_id, $employee_user_id);
                 } else {
                     $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
                 }
@@ -96,6 +103,7 @@ class MembershipManager
                 if (!$participants_object->isAssigned($student_user_id)) {
                     $participants_object->add($student_user_id, $student_role_code);
                     $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
+                    \ilForumNotification::checkForumsExistsInsert($membershipable_ref_id, $student);
                 } else {
                     $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
                 }
@@ -130,7 +138,7 @@ class MembershipManager
         $admin_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN;
         $member_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_MEMBER : IL_GRP_MEMBER;
 
-        $this->addUsersToMembershipableObject($participants_obj, $imported_event, $admin_role_code, $member_role_code);
+        $this->addUsersToMembershipableObject($participants_obj, $imported_event, $admin_role_code, $member_role_code, $ilias_event->getRefId());
 
         // TODO: Refactor. This was just a quick fix to stop removing members from events which reached their end date
         if (!$delete_not_delivered_members) {
@@ -161,7 +169,7 @@ class MembershipManager
     {
         // Add users to main event
         $participants_obj_of_event = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
-        $this->addUsersToMembershipableObject($participants_obj_of_event, $imported_event, IL_GRP_ADMIN, IL_GRP_MEMBER);
+        $this->addUsersToMembershipableObject($participants_obj_of_event, $imported_event, IL_GRP_ADMIN, IL_GRP_MEMBER, $ilias_event->getRefId());
 
         // Add users to all parent membershipable objects
         foreach ($parent_events as $parent_event) {
@@ -172,14 +180,16 @@ class MembershipManager
                     $participants_obj_of_parent,
                     $imported_event,
                     IL_CRS_ADMIN,
-                    IL_CRS_MEMBER
+                    IL_CRS_MEMBER,
+                    $parent_event
                 );
             } elseif ($participants_obj_of_parent instanceof \ilGroupParticipants) {
                 $this->addUsersToMembershipableObject(
                     $participants_obj_of_parent,
                     $imported_event,
                     IL_GRP_ADMIN,
-                    IL_GRP_MEMBER
+                    IL_GRP_MEMBER,
+                    $parent_event
                 );
             }
         }
