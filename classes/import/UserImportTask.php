@@ -96,7 +96,8 @@ class UserImportTask
      */
     private function convertDeletedAccounts()
     {
-        $list = $this->evento_user_repo->getUsersWithLastImportOlderThanOneWeek(IliasEventoUserRepository::TYPE_HSLU_AD);
+
+        $list = $this->evento_user_repo->getUsersWithLastImportOlderThanGivenDays(32, IliasEventoUserRepository::TYPE_HSLU_AD);
 
         foreach ($list as $evento_id => $ilias_user_id) {
             try {
