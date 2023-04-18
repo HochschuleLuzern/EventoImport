@@ -118,11 +118,13 @@ class IliasEventoUserRepository
         );
     }
 
-    public function getUsersWithLastImportOlderThanOneWeek(string $only_searched_account_type) : array
+    public function getUsersWithLastImportOlderThanGivenDays(int $min_days_not_delivered, string $only_searched_account_type) : array
     {
+        $deactivation_threshold_date = date("Y-m-d", strtotime("-".$min_days_not_delivered." day"));
+
         $query = 'SELECT ' . IliasEventoUserTblDef::COL_EVENTO_ID . ', ' . IliasEventoUserTblDef::COL_ILIAS_USER_ID
             . ' FROM ' . IliasEventoUserTblDef::TABLE_NAME
-            . ' WHERE ' . IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED . ' < ' . $this->db->quote(date("Y-m-d", strtotime("-1 week")), \ilDBConstants::T_DATETIME);
+            . ' WHERE ' . IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED . ' < ' . $this->db->quote( $deactivation_threshold_date, \ilDBConstants::T_DATETIME);
 
         if ($only_searched_account_type == self::TYPE_HSLU_AD || $only_searched_account_type == self::TYPE_EDU_ID) {
             $query .= ' AND ' . IliasEventoUserTblDef::COL_ACCOUNT_TYPE . ' = ' . $this->db->quote($only_searched_account_type, \ilDBConstants::T_TEXT);
