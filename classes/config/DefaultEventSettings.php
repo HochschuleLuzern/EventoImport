@@ -8,11 +8,16 @@ class DefaultEventSettings
     private int $default_sort_mode;
     private int $default_sort_direction;
     private bool $default_online_status;
+    private int $default_sort_new_items_order;
+    private int $default_sort_new_items_position;
 
     public function __construct(\ilSetting $settings)
     {
+
         $this->default_object_owner_id = (int) $settings->get(CronConfigForm::CONF_EVENT_OWNER_ID, "6");
-        $this->default_sort_mode = \ilContainer::SORT_TITLE;
+        $this->default_sort_mode = \ilContainer::SORT_MANUAL;
+        $this->default_sort_new_items_order = \ilContainer::SORT_NEW_ITEMS_ORDER_CREATION;
+        $this->default_sort_new_items_position = \ilContainer::SORT_NEW_ITEMS_POSITION_BOTTOM;
         $this->default_sort_direction = \ilContainer::SORT_DIRECTION_ASC;
         $this->default_online_status = true;
     }
@@ -25,6 +30,16 @@ class DefaultEventSettings
     public function getDefaultSortMode() : int
     {
         return $this->default_sort_mode;
+    }
+
+    public function getDefaultSortNewItemsOrder()
+    {
+        return $this->default_sort_new_items_order;
+    }
+
+    public function getDefaultSortNewItemsPosition()
+    {
+        return $this->default_sort_new_items_position;
     }
 
     public function getDefaultSortDirection() : int

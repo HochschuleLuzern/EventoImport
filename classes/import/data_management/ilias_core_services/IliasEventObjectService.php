@@ -155,6 +155,8 @@ class IliasEventObjectService
 
         $settings = new \ilContainerSortingSettings($container_object->getId());
         $settings->setSortMode($this->default_event_settings->getDefaultSortMode());
+        $settings->setSortNewItemsOrder($this->default_event_settings->getDefaultSortNewItemsOrder());
+        $settings->setSortNewItemsPosition($this->default_event_settings->getDefaultSortNewItemsPosition());
         $settings->setSortDirection($this->default_event_settings->getDefaultSortDirection());
 
         $container_object->setOrderType($this->default_event_settings->getDefaultSortMode());
