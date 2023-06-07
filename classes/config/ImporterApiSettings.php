@@ -18,11 +18,11 @@ class ImporterApiSettings
         $this->url = $settings->get(CronConfigForm::CONF_API_URI, '');
         $this->api_key = $settings->get(CronConfigForm::CONF_API_AUTH_KEY, '');
         $this->api_secret = $settings->get(CronConfigForm::CONF_API_AUTH_SECRET, '');
-        $this->page_size = (int) $settings->get(CronConfigForm::CONF_API_PAGE_SIZE, 500);
-        $this->max_pages = (int) $settings->get(CronConfigForm::CONF_API_MAX_PAGES, -1);
-        $this->timeout_after_request = (int) $settings->get(CronConfigForm::CONF_API_TIMEOUT_AFTER_REQUEST, 60);
-        $this->timeout_failed_request = (int) $settings->get(CronConfigForm::CONF_API_TIMEOUT_FAILED_REQUEST, 60);
-        $this->max_retries = (int) $settings->get(CronConfigForm::CONF_API_MAX_RETRIES, 3);
+        $this->page_size = (int) $settings->get(CronConfigForm::CONF_API_PAGE_SIZE, '500');
+        $this->max_pages = (int) $settings->get(CronConfigForm::CONF_API_MAX_PAGES, '-1');
+        $this->timeout_after_request = (int) $settings->get(CronConfigForm::CONF_API_TIMEOUT_AFTER_REQUEST, '60');
+        $this->timeout_failed_request = (int) $settings->get(CronConfigForm::CONF_API_TIMEOUT_FAILED_REQUEST, '60');
+        $this->max_retries = (int) $settings->get(CronConfigForm::CONF_API_MAX_RETRIES, '3');
     }
 
     public function getUrl() : string

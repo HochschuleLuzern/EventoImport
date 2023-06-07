@@ -104,10 +104,10 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                     $output = $api_tester_gui->getApiDataAsString($cmd);
 
                     if (strlen($output) > 0) {
-                        ilUtil::sendSuccess($output, true);
+                        ilEventoImportPlugin::sendSuccess($output, true);
                     }
                 } catch (Exception $e) {
-                    ilUtil::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
+                    ilEventoImportPlugin::sendFailure('Exception: ' . print_r([$e->getMessage(), $e->getTraceAsString()], true));
                 }
 
                 $this->ctrl->redirect($this, 'configure');
@@ -120,7 +120,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
                 $diff = $locations_builder->rebuildRepositoryLocationsTable($locations_settings);
 
-                \ilUtil::sendSuccess("Event Locats reloaded successfully. Added $diff new locations", true);
+                \ilEventoImportPlugin::sendSuccess("Event Locats reloaded successfully. Added $diff new locations", true);
                 $this->ctrl->redirect($this, 'configure');
                 break;
 
@@ -176,13 +176,13 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
 
                 $locations_builder->rebuildRepositoryLocationsTable($locations_settings);
 
-                \ilUtil::sendSuccess($this->ui_services->renderer()->render($ui_comps), true);
+                \ilEventoImportPlugin::sendSuccess($this->ui_services->renderer()->render($ui_comps), true);
                 $this->ctrl->redirect($this, 'configure');
 
                 break;
 
             default:
-                ilUtil::sendFailure('Command not found', true);
+                ilEventoImportPlugin::sendFailure('Command not found', true);
                 $this->ctrl->redirect($this, 'configure');
                 break;
         }

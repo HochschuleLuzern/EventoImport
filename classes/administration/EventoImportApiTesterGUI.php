@@ -60,11 +60,11 @@ class EventoImportApiTesterGUI
             $data = $model ? htmlspecialchars(print_r($model->getDecodedApiData(), true)) : 'No object received from API';
             return $this->buildMessageForNextPage("CMD = $cmd", $data);
         } catch (\ilEventoImportApiDataException $e) {
-            \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+            \ilEventoImportPlugin::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
         } catch (\ilEventoImportCommunicationException $e) {
-            \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
+            \ilEventoImportPlugin::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
         } catch (\Exception $e) {
-            \ilUtil::sendFailure("Error occured for paramerers: ", true);
+            \ilEventoImportPlugin::sendFailure("Error occured for paramerers: ", true);
         }
 
         return '';
@@ -81,11 +81,11 @@ class EventoImportApiTesterGUI
 
             return $this->buildMessageForNextPage("CMD = $cmd, Skip = $skip, Take = $take", $ret);
         } catch (\ilEventoImportApiDataException $e) {
-            \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+            \ilEventoImportPlugin::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
         } catch (\ilEventoImportCommunicationException $e) {
-            \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
+            \ilEventoImportPlugin::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
         } catch (\Exception $e) {
-            \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd, Skip = $skip, Take = $take", true);
+            \ilEventoImportPlugin::sendFailure("Error occured for paramerers CMD = $cmd, Skip = $skip, Take = $take", true);
         }
 
         return '';
@@ -103,11 +103,11 @@ class EventoImportApiTesterGUI
 
             return $this->buildMessageForNextPage("CMD = $cmd", $data);
         } catch (\ilEventoImportApiDataException $e) {
-            \ilUtil::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
+            \ilEventoImportPlugin::sendFailure('Delivered Data from API was invalid: ' . $e->getMessage(), true);
         } catch (\ilEventoImportCommunicationException $e) {
-            \ilUtil::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
+            \ilEventoImportPlugin::sendFailure('Communication error with API occured: ' . $e->getMessage(), true);
         } catch (\Exception $e) {
-            \ilUtil::sendFailure("Error occured for paramerers CMD = $cmd", true);
+            \ilEventoImportPlugin::sendFailure("Error occured for paramerers CMD = $cmd", true);
         }
 
         return '';
