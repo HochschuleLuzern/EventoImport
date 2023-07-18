@@ -11,7 +11,7 @@ class DefaultEventSettings
 
     public function __construct(\ilSetting $settings)
     {
-        $this->default_object_owner_id = (int) $settings->get(CronConfigForm::CONF_EVENT_OWNER_ID, 6);
+        $this->default_object_owner_id = (int) $settings->get(CronConfigForm::CONF_EVENT_OWNER_ID, "6");
         $this->default_sort_mode = \ilContainer::SORT_TITLE;
         $this->default_sort_direction = \ilContainer::SORT_DIRECTION_ASC;
         $this->default_online_status = true;

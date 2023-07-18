@@ -35,9 +35,9 @@ class DefaultUserSettings
         $this->student_role_id = (int) $settings->get(CronConfigForm::CONF_USER_STUDENT_ROLE_ID);
 
         $this->now = new \DateTimeImmutable();
-        $import_acc_duration_in_months = (int) $settings->get(CronConfigForm::CONF_USER_IMPORT_ACC_DURATION, 12);
+        $import_acc_duration_in_months = (int) $settings->get(CronConfigForm::CONF_USER_IMPORT_ACC_DURATION, "12");
         $this->acc_duration_after_import = $this->addMonthsToCurrent($import_acc_duration_in_months);
-        $max_acc_duration_in_months = (int) $settings->get(CronConfigForm::CONF_USER_MAX_ACC_DURATION, 24);
+        $max_acc_duration_in_months = (int) $settings->get(CronConfigForm::CONF_USER_MAX_ACC_DURATION, "24");
         $this->max_acc_duration = $this->addMonthsToCurrent($max_acc_duration_in_months);
 
         $this->auth_mode = $settings->get(CronConfigForm::CONF_USER_AUTH_MODE, 'local');

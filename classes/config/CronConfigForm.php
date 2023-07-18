@@ -584,7 +584,7 @@ class CronConfigForm
             case self::FORM_EVENT_OPT_OWNER_CUSTOM_USER:
                 $input_user_id = (int) $form->getInput(self::FORM_EVENT_OPT_OWNER_CUSTOM_ID);
                 $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_CUSTOM_USER);
-                $this->settings->set(self::CONF_EVENT_OWNER_ID, $input_user_id);
+                $this->settings->set(self::CONF_EVENT_OWNER_ID, "$input_user_id");
                 break;
         }
 
@@ -638,7 +638,7 @@ class CronConfigForm
     {
         $value = (int) $form->getInput($input_field);
         if (!is_null($value)) {
-            $this->settings->set($conf_key, $value);
+            $this->settings->set($conf_key, "$value");
         }
     }
 }
