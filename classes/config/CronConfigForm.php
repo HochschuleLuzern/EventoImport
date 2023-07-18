@@ -238,19 +238,20 @@ class CronConfigForm
             self::FORM_USER_AUTH_MODE
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_USER_AUTH_MODE_DESC));
-        $auth_modes = ilAuthUtils::_getAllAuthModes();
+
+        global $DIC;
+        $lng = $DIC->language();
+        // The following code block to get list of auth-modes is stolen from ilObjUserGUI around line 1096 (from initForm())
+        $auth_modes = \ilAuthUtils::_getActiveAuthModes();
         $options = [];
-        foreach ($auth_modes as $auth_mode => $auth_name) {
-            if (ilLDAPServer::isAuthModeLDAP($auth_mode)) {
-                $server = ilLDAPServer::getInstanceByServerId(ilLDAPServer::getServerIdByAuthMode($auth_mode));
-                if ($server->isActive()) {
-                    $options[$auth_name] = $auth_name;
-                }
+        foreach ($auth_modes as $auth_name => $auth_key) {
+            if ($auth_name == 'default') {
+                $name = $lng->txt('auth_' . $auth_name) . " (" . $lng->txt('auth_' . ilAuthUtils::_getAuthModeName($auth_key)) . ")";
+
             } else {
-                if ($this->settings->get($auth_name . '_active') || $auth_mode == AUTH_LOCAL) {
-                    $options[$auth_name] = $auth_name;
-                }
+                $name = ilAuthUtils::getAuthModeTranslation("$auth_key", $auth_name);
             }
+            $options[$auth_name] = $name;
         }
         $ws_item->setOptions($options);
         $ws_item->setValue($this->settings->get(self::CONF_USER_AUTH_MODE));
@@ -291,7 +292,6 @@ class CronConfigForm
         );
         $ws_item->setInfo($this->cp->txt(self::LANG_USER_CHANGED_MAIL_BODY_DESC));
         $ws_item->setRequired(true);
-        $ws_item->usePurifier(true);
         $ws_item->setValue($this->settings->get(self::CONF_USER_CHANGED_MAIL_BODY, ''));
         $form->addItem($ws_item);
 
@@ -345,7 +345,7 @@ class CronConfigForm
 
             if (isset($role_mapping[$role_id])) {
                 $ws_item->setChecked(true);
-                $mapping_input->setValue($role_mapping[$role_id]);
+                $mapping_input->setValue((string) $role_mapping[$role_id]);
             } else {
                 $ws_item->setChecked(false);
             }
@@ -578,7 +578,7 @@ class CronConfigForm
         switch ($input_object_owner) {
             case self::FORM_EVENT_OPT_OWNER_ROOT:
                 $this->settings->set(self::CONF_EVENT_OBJECT_OWNER, self::FORM_EVENT_OPT_OWNER_ROOT);
-                $this->settings->set(self::CONF_EVENT_OWNER_ID, 6);
+                $this->settings->set(self::CONF_EVENT_OWNER_ID, "6");
                 break;
 
             case self::FORM_EVENT_OPT_OWNER_CUSTOM_USER:

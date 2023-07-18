@@ -38,7 +38,7 @@ class RepositoryLocationSeeker
     private function searchRefIdForObjTitle(int $root_ref_id, string $searched_obj_title) : ?int
     {
         foreach ($this->tree->getChildsByType($root_ref_id, 'cat') as $child_node) {
-            $child_ref = $child_node['child'];
+            $child_ref = (int) $child_node['child'];
             $obj_id = \ilObject::_lookupObjectId($child_ref);
             if (\ilObject::_lookupTitle($obj_id) == $searched_obj_title) {
                 return (int) $child_ref;
