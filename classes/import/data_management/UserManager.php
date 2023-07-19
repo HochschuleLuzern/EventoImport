@@ -212,7 +212,7 @@ class UserManager
 
             Since the second call without an if-statement makes this block useless, it is not in the code anymore
         */
-        $ilias_user->setPasswd('', IL_PASSWD_PLAIN);
+        $ilias_user->setPasswd('');
 
         // profil is always public for registered users
         $ilias_user->setPref(

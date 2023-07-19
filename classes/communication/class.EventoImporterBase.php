@@ -39,6 +39,7 @@ abstract class EventoImporterBase
         int $max_retries,
         Logger $logger
     ) {
+        $this->has_more_data = false;
         $this->data_source = $data_source;
         $this->seconds_before_retry = $seconds_before_retry;
         $this->max_retries = $max_retries;

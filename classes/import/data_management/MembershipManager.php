@@ -127,8 +127,8 @@ class MembershipManager
     {
         $participants_obj = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
 
-        $admin_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN;
-        $member_role_code = $ilias_event->getIliasType() == 'crs' ? IL_CRS_MEMBER : IL_GRP_MEMBER;
+        $admin_role_code = $ilias_event->getIliasType() == 'crs' ? \ilParticipants::IL_CRS_ADMIN : \ilParticipants::IL_GRP_ADMIN;
+        $member_role_code = $ilias_event->getIliasType() == 'crs' ? \ilParticipants::IL_CRS_MEMBER : \ilParticipants::IL_GRP_MEMBER;
 
         $this->addUsersToMembershipableObject($participants_obj, $imported_event, $admin_role_code, $member_role_code);
 
@@ -143,7 +143,11 @@ class MembershipManager
         foreach ($this->getUsersToRemove($imported_event) as $user_to_remove) {
             if ($participants_obj->isAssigned($user_to_remove->getIliasUserId())) {
                 $participants_obj->delete($user_to_remove->getIliasUserId());
-                $this->logger->logEventMembership(Logger::CREVENTO_SUB_REMOVED, $imported_event->getEventoId(), $user_to_remove->getEventoUserId());
+                $this->logger->logEventMembership(
+                    Logger::CREVENTO_SUB_REMOVED,
+                    $imported_event->getEventoId(),
+                    $user_to_remove->getEventoUserId()
+                );
             } else {
                 $this->logger->logEventMembership(
                     Logger::CREVENTO_SUB_ALREADY_DEASSIGNED,
@@ -161,7 +165,12 @@ class MembershipManager
     {
         // Add users to main event
         $participants_obj_of_event = $this->getParticipantsObjectForRefId($ilias_event->getRefId());
-        $this->addUsersToMembershipableObject($participants_obj_of_event, $imported_event, IL_GRP_ADMIN, IL_GRP_MEMBER);
+        $this->addUsersToMembershipableObject(
+            $participants_obj_of_event,
+            $imported_event,
+            \ilParticipants::IL_GRP_ADMIN,
+            \ilParticipants::IL_GRP_MEMBER
+        );
 
         // Add users to all parent membershipable objects
         foreach ($parent_events as $parent_event) {
@@ -171,15 +180,15 @@ class MembershipManager
                 $this->addUsersToMembershipableObject(
                     $participants_obj_of_parent,
                     $imported_event,
-                    IL_CRS_ADMIN,
-                    IL_CRS_MEMBER
+                    \ilParticipants::IL_CRS_ADMIN,
+                    \ilParticipants::IL_CRS_MEMBER
                 );
             } elseif ($participants_obj_of_parent instanceof \ilGroupParticipants) {
                 $this->addUsersToMembershipableObject(
                     $participants_obj_of_parent,
                     $imported_event,
-                    IL_GRP_ADMIN,
-                    IL_GRP_MEMBER
+                    \ilParticipants::IL_GRP_ADMIN,
+                    \ilParticipants::IL_GRP_MEMBER
                 );
             }
         }
@@ -222,7 +231,7 @@ class MembershipManager
                     }
 
                     $co_particpants_list = $this->getParticipantsObjectForRefId($co_membershipable);
-                    if ($co_particpants_list->isAssigned($user_to_remove)) {
+                    if ($co_particpants_list->isAssigned($user_to_remove->getIliasUserId())) {
                         $is_in_co_membershipable = true;
                     }
                 }
@@ -270,7 +279,7 @@ class MembershipManager
         $this->addAdminListToObject(
             $event_participant_obj,
             $event_admin_list->getAccountList(),
-            $ilias_evento_event->getIliasType() == 'crs' ? IL_CRS_ADMIN : IL_GRP_ADMIN
+            $ilias_evento_event->getIliasType() == 'crs' ? \ilParticipants::IL_CRS_ADMIN : \ilParticipants::IL_GRP_ADMIN
         );
 
         $parent_membershipables = $this->tree_seeker->getRefIdsOfParentMembershipables($ilias_evento_event->getRefId());
@@ -281,13 +290,13 @@ class MembershipManager
                 $this->addAdminListToObject(
                     $participants_obj,
                     $event_admin_list->getAccountList(),
-                    IL_CRS_ADMIN,
+                    \ilParticipants::IL_CRS_ADMIN,
                 );
             } elseif ($participants_obj instanceof \ilGroupParticipants) {
                 $this->addAdminListToObject(
                     $participants_obj,
                     $event_admin_list->getAccountList(),
-                    IL_GRP_ADMIN,
+                    \ilParticipants::IL_GRP_ADMIN,
                 );
             }
         }

@@ -82,7 +82,7 @@ class IliasEventObjectService
 
         $this->createContainerObject($group_object, $title, $description, $destination_ref_id);
 
-        $group_object->updateGroupType(GRP_TYPE_CLOSED);
+        $group_object->updateGroupType(\ilGroupConstants::GRP_TYPE_CLOSED);
         $this->removeDeletePermissionsFromAdminRole($group_object);
 
         return $group_object;
