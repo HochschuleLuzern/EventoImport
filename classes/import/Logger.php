@@ -159,12 +159,20 @@ class Logger
         } else {
             $employees_list = [];
         }
+        $employees_list_as_str = json_encode($employees_list);
+        if (mb_strlen($employees_list_as_str) > 3995) {
+            $employees_list_as_str = mb_substr($employees_list_as_str, 0, 3995);
+        }
 
         if (isset($import_data['api_data']) && isset($import_data['api_data'][EventoEvent::JSON_STUDENTS])) {
             $students_list = $import_data['api_data'][EventoEvent::JSON_STUDENTS];
             unset($import_data['api_data'][EventoEvent::JSON_STUDENTS]);
         } else {
             $students_list = [];
+        }
+        $students_list_as_str = json_encode($students_list);
+        if (mb_strlen($students_list_as_str) > 3995) {
+            $students_list_as_str = mb_substr($students_list_as_str, 0, 3995);
         }
 
         $r = $this->ilDB->query("SELECT 1 FROM " . self::TABLE_LOG_EVENTS . " WHERE evento_id = " . $this->ilDB->quote(
@@ -181,8 +189,8 @@ class Logger
                     'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                    'last_import_employees' => [\ilDBConstants::T_TEXT, json_encode($employees_list)],
-                    'last_import_students' => [\ilDBConstants::T_TEXT, json_encode($students_list)]
+                    'last_import_employees' => [\ilDBConstants::T_TEXT, $employees_list_as_str],
+                    'last_import_students' => [\ilDBConstants::T_TEXT, $students_list_as_str]
                 ]
             );
         } else {
@@ -193,8 +201,8 @@ class Logger
                     'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
                     'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                    'last_import_employees' => [\ilDBConstants::T_TEXT, json_encode($employees_list)],
-                    'last_import_students' => [\ilDBConstants::T_TEXT, json_encode($students_list)]
+                    'last_import_employees' => [\ilDBConstants::T_TEXT, $employees_list_as_str],
+                    'last_import_students' => [\ilDBConstants::T_TEXT, $students_list_as_str]
                 ],
                 [
                     'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
