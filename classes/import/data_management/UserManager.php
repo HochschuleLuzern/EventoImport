@@ -100,20 +100,22 @@ class UserManager
     public function updateIliasUserFromEventoUser(\ilObjUser $ilias_user, EventoUser $evento_user)
     {
         $changed_user_data = [];
-        if ($ilias_user->getFirstname() != $evento_user->getFirstName()) {
+        $first_name = $this->shortenStringIfTooLong($evento_user->getFirstName(), 32);
+        if ($ilias_user->getFirstname() != $first_name) {
             $changed_user_data['first_name'] = [
                 'old' => $ilias_user->getFirstname(),
-                'new' => $evento_user->getFirstName()
+                'new' => $first_name
             ];
-            $ilias_user->setFirstname($evento_user->getFirstName());
+            $ilias_user->setFirstname($first_name);
         }
 
-        if ($ilias_user->getlastname() != $evento_user->getLastName()) {
+        $last_name = $this->shortenStringIfTooLong($evento_user->getLastName(), 32);
+        if ($ilias_user->getlastname() != $last_name) {
             $changed_user_data['last_name'] = [
                 'old' => $ilias_user->getFirstname(),
-                'new' => $evento_user->getFirstName()
+                'new' => $last_name
             ];
-            $ilias_user->setLastname($evento_user->getLastName());
+            $ilias_user->setLastname($last_name);
         }
 
         $received_gender_char = $this->convertEventoToIliasGenderChar($evento_user->getGender());
@@ -168,8 +170,8 @@ class UserManager
     private function setUserValuesFromEventoUserObject(\ilObjUser $ilias_user, EventoUser $evento_user) : \ilObjUser
     {
         $ilias_user->setLogin($evento_user->getLoginName());
-        $ilias_user->setFirstname($evento_user->getFirstName());
-        $ilias_user->setLastname($evento_user->getLastName());
+        $ilias_user->setFirstname($this->shortenStringIfTooLong($evento_user->getFirstName(), 32));
+        $ilias_user->setLastname($this->shortenStringIfTooLong($evento_user->getLastName(), 32));
         $ilias_user->setGender($this->convertEventoToIliasGenderChar($evento_user->getGender()));
         $ilias_user->setEmail($evento_user->getEmailList()[0]);
         $ilias_user->setSecondEmail($evento_user->getEmailList()[0]);
@@ -313,5 +315,14 @@ class UserManager
     public function getIliasEventoUserForEventoUser(EventoUserShort $evento_user) : ?IliasEventoUser
     {
         return $this->evento_user_repo->getIliasEventoUserByEventoId($evento_user->getEventoId());
+    }
+
+    private function shortenStringIfTooLong(string $string, int $max_length)
+    {
+        if (mb_strlen($string) > $max_length) {
+            return mb_substr($string, 0, $max_length);
+        }
+
+        return $string;
     }
 }
