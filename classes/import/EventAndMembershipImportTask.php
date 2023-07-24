@@ -62,7 +62,7 @@ class EventAndMembershipImportTask
             } catch (\ilEventoImportCommunicationException $e) {
                 throw $e;
             } catch (\Exception $e) {
-                $this->logger->logException('Importing Event Page', $e->getMessage());
+                $this->logger->logException('Importing Event Page', $e->getMessage(), $e->getTraceAsString());
             }
         } while ($this->evento_importer->hasMoreData());
     }

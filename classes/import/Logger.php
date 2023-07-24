@@ -133,9 +133,9 @@ class Logger
         }
     }
 
-    public function logException($operation, $message)
+    public function logException($operation, $message, string $trace_as_string = '')
     {
-        ilLoggerFactory::getRootLogger()->error("EventoImport failed while $operation due to '$message'");
+        ilLoggerFactory::getRootLogger()->error("EventoImport failed while $operation due to '$message' " . $trace_as_string);
     }
 
     public function logEventImport(int $log_info_code, int $evento_id, ?int $ref_id, array $import_data)

@@ -38,7 +38,7 @@ class AdminImportTask
                     $this->hidden_admin_manager->synchronizeEventAdmins($event_admin_list, $ilias_evento_event);
                 }
             } catch (\Exception $e) {
-                $this->logger->logException('Admin Import', $e->getMessage());
+                $this->logger->logException('Admin Import', $e->getMessage(), $e->getTraceAsString());
             }
         }
     }

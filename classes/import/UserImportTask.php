@@ -60,7 +60,7 @@ class UserImportTask
             } catch (\ilEventoImportCommunicationException $e) {
                 throw $e;
             } catch (\Exception $e) {
-                $this->evento_logger->logException('User Import', $e->getMessage());
+                $this->evento_logger->logException('User Import', $e->getMessage(), $e->getTraceAsString());
             }
         } while ($this->evento_importer->hasMoreData());
     }
@@ -83,7 +83,7 @@ class UserImportTask
                 }
                 $this->evento_logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());
             } catch (\Exception $e) {
-                $this->evento_logger->logException('User Import', $e->getMessage());
+                $this->evento_logger->logException('User Import', $e->getMessage(), $e->getTraceAsString());
             }
         }
     }
@@ -113,7 +113,7 @@ class UserImportTask
                 }
             } catch (\Exception $e) {
                 $this->evento_logger->logException('Convert Deleted User Accounts', "Exception on deleting user with evento_id $ilias_user_id"
-                    . ', exception message: ' . $e->getMessage());
+                    . ', exception message: ' . $e->getMessage(), $e->getTraceAsString());
             }
         }
     }
