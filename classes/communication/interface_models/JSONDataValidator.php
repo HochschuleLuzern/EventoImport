@@ -127,7 +127,7 @@ trait JSONDataValidator
             if (
                 isset($data_array[$key])
                 && is_string($data_array[$key])
-                && strlen($data_array[$key]) > 0
+                && strlen(trim($data_array[$key])) > 0
                 && !in_array($data_array[$key], $list_of_values)
             ) {
                 $list_of_values[] = $data_array[$key];
