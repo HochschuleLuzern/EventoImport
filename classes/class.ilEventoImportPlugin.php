@@ -162,7 +162,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
     {
         global $DIC;
 
-        if(isset($DIC["tpl"])) {
+        if (isset($DIC["tpl"])) {
             $tpl = $DIC["tpl"];
             $tpl->setOnScreenMessage("info", $a_info, $a_keep);
         }
@@ -196,7 +196,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
     {
         global $DIC;
 
-        if(isset($DIC["tpl"])) {
+        if (isset($DIC["tpl"])) {
             $tpl = $DIC["tpl"];
             $tpl->setOnScreenMessage("question", $a_info, $a_keep);
         }
@@ -215,7 +215,7 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         global $DIC;
 
         /** @var ilTemplate $tpl */
-        if(isset($DIC["tpl"])) {
+        if (isset($DIC["tpl"])) {
             $tpl = $DIC["tpl"];
             $tpl->setOnScreenMessage("success", $a_info, $a_keep);
         }

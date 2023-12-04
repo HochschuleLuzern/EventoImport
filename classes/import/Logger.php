@@ -91,7 +91,7 @@ class Logger
         $this->ilDB = $db;
     }
 
-    public function logUserImport($log_info_code, $evento_id, $username, $import_data)
+    public function logUserImport($log_info_code, $evento_id, $username, $import_data): void
     {
         if ($log_info_code < 300 || $log_info_code >= 400) {
             $this->logException(
@@ -117,28 +117,29 @@ class Logger
                     'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
                 ]
             );
-        } else {
-            $this->ilDB->update(
-                self::TABLE_LOG_USERS,
-                [
-                    'usrname' => [\ilDBConstants::T_TEXT, $username],
-                    'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
-                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
-                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                ],
-                [
-                    'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
-                ]
-            );
+            return;
         }
+
+        $this->ilDB->update(
+            self::TABLE_LOG_USERS,
+            [
+                'usrname' => [\ilDBConstants::T_TEXT, $username],
+                'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
+                'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+            ],
+            [
+                'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
+            ]
+        );
     }
 
-    public function logException($operation, $message, string $trace_as_string = '')
+    public function logException($operation, $message, string $trace_as_string = ''): void
     {
         ilLoggerFactory::getRootLogger()->error("EventoImport failed while $operation due to '$message' " . $trace_as_string);
     }
 
-    public function logEventImport(int $log_info_code, int $evento_id, ?int $ref_id, array $import_data)
+    public function logEventImport(int $log_info_code, int $evento_id, ?int $ref_id, array $import_data): void
     {
         if ($log_info_code < 200 || $log_info_code >= 300) {
             $this->logException(
@@ -153,23 +154,23 @@ class Logger
          * This is necessary, since the serialization of imported_data can be over 4000 chars (max. string length) with long user lists.
          * The alternative would be to convert the column from varchar to clob. But this approach should work pretty good as well.
          */
+        $employees_list = [];
         if (isset($import_data['api_data']) && isset($import_data['api_data'][EventoEvent::JSON_EMPLOYEES])) {
             $employees_list = $import_data['api_data'][EventoEvent::JSON_EMPLOYEES];
             unset($import_data['api_data'][EventoEvent::JSON_EMPLOYEES]);
-        } else {
-            $employees_list = [];
         }
+
         $employees_list_as_str = json_encode($employees_list);
         if (mb_strlen($employees_list_as_str) > 3995) {
             $employees_list_as_str = mb_substr($employees_list_as_str, 0, 3995);
         }
 
+        $students_list = [];
         if (isset($import_data['api_data']) && isset($import_data['api_data'][EventoEvent::JSON_STUDENTS])) {
             $students_list = $import_data['api_data'][EventoEvent::JSON_STUDENTS];
             unset($import_data['api_data'][EventoEvent::JSON_STUDENTS]);
-        } else {
-            $students_list = [];
         }
+
         $students_list_as_str = json_encode($students_list);
         if (mb_strlen($students_list_as_str) > 3995) {
             $students_list_as_str = mb_substr($students_list_as_str, 0, 3995);
@@ -193,25 +194,26 @@ class Logger
                     'last_import_students' => [\ilDBConstants::T_TEXT, $students_list_as_str]
                 ]
             );
-        } else {
-            $this->ilDB->update(
-                self::TABLE_LOG_EVENTS,
-                [
-                    'ref_id' => [\ilDBConstants::T_INTEGER, $ref_id],
-                    'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
-                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
-                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                    'last_import_employees' => [\ilDBConstants::T_TEXT, $employees_list_as_str],
-                    'last_import_students' => [\ilDBConstants::T_TEXT, $students_list_as_str]
-                ],
-                [
-                    'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
-                ]
-            );
+            return;
         }
+
+        $this->ilDB->update(
+            self::TABLE_LOG_EVENTS,
+            [
+                'ref_id' => [\ilDBConstants::T_INTEGER, $ref_id],
+                'last_import_data' => [\ilDBConstants::T_TEXT, json_encode($import_data)],
+                'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+                'last_import_employees' => [\ilDBConstants::T_TEXT, $employees_list_as_str],
+                'last_import_students' => [\ilDBConstants::T_TEXT, $students_list_as_str]
+            ],
+            [
+                'evento_id' => [\ilDBConstants::T_INTEGER, $evento_id]
+            ]
+        );
     }
 
-    public function logEventMembership(int $log_info_code, int $evento_event_id, int $evento_user_id, int $role_type = -1)
+    public function logEventMembership(int $log_info_code, int $evento_event_id, int $evento_user_id, int $role_type = -1): void
     {
         if ($log_info_code < 100 || $log_info_code >= 200) {
             $this->logException(
@@ -237,25 +239,26 @@ class Logger
                         'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
                     ]
                 );
-            } else {
-                $values = [
-                    'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
-                    'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
-                ];
-
-                if ($role_type != -1) {
-                    $values = ['role_type' => [\ilDBConstants::T_INTEGER, $role_type]];
-                }
-
-                $this->ilDB->update(
-                    self::TABLE_LOG_MEMBERSHIPS,
-                    $values,
-                    [
-                        'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
-                        'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id]
-                    ]
-                );
+                return;
             }
+
+            $values = [
+                'last_import_date' => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                'update_info_code' => [\ilDBConstants::T_INTEGER, $log_info_code],
+            ];
+
+            if ($role_type != -1) {
+                $values = ['role_type' => [\ilDBConstants::T_INTEGER, $role_type]];
+            }
+
+            $this->ilDB->update(
+                self::TABLE_LOG_MEMBERSHIPS,
+                $values,
+                [
+                    'evento_event_id' => [\ilDBConstants::T_INTEGER, $evento_event_id],
+                    'evento_user_id' => [\ilDBConstants::T_INTEGER, $evento_user_id]
+                ]
+            );
         } catch (\Exception $e) {
             $this->logException('Log Membership', $e->getMessage() . $e->getTraceAsString());
         }

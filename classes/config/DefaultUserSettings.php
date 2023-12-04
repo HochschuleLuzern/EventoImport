@@ -50,11 +50,13 @@ class DefaultUserSettings
         $role_mapping = $settings->get(CronConfigForm::CONF_ROLES_ILIAS_EVENTO_MAPPING, null);
         $role_mapping = !is_null($role_mapping) ? json_decode($role_mapping, true) : null;
         $this->evento_to_ilias_role_mapping = [];
-        if (!is_null($role_mapping)) {
-            foreach ($role_mapping as $ilias_role_id => $evento_role) {
-                $this->evento_to_ilias_role_mapping[$evento_role] = $ilias_role_id;
-                $this->assignable_roles[] = $ilias_role_id;
-            }
+        if (is_null($role_mapping)) {
+            return;
+        }
+
+        foreach ($role_mapping as $ilias_role_id => $evento_role) {
+            $this->evento_to_ilias_role_mapping[$evento_role] = $ilias_role_id;
+            $this->assignable_roles[] = $ilias_role_id;
         }
     }
 

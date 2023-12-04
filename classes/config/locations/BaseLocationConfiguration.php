@@ -24,16 +24,17 @@ class BaseLocationConfiguration
         if (is_null($json)) {
             $this->configured_departments = [];
             $this->configured_kinds = [];
-        } else {
-            $location_settings = json_decode($json, true);
-            if (!is_null($location_settings)) {
-                if(isset($location_settings[self::CONF_KEY_DEPARTMENTS]) && is_array($location_settings[self::CONF_KEY_DEPARTMENTS])) {
-                    $this->setDepartmentLocationList($location_settings[self::CONF_KEY_DEPARTMENTS]);
-                }
+            return;
+        }
 
-                if (isset($location_settings[self::CONF_KEY_KINDS]) && is_array($location_settings[self::CONF_KEY_KINDS])) {
-                    $this->setKindLocationList($location_settings[self::CONF_KEY_KINDS]);
-                }
+        $location_settings = json_decode($json, true);
+        if (!is_null($location_settings)) {
+            if (isset($location_settings[self::CONF_KEY_DEPARTMENTS]) && is_array($location_settings[self::CONF_KEY_DEPARTMENTS])) {
+                $this->setDepartmentLocationList($location_settings[self::CONF_KEY_DEPARTMENTS]);
+            }
+
+            if (isset($location_settings[self::CONF_KEY_KINDS]) && is_array($location_settings[self::CONF_KEY_KINDS])) {
+                $this->setKindLocationList($location_settings[self::CONF_KEY_KINDS]);
             }
         }
     }

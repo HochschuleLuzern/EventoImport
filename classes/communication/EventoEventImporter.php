@@ -52,10 +52,10 @@ class EventoEventImporter extends EventoImporterBase
         if (count($response->getData()) < 1) {
             $this->has_more_data = false;
             return [];
-        } else {
-            $this->has_more_data = $response->getHasMoreData();
-            return $response->getData();
         }
+
+        $this->has_more_data = $response->getHasMoreData();
+        return $response->getData();
     }
 
     public function fetchSpecificEventDataSet(int $skip, int $take) : array

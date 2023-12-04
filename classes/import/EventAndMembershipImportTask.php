@@ -80,10 +80,11 @@ class EventAndMembershipImportTask
                 if (is_null($result)) {
                     $action = $this->event_import_action_decider->determineDeleteAction($ilias_evento_event);
                     $action->executeAction();
-                } else {
-                    $this->evento_event_obj_repo->registerEventAsDelivered($result->getEventoId());
-                    $this->logger->logException('Deleting Event', 'Event which was not delivered during "Import Events" can be requested by ID. Therefore it still exsits. Evento ID = ' . $ilias_evento_event->getEventoEventId());
+                    continue;
                 }
+
+                $this->evento_event_obj_repo->registerEventAsDelivered($result->getEventoId());
+                $this->logger->logException('Deleting Event', 'Event which was not delivered during "Import Events" can be requested by ID. Therefore it still exsits. Evento ID = ' . $ilias_evento_event->getEventoEventId());
             } catch (\Exception $e) {
                 $this->logger->logException('Deleting Event', 'Exception on deleting event with evento_id ' . $ilias_evento_event->getEventoEventId()
                     . ', exception message: ' . $e->getMessage());
@@ -101,11 +102,11 @@ class EventAndMembershipImportTask
                 $action->executeAction();
             } catch (\ilEventoImportApiDataException $e) {
                 $data = $e->getApiData();
+
+                $evento_id_msg = "Evento ID not given";
                 if (isset($data[EventoEvent::JSON_ID])) {
                     $id = $data[EventoEvent::JSON_ID];
                     $evento_id_msg = "Evento ID: $id";
-                } else {
-                    $evento_id_msg = "Evento ID not given";
                 }
 
                 $this->logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());

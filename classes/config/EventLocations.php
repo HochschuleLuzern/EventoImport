@@ -53,26 +53,24 @@ class EventLocations
         $event_year = (int) $evento_event->getStartDate()->format('Y');
 
         try {
-            $ref_id = $this->getLocationRefIdForParameters(
+            return $this->getLocationRefIdForParameters(
                 $evento_event->getDepartment(),
                 $evento_event->getKind(),
                 $event_year
             );
         } catch (\ilEventoImportEventLocationNotFoundException $e) {
-            if ($create_year_cat_if_not_existing) {
-                $ref_id = $this->tryToCreateLocationForEventoEvent(
-                    $evento_event->getDepartment(),
-                    $evento_event->getKind(),
-                    $event_year
-                );
-            } else {
-                $ref_id = null;
+            if (!$create_year_cat_if_not_existing) {
+                return null;
             }
-        } catch (\Exception $e) {
-            $ref_id = null;
-        }
 
-        return $ref_id;
+            return $this->tryToCreateLocationForEventoEvent(
+                $evento_event->getDepartment(),
+                $evento_event->getKind(),
+                $event_year
+            );
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     private function tryToCreateLocationForEventoEvent(string $department_short_name, string $kind, int $year) : ?int
@@ -83,19 +81,21 @@ class EventLocations
                 $kind
             );
 
-            if (!is_null($kind_ref_id)) {
-                $cat_ref_id = $this->event_location_builder->createNewLocationObjectAndReturnRefId($kind_ref_id, "$year");
-
-                $this->locations_repo->addNewLocation(
-                    $department_short_name,
-                    $kind,
-                    $year,
-                    $cat_ref_id
-                );
-                $this->locations[$department_short_name][$kind][$year] = $cat_ref_id;
-
-                return $cat_ref_id;
+            if (is_null($kind_ref_id)) {
+                return null;
             }
+
+            $cat_ref_id = $this->event_location_builder->createNewLocationObjectAndReturnRefId($kind_ref_id, "$year");
+
+            $this->locations_repo->addNewLocation(
+                $department_short_name,
+                $kind,
+                $year,
+                $cat_ref_id
+            );
+            $this->locations[$department_short_name][$kind][$year] = $cat_ref_id;
+
+            return $cat_ref_id;
         } catch (\Exception $e) {
         }
 

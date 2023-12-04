@@ -47,13 +47,15 @@ class EventLocationsBuilder
 
         foreach ($locations_settings['departments'] as $department) {
             $department_ref_id = $this->fetchRefIdForObjTitle($repository_root_ref_id, $department);
-            if ($department_ref_id) {
-                foreach ($locations_settings['kinds'] as $kind) {
-                    $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
-                    if (is_null($kind_ref_id)) {
-                        $this->createCategoryObject($department_ref_id, $kind);
-                        $newly_created_locations[] = strip_tags("$department/$kind");
-                    }
+            if ($department_ref_id === null) {
+                continue;
+            }
+
+            foreach ($locations_settings['kinds'] as $kind) {
+                $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
+                if (is_null($kind_ref_id)) {
+                    $this->createCategoryObject($department_ref_id, $kind);
+                    $newly_created_locations[] = strip_tags("$department/$kind");
                 }
             }
         }
@@ -68,15 +70,15 @@ class EventLocationsBuilder
         $missing_locations = [];
         foreach ($locations_settings['departments'] as $department) {
             $department_ref_id = $this->fetchRefIdForObjTitle($repository_root_ref_id, $department);
-            if (!is_null($department_ref_id)) {
-                foreach ($locations_settings['kinds'] as $kind) {
-                    $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
-                    if (is_null($kind_ref_id)) {
-                        $missing_locations[] = strip_tags("/$department/$kind/*");
-                    }
-                }
-            } else {
+            if (is_null($department_ref_id)) {
                 $missing_locations[] = strip_tags("/$department/*");
+            }
+
+            foreach ($locations_settings['kinds'] as $kind) {
+                $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
+                if (is_null($kind_ref_id)) {
+                    $missing_locations[] = strip_tags("/$department/$kind/*");
+                }
             }
         }
 
@@ -152,20 +154,24 @@ class EventLocationsBuilder
         $repository_root_ref_id = 1;
         foreach ($locations_settings['departments'] as $department) {
             $department_ref_id = $this->fetchRefIdForObjTitle($repository_root_ref_id, $department);
-            if ($department_ref_id) {
-                foreach ($locations_settings['kinds'] as $kind) {
-                    $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
-                    if ($kind_ref_id) {
-                        foreach ($this->tree->getChildsByType($kind_ref_id, 'cat') as $child_node) {
-                            if ($this->isPossibleYearCategory($child_node)) {
-                                $this->locations_repository->addNewLocation(
-                                    $this->getMappedDepartmentName($department),
-                                    $kind,
-                                    (int) $child_node['title'],
-                                    (int) $child_node['ref_id']
-                                );
-                            }
-                        }
+            if ($department_ref_id === null) {
+                continue;
+            }
+
+            foreach ($locations_settings['kinds'] as $kind) {
+                $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
+                if ($kind_ref_id === null) {
+                    continue;
+                }
+
+                foreach ($this->tree->getChildsByType($kind_ref_id, 'cat') as $child_node) {
+                    if ($this->isPossibleYearCategory($child_node)) {
+                        $this->locations_repository->addNewLocation(
+                            $this->getMappedDepartmentName($department),
+                            $kind,
+                            (int) $child_node['title'],
+                            (int) $child_node['ref_id']
+                        );
                     }
                 }
             }

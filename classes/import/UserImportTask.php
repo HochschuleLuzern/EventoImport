@@ -75,11 +75,10 @@ class UserImportTask
                 $action->executeAction();
             } catch (\ilEventoImportApiDataException $e) {
                 $data = $e->getApiData();
+                $evento_id_msg = "Evento ID not given";
                 if (isset($data[EventoUser::JSON_ID])) {
                     $id = $data[EventoUser::JSON_ID];
                     $evento_id_msg = "Evento ID: $id";
-                } else {
-                    $evento_id_msg = "Evento ID not given";
                 }
                 $this->evento_logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());
             } catch (\Exception $e) {
@@ -94,7 +93,7 @@ class UserImportTask
      * by itself. For this reason, every imported account has a last-imported-timestamp. With this value, users which have not
      * been imported since a longer time can be found.
      */
-    private function convertDeletedAccounts()
+    private function convertDeletedAccounts(): void
     {
 
         $list = $this->evento_user_repo->getUsersWithLastImportOlderThanGivenDays(32, IliasEventoUserRepository::TYPE_HSLU_AD);
@@ -107,10 +106,11 @@ class UserImportTask
                 if (is_null($result)) {
                     $action = $this->user_import_action_decider->determineDeleteAction($ilias_user_id, $evento_id);
                     $action->executeAction();
-                } else {
-                    $this->evento_user_repo->registerUserAsDelivered($result->getEventoId());
-                    $this->evento_logger->logException('Deleting User', 'User which was not delivered during "Import Users" can be requested by ID. Therefore it still exsits. Evento ID = ' . $evento_id);
+                    return;
                 }
+
+                $this->evento_user_repo->registerUserAsDelivered($result->getEventoId());
+                $this->evento_logger->logException('Deleting User', 'User which was not delivered during "Import Users" can be requested by ID. Therefore it still exsits. Evento ID = ' . $evento_id);
             } catch (\Exception $e) {
                 $this->evento_logger->logException('Convert Deleted User Accounts', "Exception on deleting user with evento_id $ilias_user_id"
                     . ', exception message: ' . $e->getMessage(), $e->getTraceAsString());
@@ -122,7 +122,7 @@ class UserImportTask
      * User accounts which don't have a time limitation are limited to
      * two years since their creation.
      */
-    private function setUserTimeLimits()
+    private function setUserTimeLimits(): void
     {
         $this->ilias_user_service->setUserTimeLimits();
     }

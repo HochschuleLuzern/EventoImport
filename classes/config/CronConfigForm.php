@@ -435,44 +435,46 @@ class CronConfigForm
         foreach($locations->getDepartmentLocationList() as $department_name) {
             foreach($locations->getKindLocationList() as $kind_name) {
                 $ref_id = $location_seeker->searchRefIdOfKindCategory($department_name, $kind_name);
-                if(!is_null($ref_id)) {
-                    $role = $local_role_manager->getLocalVisitorRoleByDepartmentAndKind($department_name, $kind_name);
-                    $title = htmlspecialchars("$department_name/$kind_name");
-                    $title = $this->cp->txt(self::LANG_VISITOR_ROLE_CB) . " \"$title\"";
-                    $post_var = str_replace(' ', '_',strtolower("visitors-{$department_name}-{$kind_name}"));
-                    $ws_item = new ilCheckboxInputGUI(
-                        $title,
-                        $post_var
-                    );
-                    $ws_item->setValue('1');
-                    $ws_item->setChecked(!is_null($role));
-
-                    $txt_item = new \ilNonEditableValueGUI($this->cp->txt(self::LANG_VISITOR_REF_ID));
-                    $txt_item->setValue($ref_id);
-                    $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_REF_ID_DESC) . ' ' . \ilLink::_getLink($ref_id, 'cat'));
-                    $ws_item->addSubItem($txt_item);
-
-                    $txt_item = new \ilNonEditableValueGUI($this->cp->txt(self::LANG_VISITOR_ROLE_ID));
-                    if(is_null($role)) {
-                        $txt_item->setValue("-");
-                        $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_NO_ROLE_DESC));
-                    } else {
-                        $txt_item->setValue($role->getRoleId());
-                        $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_ROLE_ID_DESC));
-                    }
-
-                    $ws_item->addSubItem($txt_item);
-
-                    $post_var = str_replace(' ', '_',strtolower("shortname_{$department_name}-{$kind_name}"));
-                    $txt_item = new ilTextInputGUI($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME), $post_var);
-                    $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME_DESC));
-                    if(!is_null($role)) {
-                        $txt_item->setValue($role->getDepartmentApiName());
-                    }
-                    $ws_item->addSubItem($txt_item);
-
-                    $form->addItem($ws_item);
+                if (is_null($ref_id)) {
+                    continue;
                 }
+
+                $role = $local_role_manager->getLocalVisitorRoleByDepartmentAndKind($department_name, $kind_name);
+                $title = htmlspecialchars("$department_name/$kind_name");
+                $title = $this->cp->txt(self::LANG_VISITOR_ROLE_CB) . " \"$title\"";
+                $post_var = str_replace(' ', '_',strtolower("visitors-{$department_name}-{$kind_name}"));
+                $ws_item = new ilCheckboxInputGUI(
+                    $title,
+                    $post_var
+                );
+                $ws_item->setValue('1');
+                $ws_item->setChecked(!is_null($role));
+
+                $txt_item = new \ilNonEditableValueGUI($this->cp->txt(self::LANG_VISITOR_REF_ID));
+                $txt_item->setValue($ref_id);
+                $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_REF_ID_DESC) . ' ' . \ilLink::_getLink($ref_id, 'cat'));
+                $ws_item->addSubItem($txt_item);
+
+                $txt_item = new \ilNonEditableValueGUI($this->cp->txt(self::LANG_VISITOR_ROLE_ID));
+                if (is_null($role)) {
+                    $txt_item->setValue("-");
+                    $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_NO_ROLE_DESC));
+                } else {
+                    $txt_item->setValue($role->getRoleId());
+                    $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_ROLE_ID_DESC));
+                }
+
+                $ws_item->addSubItem($txt_item);
+
+                $post_var = str_replace(' ', '_',strtolower("shortname_{$department_name}-{$kind_name}"));
+                $txt_item = new ilTextInputGUI($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME), $post_var);
+                $txt_item->setInfo($this->cp->txt(self::LANG_VISITOR_DEP_API_NAME_DESC));
+                if (!is_null($role)) {
+                    $txt_item->setValue($role->getDepartmentApiName());
+                }
+                $ws_item->addSubItem($txt_item);
+
+                $form->addItem($ws_item);
             }
         }
     }
@@ -543,7 +545,10 @@ class CronConfigForm
                 $mapped_role_input = (int) $form->getInput(self::FORM_USER_EVENTO_ROLE_MAPPED_TO_ . $role_id);
                 if (!is_null($mapped_role_input) && !in_array($mapped_role_input, $role_mapping)) {
                     $role_mapping[$role_id] = $mapped_role_input;
-                } elseif (in_array($mapped_role_input, $role_mapping)) {
+                    continue;
+                }
+
+                if (in_array($mapped_role_input, $role_mapping)) {
                     $form_input_correct = false;
                     $save_global_role_mapping = false;
                 }
@@ -605,20 +610,21 @@ class CronConfigForm
         foreach($locations->getDepartmentLocationList() as $department_name) {
             foreach($locations->getKindLocationList() as $kind_name) {
                 $ref_id = $location_seeker->searchRefIdOfKindCategory($department_name, $kind_name);
-                if(!is_null($ref_id)) {
+                if (is_null($ref_id)) {
+                    continue;
+                }
 
-                    $post_var = str_replace(' ', '_',strtolower("visitors-{$department_name}-{$kind_name}"));
-                    $check_box = $form->getInput($post_var);
-                    if($check_box == '1') {
-                        $post_var = str_replace(' ', '_',strtolower("shortname_{$department_name}-{$kind_name}"));
-                        $dep_api_name = $form->getInput($post_var);
-                        if($dep_api_name == '' || $dep_api_name == null) {
-                            $dep_api_name = $department_name;
-                        }
-                        $local_role_manager->configLocalRoleByDepartmentAndKind($department_name, $kind_name, $ref_id, $dep_api_name);
-                    } else {
-                        $local_role_manager->unconfigLocalRoleByDepartmentAndKind($department_name, $kind_name, $ref_id);
+                $post_var = str_replace(' ', '_',strtolower("visitors-{$department_name}-{$kind_name}"));
+                $check_box = $form->getInput($post_var);
+                if ($check_box == '1') {
+                    $post_var = str_replace(' ', '_',strtolower("shortname_{$department_name}-{$kind_name}"));
+                    $dep_api_name = $form->getInput($post_var);
+                    if ($dep_api_name == '' || $dep_api_name == null) {
+                        $dep_api_name = $department_name;
                     }
+                    $local_role_manager->configLocalRoleByDepartmentAndKind($department_name, $kind_name, $ref_id, $dep_api_name);
+                } else {
+                    $local_role_manager->unconfigLocalRoleByDepartmentAndKind($department_name, $kind_name, $ref_id);
                 }
             }
         }

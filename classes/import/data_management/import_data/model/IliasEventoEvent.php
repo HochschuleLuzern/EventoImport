@@ -132,7 +132,7 @@ class IliasEventoEvent
         $clone->obj_id = $new_object->getId();
         $clone->ref_id = $new_object->getRefId();
         $clone->ilias_type = $new_object->getType();
-        if($new_object instanceof \ilObjCourse || $new_object instanceof \ilObjGroup) {
+        if ($new_object instanceof \ilObjCourse || $new_object instanceof \ilObjGroup) {
             $clone->student_role_id = (int) $new_object->getDefaultMemberRole();
             $clone->admin_role_id = (int) $new_object->getDefaultAdminRole();
         }

@@ -39,38 +39,40 @@ class EventoImportApiTester
                 $api_importer_settings->getMaxRetries()
             );
             return $importer->fetchUserDataRecordById($id);
-        } else {
-            if ($cmd == 'event') {
-                $importer = new EventoEventImporter(
-                    $request_client,
-                    $iterator,
-                    $logger,
-                    $api_importer_settings->getTimeoutAfterRequest(),
-                    $api_importer_settings->getMaxRetries()
-                );
-                return $importer->fetchEventDataRecordById($id);
-            } else {
-                if ($cmd == 'photo') {
-                    $importer = new EventoUserPhotoImporter(
-                        $request_client,
-                        $api_importer_settings->getTimeoutAfterRequest(),
-                        $api_importer_settings->getMaxRetries(),
-                        $logger
-                    );
-                    return $importer->fetchUserPhotoDataById($id);
-                } else {
-                    if ($cmd == 'admin') {
-                        $importer = new EventoAdminImporter(
-                            $request_client,
-                            $logger,
-                            $api_importer_settings->getTimeoutAfterRequest(),
-                            $api_importer_settings->getMaxRetries()
-                        );
-                        return $importer->fetchEventAdminDataRecordById($id);
-                    }
-                }
-            }
         }
+
+        if ($cmd == 'event') {
+            $importer = new EventoEventImporter(
+                $request_client,
+                $iterator,
+                $logger,
+                $api_importer_settings->getTimeoutAfterRequest(),
+                $api_importer_settings->getMaxRetries()
+            );
+            return $importer->fetchEventDataRecordById($id);
+        }
+
+        if ($cmd == 'photo') {
+            $importer = new EventoUserPhotoImporter(
+                $request_client,
+                $api_importer_settings->getTimeoutAfterRequest(),
+                $api_importer_settings->getMaxRetries(),
+                $logger
+            );
+            return $importer->fetchUserPhotoDataById($id);
+        }
+
+        if ($cmd == 'admin') {
+            $importer = new EventoAdminImporter(
+                $request_client,
+                $logger,
+                $api_importer_settings->getTimeoutAfterRequest(),
+                $api_importer_settings->getMaxRetries()
+            );
+            return $importer->fetchEventAdminDataRecordById($id);
+        }
+
+        return null;
     }
 
     public function fetchDataSet(string $cmd, int $skip, int $take) : array
@@ -90,18 +92,20 @@ class EventoImportApiTester
                 $api_importer_settings->getMaxRetries()
             );
             return $importer->fetchSpecificUserDataSet($skip, $take);
-        } else {
-            if ($cmd == 'event') {
-                $importer = new EventoEventImporter(
-                    $request_client,
-                    $iterator,
-                    $logger,
-                    $api_importer_settings->getTimeoutAfterRequest(),
-                    $api_importer_settings->getMaxRetries()
-                );
-                return $importer->fetchSpecificEventDataSet($skip, $take);
-            }
         }
+
+        if ($cmd == 'event') {
+            $importer = new EventoEventImporter(
+                $request_client,
+                $iterator,
+                $logger,
+                $api_importer_settings->getTimeoutAfterRequest(),
+                $api_importer_settings->getMaxRetries()
+            );
+            return $importer->fetchSpecificEventDataSet($skip, $take);
+        }
+
+        return [];
     }
 
     public function fetchParameterlessDataset() : array

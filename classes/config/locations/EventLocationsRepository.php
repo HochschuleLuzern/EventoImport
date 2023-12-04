@@ -39,11 +39,15 @@ class EventLocationsRepository
     {
         if (!isset($this->cache[$department])) {
             $this->cache[$department] = [$kind => [$year => $ref_id]];
-        } elseif (!isset($this->cache[$department][$kind])) {
-            $this->cache[$department][$kind] = [$year => $ref_id];
-        } else {
-            $this->cache[$department][$kind][$year] = $ref_id;
+            return;
         }
+
+        if (!isset($this->cache[$department][$kind])) {
+            $this->cache[$department][$kind] = [$year => $ref_id];
+            return;
+        }
+
+        $this->cache[$department][$kind][$year] = $ref_id;
     }
 
     private function checkCache(string $department, string $kind, int $year) : ?int
@@ -52,9 +56,9 @@ class EventLocationsRepository
             && isset($this->cache[$department][$kind])
             && isset($this->cache[$department][$kind][$year])) {
             return $this->cache[$department][$kind][$year];
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     public function getRefIdForEventoObject(EventoEvent $evento_event) : ?int
@@ -113,13 +117,20 @@ class EventLocationsRepository
 
             if (!isset($locations[$dep])) {
                 $locations[$dep] = [$kind => [$year => $ref]];
-            } elseif (!isset($locations[$dep][$kind])) {
-                $locations[$dep][$kind] = [$year => $ref];
-            } elseif (!isset($locations[$dep][$kind][$year])) {
-                $locations[$dep][$kind][$year] = $ref;
-            } else {
-                $locations[$dep][$kind][$year] = $ref;
+                continue;
             }
+
+            if (!isset($locations[$dep][$kind])) {
+                $locations[$dep][$kind] = [$year => $ref];
+                continue;
+            }
+
+            if (!isset($locations[$dep][$kind][$year])) {
+                $locations[$dep][$kind][$year] = $ref;
+                continue;
+            }
+
+            $locations[$dep][$kind][$year] = $ref;
         }
 
         return $locations;

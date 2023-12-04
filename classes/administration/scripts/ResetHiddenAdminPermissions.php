@@ -53,7 +53,7 @@ class ResetHiddenAdminPermissions implements AdminScriptInterface
     public function getResultModalFromRequest(string $cmd, Factory $f) : Modal
     {
         $form = $this->getParameterFormUI();
-        if(!$form->checkInput() || $cmd != self::CMD_SET_PERMISSION) {
+        if (!$form->checkInput() || $cmd != self::CMD_SET_PERMISSION) {
             throw new \InvalidArgumentException("Invalid Form Input!");
         }
 
@@ -68,9 +68,9 @@ class ResetHiddenAdminPermissions implements AdminScriptInterface
                 $obj_ref_id = (int) $row[HiddenAdminsTableDef::COL_OBJECT_REF_ID];
                 if (!\ilObject::_exists($role_id)) {
                     $errors[] = "Role with role_id $role_id does not exist";
-                } else if (!\ilObject::_exists($obj_ref_id, true)) {
+                } elseif (!\ilObject::_exists($obj_ref_id, true)) {
                     $errors[] = "Object with ref_id $obj_ref_id does not exist";
-                } else if (!$this->tree->isInTree($obj_ref_id)) {
+                } elseif (!$this->tree->isInTree($obj_ref_id)) {
                     $errors[] = "Object with ref_id $obj_ref_id is not in tree";
                 } else {
                     $this->resetPermissionsForRole(

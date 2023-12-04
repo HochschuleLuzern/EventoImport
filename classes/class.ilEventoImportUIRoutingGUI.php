@@ -60,7 +60,7 @@ class ilEventoImportUIRoutingGUI
 
     public function executeCommand()
     {
-        if(isset($this->gui_classes[self::GUI_ADMIN_SCRIPTS])) {
+        if (isset($this->gui_classes[self::GUI_ADMIN_SCRIPTS])) {
             $this->gui_classes[self::GUI_ADMIN_SCRIPTS]()->executeCommandAndRenderGUI();
         }
     }

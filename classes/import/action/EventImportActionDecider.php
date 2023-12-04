@@ -98,16 +98,16 @@ class EventImportActionDecider
             return $this->event_action_factory->unmarkExistingIliasObjFromEventoEvents($ilias_evento_event);
         }
 
-        if ($ilias_evento_event->isSubGroupEvent()) {
-            $parent_event = $this->event_manager->getParentEventForIliasEventoEvent($ilias_evento_event);
-
-            if (!is_null($parent_event) && $this->event_manager->getNumberOfChildEventsForParentEvent($parent_event) <= 1) {
-                return $this->event_action_factory->deleteEventGroupWithParentEventCourse($ilias_evento_event, $parent_event);
-            }
-
-            return $this->event_action_factory->deleteGroupEventInCourse($ilias_evento_event);
+        if (!$ilias_evento_event->isSubGroupEvent()) {
+            return $this->event_action_factory->deleteSingleCourseEvent($ilias_evento_event);
         }
 
-        return $this->event_action_factory->deleteSingleCourseEvent($ilias_evento_event);
+        $parent_event = $this->event_manager->getParentEventForIliasEventoEvent($ilias_evento_event);
+
+        if (!is_null($parent_event) && $this->event_manager->getNumberOfChildEventsForParentEvent($parent_event) <= 1) {
+            return $this->event_action_factory->deleteEventGroupWithParentEventCourse($ilias_evento_event, $parent_event);
+        }
+
+        return $this->event_action_factory->deleteGroupEventInCourse($ilias_evento_event);
     }
 }
