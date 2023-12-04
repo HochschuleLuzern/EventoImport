@@ -53,7 +53,7 @@ class IliasUserServices
 
     public function getUserIdsByEmailAddresses(array $email_adresses)
     {
-        $user_lists = array();
+        $user_lists = [];
 
         // For each mail given in the adress array...
         foreach ($email_adresses as $email_adress) {
@@ -94,7 +94,7 @@ class IliasUserServices
 
     public function getUserIdsByEventoId(int $evento_id) : array
     {
-        $list = array();
+        $list = [];
 
         $query = "SELECT usr_id FROM usr_data WHERE matriculation = " . $this->db->quote("Evento:$evento_id", \ilDBConstants::T_TEXT);
         $result = $this->db->query($query);

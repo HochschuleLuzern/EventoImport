@@ -13,7 +13,7 @@ class EventLocationsRepository
     public function __construct(\ilDBInterface $db)
     {
         $this->db = $db;
-        $this->cache = array();
+        $this->cache = [];
     }
 
     public function addNewLocation(string $department, string $kind, int $year, int $ref_id) : void
@@ -38,9 +38,9 @@ class EventLocationsRepository
     private function addToCache(int $ref_id, string $department, string $kind, int $year) : void
     {
         if (!isset($this->cache[$department])) {
-            $this->cache[$department] = array($kind => array($year => $ref_id));
+            $this->cache[$department] = [$kind => [$year => $ref_id]];
         } elseif (!isset($this->cache[$department][$kind])) {
-            $this->cache[$department][$kind] = array($year => $ref_id);
+            $this->cache[$department][$kind] = [$year => $ref_id];
         } else {
             $this->cache[$department][$kind][$year] = $ref_id;
         }

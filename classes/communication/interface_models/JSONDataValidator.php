@@ -9,7 +9,7 @@ namespace EventoImport\communication\api_models;
 trait JSONDataValidator
 {
     /** @var array */
-    protected array $key_errors = array();
+    protected array $key_errors = [];
 
     /**
      * @param array  $data_array
@@ -97,7 +97,7 @@ trait JSONDataValidator
      */
     protected function validateCombineAndReturnListOfValues(array $data_array, array $key_list, bool $is_empty_list_allowed = false) : ?array
     {
-        $list_of_values = array();
+        $list_of_values = [];
 
         foreach ($key_list as $key) {
             if (isset($data_array[$key]) && !in_array($data_array[$key], $list_of_values)) {
@@ -121,7 +121,7 @@ trait JSONDataValidator
      */
     protected function validateCombineAndReturnListOfNonEmptyStrings(array $data_array, array $key_list, bool $is_empty_list_allowed = false) : ?array
     {
-        $list_of_values = array();
+        $list_of_values = [];
 
         foreach ($key_list as $key) {
             if (

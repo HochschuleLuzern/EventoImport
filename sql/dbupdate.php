@@ -19,7 +19,7 @@
  * see <http://www.gnu.org/licenses/>.
  */
 ?>
-	 
+
 <#1>
 
 <?php
@@ -38,108 +38,108 @@
  * The update_info_code is defined in hte class ilEventoImportLogger
  */
     if (!$ilDB->tableExists('crnhk_crevento_usrs')) {
-        $fields = array(
-            'evento_id' => array(
+        $fields = [
+            'evento_id' => [
                 'type' => 'integer',
                 'length' => 8,
                 'notnull' => true
-            ),
-            'usrname' => array(
+            ],
+            'usrname' => [
                 'type' => 'text',
                 'length' => 50,
                 'notnull' => true
-            ),
-            'last_import_data' => array(
+            ],
+            'last_import_data' => [
                 'type' => 'text',
                 'length' => 4000,
                 'notnull' => false
-            ),
-            'last_import_date' => array(
+            ],
+            'last_import_date' => [
                 'type' => 'timestamp',
                 'notnull' => true
-            ),
-            'update_info_code' => array(
+            ],
+            'update_info_code' => [
                 'type' => 'integer',
                 'length' => 2,
                 'notnull' => true
-            )
-        );
-        
+            ]
+        ];
+
         $ilDB->createTable("crnhk_crevento_usrs", $fields);
-        $ilDB->addPrimaryKey("crnhk_crevento_usrs", array("evento_id"));
+        $ilDB->addPrimaryKey("crnhk_crevento_usrs", ["evento_id"]);
     }
 
     if (!$ilDB->tableExists('crnhk_crevento_subs')) {
-        $fields = array(
-            'usr_id' => array(
+        $fields = [
+            'usr_id' => [
                 'type' => 'integer',
                 'length' => 8,
                 'notnull' => true
-            ),
-            'role_id' => array(
+            ],
+            'role_id' => [
                 'type' => 'integer',
                 'length' => 8,
                 'notnull' => true
-            ),
-            'last_import_date' => array(
+            ],
+            'last_import_date' => [
                 'type' => 'timestamp',
                 'notnull' => true
-            ),
-            'update_info_code' => array(
+            ],
+            'update_info_code' => [
                 'type' => 'integer',
                 'length' => 2,
                 'notnull' => true
-            )
-        );
+            ]
+        ];
 
         $ilDB->createTable("crnhk_crevento_subs", $fields);
-        $ilDB->addPrimaryKey('crnhk_crevento_subs', array('usr_id', 'role_id'));
+        $ilDB->addPrimaryKey('crnhk_crevento_subs', ['usr_id', 'role_id']);
     }
 
     if (!$ilDB->tableExists('crnhk_crevento_mas')) {
-        $fields = array(
-            'evento_id' => array(
+        $fields = [
+            'evento_id' => [
                 'type' => 'text',
                 'length' => 50,
                 'notnull' => true
-            ),
-            'ref_id' => array(
+            ],
+            'ref_id' => [
                 'type' => 'integer',
                 'length' => 8,
                 'notnull' => false
-            ),
-            'role_id' => array(
+            ],
+            'role_id' => [
                 'type' => 'integer',
                 'length' => 8,
                 'notnull' => false
-            ),
-            'end_date' => array(
+            ],
+            'end_date' => [
                 'type' => 'timestamp',
                 'notnull' => false
-            ),
-            'number_of_subs' => array(
+            ],
+            'number_of_subs' => [
                 'type' => 'integer',
                 'length' => 8,
                 'notnull' => false
-            ),
-            'last_import_data' => array(
+            ],
+            'last_import_data' => [
                 'type' => 'text',
                 'length' => 4000,
                 'notnull' => false
-            ),
-            'last_import_date' => array(
+            ],
+            'last_import_date' => [
                 'type' => 'timestamp',
                 'notnull' => true
-            ),
-            'update_info_code' => array(
+            ],
+            'update_info_code' => [
                 'type' => 'integer',
                 'length' => 2,
                 'notnull' => true
-            )
-        );
-    
+            ]
+        ];
+
         $ilDB->createTable("crnhk_crevento_mas", $fields);
-        $ilDB->addPrimaryKey("crnhk_crevento_mas", array("evento_id"));
+        $ilDB->addPrimaryKey("crnhk_crevento_mas", ["evento_id"]);
     }
 ?>
 <#2>
@@ -147,28 +147,28 @@
 
 $table_name = \EventoImport\db\IliasEventoUserTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImport\db\IliasEventoUserTblDef::COL_EVENTO_ID => array(
+    $fields = [
+        \EventoImport\db\IliasEventoUserTblDef::COL_EVENTO_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoUserTblDef::COL_ILIAS_USER_ID => array(
+        ],
+        \EventoImport\db\IliasEventoUserTblDef::COL_ILIAS_USER_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => array(
+        ],
+        \EventoImport\db\IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => [
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoUserTblDef::COL_ACCOUNT_TYPE => array(
+        ],
+        \EventoImport\db\IliasEventoUserTblDef::COL_ACCOUNT_TYPE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 15,
             'notnull' => true
-        ),
+        ],
 
-    );
+    ];
 
     $ilDB->createTable($table_name, $fields);
     $ilDB->addPrimaryKey($table_name, [\EventoImport\db\IliasEventoUserTblDef::COL_EVENTO_ID]);
@@ -181,80 +181,80 @@ if (!$ilDB->tableExists($table_name)) {
 
 $table_name = \EventoImport\db\IliasEventoEventsTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_ID => array(
+    $fields = [
+        \EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_TITLE => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_TITLE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 255,
             'notnull' => true,
             'fixed' => false
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 128,
             'notnull' => true,
             'fixed' => false
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_TYPE => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_TYPE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 25,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 1,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_START_DATE => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_START_DATE => [
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_END_DATE => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_END_DATE => [
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => false
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => [
             'type' => ilDBConstants::T_TIMESTAMP,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_ILIAS_TYPE => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_ILIAS_TYPE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 4,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_REF_ID => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_REF_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_OBJ_ID => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_OBJ_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => array(
+        ],
+        \EventoImport\db\IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 100,
             'notnull' => false
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_ID));
+    $ilDB->addPrimaryKey($table_name, [\EventoImport\db\IliasEventoEventsTblDef::COL_EVENTO_ID]);
 }
 
 ?>
@@ -263,33 +263,33 @@ if (!$ilDB->tableExists($table_name)) {
 
 $table_name = \EventoImport\db\IliasEventLocationsTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImport\db\IliasEventLocationsTblDef::COL_DEPARTMENT_NAME => array(
+    $fields = [
+        \EventoImport\db\IliasEventLocationsTblDef::COL_DEPARTMENT_NAME => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 30,
             'notnull' => true,
             'fixed' => false
-        ),
-        \EventoImport\db\IliasEventLocationsTblDef::COL_EVENT_KIND => array(
+        ],
+        \EventoImport\db\IliasEventLocationsTblDef::COL_EVENT_KIND => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 30,
             'notnull' => true,
             'fixed' => false
-        ),
-        \EventoImport\db\IliasEventLocationsTblDef::COL_YEAR => array(
+        ],
+        \EventoImport\db\IliasEventLocationsTblDef::COL_YEAR => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 2,
             'notnull' => true,
-        ),
-        \EventoImport\db\IliasEventLocationsTblDef::COL_REF_ID => array(
+        ],
+        \EventoImport\db\IliasEventLocationsTblDef::COL_REF_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImport\db\IliasEventLocationsTblDef::COL_DEPARTMENT_NAME, \EventoImport\db\IliasEventLocationsTblDef::COL_EVENT_KIND, \EventoImport\db\IliasEventLocationsTblDef::COL_YEAR));
+    $ilDB->addPrimaryKey($table_name, [\EventoImport\db\IliasEventLocationsTblDef::COL_DEPARTMENT_NAME, \EventoImport\db\IliasEventLocationsTblDef::COL_EVENT_KIND, \EventoImport\db\IliasEventLocationsTblDef::COL_YEAR]);
 }
 
 ?>
@@ -298,27 +298,27 @@ if (!$ilDB->tableExists($table_name)) {
 
 $table_name = \EventoImport\db\IliasEventoEventMembershipsTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImport\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID => array(
+    $fields = [
+        \EventoImport\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID => array(
+        ],
+        \EventoImport\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasEventoEventMembershipsTblDef::COL_ROLE_TYPE => array(
+        ],
+        \EventoImport\db\IliasEventoEventMembershipsTblDef::COL_ROLE_TYPE => [
             'type' => 'integer',
             'length' => 1,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImport\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID,
-                                            \EventoImport\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID));
+    $ilDB->addPrimaryKey($table_name, [\EventoImport\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_EVENT_ID,
+                                            \EventoImport\db\IliasEventoEventMembershipsTblDef::COL_EVENTO_USER_ID]);
 }
 
 ?>
@@ -327,142 +327,142 @@ if (!$ilDB->tableExists($table_name)) {
 
 $table_name = \EventoImport\db\IliasParentEventTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImport\db\IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY => array(
+    $fields = [
+        \EventoImport\db\IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 100,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasParentEventTblDef::COL_GROUP_EVENTO_ID => array(
+        ],
+        \EventoImport\db\IliasParentEventTblDef::COL_GROUP_EVENTO_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasParentEventTblDef::COL_TITLE => array(
+        ],
+        \EventoImport\db\IliasParentEventTblDef::COL_TITLE => [
             'type' => ilDBConstants::T_TEXT,
             'length' => 100,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasParentEventTblDef::COL_REF_ID => array(
+        ],
+        \EventoImport\db\IliasParentEventTblDef::COL_REF_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasParentEventTblDef::COL_ADMIN_ROLE_ID => array(
+        ],
+        \EventoImport\db\IliasParentEventTblDef::COL_ADMIN_ROLE_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\IliasParentEventTblDef::COL_STUDENT_ROLE_ID => array(
+        ],
+        \EventoImport\db\IliasParentEventTblDef::COL_STUDENT_ROLE_ID => [
             'type' => ilDBConstants::T_INTEGER,
             'length' => 8,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImport\db\IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY));
+    $ilDB->addPrimaryKey($table_name, [\EventoImport\db\IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY]);
 }
 ?>
 <#7>
 <?php
 $table_name = 'crevento_log_users';
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        'evento_id' => array(
+    $fields = [
+        'evento_id' => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        'usrname' => array(
+        ],
+        'usrname' => [
             'type' => 'text',
             'length' => 50,
             'notnull' => true
-        ),
-        'last_import_data' => array(
+        ],
+        'last_import_data' => [
             'type' => 'text',
             'length' => 4000,
             'notnull' => false
-        ),
-        'last_import_date' => array(
+        ],
+        'last_import_date' => [
             'type' => 'timestamp',
             'notnull' => true
-        ),
-        'update_info_code' => array(
+        ],
+        'update_info_code' => [
             'type' => 'integer',
             'length' => 2,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array("evento_id"));
+    $ilDB->addPrimaryKey($table_name, ["evento_id"]);
 }
 
 $table_name = 'crevento_log_members';
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        'evento_event_id' => array(
+    $fields = [
+        'evento_event_id' => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        'evento_user_id' => array(
+        ],
+        'evento_user_id' => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        'role_type' => array(
+        ],
+        'role_type' => [
             'type' => 'integer',
             'length' => 1,
             'notnull' => true
-        ),
-        'last_import_date' => array(
+        ],
+        'last_import_date' => [
             'type' => 'timestamp',
             'notnull' => true
-        ),
-        'update_info_code' => array(
+        ],
+        'update_info_code' => [
             'type' => 'integer',
             'length' => 2,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array('evento_event_id', 'evento_user_id'));
+    $ilDB->addPrimaryKey($table_name, ['evento_event_id', 'evento_user_id']);
 }
 
 $table_name = 'crevento_log_events';
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        'evento_id' => array(
+    $fields = [
+        'evento_id' => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        'ref_id' => array(
+        ],
+        'ref_id' => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => false
-        ),
-        'last_import_data' => array(
+        ],
+        'last_import_data' => [
             'type' => 'text',
             'length' => 4000,
             'notnull' => false
-        ),
-        'last_import_date' => array(
+        ],
+        'last_import_date' => [
             'type' => 'timestamp',
             'notnull' => true
-        ),
-        'update_info_code' => array(
+        ],
+        'update_info_code' => [
             'type' => 'integer',
             'length' => 2,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array("evento_id"));
+    $ilDB->addPrimaryKey($table_name, ["evento_id"]);
 }
 ?>
 <#8>
@@ -486,11 +486,11 @@ if (!$ilDB->tableColumnExists('crevento_log_events', 'last_import_employees')) {
     $ilDB->addTableColumn(
         'crevento_log_events',
         'last_import_employees',
-        array(
+        [
             'type' => 'text',
             'length' => 4000,
             'notnull' => false
-        )
+        ]
     );
 }
 
@@ -498,11 +498,11 @@ if (!$ilDB->tableColumnExists('crevento_log_events', 'last_import_students')) {
     $ilDB->addTableColumn(
         'crevento_log_events',
         'last_import_students',
-        array(
+        [
             'type' => 'text',
             'length' => 4000,
             'notnull' => false
-        )
+        ]
     );
 }
 ?>
@@ -511,57 +511,57 @@ if (!$ilDB->tableColumnExists('crevento_log_events', 'last_import_students')) {
 
 $table_name = \EventoImport\db\LocalVisitorRolesTblDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImport\db\LocalVisitorRolesTblDef::COL_LOCAL_ROLE_ID => array(
+    $fields = [
+        \EventoImport\db\LocalVisitorRolesTblDef::COL_LOCAL_ROLE_ID => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\LocalVisitorRolesTblDef::COL_DEPARTMENT_LOCATION_NAME => array(
+        ],
+        \EventoImport\db\LocalVisitorRolesTblDef::COL_DEPARTMENT_LOCATION_NAME => [
             'type' => 'text',
             'length' => 50,
             'notnull' => true
-        ),
-        \EventoImport\db\LocalVisitorRolesTblDef::COL_KIND_LOCATION_NAME => array(
+        ],
+        \EventoImport\db\LocalVisitorRolesTblDef::COL_KIND_LOCATION_NAME => [
             'type' => 'text',
             'length' => 50,
             'notnull' => true
-        ),
-        \EventoImport\db\LocalVisitorRolesTblDef::COL_LOCATION_REF_ID => array(
+        ],
+        \EventoImport\db\LocalVisitorRolesTblDef::COL_LOCATION_REF_ID => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
-        \EventoImport\db\LocalVisitorRolesTblDef::COL_DEPARTMENT_API_NAME => array(
+        ],
+        \EventoImport\db\LocalVisitorRolesTblDef::COL_DEPARTMENT_API_NAME => [
             'type' => 'text',
             'length' => 50,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImport\db\LocalVisitorRolesTblDef::COL_LOCAL_ROLE_ID));
+    $ilDB->addPrimaryKey($table_name, [\EventoImport\db\LocalVisitorRolesTblDef::COL_LOCAL_ROLE_ID]);
 }
 ?>
 <#11>
 <?php
 $table_name = \EventoImport\db\HiddenAdminsTableDef::TABLE_NAME;
 if (!$ilDB->tableExists($table_name)) {
-    $fields = array(
-        \EventoImport\db\HiddenAdminsTableDef::COL_OBJECT_REF_ID => array(
+    $fields = [
+        \EventoImport\db\HiddenAdminsTableDef::COL_OBJECT_REF_ID => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        ),
+        ],
 
-        \EventoImport\db\HiddenAdminsTableDef::COL_HIDDEN_ADMIN_ROLE_ID => array(
+        \EventoImport\db\HiddenAdminsTableDef::COL_HIDDEN_ADMIN_ROLE_ID => [
             'type' => 'integer',
             'length' => 8,
             'notnull' => true
-        )
-    );
+        ]
+    ];
 
     $ilDB->createTable($table_name, $fields);
-    $ilDB->addPrimaryKey($table_name, array(\EventoImport\db\HiddenAdminsTableDef::COL_OBJECT_REF_ID));
+    $ilDB->addPrimaryKey($table_name, [\EventoImport\db\HiddenAdminsTableDef::COL_OBJECT_REF_ID]);
 }
 ?>
