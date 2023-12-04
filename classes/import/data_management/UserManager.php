@@ -26,6 +26,19 @@ class UserManager
         $this->logger = $logger;
     }
 
+    /**
+     *
+     * sk 04.12.2023: This is temporary and will only be needed until the update
+     * to KeyCloak and the EduID for login purposes.
+     */
+    public function addUserToGroupForEduIdMessage(\ilObjUser $ilias_user): void
+    {
+        $this->ilias_user_service->assignUserToRole(
+            $ilias_user->getId(),
+            $this->default_user_settings->getRoleForEventoNotification()
+        );
+    }
+
     public function createAndSetupNewIliasUser(EventoUser $evento_user) : \ilObjUser
     {
         $ilias_user_object = $this->ilias_user_service->createNewIliasUserObject();

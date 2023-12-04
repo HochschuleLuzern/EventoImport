@@ -315,6 +315,15 @@ class CronConfigForm
         $ws_item->setValue($this->settings->get(self::CONF_DEFAULT_USER_ROLE));
         $form->addItem($ws_item);
 
+        $ws_item = new ilNumberInputGUI(
+            'Role For Evento Notification',
+            'role_for_evento_notification'
+        );
+        $ws_item->setRequired(true);
+        $ws_item->allowDecimals(false);
+        $ws_item->setValue($this->settings->get('role_for_evento_notification'));
+        $form->addItem($ws_item);
+
         $section = new ilFormSectionHeaderGUI();
         $section->setTitle($this->cp->txt(self::LANG_HEADER_USER_ADDITIONAL_ROLE_MAPPING));
         $form->addItem($section);
@@ -532,6 +541,7 @@ class CronConfigForm
 
         $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_USER_STUDENT_ROLE_ID, self::CONF_USER_STUDENT_ROLE_ID);
         $this->getIntegerInputAndSaveIfNotNull($form, self::FORM_DEFAULT_USER_ROLE, self::CONF_DEFAULT_USER_ROLE);
+        $this->getIntegerInputAndSaveIfNotNull($form, 'role_for_evento_notification', 'role_for_evento_notification');
 
         $global_roles = $this->rbac->review()->getGlobalRoles();
         $role_mapping = [];

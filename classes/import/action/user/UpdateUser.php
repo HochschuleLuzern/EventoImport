@@ -38,6 +38,10 @@ class UpdateUser implements UserImportAction
         $this->user_manager->synchronizeIliasUserWithEventoRoles($this->ilias_user, $this->evento_user->getRoles());
         $this->user_manager->importAndSetUserPhoto($this->ilias_user, $this->evento_user->getEventoId(), $this->photo_importer);
 
+        if ($this->evento_user->getEduId() === '') {
+            $this->user_manager->addUserToGroupForEduIdMessage($this->ilias_user);
+        }
+
         $old_login = $this->ilias_user->getLogin();
         if ($old_login != $this->evento_user->getLoginName()) {
             $login_change_successful = $this->ilias_user->updateLogin($this->evento_user->getLoginName());

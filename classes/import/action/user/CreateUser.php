@@ -30,6 +30,10 @@ class CreateUser implements UserImportAction
     {
         $ilias_user_object = $this->user_manager->createAndSetupNewIliasUser($this->evento_user);
 
+        if ($this->evento_user->getEduId() === '') {
+            $this->user_manager->addUserToGroupForEduIdMessage($ilias_user_object);
+        }
+
         $this->user_manager->synchronizeIliasUserWithEventoRoles($ilias_user_object, $this->evento_user->getRoles());
         $this->user_manager->importAndSetUserPhoto($ilias_user_object, $this->evento_user->getEventoId(), $this->photo_importer);
 
