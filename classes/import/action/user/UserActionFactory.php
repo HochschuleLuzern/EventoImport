@@ -22,7 +22,7 @@ class UserActionFactory
         $this->logger = $logger;
     }
 
-    public function buildCreateAction(EventoUser $evento_user) : CreateUser
+    public function buildCreateAction(EventoUser $evento_user): CreateUser
     {
         return new CreateUser(
             $evento_user,
@@ -32,7 +32,7 @@ class UserActionFactory
         );
     }
 
-    public function buildUpdateAction(EventoUser $evento_user, int $ilias_user_id) : UpdateUser
+    public function buildUpdateAction(EventoUser $evento_user, int $ilias_user_id): UpdateUser
     {
         return new UpdateUser(
             $evento_user,
@@ -43,37 +43,44 @@ class UserActionFactory
         );
     }
 
+    /**
+     * @param array<\ilObjUser> $old_ilias_users
+     */
     public function buildRenameExistingAndCreateNewAction(
         EventoUser $evento_user,
-        \ilObjUser $old_ilias_user,
+        array $old_ilias_users,
         string $found_by
-    ) : RenameExistingUserExecuteNextImportAction {
+    ): RenameExistingUserExecuteNextImportAction {
         return new RenameExistingUserExecuteNextImportAction(
             $this->buildCreateAction($evento_user),
             $evento_user,
-            $old_ilias_user,
+            $old_ilias_users,
             $found_by,
             $this->logger
         );
     }
 
+    /**
+     * @param array<\ilObjUser> $old_ilias_users
+     */
     public function buildRenameExistingAndUpdateDeliveredAction(
         EventoUser $evento_user,
         int $user_id_of_found_delivered_user,
-        \ilObjUser $old_ilias_user,
+        array $old_ilias_users,
         string $found_by
-    ) {
+    ): RenameExistingUserExecuteNextImportAction {
         return new RenameExistingUserExecuteNextImportAction(
             $this->buildUpdateAction($evento_user, $user_id_of_found_delivered_user),
             $evento_user,
-            $old_ilias_user,
+            $old_ilias_users,
             $found_by,
             $this->logger
         );
     }
 
-    public function buildReportConflict(EventoUser $evento_user) : ReportDatasetWithoutAction
-    {
+    public function buildReportConflict(
+        EventoUser $evento_user
+    ): ReportDatasetWithoutAction {
         return new ReportUserImportDatasetWithoutAction(
             Logger::CREVENTO_USR_NOTICE_CONFLICT,
             $evento_user->getEventoId(),
@@ -83,8 +90,10 @@ class UserActionFactory
         );
     }
 
-    public function buildReportError(EventoUser $evento_user, array $found_user_data)
-    {
+    public function buildReportError(
+        EventoUser $evento_user,
+        array $found_user_data
+    ): ReportUserImportDatasetWithoutAction {
         return new ReportUserImportDatasetWithoutAction(
             Logger::CREVENTO_USR_ERROR_ERROR,
             $evento_user->getEventoId(),
@@ -97,25 +106,13 @@ class UserActionFactory
         );
     }
 
-    public function buildConvertUserAuth(\ilObjUser $ilias_user_object, int $evento_id) : EventoImportAction
-    {
-        return new ConvertUserToLocalAuth(
-            $ilias_user_object,
-            $evento_id,
-            'local',
-            $this->user_manager,
-            $this->logger
-        );
-    }
-
-    public function buildConvertAuthAndDeactivateUser(
+    public function buildRemoveConnectionToInstitution(
         \ilObjUser $ilias_user_object,
         int $evento_id
-    ) : EventoImportAction {
-        return new ConvertAndDeactivateUser(
+    ): UserConnectionRemoveAction {
+        return new RemoveConnectionToInstitution(
             $ilias_user_object,
             $evento_id,
-            'local',
             $this->user_manager,
             $this->logger
         );

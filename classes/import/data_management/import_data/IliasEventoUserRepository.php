@@ -19,21 +19,11 @@ class IliasEventoUserRepository
         $this->db = $db;
     }
 
-    public function addNewEventoIliasUserByEventoUser(EventoUser $evento_user, \ilObjUser $ilias_user, string $account_type) : IliasEventoUser
-    {
-        return $this->addNewEventoIliasUser($evento_user->getEventoId(), (int) $ilias_user->getId(), $account_type);
-    }
-
-    public function addNewEventoIliasUserByEventoUserShort(
-        EventoUserShort $evento_user,
-        \ilObjUser $ilias_user,
+    public function addNewEventoIliasUser(
+        int $evento_id,
+        int $ilias_user_id,
         string $account_type
     ) : IliasEventoUser {
-        return $this->addNewEventoIliasUser($evento_user->getEventoId(), (int) $ilias_user->getId(), $account_type);
-    }
-
-    private function addNewEventoIliasUser(int $evento_id, int $ilias_user_id, string $account_type) : IliasEventoUser
-    {
         $this->db->insert(
         // INSERT INTO
             IliasEventoUserTblDef::TABLE_NAME,

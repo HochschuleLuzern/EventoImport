@@ -6,7 +6,7 @@ use EventoImport\config\CronConfigForm;
 
 class BaseLocationConfiguration
 {
-    private const CONF_LOCATIONS = 'crevento_location_settings';
+    public const CONF_LOCATIONS = 'crevento_location_settings';
     private const CONF_KEY_DEPARTMENTS = 'departments';
     private const CONF_KEY_KINDS = 'kinds';
 

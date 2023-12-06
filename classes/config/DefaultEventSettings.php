@@ -4,6 +4,10 @@ namespace EventoImport\config;
 
 class DefaultEventSettings
 {
+    private const CONF_EVENT_OWNER_ID = 'crevento_object_owner_id';
+
+    private \ilSetting $settings;
+
     private int $default_object_owner_id;
     private int $default_sort_mode;
     private int $default_sort_direction;
@@ -13,8 +17,9 @@ class DefaultEventSettings
 
     public function __construct(\ilSetting $settings)
     {
+        $this->settings = $settings;
 
-        $this->default_object_owner_id = (int) $settings->get(CronConfigForm::CONF_EVENT_OWNER_ID, "6");
+        $this->default_object_owner_id = (int) $this->settings->get(self::CONF_EVENT_OWNER_ID, "6");
         $this->default_sort_mode = \ilContainer::SORT_MANUAL;
         $this->default_sort_new_items_order = \ilContainer::SORT_NEW_ITEMS_ORDER_CREATION;
         $this->default_sort_new_items_position = \ilContainer::SORT_NEW_ITEMS_POSITION_BOTTOM;
@@ -22,33 +27,43 @@ class DefaultEventSettings
         $this->default_online_status = true;
     }
 
-    public function getDefaultObjectOwnerId() : int
+    public function getDefaultObjectOwnerId(): int
     {
         return $this->default_object_owner_id;
     }
 
-    public function getDefaultSortMode() : int
+    public function setDefaultObjectOwnerId(int $default_object_owner_id): void
+    {
+        $this->default_object_owner_id = $default_object_owner_id;
+    }
+
+    public function getDefaultSortMode(): int
     {
         return $this->default_sort_mode;
     }
 
-    public function getDefaultSortNewItemsOrder()
+    public function getDefaultSortNewItemsOrder(): int
     {
         return $this->default_sort_new_items_order;
     }
 
-    public function getDefaultSortNewItemsPosition()
+    public function getDefaultSortNewItemsPosition(): int
     {
         return $this->default_sort_new_items_position;
     }
 
-    public function getDefaultSortDirection() : int
+    public function getDefaultSortDirection(): int
     {
         return $this->default_sort_direction;
     }
 
-    public function isDefaultOnline() : bool
+    public function isDefaultOnline(): bool
     {
         return $this->default_online_status;
+    }
+
+    public function saveCurrentConfigurationToSettings(): void
+    {
+        $this->settings->set(self::CONF_EVENT_OWNER_ID, (string) $this->getDefaultObjectOwnerId());
     }
 }

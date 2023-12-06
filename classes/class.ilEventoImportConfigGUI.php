@@ -7,6 +7,7 @@ use ILIAS\DI\UIServices;
 use EventoImport\administration\EventoImportApiTester;
 use EventoImport\administration\AdminScriptPageGUI;
 use EventoImport\config\locations\EventLocationsRepository;
+use EventoImport\config\locations\BaseLocationConfiguration;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -114,7 +115,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 break;
 
             case 'reload_repo_locations':
-                $json_settings = $this->settings->get('crevento_location_settings');
+                $json_settings = $this->settings->get(BaseLocationConfiguration::CONF_LOCATIONS);
                 $locations_settings = json_decode($json_settings, true);
 
                 $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
@@ -125,7 +126,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 break;
 
             case 'show_missing_repo_locations':
-                $json_settings = $this->settings->get('crevento_location_settings');
+                $json_settings = $this->settings->get(BaseLocationConfiguration::CONF_LOCATIONS);
                 $locations_settings = json_decode($json_settings, true);
 
                 $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);
@@ -161,7 +162,7 @@ class ilEventoImportConfigGUI extends ilPluginConfigGUI
                 break;
 
             case 'create_repo_locations':
-                $json_settings = $this->settings->get('crevento_location_settings');
+                $json_settings = $this->settings->get(BaseLocationConfiguration::CONF_LOCATIONS);
                 $locations_settings = json_decode($json_settings, true);
 
                 $locations_builder = new EventLocationsBuilder(new EventLocationsRepository($this->db), $this->tree);

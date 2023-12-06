@@ -60,7 +60,7 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
             $data_source = new RestClientService(
                 $api_settings->getUrl(),
                 $api_settings->getTimeoutAfterRequest(),
-                $api_settings->getApikey(),
+                $api_settings->getApiKey(),
                 $api_settings->getApiSecret()
             );
 

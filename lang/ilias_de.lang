@@ -28,8 +28,12 @@ daily_import_cj_desc#:#Vollständiger Import von Evento Benutzern und Modulanlä
 daily_import_cj_title#:#Evento Import: Täglich laufender Import
 default_user_role#:#Standard Benutzerrolle
 default_user_role_desc#:#ID der standard Benutzerrolle, die allen importierten Accounts zugeteilt werden soll.
+delete_from_admins_on_removal#:#Aus Admin Rollen entfernen
+delete_from_admins_on_removal_desc#:#Nutzer:innen, die dieser Rolle zugeordnet sind, werden beim Entfernen daraus auch aus allen anderen ihnen zugeordneten Administrations-Rollen entfernt.
 description#:#Aktualisiert die ILIAS-Benutzer über die HSLU-SOAP-Schnittstelle zu Evento. Neben den Benutzern werden auch ihre Mitgliedschaften in Kursen und Gruppen aktualisiert.
 event_import_settings#:#Anlassimport Einstellungen
+follow_up_role_mapping#:#Nachfolgerollen
+follow_up_role_mapping_desc#:#Hier kann festgelegt werden, ob und wenn ja in welche Rolle eine Nutzer:in eingetragen werden soll, nachdem sie aus einer von Evento verwalteten Rolle ausgetragen wird. Wird eine Änderung im Abschnitt "Zuordnung zusätzlicher ILIAS-Rollen zu erhaltenen Evento-Rollen" vorgenommen, muss gespeichert werden, damit die Änderung in diesem Abschnitt sichtbar wird.
 hourly_import_cj_desc#:#Importiert in Admin-Rollen eingetragene Benutzer nach ILIAS und trägt sie in die entsprechenden Kurse und Gruppen (gemäss Modulanlass) ein
 hourly_import_cj_title#:#Evento Import: Stündlich laufender Import
 import_additional_roles_desc#:#Alle Benutzer, die über die Operation '%s' importiert werden, werden zusätzlich dieser Rolle hinzugefügt.
@@ -58,15 +62,7 @@ standard_user_role_id_desc#:#ID der standard Benutzerrolle, die allen Nutzern zu
 title#:#Benutzer über Evento-SOAP-Schnittstelle aktualisieren
 user_auth_mode#:#Authmode neuer Benutzer
 user_auth_mode_desc#:#Neu abgelegte ILIAS-Benutzer erhalten diesen Authentifizierungsmechanismus zugewiesen
-user_changed_mail_body#:#Mail Text
-user_changed_mail_body_desc#:#Bitte hier den Text für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wir (ohne Anrede). Die Platzhalter [oldlogin], [newlogin] und [email] werden durch die entsprechenden Angaben des Benutzers ersetzt.
-user_changed_mail_subject#:#Mail Betreff
-user_changed_mail_subject_desc#:#Bitte hier den Betreff für das E-Mail eingeben, welches bei einer Änderung des Benutzernamens an den Benutzer gesendet wird.
-user_import_account_duration#:#Gültigkeit von importierten Account
-user_import_account_duration_desc#:#Vom Importer erstellte Accounts erhalten diese Gültigkeitsdauer (in Monaten).
 user_import_settings#:#Benutzerimport Einstellungen
-user_max_account_duration#:#Maximale gültigkeit von Accounts
-user_max_account_duration_desc#:#Maximale Gültigkeitsdauer für einen Account in Monaten. Werden unlimitierte Accounts oder Accounts mit längerer Gültigkeit erstellt, werden sie auf diese Dauer beschränkt. 0 bedeutet, dass es keine Einschränkungen gibt.
 user_student_role_id#:#Studierenden Rollen ID
 user_student_role_id_desc#:#Rollen ID der Studierenden Rolle. Accounts in dieser Rolle, welche vom Import als gelöscht markiert werden, sind noch 1 Jahr lang als lokale Accounts gültig.
 user_type_specific_settings_header#:#Einstellungen für Benutzergruppe '%s'

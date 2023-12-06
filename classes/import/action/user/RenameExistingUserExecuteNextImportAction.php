@@ -9,22 +9,36 @@ class RenameExistingUserExecuteNextImportAction implements UserImportAction
 {
     private UserImportAction $next_action;
     private EventoUser $new_evento_user;
-    private \ilObjUser $old_user_to_rename;
+
+    /**
+     * @param array<\ilObjUser> $old_users_to_rename
+     */
+    private array $old_users_to_rename;
     private string $found_by;
     private Logger $logger;
 
-    public function __construct(UserImportAction $next_action, EventoUser $new_evento_user, \ilObjUser $old_user_to_rename, string $found_by, Logger $logger)
-    {
+    /**
+     * @param array<\ilObjUser> $old_users_to_rename
+     */
+    public function __construct(
+        UserImportAction $next_action,
+        EventoUser $new_evento_user,
+        array $old_users_to_rename,
+        string $found_by,
+        Logger $logger
+    ) {
         $this->new_evento_user = $new_evento_user;
         $this->next_action = $next_action;
-        $this->old_user_to_rename = $old_user_to_rename;
+        $this->old_users_to_rename = $old_users_to_rename;
         $this->found_by = $found_by;
         $this->logger = $logger;
     }
 
     public function executeAction() : void
     {
-        $this->renameExistingUser($this->old_user_to_rename);
+        foreach ($this->old_users_to_rename as $old_user_to_rename) {
+            $this->renameExistingUser($old_user_to_rename);
+        }
         $this->next_action->executeAction();
     }
 
@@ -40,11 +54,13 @@ class RenameExistingUserExecuteNextImportAction implements UserImportAction
         $changed_user_data['FirstName'] = $old_user->getFirstname();
         $changed_user_data['LastName'] = $old_user->getLastname();
         $changed_user_data['Gender'] = $old_user->getGender();
+        $changed_user_data['External Account'] = '';
         $changed_user_data['Matriculation'] = $old_user->getMatriculation();
 
         $old_user->setActive(false);
         $old_user->update();
         $old_user->setLogin($changed_user_data['Login']);
+        $old_user->setExternalAccount('');
         $old_user->updateLogin($old_user->getLogin());
 
         $this->logger->logUserImport(

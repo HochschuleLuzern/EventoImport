@@ -4,6 +4,14 @@ use EventoImport\import\Logger;
 use EventoImport\import\ImportTaskFactory;
 use EventoImport\config\ConfigurationManager;
 use EventoImport\config\CronConfigForm;
+use EventoImport\config\DefaultUserSettings;
+use EventoImport\config\DefaultEventSettings;
+use EventoImport\config\ImporterApiSettings;
+use EventoImport\config\locations\BaseLocationConfiguration;
+use EventoImport\config\locations\RepositoryLocationSeeker;
+use EventoImport\config\local_roles\LocalVisitorRoleManager;
+use EventoImport\config\local_roles\LocalVisitorRoleFactory;
+use EventoImport\config\local_roles\LocalVisitorRoleRepository;
 
 /**
  * Copyright (c) 2017 Hochschule Luzern
@@ -36,33 +44,33 @@ class ilEventoImportPlugin extends ilCronHookPlugin
     const ID = 'crevento';
     const PLUGIN_NAME = "EventoImport";
 
-    public function __construct()
-    {
-        global $DIC;
-        $this->db = $DIC->database();
-        parent::__construct($this->db, $DIC["component.repository"], self::ID);
+    public function __construct(
+        \ilDBInterface $db,
+        \ilComponentRepositoryWrite $component_repository
+    ) {
+        parent::__construct($db, $component_repository, self::ID);
     }
 
     public function getPluginName(): string
     {
         return self::PLUGIN_NAME;
     }
-    
+
     /**
      * @var ilCronJob[]
      */
     protected static $cron_job_instances;
-    
+
     /**
      * @return  ilCronJob[]
      */
     public function getCronJobInstances() : array
     {
         $this->loadCronJobInstance();
-        
+
         return array_values(self::$cron_job_instances);
     }
-    
+
     /**
      * @return  ilCronJob or throw exception
      */
@@ -71,26 +79,42 @@ class ilEventoImportPlugin extends ilCronHookPlugin
         $this->loadCronJobInstance();
         return self::$cron_job_instances[$a_job_id];
     }
-    
+
     protected function loadCronJobInstance()
     {
+        /** @var ILIAS\DI\Container $DIC */
         global $DIC;
-        $db = $DIC->database();
+        $lng = $DIC['lng'];
         $rbac = $DIC->rbac();
-        $tree = $DIC->repositoryTree();
+        $tree = $DIC['tree'];
+        $settings = new ilSetting('crevento');
 
         //This is a workaround to avoid problems with missing templates
         if (!method_exists($DIC, 'ui') || !method_exists($DIC->ui(), 'factory') || !isset($DIC['ui.factory'])) {
             ilInitialisation::initUIFramework($DIC);
             ilStyleDefinition::setCurrentStyle('Desktop');
         }
-        
+
         if (!isset(self::$cron_job_instances)) {
-            $settings = new ilSetting('crevento');
-            $cron_config = new CronConfigForm($settings, $this, $rbac);
-            $config_manager = new ConfigurationManager($cron_config, $settings, $db, $tree);
-            $import_factory = new ImportTaskFactory($config_manager, $db, $tree, $rbac);
-            $logger = new Logger($db);
+            ;
+            $cron_config = new CronConfigForm(
+                new DefaultUserSettings($settings),
+                new DefaultEventSettings($settings),
+                new ImporterApiSettings($settings),
+                new BaseLocationConfiguration($settings),
+                new RepositoryLocationSeeker($tree, 1),
+                new LocalVisitorRoleManager(
+                    new LocalVisitorRoleRepository($this->db),
+                    new LocalVisitorRoleFactory($rbac),
+                    $rbac
+                ),
+                $this,
+                $lng,
+                $rbac
+            );
+            $config_manager = new ConfigurationManager($cron_config, $settings, $this->db, $tree);
+            $import_factory = new ImportTaskFactory($config_manager, $this->db, $tree, $rbac);
+            $logger = new Logger($this->db);
 
             self::$cron_job_instances[ilEventoImportDailyImportCronJob::ID] = new ilEventoImportDailyImportCronJob(
                 $this,
@@ -109,9 +133,6 @@ class ilEventoImportPlugin extends ilCronHookPlugin
 
     protected function beforeUninstall(): bool
     {
-        global $DIC;
-        $db = $DIC->database();
-        
         $drop_table_list = [
             'crnhk_crevento_usrs',
             'crnhk_crevento_mas',
@@ -126,9 +147,9 @@ class ilEventoImportPlugin extends ilCronHookPlugin
             Logger::TABLE_LOG_MEMBERSHIPS
         ];
 
-        foreach ($drop_table_list as $key => $table) {
-            if ($db->tableExists($table)) {
-                $db->dropTable($table);
+        foreach ($drop_table_list as $table) {
+            if ($this->db->tableExists($table)) {
+                $this->db->dropTable($table);
             }
         }
 

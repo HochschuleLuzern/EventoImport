@@ -29,8 +29,6 @@ class Logger
 {
     private \ilDBInterface $ilDB;
 
-    #const CREVENTO_SUB_CREATED = 101;
-    #const CREVENTO_SUB_UPDATED = 102;
     const CREVENTO_SUB_REMOVED = 103;
     const CREVENTO_SUB_NEWLY_ADDED = 104;
     const CREVENTO_SUB_ALREADY_ASSIGNED = 105;
@@ -79,6 +77,7 @@ class Logger
     const CREVENTO_USR_UPDATED = 302;
     const CREVENTO_USR_RENAMED = 303;
     const CREVENTO_USR_CONVERTED = 304;
+    const CREVENTO_USR_REMOVED = 305;
     const CREVENTO_USR_NOTICE_CONFLICT = 313;
     const CREVENTO_USR_ERROR_ERROR = 324;
 

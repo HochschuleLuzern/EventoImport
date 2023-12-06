@@ -7,7 +7,7 @@ account_duration_desc#:#Accounts created by this cron job have this validity (in
 additional_roles_desc#:#Users imported through the operation '%s' will additionally be added to the chosen global roles.
 additional_roles_header#:#Additional global roles for '%s'
 additional_roles_info#:#Additional global roles
-additional_user_roles_mapping#:#Assignment of addintional global ILIAS roles to given roles by Evento
+additional_user_roles_mapping#:#Assignment of additional global ILIAS roles to given roles by Evento
 api_max_pages#:#Max amount of pages
 api_max_pages_desc#:#How many pages should be request? Use -1 to request all pages
 api_max_retries#:#Max retries
@@ -33,11 +33,15 @@ daily_import_cj_desc#:#Import of Evento users und events to ILIAS.
 daily_import_cj_title#:#Evento Import: Daily import
 default_user_role#:#Default user role
 default_user_role_desc#:#ID of the default user role. This role will be assigned to all imported users.
+delete_from_admins_on_removal#:#Delete from Admins
+delete_from_admins_on_removal_desc#:#Users assigned to this Role will be removed from all Admin-Roles, when the assignement to this role is removed.
 description#:#Updates all ILIAS-Users by querying the HSLU Soap interface to Evento. Users and Course-Memberships are updated
 email_account_changed_body#:#Text
 email_account_changed_body_desc#:#Please enter a text for the e-mail sent out to users who's login-name needed to be changed (without salutation). The following tags will be replaced by the corresponding user-information: [oldlogin], [newlogin] and [email].
 email_account_changed_subject_desc#:#Please enter a subject-line for the e-mail sent out to users who's login-name needed to be changed.
 event_import_settings#:#Event import settings
+follow_up_role_mapping#:#Follow-up Roles
+follow_up_role_mapping_desc#:#You can define, if a user should be assigned to another role, once deassigned from a role managed by Evento. After changing anything under "Assignment of additional global ILIAS roles to given roles by Evento", you need to save once, for the changes to become visible here
 hourly_import_cj_desc#:#Imports users registered in admin roles to ILIAS and enters them in the corresponding courses and groups (according to given events)
 hourly_import_cj_title#:#Evento Import: Hourly Import
 ilias_auth_mode#:#Authmode of new users
@@ -76,17 +80,7 @@ standard_user_role_id_desc#:#ID of the default user role assigned to all users.
 title#:#Update Users from Evento-Soap Interface
 user_auth_mode#:#Authmode of new users
 user_auth_mode_desc#:#Newly created ILIAS-Users will use this authentication mode
-user_changed_mail_body#:#Mail body
-user_changed_mail_body_desc#:#Please enter here the text for the email that will be sent to the user when the user name is changed (without salutation). The placeholders [oldlogin], [newlogin] and [email] will be replaced by the corresponding information of the user.
-user_changed_mail_subject#:#Mail subject
-user_changed_mail_subject_desc#:#Please enter here the subject for the e-mail that will be sent to the user when the username is changed.
-user_import_account_duration#:#Account duration for imported users
-user_import_account_duration_desc#:#Number of moths for which the user accounts created by the import will be accessible
 user_import_settings#:#User Import settings
-user_max_account_duration#:#Max account duration
-user_max_account_duration_desc#:#Maximum validity period for an account in months. If unlimited accounts or accounts with longer validity are created, they will be limited to this duration. 0 means that there are no restrictions.
-user_student_role_id#:#Student Role ID
-user_student_role_id_desc#:#ID of the student role. Accounts with this role, which are marked as deleted by the import, are still valid for 1 year as local accounts.
 user_type_specific_settings_header#:#Settings for the user group '%s'
 ws_password#:#SOAP Password
 ws_password_desc#:#Password to access the SOAP Interface

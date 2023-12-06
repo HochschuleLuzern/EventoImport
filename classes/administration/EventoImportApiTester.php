@@ -129,7 +129,7 @@ class EventoImportApiTester
         return new RestClientService(
             $api_importer_settings->getUrl(),
             $api_importer_settings->getTimeoutAfterRequest(),
-            $api_importer_settings->getApikey(),
+            $api_importer_settings->getApiKey(),
             $api_importer_settings->getApiSecret()
         );
     }

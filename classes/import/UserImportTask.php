@@ -49,7 +49,6 @@ class UserImportTask
     {
         $this->importUsers();
         $this->convertDeletedAccounts();
-        $this->setUserTimeLimits();
     }
 
     private function importUsers() : void
@@ -116,14 +115,5 @@ class UserImportTask
                     . ', exception message: ' . $e->getMessage(), $e->getTraceAsString());
             }
         }
-    }
-
-    /**
-     * User accounts which don't have a time limitation are limited to
-     * two years since their creation.
-     */
-    private function setUserTimeLimits(): void
-    {
-        $this->ilias_user_service->setUserTimeLimits();
     }
 }

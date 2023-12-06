@@ -19,7 +19,6 @@ class RestClientService implements RequestClientService
         string $api_key,
         string $api_secret
     ) {
-        //$this->base_uri = "https://$base_url:$port$base_path";
         $this->base_uri = $base_uri;
         $this->timeout_after_request_seconds = $timeout_after_request_seconds;
         $this->api_key = $api_key;

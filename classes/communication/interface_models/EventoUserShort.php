@@ -5,15 +5,15 @@ namespace EventoImport\communication\api_models;
 class EventoUserShort extends ApiDataModelBase
 {
     const JSON_ID = 'idAccount';
-    const JSON_EMAIL = 'email';
+    const JSON_EDU_ID = 'eduId';
 
     private ?int $evento_id;
-    private ?string $email_address;
+    private ?string $edu_id;
 
     public function __construct(array $data_set)
     {
         $this->evento_id = $this->validateAndReturnNumber($data_set, self::JSON_ID);
-        $this->email_address = $this->validateAndReturnString($data_set, self::JSON_EMAIL);
+        $this->edu_id = $this->validateAndReturnString($data_set, self::EDU_ID);
 
         $this->decoded_api_data = $data_set;
         $this->checkErrorsAndMaybeThrowException();
@@ -24,9 +24,9 @@ class EventoUserShort extends ApiDataModelBase
         return $this->evento_id;
     }
 
-    public function getEmailAddress() : string
+    public function getEduId() : string
     {
-        return $this->email_address;
+        return $this->edu_id;
     }
 
     public function getDecodedApiData() : array

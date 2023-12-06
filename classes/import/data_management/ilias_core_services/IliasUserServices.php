@@ -15,20 +15,22 @@ use EventoImport\config\DefaultUserSettings;
  */
 class IliasUserServices
 {
-    private DefaultUserSettings $user_settings;
+    private DefaultUserSettings $default_user_settings;
     private \ilDBInterface $db;
-    private RBACServices $rbac_services;
     private \ilRbacReview $rbac_review;
     private \ilRbacAdmin $rbac_admin;
     private ?int $student_role_id;
 
-    public function __construct(DefaultUserSettings $user_settings, \ilDBInterface $db, RBACServices $rbac_services)
-    {
-        $this->user_settings = $user_settings;
+    public function __construct(
+        DefaultUserSettings $default_user_settings,
+        \ilDBInterface $db,
+        \ilRbacReview $rbac_review,
+        \ilRbacAdmin $rbac_admin
+    ) {
+        $this->default_user_settings = $default_user_settings;
         $this->db = $db;
-        $this->rbac_services = $rbac_services;
-        $this->rbac_review = $rbac_services->review();
-        $this->rbac_admin = $rbac_services->admin();
+        $this->rbac_review = $rbac_review;
+        $this->rbac_admin = $rbac_admin;
 
         $this->student_role_id = null;
     }
@@ -37,12 +39,12 @@ class IliasUserServices
      * Get / Create ILIAS User objects
      */
 
-    public function createNewIliasUserObject() : \ilObjUser
+    public function createNewIliasUserObject(): \ilObjUser
     {
         return new \ilObjUser();
     }
 
-    public function getExistingIliasUserObjectById(int $user_id) : \ilObjUser
+    public function getExistingIliasUserObjectById(int $user_id): \ilObjUser
     {
         return new \ilObjUser($user_id);
     }
@@ -69,7 +71,7 @@ class IliasUserServices
         return $user_lists;
     }
 
-    public function getUserIdsByEmailAddress(string $mail_address) : array
+    public function getUserIdsByEmailAddress(string $mail_address): array
     {
         /* The user ids from ilObjUser::getUserIdsByEmail() are returned as string instead of int. Since we use strict_type
         int his plugin, this throws a TypeError when ever an id from this array is passed to a method which expects an argument
@@ -82,17 +84,28 @@ class IliasUserServices
         return $ids;
     }
 
-    public function getUserIdByLogin(string $login_name)
+    public function getUserIdByExternalAccount(string $external_account): int
+    {
+        $login_name = \ilObjUser::_checkExternalAuthAccount($this->default_user_settings->getAuthMode(), $external_account);
+
+        if ($login_name === null) {
+            return 0;
+        }
+
+        return \ilObjUser::getUserIdByLogin($login_name);
+    }
+
+    public function getUserIdByLogin(string $login_name): int
     {
         return \ilObjUser::getUserIdByLogin($login_name);
     }
 
-    public function getLoginByUserId(int $user_id)
+    public function getLoginByUserId(int $user_id): ?string
     {
         return \ilObjUser::_lookupLogin($user_id);
     }
 
-    public function getUserIdsByEventoId(int $evento_id) : array
+    public function getUserIdsByEventoId(int $evento_id): array
     {
         $list = [];
 
@@ -105,26 +118,36 @@ class IliasUserServices
         return $list;
     }
 
-    public function searchEduUserByEmail(string $mail_address) : ?\ilObjUser
+    public function getGlobalRolesOfUser(int $user_id): array
     {
-        $user_ids = $this->getUserIdsByEmailAddress($mail_address);
+        return $this->rbac_review->assignedGlobalRoles($user_id);
+    }
 
-        $found_user_obj = null;
-        foreach ($user_ids as $user_id) {
-            $user_obj = $this->getExistingIliasUserObjectById($user_id);
-            if (stristr($user_obj->getExternalAccount(), '@eduid.ch') !== false) {
-                $found_user_obj = $this->getExistingIliasUserObjectById($user_id);
+    public function getCrsAdminButNotOwnerRolesOfUser(int $user_id): array
+    {
+        $roles = $this->rbac_review->assignedRoles($user_id);
+        $admin_roles = [];
+        foreach ($roles as $role_id) {
+            $title = \ilObject::_lookupTitle($role_id);
+            $object_id = $this->rbac_review->getObjectOfRole($role_id);
+
+            if (substr($title, 0, 12) === 'il_crs_admin'
+                && \ilObject::_lookupOwner($object_id) !== $user_id) {
+                $admin_roles[] = $role_id;
             }
         }
+        return $admin_roles;
+    }
 
-        return $found_user_obj;
+    public function isUserAssignedToRole(int $user_id, int $role_id): bool
+    {
+        return $this->rbac_review->isAssigned($user_id, $role_id);
     }
 
     /*
      * User and role specific methods
      */
-
-    public function assignUserToRole(int $user_id, int $role_id) : void
+    public function assignUserToRole(int $user_id, int $role_id): void
     {
         if (!$this->rbac_review->isAssigned($user_id, $role_id)) {
             $this->rbac_admin->assignUser($role_id, $user_id);
@@ -138,31 +161,31 @@ class IliasUserServices
         }
     }
 
-    public function userWasStudent(\ilObjUser $ilias_user_object) : bool
+    public function userWasStudent(\ilObjUser $ilias_user_object): bool
     {
         // TODO: Implement config for this
         if (is_null($this->student_role_id)) {
-            $this->student_role_id = $this->user_settings->getStudentRoleId();
+            $this->student_role_id = $this->default_user_settings->getStudentRoleId();
             if (is_null($this->student_role_id)) {
                 return false;
             }
         }
 
-        return $this->rbac_services->review()->isAssigned($ilias_user_object->getId(), $this->student_role_id);
+        return $this->rbac_review->isAssigned($ilias_user_object->getId(), $this->student_role_id);
     }
 
     /*
      *
      */
 
-    public function userHasPersonalPicture(int $ilias_user_id) : bool
+    public function userHasPersonalPicture(int $ilias_user_id): bool
     {
         $personal_picturpath = \ilObjUser::_getPersonalPicturePath($ilias_user_id, "small", false);
 
         return strpos($personal_picturpath, 'data:image/svg+xml') === false;
     }
 
-    public function saveEncodedPersonalPictureToUserProfile(int $ilias_user_id, string $encoded_image_string) : void
+    public function saveEncodedPersonalPictureToUserProfile(int $ilias_user_id, string $encoded_image_string): void
     {
         try {
             return;
@@ -194,53 +217,5 @@ class IliasUserServices
         $mail_options = new \ilMailOptions($user_id);
         $mail_options->setIncomingType($incoming_type);
         $mail_options->updateOptions();
-    }
-
-    /*
-     * Set values for multiple users
-     */
-
-    public function setUserTimeLimits()
-    {
-        $until_max = $this->user_settings->getMaxDurationOfAccounts()->getTimestamp();
-
-        $this->setTimeLimitForUnlimitedUsersExceptSpecialUsers($until_max);
-        $this->setUserTimeLimitsToAMaxValue($until_max);
-        $this->setUserTimeLimitsBelowThresholdToGivenValue(90, 7889229);
-    }
-
-    private function setTimeLimitForUnlimitedUsersExceptSpecialUsers(int $new_time_limit_ts) : void
-    {
-        if ($new_time_limit_ts == 0) {
-            throw new \InvalidArgumentException("Error in setting time limit for unlimited users: new time limit cannot be 0");
-        }
-
-        //no unlimited users
-        $q = "UPDATE usr_data set time_limit_unlimited=0, time_limit_until='" . $this->db->quote($new_time_limit_ts, \ilDBConstants::T_INTEGER) . "' WHERE time_limit_unlimited=1 AND login NOT IN ('root','anonymous') AND ext_account NOT LIKE '%@eduid.ch'";
-        $this->db->manipulate($q);
-    }
-
-    private function setUserTimeLimitsToAMaxValue(int $until_max_ts) : void
-    {
-        if ($until_max_ts === 0) {
-            throw new \InvalidArgumentException("Error in setting user time limits to max value: Until Max cannot be 0");
-        }
-
-        //all users are constraint to a value defined in the configuration
-        $q = "UPDATE usr_data set time_limit_until='" . $this->db->quote($until_max_ts, \ilDBConstants::T_INTEGER) . "'"
-            . " WHERE time_limit_until>'" . $this->db->quote($until_max_ts, \ilDBConstants::T_INTEGER) . "'";
-        $this->db->manipulate($q);
-    }
-
-    private function setUserTimeLimitsBelowThresholdToGivenValue(int $min_threshold_in_days, int $new_time_limit_ts) : void
-    {
-        if ($new_time_limit_ts === 0) {
-            throw new \InvalidArgumentException("Error in setting user time limits to new value: New time limit cannot be 0");
-        }
-
-        //all users have at least 90 days of access (needed for Shibboleth)
-        $q = "UPDATE `usr_data` SET time_limit_until=time_limit_until+" . $this->db->quote($new_time_limit_ts, \ilDBConstants::T_INTEGER)
-            . " WHERE DATEDIFF(FROM_UNIXTIME(time_limit_until),create_date)< " . $this->db->quote($min_threshold_in_days, \ilDBConstants::T_INTEGER);
-        $this->db->manipulate($q);
     }
 }
