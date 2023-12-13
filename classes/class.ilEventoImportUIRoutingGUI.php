@@ -16,7 +16,6 @@ class ilEventoImportUIRoutingGUI
     private ServerRequestInterface $request;
 
     private array $gui_classes;
-    private ilEventoImportPlugin $plugin;
     private \ILIAS\DI\UIServices $ui_services;
     private ilDBInterface $db;
     private ilTabsGUI $tabs;
@@ -25,10 +24,11 @@ class ilEventoImportUIRoutingGUI
     private ilObjUser $user;
     private $error;
 
+    private ilEventoImportPlugin $plugin;
+
     public function __construct()
     {
         global $DIC;
-        $this->plugin = new \ilEventoImportPlugin();
         $this->tpl = $DIC->ui()->mainTemplate();
         $this->ctrl = $DIC->ctrl();
         $this->request = $DIC->http()->request();
@@ -39,6 +39,8 @@ class ilEventoImportUIRoutingGUI
         $this->rbac_services = $DIC->rbac();
         $this->user = $DIC->user();
         $this->error = $DIC["ilErr"];
+
+        $this->plugin = new \ilEventoImportPlugin($this->db, $DIC['component.repository']);
 
         $this->gui_classes = [];
         $this->gui_classes[self::GUI_ADMIN_SCRIPTS] = function () {

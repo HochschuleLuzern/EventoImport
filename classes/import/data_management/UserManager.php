@@ -79,11 +79,22 @@ class UserManager
     {
         $this->ilias_user_service->assignUserToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
 
+        $follow_up_roles_mapping = $this->default_user_settings->getFollowUpRoleMapping();
+
         // Set ilias roles according to given evento roles
         foreach ($this->default_user_settings->getEventoCodeToIliasRoleMapping() as $evento_role_code => $ilias_role_id) {
             if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $ilias_role_id)
                 && in_array($evento_role_code, $imported_evento_roles)) {
                 continue;
+            }
+
+            if (in_array($evento_role_code, $imported_evento_roles)
+                && array_key_exists($ilias_role_id, $follow_up_roles_mapping)
+                && $this->ilias_user_service->isUserAssignedToRole(
+                    $user->getId(),
+                    $follow_up_roles_mapping[$ilias_role_id])
+                ) {
+                $this->ilias_user_service->deassignUserFromRole($user->getId(), $follow_up_roles_mapping[$ilias_role_id]);
             }
 
             if (in_array($evento_role_code, $imported_evento_roles)) {
