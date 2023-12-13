@@ -79,8 +79,6 @@ class UserManager
     {
         $this->ilias_user_service->assignUserToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
 
-        $follow_up_roles_mapping = $this->default_user_settings->getFollowUpRoleMapping();
-
         // Set ilias roles according to given evento roles
         foreach ($this->default_user_settings->getEventoCodeToIliasRoleMapping() as $evento_role_code => $ilias_role_id) {
             if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $ilias_role_id)
@@ -88,22 +86,40 @@ class UserManager
                 continue;
             }
 
-            if (in_array($evento_role_code, $imported_evento_roles)
-                && array_key_exists($ilias_role_id, $follow_up_roles_mapping)
-                && $this->ilias_user_service->isUserAssignedToRole(
-                    $user->getId(),
-                    $follow_up_roles_mapping[$ilias_role_id])
-                ) {
-                $this->ilias_user_service->deassignUserFromRole($user->getId(), $follow_up_roles_mapping[$ilias_role_id]);
-            }
-
             if (in_array($evento_role_code, $imported_evento_roles)) {
-                $this->ilias_user_service->assignUserToRole($user->getId(), $ilias_role_id);
+                $this->performAddToUserRoleSubTasks($user, $imported_evento_roles, $evento_role_code, $ilias_role_id);
                 continue;
             }
 
             $this->removeUserAccessAfterRemovalOfEventoRole($user, $ilias_role_id);
         }
+    }
+
+    private function performAddToUserRoleSubTasks(
+        \ilObjUser $user,
+        array $imported_evento_roles,
+        int $evento_role_code,
+        int $ilias_role_id
+    ): void {
+        $track_removal_custom_fields_mapping = $this->default_user_settings->getTrackRemovalCustomFieldsMapping();
+        $follow_up_roles_mapping = $this->default_user_settings->getFollowUpRoleMapping();
+
+        if (in_array($evento_role_code, $imported_evento_roles)
+            && array_key_exists($ilias_role_id, $follow_up_roles_mapping)
+            && $this->ilias_user_service->isUserAssignedToRole(
+                $user->getId(),
+                $follow_up_roles_mapping[$ilias_role_id])
+            ) {
+            $this->ilias_user_service->deassignUserFromRole($user->getId(), $follow_up_roles_mapping[$ilias_role_id]);
+        }
+
+        if (in_array($evento_role_code, $imported_evento_roles)
+            && array_key_exists($ilias_role_id, $track_removal_custom_fields_mapping)
+            && $track_removal_custom_fields_mapping[$ilias_role_id] !== 0) {
+            $this->saveUserRoleRemovalDateToCustomField($user, $track_removal_custom_fields_mapping[$ilias_role_id], date('Y-m-d H:i:s'));
+        }
+
+        $this->ilias_user_service->assignUserToRole($user->getId(), $ilias_role_id);
     }
 
     public function removeUserAccessesAfterLeavingInstitution(\ilObjUser $user): void
@@ -123,9 +139,16 @@ class UserManager
     private function removeUserAccessAfterRemovalOfEventoRole(\ilObjUser $user, int $role_id): void
     {
         $follow_up_roles_mapping = $this->default_user_settings->getFollowUpRoleMapping();
+        $track_removal_custom_fields_mapping = $this->default_user_settings->getTrackRemovalCustomFieldsMapping();
         $roles_needing_admin_removal = $this->default_user_settings->getDeleteFromAdminWhenRemovedFromRoleMapping();
 
         $this->ilias_user_service->deassignUserFromRole($user->getId(), $role_id);
+
+        if (array_key_exists($role_id, $track_removal_custom_fields_mapping)
+            && $track_removal_custom_fields_mapping[$role_id] !== 0) {
+            $this->saveUserRoleRemovalDateToCustomField($user, $track_removal_custom_fields_mapping[$role_id], date('Y-m-d H:i:s'));
+        }
+
         if (array_key_exists($role_id, $follow_up_roles_mapping)) {
             $this->ilias_user_service->assignUserToRole($user->getId(), $follow_up_roles_mapping[$role_id]);
         }
@@ -136,6 +159,12 @@ class UserManager
                 $this->ilias_user_service->deassignUserFromRole($user->getId(), $admin_role_id);
             }
         }
+    }
+
+    public function saveUserRoleRemovalDateToCustomField(\ilObjUser $user, int $custom_field_id, string $date): void
+    {
+        $user->setUserDefinedData([$custom_field_id => $date]);
+        $user->update();
     }
 
     public function renameAndDeactivateIliasUser(\ilObjUser $old_user_to_rename, string $new_login)

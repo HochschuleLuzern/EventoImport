@@ -29,7 +29,7 @@ daily_import_cj_title#:#Evento Import: Täglich laufender Import
 default_user_role#:#Standard Benutzerrolle
 default_user_role_desc#:#ID der standard Benutzerrolle, die allen importierten Accounts zugeteilt werden soll.
 delete_from_admins_on_removal#:#Aus Admin Rollen entfernen
-delete_from_admins_on_removal_desc#:#Nutzer:innen, die dieser Rolle zugeordnet sind, werden beim Entfernen daraus auch aus allen anderen ihnen zugeordneten Administrations-Rollen entfernt.
+delete_from_admins_on_removal_desc#:#Nutzer:innen, die dieser Rolle zugeordnet sind, werden beim Entfernen daraus auch aus allen anderen ihnen zugeordneten Kurs-Administrations-Rollen entfernt.
 description#:#Aktualisiert die ILIAS-Benutzer über die HSLU-SOAP-Schnittstelle zu Evento. Neben den Benutzern werden auch ihre Mitgliedschaften in Kursen und Gruppen aktualisiert.
 event_import_settings#:#Anlassimport Einstellungen
 follow_up_role_mapping#:#Nachfolgerollen
@@ -60,6 +60,8 @@ settings_for_import_operation_header#:#Einstellungen für die Import-Operation
 standard_user_role_id#:#Standard Benutzerrolle
 standard_user_role_id_desc#:#ID der standard Benutzerrolle, die allen Nutzern zugeteilt werden soll.
 title#:#Benutzer über Evento-SOAP-Schnittstelle aktualisieren
+track_removal_custom_field#:#Benutzerfeld zur Speicherung des Entfernungsdatums
+track_removal_custom_field_desc#:#Wird hier ein Benutzerfeld ausgewählt, wird in diesem das Datum gespeichert, wenn die Nutzer:in aus der entsprechenden Rolle entfernt wurde.
 user_auth_mode#:#Authmode neuer Benutzer
 user_auth_mode_desc#:#Neu abgelegte ILIAS-Benutzer erhalten diesen Authentifizierungsmechanismus zugewiesen
 user_import_settings#:#Benutzerimport Einstellungen

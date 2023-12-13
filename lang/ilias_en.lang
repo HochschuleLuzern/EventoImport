@@ -34,7 +34,7 @@ daily_import_cj_title#:#Evento Import: Daily import
 default_user_role#:#Default user role
 default_user_role_desc#:#ID of the default user role. This role will be assigned to all imported users.
 delete_from_admins_on_removal#:#Delete from Admins
-delete_from_admins_on_removal_desc#:#Users assigned to this Role will be removed from all Admin-Roles, when the assignement to this role is removed.
+delete_from_admins_on_removal_desc#:#Users assigned to this Role will be removed from all Coure-Admin-Roles, when the assignement to this role is removed.
 description#:#Updates all ILIAS-Users by querying the HSLU Soap interface to Evento. Users and Course-Memberships are updated
 email_account_changed_body#:#Text
 email_account_changed_body_desc#:#Please enter a text for the e-mail sent out to users who's login-name needed to be changed (without salutation). The following tags will be replaced by the corresponding user-information: [oldlogin], [newlogin] and [email].
@@ -78,6 +78,8 @@ settings_for_operation_header#:#Settings for the '%s' operation
 standard_user_role_id#:#Default User Role
 standard_user_role_id_desc#:#ID of the default user role assigned to all users.
 title#:#Update Users from Evento-Soap Interface
+track_removal_custom_field#:#Track Removal from Role in Custom Field
+track_removal_custom_field_desc#:#If a custom field is selected here, this field will be used to store the date the user was removed from this role.
 user_auth_mode#:#Authmode of new users
 user_auth_mode_desc#:#Newly created ILIAS-Users will use this authentication mode
 user_import_settings#:#User Import settings

@@ -7,6 +7,7 @@ class DefaultUserSettings
     private const CONF_USER_AUTH_MODE = 'crevento_ilias_auth_mode';
     private const CONF_DEFAULT_USER_ROLE = 'crevento_default_user_role';
     private const CONF_ROLES_ILIAS_EVENTO_MAPPING = 'crevento_roles_ilias_evento_mapping';
+    private const CONF_ROLES_TRACK_REMOVAL_CUSTOM_FIELD = 'crevento_roles_track_removal_custom_field';
     private const CONF_ROLES_DELETE_FROM_ADMIN_ON_REMOVAL = 'crevento_roles_delete_from_admin_on_removal';
     private const CONF_ROLES_FOLLOW_UP_ROLE_MAPPING = 'crevento_roles_follow_up_role_mapping';
 
@@ -22,6 +23,7 @@ class DefaultUserSettings
     private int $mail_incoming_type;
     private array $evento_to_ilias_role_mapping;
     private array $delete_when_removed_mapping;
+    private array $track_removal_custom_fields_mapping;
     private array $follow_up_role_mapping;
 
     public function __construct(\ilSetting $settings)
@@ -43,7 +45,7 @@ class DefaultUserSettings
             json_decode($this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, '[]'), true) ?? []
         );
         $this->delete_when_removed_mapping = json_decode($this->settings->get(self::CONF_ROLES_DELETE_FROM_ADMIN_ON_REMOVAL, '[]'), true) ?? [];
-
+        $this->track_removal_custom_fields_mapping = json_decode($this->settings->get(self::CONF_ROLES_TRACK_REMOVAL_CUSTOM_FIELD, '[]'), true) ?? [];
         $this->follow_up_role_mapping = json_decode($this->settings->get(self::CONF_ROLES_FOLLOW_UP_ROLE_MAPPING, '[]'), true) ?? [];
     }
 
@@ -107,6 +109,16 @@ class DefaultUserSettings
         $this->evento_to_ilias_role_mapping = $evento_to_ilias_role_mapping;
     }
 
+    public function getTrackRemovalCustomFieldsMapping(): array
+    {
+        return $this->track_removal_custom_fields_mapping;
+    }
+
+    public function setTrackRemovalCustomFieldsMapping(array $track_removal_custom_fields_mapping): void
+    {
+        $this->track_removal_custom_fields_mapping = $track_removal_custom_fields_mapping;
+    }
+
     public function getDeleteFromAdminWhenRemovedFromRoleMapping(): array
     {
         return $this->delete_when_removed_mapping;
@@ -140,6 +152,10 @@ class DefaultUserSettings
         $this->settings->set(
             self::CONF_ROLES_DELETE_FROM_ADMIN_ON_REMOVAL,
             json_encode($this->getDeleteFromAdminWhenRemovedFromRoleMapping())
+        );
+        $this->settings->set(
+            self::CONF_ROLES_TRACK_REMOVAL_CUSTOM_FIELD,
+            json_encode($this->getTrackRemovalCustomFieldsMapping())
         );
         $this->settings->set(
             self::CONF_ROLES_FOLLOW_UP_ROLE_MAPPING,
