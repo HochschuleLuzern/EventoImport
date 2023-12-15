@@ -92,8 +92,8 @@ class UserImportActionDecider
 
         /**
          * We do have this account exactly as she should be or we have at least
-         * a user with correct matriculation and external_account as well as
-         * the login are still untaken
+         * a user with correct matriculation and the corresponding external_account
+         * login are still free to be used
          * --> Update
          */
         if (count($data['ids_by_matriculation']) === 1
@@ -102,7 +102,6 @@ class UserImportActionDecider
             && ($data['ids_by_matriculation'][0] === $data['id_by_login']
                 || $data['id_by_login'] === 0)
             ) {
-            $this->addUserToEventoIliasMappingTable($evento_user, $data['ids_by_matriculation'][0]);
             return $this->action_factory->buildUpdateAction(
                 $evento_user,
                 $data['ids_by_matriculation'][0]
@@ -111,20 +110,21 @@ class UserImportActionDecider
 
         /**
          * We do have an account with the corresponding matriculation, but sadly
-         * the external account is taken by another account (as all other cases
-         * have been filtered away by the previous condition).
+         * the external account and or the login are taken by another account
+         * (as all other cases have been filtered away by the previous condition).
          * --> Remove external account from conflicting account, deactivate
          *     conflicting account, then update new account.
          */
         if (count($data['ids_by_matriculation']) === 1) {
-            $user_objs = [
-                'by_external_account' => $this->ilias_user_service->getExistingIliasUserObjectById($data['id_by_external_account'])
-            ];
+            $user_objs = [];
+            if ($data['id_by_external_account'] !== 0) {
+                $user_objs['by_external_account'] = $this->ilias_user_service->getExistingIliasUserObjectById($data['id_by_external_account']);
+            }
 
-            if ($data['id_external_account'] !== $data['id_by_login']) {
+            if ($data['id_by_login'] !== 0
+                && $data['id_external_account'] !== $data['id_by_login']) {
                 $user_objs['by_login'] = $this->ilias_user_service->getExistingIliasUserObjectById($data['id_by_login']);
             }
-            $this->addUserToEventoIliasMappingTable($evento_user, $data['ids_by_matriculation'][0]);
             return $this->action_factory->buildRenameExistingAndUpdateDeliveredAction(
                 $evento_user,
                 $data['ids_by_matriculation'][0],
@@ -136,8 +136,8 @@ class UserImportActionDecider
         /**
          * We didn't find an account with the corresponding matriculation, but
          * we found an account with the corresponding external account or a
-         * corresponding login or we found one account with thre corresponding
-         * external account and the corresponding login.
+         * corresponding login or we found one account with a corresponding
+         * external account and the same corresponding login.
          */
         if ($data['id_by_external_account'] !== 0
                 && $data['id_by_login'] === 0
@@ -167,7 +167,7 @@ class UserImportActionDecider
                 ->getExistingIliasUserObjectById($data['id_by_login']);
 
             // The account by external account and/or the account by login have
-            // a matriculation of some kind.
+            // a matriculation of some kind that doesn't come from Evento.
             // --> Bail
             if ($user_by_external_account->getMatriculation() !== ''
                     && substr($user_by_external_account->getMatriculation(), 0, 7) !== 'Evento:'
@@ -189,7 +189,7 @@ class UserImportActionDecider
                 );
             }
 
-            // The user account by external account has no a valid matriculation
+            // The user account by external account has a valid matriculation
             // --> Remove external account from account by login and from account
             //     by external account, deactivate account by login and account
             //     by external account, then create new account.
@@ -226,7 +226,6 @@ class UserImportActionDecider
         // --> Remove external account from conflicting account, deactivate
         //     conflicting account, then update new account.
         if (substr($found_user->getMatriculation(), 0, 7) === 'Evento:') {
-            $this->addUserToEventoIliasMappingTable($evento_user, $found_user_id);
             return $this->action_factory->buildRenameExistingAndCreateNewAction(
                 $evento_user,
                 [$found_user],

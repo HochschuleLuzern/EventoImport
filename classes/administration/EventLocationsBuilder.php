@@ -106,7 +106,6 @@ class EventLocationsBuilder
         $new_category->setPermissions($parent_ref_id);
 
         // default: sort by title
-        include_once('Services/Container/classes/class.ilContainerSortingSettings.php');
         $settings = new \ilContainerSortingSettings($new_category->getId());
         $settings->setSortMode(\ilContainer::SORT_TITLE);
         $settings->save();
@@ -114,7 +113,6 @@ class EventLocationsBuilder
         try {
             // inherit parents content style, if not individual
             $parent_id = \ilObject::_lookupObjId($parent_ref_id);
-            include_once("./Services/Style/Content/classes/class.ilObjStyleSheet.php");
             $style_id = \ilObjStyleSheet::lookupObjectStyle($parent_id);
             if ($style_id > 0) {
                 if (\ilObjStyleSheet::_lookupStandard($style_id)) {
@@ -131,7 +129,7 @@ class EventLocationsBuilder
     {
         foreach ($this->tree->getChildsByType($root_ref_id, 'cat') as $child_node) {
             $child_ref = $child_node['child'];
-            $obj_id = \ilObject::_lookupObjectId($child_ref);
+            $obj_id = \ilObject::_lookupObjectId((int) $child_ref);
             if (\ilObject::_lookupTitle($obj_id) == $searched_obj_title) {
                 return (int) $child_ref;
             }

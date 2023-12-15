@@ -44,13 +44,17 @@ class RenameExistingUserExecuteNextImportAction implements UserImportAction
 
     private function renameExistingUser(\ilObjUser $old_user) : void
     {
-        $old_user_evento_id = trim(substr($old_user->getMatriculation() ?? '', 7));
+        $old_user_evento_id = trim(mb_substr($old_user->getMatriculation(), 7));
         $changed_user_data['user_id'] = $old_user->getId();
         $changed_user_data['EvtID'] = $old_user_evento_id;
         $changed_user_data['new_user_info'] = $this->new_evento_user->getEventoId();
         $changed_user_data['found_by'] = $this->found_by;
 
-        $changed_user_data['Login'] = date('Ymd') . '_' . $old_user->getLogin();
+        $login = $old_user->getLogin();
+        if ($old_user->getLogin() === $this->new_evento_user->getLoginName()) {
+            $login = date('Ymd') . '_' . $login;
+        }
+        $changed_user_data['Login'] =  $login;
         $changed_user_data['FirstName'] = $old_user->getFirstname();
         $changed_user_data['LastName'] = $old_user->getLastname();
         $changed_user_data['Gender'] = $old_user->getGender();
@@ -58,9 +62,9 @@ class RenameExistingUserExecuteNextImportAction implements UserImportAction
         $changed_user_data['Matriculation'] = $old_user->getMatriculation();
 
         $old_user->setActive(false);
+        $old_user->setExternalAccount('');
         $old_user->update();
         $old_user->setLogin($changed_user_data['Login']);
-        $old_user->setExternalAccount('');
         $old_user->updateLogin($old_user->getLogin());
 
         $this->logger->logUserImport(

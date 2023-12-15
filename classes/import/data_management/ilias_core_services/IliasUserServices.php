@@ -86,6 +86,9 @@ class IliasUserServices
 
     public function getUserIdByExternalAccount(string $external_account): int
     {
+        if ($external_account === '') {
+            return 0;
+        }
         $login_name = \ilObjUser::_checkExternalAuthAccount($this->default_user_settings->getAuthMode(), $external_account);
 
         if ($login_name === null) {

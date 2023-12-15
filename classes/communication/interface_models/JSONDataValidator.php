@@ -31,6 +31,21 @@ trait JSONDataValidator
      * @param string $key
      * @return string|null
      */
+    protected function validateAndReturnStringOrNull(array $data_array, string $key) : ?string
+    {
+        if (!array_key_exists($key, $data_array)) {
+            $this->key_errors[$key] = 'Value not set';
+            return null;
+        }
+
+        return (string) $data_array[$key];
+    }
+
+    /**
+     * @param array  $data_array
+     * @param string $key
+     * @return string|null
+     */
     protected function validateAndReturnString(array $data_array, string $key) : ?string
     {
         if (!isset($data_array[$key])) {

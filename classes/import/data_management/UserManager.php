@@ -116,7 +116,7 @@ class UserManager
         if (in_array($evento_role_code, $imported_evento_roles)
             && array_key_exists($ilias_role_id, $track_removal_custom_fields_mapping)
             && $track_removal_custom_fields_mapping[$ilias_role_id] !== 0) {
-            $this->saveUserRoleRemovalDateToCustomField($user, $track_removal_custom_fields_mapping[$ilias_role_id], date('Y-m-d H:i:s'));
+            $this->saveUserRoleRemovalDateToCustomField($user, (int) $track_removal_custom_fields_mapping[$ilias_role_id], date('Y-m-d H:i:s'));
         }
 
         $this->ilias_user_service->assignUserToRole($user->getId(), $ilias_role_id);
@@ -146,7 +146,7 @@ class UserManager
 
         if (array_key_exists($role_id, $track_removal_custom_fields_mapping)
             && $track_removal_custom_fields_mapping[$role_id] !== 0) {
-            $this->saveUserRoleRemovalDateToCustomField($user, $track_removal_custom_fields_mapping[$role_id], date('Y-m-d H:i:s'));
+            $this->saveUserRoleRemovalDateToCustomField($user, (int) $track_removal_custom_fields_mapping[$role_id], date('Y-m-d H:i:s'));
         }
 
         if (array_key_exists($role_id, $follow_up_roles_mapping)) {
@@ -154,7 +154,7 @@ class UserManager
         }
 
         if (in_array($role_id, $roles_needing_admin_removal)) {
-            $admin_roles = $this->ilias_user_service->getCrsAdminButNotOwnerRolesOfUser();
+            $admin_roles = $this->ilias_user_service->getCrsAdminButNotOwnerRolesOfUser($user->getId());
             foreach ($admin_roles as $admin_role_id) {
                 $this->ilias_user_service->deassignUserFromRole($user->getId(), $admin_role_id);
             }

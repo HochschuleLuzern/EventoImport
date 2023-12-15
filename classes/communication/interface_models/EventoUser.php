@@ -16,7 +16,7 @@ class EventoUser extends ApiDataModelBase
     const JSON_ROLES = 'roles';
 
     private int $evento_id = 0;
-    private string $edu_id = '';
+    private ?string $edu_id = null;
     private string $last_name = '';
     private string $first_name = '';
     private string $gender = '';
@@ -27,7 +27,7 @@ class EventoUser extends ApiDataModelBase
     public function __construct(array $data_set)
     {
         $this->evento_id = $this->validateAndReturnNumber($data_set, self::JSON_ID);
-        $this->edu_id = $this->validateAndReturnString($data_set, self::EDU_ID);
+        $this->edu_id = $this->validateAndReturnStringOrNull($data_set, self::EDU_ID);
         $this->last_name = $this->validateAndReturnString($data_set, self::JSON_LAST_NAME);
         $this->first_name = $this->validateAndReturnString($data_set, self::JSON_FIRST_NAME);
         $this->gender = $this->validateAndReturnString($data_set, self::JSON_GENDER);
@@ -46,7 +46,7 @@ class EventoUser extends ApiDataModelBase
 
     public function getEduId() : string
     {
-        return $this->edu_id;
+        return $this->edu_id ?? '';
     }
 
     public function getLastName() : string
