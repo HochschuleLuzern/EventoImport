@@ -13,7 +13,7 @@ class EventoUserShort extends ApiDataModelBase
     public function __construct(array $data_set)
     {
         $this->evento_id = $this->validateAndReturnNumber($data_set, self::JSON_ID);
-        $this->edu_id = $this->validateAndReturnString($data_set, self::EDU_ID);
+        $this->edu_id = $this->validateAndReturnString($data_set, self::JSON_EDU_ID);
 
         $this->decoded_api_data = $data_set;
         $this->checkErrorsAndMaybeThrowException();
