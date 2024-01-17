@@ -132,7 +132,7 @@ class UserManager
             if (!in_array($global_role_id, $roles_mapped_to_evento)) {
                 continue;
             }
-            $this->removeUserAccessAfterRemovalOfEventoRole($user, $global_role_id);
+            $this->removeUserAccessAfterRemovalOfEventoRole($user, (int) $global_role_id);
         }
     }
 
