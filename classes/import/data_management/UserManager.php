@@ -261,7 +261,7 @@ class UserManager
         $ilias_user->setTitle($ilias_user->getFullname());
         $ilias_user->setDescription($ilias_user->getEmail());
         $ilias_user->setMatriculation('Evento:' . $evento_user->getEventoId());
-        $ilias_user->setExternalAccount($evento_user->getEventoId() . '@hslu.ch');
+        $ilias_user->setExternalAccount($evento_user->getEduId());
         $ilias_user->setAuthMode($this->default_user_settings->getAuthMode());
 
         return $ilias_user;

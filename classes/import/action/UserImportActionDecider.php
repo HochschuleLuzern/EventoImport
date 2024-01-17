@@ -34,24 +34,41 @@ class UserImportActionDecider
     {
         $matched_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
 
-        if (is_null($matched_user_id)) {
+        if ($matched_user_id === null) {
             return $this->matchToIliasUsersAndDetermineAction($evento_user);
         }
 
+        $users_to_rename = [];
+        $found_by = '';
         $current_login_of_matched_user = $this->ilias_user_service->getLoginByUserId($matched_user_id);
         // Check if login of delivered user has changed AND the changed login name is already taken
         if ($current_login_of_matched_user != $evento_user->getLoginName()
-            && $this->ilias_user_service->getUserIdByLogin($evento_user->getLoginName()) > 0
+            && ($additional_user_id_by_login = $this->ilias_user_service->getUserIdByLogin($evento_user->getLoginName())) > 0
         ) {
-            $id_of_user_to_rename = $this->ilias_user_service->getUserIdByLogin($evento_user->getLoginName());
-            $users_to_rename = [
-                $this->ilias_user_service->getExistingIliasUserObjectById($id_of_user_to_rename)
-            ];
+            $user_to_rename[] = $this->ilias_user_service->getExistingIliasUserObjectById(
+                $additional_user_id_by_login
+            );
+            $found_by = 'login';
+        }
+
+        $current_external_account_matched_user = $this->ilias_user_service->getExternalAccountByUserId($matched_user_id);
+        if ($evento_user->getEduId() !== null
+            && $evento_user->getEduId() !== ''
+            && $current_external_account_matched_user !== $evento_user->getEduId()
+            && ($additional_user_by_external_account = $this->ilias_user_service->getUserIdByExternalAccount($evento_user->getEduId())) > 0
+        ) {
+            $user_to_rename[] = $this->ilias_user_service->getExistingIliasUserObjectById(
+                $additional_user_by_external_account
+            );
+            $found_by = $found_by === '' ? 'external_account' : 'login + external_account';
+        }
+
+        if ($users_to_rename !== []) {
             return $this->action_factory->buildRenameExistingAndUpdateDeliveredAction(
                 $evento_user,
                 $matched_user_id,
                 $users_to_rename,
-                'login'
+                $found_by
             );
         }
 
