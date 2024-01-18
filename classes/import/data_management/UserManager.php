@@ -82,7 +82,9 @@ class UserManager
         // Set ilias roles according to given evento roles
         foreach ($this->default_user_settings->getEventoCodeToIliasRoleMapping() as $evento_role_code => $ilias_role_id) {
             if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $ilias_role_id)
-                && in_array($evento_role_code, $imported_evento_roles)) {
+                    && in_array($evento_role_code, $imported_evento_roles)
+                || !$this->ilias_user_service->isUserAssignedToRole($user->getId(), $ilias_role_id)
+                    && !in_array($evento_role_code, $imported_evento_roles)) {
                 continue;
             }
 
@@ -233,6 +235,14 @@ class UserManager
                 'new' => $this->default_user_settings->getAuthMode()
             ];
             $ilias_user->setAuthMode($this->default_user_settings->getAuthMode());
+        }
+
+        if ($ilias_user->getExternalAccount() !== $evento_user->getEduId()) {
+            $changed_user_data['external_account'] = [
+                'old' => $ilias_user->getExternalAccount(),
+                'new' => $evento_user->getEduId()
+            ];
+            $ilias_user->setExternalAccount($evento_user->getEduId());
         }
 
         if (!$ilias_user->getActive()) {
