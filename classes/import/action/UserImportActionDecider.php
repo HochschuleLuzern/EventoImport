@@ -45,7 +45,7 @@ class UserImportActionDecider
         if ($current_login_of_matched_user != $evento_user->getLoginName()
             && ($additional_user_id_by_login = $this->ilias_user_service->getUserIdByLogin($evento_user->getLoginName())) > 0
         ) {
-            $user_to_rename[] = $this->ilias_user_service->getExistingIliasUserObjectById(
+            $users_to_rename[] = $this->ilias_user_service->getExistingIliasUserObjectById(
                 $additional_user_id_by_login
             );
             $found_by = 'login';
@@ -57,7 +57,7 @@ class UserImportActionDecider
             && $current_external_account_matched_user !== $evento_user->getEduId()
             && ($additional_user_by_external_account = $this->ilias_user_service->getUserIdByExternalAccount($evento_user->getEduId())) > 0
         ) {
-            $user_to_rename[] = $this->ilias_user_service->getExistingIliasUserObjectById(
+            $users_to_rename[] = $this->ilias_user_service->getExistingIliasUserObjectById(
                 $additional_user_by_external_account
             );
             $found_by = $found_by === '' ? 'external_account' : 'login + external_account';

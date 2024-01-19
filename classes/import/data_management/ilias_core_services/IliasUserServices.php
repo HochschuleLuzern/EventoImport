@@ -98,7 +98,7 @@ class IliasUserServices
         return \ilObjUser::getUserIdByLogin($login_name);
     }
 
-    public function getExternalAccountByUserId(int $user_id) {
+    public function getExternalAccountByUserId(int $user_id): string {
         return \ilObjUser::_lookupExternalAccount($user_id);
     }
 

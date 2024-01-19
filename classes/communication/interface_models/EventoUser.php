@@ -5,7 +5,7 @@ namespace EventoImport\communication\api_models;
 class EventoUser extends ApiDataModelBase
 {
     const JSON_ID = 'idAccount';
-    const EDU_ID = 'eduId';
+    const JSON_EDU_ID = 'eduId';
     const JSON_LAST_NAME = 'lastName';
     const JSON_FIRST_NAME = 'firstName';
     const JSON_GENDER = 'gender';
@@ -27,7 +27,7 @@ class EventoUser extends ApiDataModelBase
     public function __construct(array $data_set)
     {
         $this->evento_id = $this->validateAndReturnNumber($data_set, self::JSON_ID);
-        $this->edu_id = $this->validateAndReturnStringOrNull($data_set, self::EDU_ID);
+        $this->edu_id = $this->validateAndReturnStringOrNull($data_set, self::JSON_EDU_ID);
         $this->last_name = $this->validateAndReturnString($data_set, self::JSON_LAST_NAME);
         $this->first_name = $this->validateAndReturnString($data_set, self::JSON_FIRST_NAME);
         $this->gender = $this->validateAndReturnString($data_set, self::JSON_GENDER);
