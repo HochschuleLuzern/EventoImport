@@ -77,7 +77,23 @@ class UserManager
 
     public function synchronizeIliasUserWithEventoRoles(\ilObjUser $user, array $imported_evento_roles): void
     {
-        $this->ilias_user_service->assignUserToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
+        if ($imported_evento_roles === []) {
+            if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId())) {
+                $this->ilias_user_service->deassignUserFromRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
+            }
+
+            if (!$this->ilias_user_service->isUserAssignedToRole($user->getId(), $this->default_user_settings->getDefaultGuestRoleId())) {
+                $this->ilias_user_service->assignUserToRole($user->getId(), $this->default_user_settings->getDefaultGuestRoleId());
+            }
+        } else {
+            if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $this->default_user_settings->getDefaultGuestRoleId())) {
+                $this->ilias_user_service->deassignUserFromRole($user->getId(), $this->default_user_settings->getDefaultGuestRoleId());
+            }
+
+            if (!$this->ilias_user_service->isUserAssignedToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId())) {
+                $this->ilias_user_service->assignUserToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
+            }
+        }
 
         // Set ilias roles according to given evento roles
         foreach ($this->default_user_settings->getEventoCodeToIliasRoleMapping() as $evento_role_code => $ilias_role_id) {

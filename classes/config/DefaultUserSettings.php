@@ -4,8 +4,16 @@ namespace EventoImport\config;
 
 class DefaultUserSettings
 {
+    private const DEFAULT_USER_ROLE = 109;
+    private const DEFAULT_GUEST_ROLE = 5;
+    private const DEFAULT_HITS_PER_PAGE = 100;
+    private const DEFAULT_SHOW_USERS_ONLINE = 'associated';
+    private const DEFAULT_IS_PROFILE_PUBLIC = true;
+    private const DEFAULT_IS_PROFILE_PICTURE_PUBLIC = true;
+    private const DEFAULT_IS_MAIL_PUBLIC = true;
+    private const DEFAULT_MAIL_INCOMING_TYPE = 2;
+
     private const CONF_USER_AUTH_MODE = 'crevento_ilias_auth_mode';
-    private const CONF_DEFAULT_USER_ROLE = 'crevento_default_user_role';
     private const CONF_ROLES_ILIAS_EVENTO_MAPPING = 'crevento_roles_ilias_evento_mapping';
     private const CONF_ROLES_TRACK_REMOVAL_CUSTOM_FIELD = 'crevento_roles_track_removal_custom_field';
     private const CONF_ROLES_DELETE_FROM_ADMIN_ON_REMOVAL = 'crevento_roles_delete_from_admin_on_removal';
@@ -14,13 +22,7 @@ class DefaultUserSettings
     private \ilSetting $settings;
 
     private $auth_mode;
-    private bool $is_profile_public;
     private bool $is_profile_picture_public;
-    private bool $is_mail_public;
-    private int $default_user_role_id;
-    private int $default_hits_per_page;
-    private string $default_show_users_online;
-    private int $mail_incoming_type;
     private array $evento_to_ilias_role_mapping;
     private array $delete_when_removed_mapping;
     private array $track_removal_custom_fields_mapping;
@@ -31,15 +33,6 @@ class DefaultUserSettings
         $this->settings = $settings;
 
         $this->auth_mode = $this->settings->get(self::CONF_USER_AUTH_MODE, 'local');
-
-        $this->default_user_role_id = (int) $this->settings->get(self::CONF_DEFAULT_USER_ROLE); // TODO: Use default user role from constants
-
-        $this->default_hits_per_page = 100;
-        $this->default_show_users_online = 'associated';
-        $this->is_profile_public = true;
-        $this->is_profile_picture_public = true;
-        $this->is_mail_public = true;
-        $this->mail_incoming_type = 2;
 
         $this->evento_to_ilias_role_mapping = array_flip(
             json_decode($this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, '[]'), true) ?? []
@@ -61,42 +54,42 @@ class DefaultUserSettings
 
     public function isProfilePublic(): bool
     {
-        return $this->is_profile_public;
+        return self::DEFAULT_IS_PROFILE_PUBLIC;
     }
 
     public function isProfilePicturePublic(): bool
     {
-        return $this->is_profile_picture_public;
+        return self::DEFAULT_IS_PROFILE_PICTURE_PUBLIC;
     }
 
     public function isMailPublic(): bool
     {
-        return $this->is_mail_public;
+        return self::DEFAULT_IS_MAIL_PUBLIC;
     }
 
     public function getMailIncomingType(): int
     {
-        return $this->mail_incoming_type;
+        return self::DEFAULT_MAIL_INCOMING_TYPE;
     }
 
     public function getDefaultUserRoleId(): int
     {
-        return $this->default_user_role_id;
+        return self::DEFAULT_USER_ROLE;
     }
 
-    public function setDefaultUserRoleId(int $default_user_role_id): void
+    public function getDefaultGuestRoleId(): int
     {
-        $this->default_user_role_id = $default_user_role_id;
+        return self::DEFAULT_GUEST_ROLE;
     }
 
     public function getDefaultHitsPerPage(): int
     {
-        return $this->default_hits_per_page;
+        return self::DEFAULT_HITS_PER_PAGE;
     }
 
     public function getDefaultShowUsersOnline(): string
     {
-        return $this->default_show_users_online;
+        return self::DEFAULT_SHOW_USERS_ONLINE;
     }
 
     public function getEventoCodeToIliasRoleMapping(): array
@@ -142,7 +135,6 @@ class DefaultUserSettings
     public function saveCurrentConfigurationToSettings(): void
     {
         $this->settings->set(self::CONF_USER_AUTH_MODE, $this->getAuthMode());
-        $this->settings->set(self::CONF_DEFAULT_USER_ROLE, (string) $this->getDefaultUserRoleId());
         $this->settings->set(
             self::CONF_ROLES_ILIAS_EVENTO_MAPPING,
             json_encode(
