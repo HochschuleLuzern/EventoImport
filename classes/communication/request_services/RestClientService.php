@@ -56,7 +56,16 @@ class RestClientService implements RequestClientService
     {
         $url_without_query_params = $this->base_uri . $path;
 
-        if (filter_var($this->base_uri, FILTER_VALIDATE_URL, [FILTER_FLAG_SCHEME_REQUIRED, FILTER_FLAG_HOST_REQUIRED, FILTER_FLAG_PATH_REQUIRED]) === false) {
+        if (filter_var(
+                $this->base_uri,
+                \FILTER_VALIDATE_URL,
+                [
+                    \FILTER_FLAG_SCHEME_REQUIRED,
+                    \FILTER_FLAG_HOST_REQUIRED,
+                    \FILTER_FLAG_PATH_REQUIRED
+                ]
+            ) === false
+        ) {
             throw new \InvalidArgumentException('Invalid Base-URI given! ' . $this->base_uri);
         }
 
