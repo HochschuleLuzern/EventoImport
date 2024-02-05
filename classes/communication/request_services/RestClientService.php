@@ -24,7 +24,7 @@ class RestClientService implements RequestClientService
         $this->api_key = $api_key;
         $this->api_secret = $api_secret;
 
-        if (filter_var($this->base_uri, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) === false) {
+        if (filter_var($this->base_uri, FILTER_VALIDATE_URL) === false) {
             throw new \InvalidArgumentException('Invalid Base-URI given! ' . $this->base_uri);
         }
     }
@@ -58,12 +58,8 @@ class RestClientService implements RequestClientService
 
         if (filter_var(
                 $this->base_uri,
-                \FILTER_VALIDATE_URL,
-                [
-                    \FILTER_FLAG_SCHEME_REQUIRED,
-                    \FILTER_FLAG_HOST_REQUIRED,
-                    \FILTER_FLAG_PATH_REQUIRED
-                ]
+                FILTER_VALIDATE_URL,
+                FILTER_FLAG_PATH_REQUIRED
             ) === false
         ) {
             throw new \InvalidArgumentException('Invalid Base-URI given! ' . $this->base_uri);
