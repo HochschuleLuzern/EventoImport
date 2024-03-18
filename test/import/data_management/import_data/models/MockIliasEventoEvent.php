@@ -1,4 +1,4 @@
-<?php declare(strict_type=1);
+<?php declare(strict_types=1);
 
 class MockIliasEventoEvent extends \EventoImport\import\data_management\repository\model\IliasEventoEvent
 {
