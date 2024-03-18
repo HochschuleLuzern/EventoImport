@@ -216,13 +216,7 @@ class UserManager
     private function setUserDefaultSettings(\ilObjUser $ilias_user_object, DefaultUserSettings $user_settings)
     {
         $ilias_user_object->setActive(true);
-        $ilias_user_object->setTimeLimitFrom($user_settings->getNow()->getTimestamp());
-        if ($user_settings->getAccDurationAfterImport() == 0) {
-            $ilias_user_object->setTimeLimitUnlimited(true);
-        } else {
-            $ilias_user_object->setTimeLimitUnlimited(false);
-            $ilias_user_object->setTimeLimitUntil($user_settings->getAccDurationAfterImport()->getTimestamp());
-        }
+        $ilias_user_object->setTimeLimitUnlimited(true);
 
         $ilias_user_object->setAuthMode($user_settings->getAuthMode());
 
