@@ -43,7 +43,7 @@ class LocalVisitorRoleFactory
         $role->changeExistingObjects(
             $ref_id,
             \ilObjRole::MODE_PROTECTED_KEEP_LOCAL_POLICIES,
-            array('all')
+            ['all']
         );
 
         return $role;

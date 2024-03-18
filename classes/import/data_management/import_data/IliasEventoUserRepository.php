@@ -39,12 +39,12 @@ class IliasEventoUserRepository
             IliasEventoUserTblDef::TABLE_NAME,
 
             // VALUES
-            array(
-                IliasEventoUserTblDef::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $evento_id),
-                IliasEventoUserTblDef::COL_ILIAS_USER_ID => array(\ilDBConstants::T_INTEGER, $ilias_user_id),
-                IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => array(\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")),
-                IliasEventoUserTblDef::COL_ACCOUNT_TYPE => array(\ilDBConstants::T_TEXT, $account_type)
-            )
+            [
+                IliasEventoUserTblDef::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER, $evento_id],
+                IliasEventoUserTblDef::COL_ILIAS_USER_ID => [\ilDBConstants::T_INTEGER, $ilias_user_id],
+                IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")],
+                IliasEventoUserTblDef::COL_ACCOUNT_TYPE => [\ilDBConstants::T_TEXT, $account_type]
+            ]
         );
 
         return new IliasEventoUser($evento_id, $ilias_user_id, $account_type);
@@ -97,7 +97,7 @@ class IliasEventoUserRepository
               . ' WHERE ' . $this->db->in(IliasEventoUserTblDef::COL_EVENTO_ID, $evento_ids, false, \ilDBConstants::T_INTEGER);
         $result = $this->db->query($query);
 
-        $user_ids = array();
+        $user_ids = [];
         while ($data = $this->db->fetchAssoc($result)) {
             $user_ids[] = $data[IliasEventoUserTblDef::COL_ILIAS_USER_ID];
         }
