@@ -106,7 +106,7 @@ class EventLocations
     {
         $hardcoded_locations = [
             "HSLU" => "Hochschule Luzern",
-            "DK" => "Design & Kunst",
+            "DK" => "Design Film Kunst",
             "I" => "Informatik",
             "M" => "Musik",
             "SA" => "Soziale Arbeit",

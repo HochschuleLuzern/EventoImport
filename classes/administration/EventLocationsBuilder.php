@@ -18,7 +18,7 @@ class EventLocationsBuilder
 
         $this->hard_coded_department_mapping = [
             "Hochschule Luzern" => "HSLU",
-            "Design & Kunst" => "DK",
+            "Design Film Kunst" => "DK",
             "Informatik" => "I",
             "Musik" => "M",
             "Soziale Arbeit" => "SA",
