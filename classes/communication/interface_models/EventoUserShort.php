@@ -31,9 +31,7 @@ class EventoUserShort extends ApiDataModelBase
     }
 
     public function getEduId() : string
-    {    {
-        return $this->evento_id;
-    }
+    {
         return $this->edu_id ?? '';
     }
 
