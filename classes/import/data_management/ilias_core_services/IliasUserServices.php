@@ -53,7 +53,7 @@ class IliasUserServices
      * Search for ILIAS User IDs by criteria
      */
 
-    public function getUserIdsByEmailAddresses(array $email_adresses)
+    public function getUserIdsByEmailAddresses(array $email_adresses): array
     {
         $user_lists = [];
 

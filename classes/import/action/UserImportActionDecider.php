@@ -89,9 +89,9 @@ class UserImportActionDecider
          *  --> Insert new user account.
          */
         if ($data['ids_by_matriculation'] === []
-            && $data['id_by_external_account'] === []
+            && $data['id_by_external_account'] === 0
             && $data['id_by_login'] === 0
-            && $data['ids_by_email'] === 0) {
+            && $data['ids_by_email'] === []) {
             return $this->action_factory->buildCreateAction($evento_user);
         }
 
