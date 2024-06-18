@@ -139,7 +139,7 @@ class UserImportActionDecider
             }
 
             if ($data['id_by_login'] !== 0
-                && $data['id_external_account'] !== $data['id_by_login']) {
+                && $data['id_by_external_account'] !== $data['id_by_login']) {
                 $user_objs['by_login'] = $this->ilias_user_service->getExistingIliasUserObjectById($data['id_by_login']);
             }
             return $this->action_factory->buildRenameExistingAndUpdateDeliveredAction(
