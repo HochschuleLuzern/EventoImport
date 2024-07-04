@@ -8,9 +8,9 @@ trait SingleDataRecordImport
 {
     protected function fetchDataRecordById(RequestClientService $data_source, string $method_name, int $id, int $seconds_before_retry, int $max_retries) : ?array
     {
-        $params = array(
+        $params = [
             "id" => (int) $id
-        );
+        ];
 
         $nr_of_tries = 0;
         $plain_response = null;

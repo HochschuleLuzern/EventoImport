@@ -26,7 +26,7 @@ class DefaultUserSettings
     {
         $this->settings = $settings;
 
-        $this->assignable_roles = array();
+        $this->assignable_roles = [];
 
         $this->default_user_role_id = (int) $settings->get(CronConfigForm::CONF_DEFAULT_USER_ROLE); // TODO: Use default user role from constants
         $this->assignable_roles[] = $this->default_user_role_id;

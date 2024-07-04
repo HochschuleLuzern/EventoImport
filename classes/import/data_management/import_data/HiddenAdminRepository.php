@@ -19,8 +19,8 @@ class HiddenAdminRepository
         $this->db->insert(
             HiddenAdminsTableDef::TABLE_NAME,
             [
-                HiddenAdminsTableDef::COL_OBJECT_REF_ID => array(\ilDBConstants::T_INTEGER, $membership_obj_ref_id),
-                HiddenAdminsTableDef::COL_HIDDEN_ADMIN_ROLE_ID => array(\ilDBConstants::T_INTEGER, $role_obj_id)
+                HiddenAdminsTableDef::COL_OBJECT_REF_ID => [\ilDBConstants::T_INTEGER, $membership_obj_ref_id],
+                HiddenAdminsTableDef::COL_HIDDEN_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER, $role_obj_id]
             ]
         );
     }

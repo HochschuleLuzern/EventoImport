@@ -104,7 +104,7 @@ class ResetHiddenAdminPermissions implements AdminScriptInterface
         $role_object->changeExistingObjects(
             $obj_ref_id,
             \ilObjRole::MODE_UNPROTECTED_KEEP_LOCAL_POLICIES,
-            array('all')
+            ['all']
         );
     }
 }

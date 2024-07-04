@@ -23,47 +23,47 @@ class IliasEventoEventObjectRepository
             IliasEventoEventsTblDef::TABLE_NAME,
 
             // VALUES
-            array(
+            [
                 // id
-                IliasEventoEventsTblDef::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER,
+                IliasEventoEventsTblDef::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER,
                                                                 $ilias_evento_event->getEventoEventId()
-                ),
+                ],
 
                 // evento values
-                IliasEventoEventsTblDef::COL_EVENTO_TITLE => array(\ilDBConstants::T_TEXT,
+                IliasEventoEventsTblDef::COL_EVENTO_TITLE => [\ilDBConstants::T_TEXT,
                                                                    $ilias_evento_event->getEventoTitle()
-                ),
-                IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION => array(\ilDBConstants::T_TEXT,
+                ],
+                IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION => [\ilDBConstants::T_TEXT,
                                                                          $ilias_evento_event->getEventoDescription()
-                ),
-                IliasEventoEventsTblDef::COL_EVENTO_TYPE => array(\ilDBConstants::T_TEXT,
+                ],
+                IliasEventoEventsTblDef::COL_EVENTO_TYPE => [\ilDBConstants::T_TEXT,
                                                                   $ilias_evento_event->getEventoType()
-                ),
-                IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED => array(\ilDBConstants::T_INTEGER,
+                ],
+                IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED => [\ilDBConstants::T_INTEGER,
                                                                                 $ilias_evento_event->wasAutomaticallyCreated()
-                ),
-                IliasEventoEventsTblDef::COL_START_DATE => array(\ilDBConstants::T_TIMESTAMP,
+                ],
+                IliasEventoEventsTblDef::COL_START_DATE => [\ilDBConstants::T_TIMESTAMP,
                                                                  $this->dateTimeToDBFormatOrNull($ilias_evento_event->getStartDate())
-                ),
-                IliasEventoEventsTblDef::COL_END_DATE => array(\ilDBConstants::T_TIMESTAMP,
+                ],
+                IliasEventoEventsTblDef::COL_END_DATE => [\ilDBConstants::T_TIMESTAMP,
                                                                $this->dateTimeToDBFormatOrNull($ilias_evento_event->getEndDate())
-                ),
-                IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => array(\ilDBConstants::T_TIMESTAMP, date("Y-m-d H:i:s")),
-                IliasEventoEventsTblDef::COL_ILIAS_TYPE => array(\ilDBConstants::T_TEXT, $ilias_evento_event->getIliasType()),
+                ],
+                IliasEventoEventsTblDef::COL_LAST_TIME_DELIVERED => [\ilDBConstants::T_TIMESTAMP, date("Y-m-d H:i:s")],
+                IliasEventoEventsTblDef::COL_ILIAS_TYPE => [\ilDBConstants::T_TEXT, $ilias_evento_event->getIliasType()],
 
                 // foreign keys
-                IliasEventoEventsTblDef::COL_REF_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getRefId()),
-                IliasEventoEventsTblDef::COL_OBJ_ID => array(\ilDBConstants::T_INTEGER, $ilias_evento_event->getObjId()),
-                IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => array(\ilDBConstants::T_INTEGER,
+                IliasEventoEventsTblDef::COL_REF_ID => [\ilDBConstants::T_INTEGER, $ilias_evento_event->getRefId()],
+                IliasEventoEventsTblDef::COL_OBJ_ID => [\ilDBConstants::T_INTEGER, $ilias_evento_event->getObjId()],
+                IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER,
                                                                     $ilias_evento_event->getAdminRoleId()
-                ),
-                IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => array(\ilDBConstants::T_INTEGER,
+                ],
+                IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER,
                                                                       $ilias_evento_event->getStudentRoleId()
-                ),
-                IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => array(\ilDBConstants::T_TEXT,
+                ],
+                IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => [\ilDBConstants::T_TEXT,
                                                                        $ilias_evento_event->getParentEventKey()
-                )
-            )
+                ]
+            ]
         );
     }
 
@@ -139,28 +139,28 @@ class IliasEventoEventObjectRepository
             IliasEventoEventsTblDef::TABLE_NAME,
 
             // VALUES
-            array(
+            [
                 // evento values
-                IliasEventoEventsTblDef::COL_EVENTO_TITLE => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoTitle()),
-                IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoDescription()),
-                IliasEventoEventsTblDef::COL_EVENTO_TYPE => array(\ilDBConstants::T_TEXT, $updated_obj->getEventoType()),
-                IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED => array(\ilDBConstants::T_INTEGER, $updated_obj->wasAutomaticallyCreated()),
-                IliasEventoEventsTblDef::COL_START_DATE => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($updated_obj->getStartDate())),
-                IliasEventoEventsTblDef::COL_END_DATE => array(\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($updated_obj->getEndDate())),
-                IliasEventoEventsTblDef::COL_ILIAS_TYPE => array(\ilDBConstants::T_TEXT, $updated_obj->getIliasType()),
+                IliasEventoEventsTblDef::COL_EVENTO_TITLE => [\ilDBConstants::T_TEXT, $updated_obj->getEventoTitle()],
+                IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION => [\ilDBConstants::T_TEXT, $updated_obj->getEventoDescription()],
+                IliasEventoEventsTblDef::COL_EVENTO_TYPE => [\ilDBConstants::T_TEXT, $updated_obj->getEventoType()],
+                IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED => [\ilDBConstants::T_INTEGER, $updated_obj->wasAutomaticallyCreated()],
+                IliasEventoEventsTblDef::COL_START_DATE => [\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($updated_obj->getStartDate())],
+                IliasEventoEventsTblDef::COL_END_DATE => [\ilDBConstants::T_TIMESTAMP, $this->dateTimeToDBFormatOrNull($updated_obj->getEndDate())],
+                IliasEventoEventsTblDef::COL_ILIAS_TYPE => [\ilDBConstants::T_TEXT, $updated_obj->getIliasType()],
 
                 // foreign keys
-                IliasEventoEventsTblDef::COL_REF_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getRefId()),
-                IliasEventoEventsTblDef::COL_OBJ_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getObjId()),
-                IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getAdminRoleId()),
-                IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getStudentRoleId()),
-                IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => array(\ilDBConstants::T_TEXT, $updated_obj->getParentEventKey())
-            ),
+                IliasEventoEventsTblDef::COL_REF_ID => [\ilDBConstants::T_INTEGER, $updated_obj->getRefId()],
+                IliasEventoEventsTblDef::COL_OBJ_ID => [\ilDBConstants::T_INTEGER, $updated_obj->getObjId()],
+                IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER, $updated_obj->getAdminRoleId()],
+                IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER, $updated_obj->getStudentRoleId()],
+                IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => [\ilDBConstants::T_TEXT, $updated_obj->getParentEventKey()]
+            ],
 
             // WHERE
-            array(
-                IliasEventoEventsTblDef::COL_EVENTO_ID => array(\ilDBConstants::T_INTEGER, $updated_obj->getEventoEventId())
-            )
+            [
+                IliasEventoEventsTblDef::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER, $updated_obj->getEventoEventId()]
+            ]
         );
     }
 

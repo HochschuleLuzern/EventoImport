@@ -191,29 +191,7 @@ class UserManager
         // Reset login attempts over night -> needed since login attempts are limited to 8
         $ilias_user->setLoginAttempts(0);
 
-        // Set user time limits
-        if ($user_settings->getAccDurationAfterImport()->getTimestamp() == 0) {
-            $ilias_user->setTimeLimitUnlimited(true);
-        } else {
-            $ilias_user->setTimeLimitUnlimited(false);
-
-            if ($ilias_user->getTimeLimitFrom() == 0 ||
-                $ilias_user->getTimeLimitFrom() > $user_settings->getNow()->getTimestamp()) {
-                $ilias_user->setTimeLimitFrom($user_settings->getNow()->getTimestamp());
-            }
-
-            $ilias_user->setTimeLimitUntil($user_settings->getAccDurationAfterImport()->getTimestamp());
-        }
-
-        /*
-            The old import had the $user->setPasswd method two times called. One time within an if-statement and another time without
-            Code snipped of if-statement below:
-                if ($user_settings->isAuthModeLDAP()) {
-                    $user->setPasswd('');
-                }
-
-            Since the second call without an if-statement makes this block useless, it is not in the code anymore
-        */
+        $ilias_user->setTimeLimitUnlimited(true);
         $ilias_user->setPasswd('');
 
         // profil is always public for registered users
@@ -238,13 +216,7 @@ class UserManager
     private function setUserDefaultSettings(\ilObjUser $ilias_user_object, DefaultUserSettings $user_settings)
     {
         $ilias_user_object->setActive(true);
-        $ilias_user_object->setTimeLimitFrom($user_settings->getNow()->getTimestamp());
-        if ($user_settings->getAccDurationAfterImport() == 0) {
-            $ilias_user_object->setTimeLimitUnlimited(true);
-        } else {
-            $ilias_user_object->setTimeLimitUnlimited(false);
-            $ilias_user_object->setTimeLimitUntil($user_settings->getAccDurationAfterImport()->getTimestamp());
-        }
+        $ilias_user_object->setTimeLimitUnlimited(true);
 
         $ilias_user_object->setAuthMode($user_settings->getAuthMode());
 
