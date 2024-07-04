@@ -40,6 +40,10 @@ class EventLocationsRepository
         if (!isset($this->cache[$department])) {
             $this->cache[$department] = [$kind => [$year => $ref_id]];
             return;
+        } elseif (!isset($this->cache[$department][$kind])) {
+            $this->cache[$department][$kind] = [$year => $ref_id];
+        } else {
+            $this->cache[$department][$kind][$year] = $ref_id;
         }
 
         if (!isset($this->cache[$department][$kind])) {

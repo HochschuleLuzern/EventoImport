@@ -33,6 +33,7 @@ class DefaultUserSettings
         $this->settings = $settings;
 
         $this->auth_mode = $this->settings->get(self::CONF_USER_AUTH_MODE, 'local');
+        $this->assignable_roles = [];
 
         $this->evento_to_ilias_role_mapping = array_flip(
             json_decode($this->settings->get(self::CONF_ROLES_ILIAS_EVENTO_MAPPING, '[]'), true) ?? []

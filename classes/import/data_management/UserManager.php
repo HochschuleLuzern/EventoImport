@@ -294,7 +294,6 @@ class UserManager
         // Reset login attempts over night -> needed since login attempts are limited to 8
         $ilias_user->setLoginAttempts(0);
         $ilias_user->setTimeLimitUnlimited(true);
-
         $ilias_user->setPasswd('');
 
         // profil is always public for registered users
