@@ -187,9 +187,9 @@ class UserManager
         $old_user_to_rename->updateLogin($old_user_to_rename->getLogin());
     }
 
-    public function registerEventoUserAsDelivered(EventoUser $evento_user)
+    public function registerEventoUserAsDelivered(\ilObjUser $ilias_user, EventoUser $evento_user)
     {
-        $this->evento_user_repo->registerUserAsDelivered($evento_user->getEventoId());
+        $this->evento_user_repo->registerUserAsDelivered($evento_user->getEventoId(),$ilias_user->getId());
     }
 
     public function updateIliasUserFromEventoUser(\ilObjUser $ilias_user, EventoUser $evento_user)
