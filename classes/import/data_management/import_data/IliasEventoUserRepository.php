@@ -98,7 +98,7 @@ class IliasEventoUserRepository
     public function registerUserAsDelivered(int $evento_id, int $ilias_user_id) : void
     {
         $eventoUser = $this->getIliasEventoUserByEventoId($evento_id);
-        if(is_null($eventoUser)) {
+        if(!is_null($eventoUser)) {
             $this->db->update(
                 IliasEventoUserTblDef::TABLE_NAME,
                 [
