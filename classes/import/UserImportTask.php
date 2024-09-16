@@ -71,8 +71,12 @@ class UserImportTask
             try {
                 $evento_user = new EventoUser($data_set);
 
-                $action = $this->user_import_action_decider->determineImportAction($evento_user);
-                $action->executeAction();
+                if ($evento_user->isLockdownAccount()) {
+                    $this->handleDeliveredLockdownAccount($evento_user);
+                } else {
+                    $action = $this->user_import_action_decider->determineImportAction($evento_user);
+                    $action->executeAction();
+                }
             } catch (\ilEventoImportApiDataException $e) {
                 $data = $e->getApiData();
                 if (isset($data[EventoUser::JSON_ID])) {
@@ -86,6 +90,23 @@ class UserImportTask
                 $this->evento_logger->logException('User Import', $e->getMessage());
             }
         }
+    }
+
+    private function handleDeliveredLockdownAccount(EventoUser $evento_user)
+    {
+        $ilias_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
+        $this->evento_user_repo->deleteEventoIliasUserConnectionByEventoId($evento_user->getEventoId());
+
+        if (!is_null($ilias_user_id)) {
+            $ilias_user_obj = $this->ilias_user_service->getExistingIliasUserObjectById($ilias_user_id);
+            $this->ilias_user_service->deactivateUserAccount($ilias_user_obj);
+        }
+        $this->evento_logger->logUserImport(
+            Logger::CREVENTO_USR_LOCKDOWN,
+            $evento_user->getEventoId(),
+            $evento_user->getLoginName(),
+            ['api_data' => $evento_user->getDecodedApiData()]
+        );
     }
 
     /**

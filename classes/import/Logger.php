@@ -79,7 +79,11 @@ class Logger
     const CREVENTO_USR_UPDATED = 302;
     const CREVENTO_USR_RENAMED = 303;
     const CREVENTO_USR_CONVERTED = 304;
+    const CREVENTO_USR_LOCKDOWN = 305;
+
+
     const CREVENTO_USR_NOTICE_CONFLICT = 313;
+
     const CREVENTO_USR_ERROR_ERROR = 324;
 
     const TABLE_LOG_USERS = 'crevento_log_users';

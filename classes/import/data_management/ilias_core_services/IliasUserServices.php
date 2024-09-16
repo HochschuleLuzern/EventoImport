@@ -240,4 +240,17 @@ class IliasUserServices
             . " WHERE DATEDIFF(FROM_UNIXTIME(time_limit_until),create_date)< " . $this->db->quote($min_threshold_in_days, \ilDBConstants::T_INTEGER);
         $this->db->manipulate($q);
     }
+
+    public function deactivateUserAccount(\ilObjUser $ilias_user)
+    {
+        // Deassign user from HSLU roles
+        foreach ($this->user_settings->getEventoCodeToIliasRoleMapping() as $evento_role_code => $ilias_role_id) {
+            $this->deassignUserFromRole($ilias_user->getId, $ilias_role_id);
+        }
+
+        // Set user auth mode to default (local auth) and set expiration date to now
+        $ilias_user->setAuthMode('local');
+        $ilias_user->setTimeLimitUntil($this->user_settings->getNow()->getTimestamp()); // Set user expiration date to now
+        $ilias_user->update();
+    }
 }
