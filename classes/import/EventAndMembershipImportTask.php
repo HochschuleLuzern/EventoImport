@@ -60,6 +60,7 @@ class EventAndMembershipImportTask
             try {
                 $this->importNextEventPage();
             } catch (\ilEventoImportCommunicationException $e) {
+                $this->logger->logException('Importing Event Page', $e->getMessage(), $e->getTraceAsString());
                 throw $e;
             } catch (\Exception $e) {
                 $this->logger->logException('Importing Event Page', $e->getMessage(), $e->getTraceAsString());
@@ -95,9 +96,10 @@ class EventAndMembershipImportTask
     private function importNextEventPage() : void
     {
         foreach ($this->evento_importer->fetchNextEventDataSet() as $data_set) {
+            $eventoid = 0;
             try {
                 $evento_event = new EventoEvent($data_set);
-
+                $eventoid = $evento_event->getEventoId();
                 $action = $this->event_import_action_decider->determineImportAction($evento_event);
                 $action->executeAction();
             } catch (\ilEventoImportApiDataException $e) {
@@ -111,7 +113,7 @@ class EventAndMembershipImportTask
 
                 $this->logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());
             } catch (\Exception $e) {
-                $this->logger->logException(get_class($e) . ' - Importing Event', $e->getMessage());
+                $this->logger->logException(get_class($e) . ' - Importing Event - eventoid: ' . var_export($eventoid, true), $e->getMessage());
             }
         }
     }

@@ -118,7 +118,7 @@ class IliasEventoEvent
 
     public function getEventoDescription() : string
     {
-        return $this->evento_description;
+        return substr($this->evento_description,0, 128);
     }
 
     public function isSubGroupEvent() : bool

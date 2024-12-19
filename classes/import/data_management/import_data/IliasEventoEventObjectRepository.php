@@ -82,6 +82,31 @@ class IliasEventoEventObjectRepository
         );
     }
 
+    public function updateExistingParentEvent(IliasEventoParentEvent $parent_event) : void
+    {
+        $this->db->update(
+        // UPDATE
+            IliasParentEventTblDef::TABLE_NAME,
+
+            // VALUES
+            [
+                // id
+                IliasParentEventTblDef::COL_GROUP_EVENTO_ID => [\ilDBConstants::T_INTEGER, $parent_event->getGroupEventoId()],
+
+                // foreign keys
+                IliasParentEventTblDef::COL_TITLE => [\ilDBConstants::T_TEXT, $parent_event->getTitle()],
+                IliasParentEventTblDef::COL_REF_ID => [\ilDBConstants::T_INTEGER, $parent_event->getRefId()],
+                IliasParentEventTblDef::COL_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER, $parent_event->getAdminRoleId()],
+                IliasParentEventTblDef::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER, $parent_event->getStudentRoleId()]
+            ],
+
+            // WHERE
+            [
+                IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY => [\ilDBConstants::T_TEXT, $parent_event->getGroupUniqueKey()]
+            ]
+        );
+    }
+
     public function getEventByEventoId(int $evento_id) : ?IliasEventoEvent
     {
         $query = "SELECT * FROM " . IliasEventoEventsTblDef::TABLE_NAME . " WHERE " . IliasEventoEventsTblDef::COL_EVENTO_ID . " = " . $this->db->quote(
@@ -192,7 +217,7 @@ class IliasEventoEventObjectRepository
         return new IliasEventoEvent(
             $row[IliasEventoEventsTblDef::COL_EVENTO_ID],
             $row[IliasEventoEventsTblDef::COL_EVENTO_TITLE],
-            $row[IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION],
+            substr($row[IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION],0, 128),
             $row[IliasEventoEventsTblDef::COL_EVENTO_TYPE],
             $row[IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED],
             $this->toDateTimeOrNull($row[IliasEventoEventsTblDef::COL_START_DATE]),
