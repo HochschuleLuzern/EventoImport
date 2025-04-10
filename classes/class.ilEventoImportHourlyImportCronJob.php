@@ -5,6 +5,7 @@ use EventoImport\communication\EventoAdminImporter;
 use EventoImport\import\Logger;
 use EventoImport\communication\request_services\RestClientService;
 use EventoImport\config\ConfigurationManager;
+use ILIAS\Cron\Schedule\CronJobScheduleType;
 
 class ilEventoImportHourlyImportCronJob extends ilCronJob
 {
@@ -42,9 +43,9 @@ class ilEventoImportHourlyImportCronJob extends ilCronJob
         return true;
     }
 
-    public function getDefaultScheduleType(): int
+    public function getDefaultScheduleType(): CronJobScheduleType
     {
-        return self::SCHEDULE_TYPE_IN_MINUTES;
+        return  CronJobScheduleType::SCHEDULE_TYPE_IN_MINUTES;
     }
 
     public function getDefaultScheduleValue(): ?int
