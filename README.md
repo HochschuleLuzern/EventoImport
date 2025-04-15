@@ -3,10 +3,10 @@
 Evento Import is a Cron-Plugin that updates Users and ILIAS-Object-Members based on information received from a SOAP-Interface
 
 **Minimum ILIAS Version:**
-5.2.0
+8.0
 
 **Maximum ILIAS Version:**
-5.2.999
+9.999
 
 **Responsible Developer:**
 Stephan Winiker - stephan.winiker@hslu.ch
