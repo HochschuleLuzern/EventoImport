@@ -66,14 +66,14 @@ class EventLocationsAdminGUI
         if (count($locations) > 0) {
             $saved_locations_string .= "<tr>";
             foreach ($locations[0] as $key => $value) {
-                $saved_locations_string .= "<th><b>" . htmlspecialchars($key) . "</b></th>";
+                $saved_locations_string .= "<th><b>" . htmlspecialchars(strval($key)) . "</b></th>";
             }
             $saved_locations_string .= "<tr>";
         }
         foreach ($locations as $location) {
             $saved_locations_string .= "<tr>";
             foreach ($location as $key => $value) {
-                $saved_locations_string .= "<td>" . htmlspecialchars($value) . "</td>";
+                $saved_locations_string .= "<td>" . htmlspecialchars(strval($value)) . "</td>";
             }
             $saved_locations_string .= '</tr>';
         }
