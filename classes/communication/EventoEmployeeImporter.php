@@ -61,10 +61,10 @@ class EventoEmployeeImporter extends EventoImporterBase
                 $nr_of_tries++;
             }
 
-            if (!$request_was_successful) {
-                if ($nr_of_tries < $this->max_retries) {
-                    sleep($this->seconds_before_retry);
-                } else {
+            if ($request_was_successful) {
+                continue;
+            }
+                if ($nr_of_tries >= $this->max_retries) {
                     throw new \ilEventoImportCommunicationException(
                         self::class,
                         [
@@ -74,7 +74,8 @@ class EventoEmployeeImporter extends EventoImporterBase
                         "After $nr_of_tries tries, there was still no successful call to the API"
                     );
                 }
-            }
+
+                sleep($this->seconds_before_retry);
         } while (!$request_was_successful);
 
         return $response->getData();

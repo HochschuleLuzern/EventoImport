@@ -94,7 +94,12 @@ class EventManager
 
         $parent_event = $this->eventoEventAndIliasObjToParentEvent($evento_event, $course_obj);
 
-        $this->event_obj_repo->addNewParentEvent($parent_event);
+        if($this->event_obj_repo->getParentEventbyGroupUniqueKey($parent_event->getGroupUniqueKey()) != null) {
+            $this->event_obj_repo->updateExistingParentEvent($parent_event);
+        }
+        else {
+            $this->event_obj_repo->addNewParentEvent($parent_event);
+        }
         $this->event_obj_repo->removeIliasEventoEvent($ilias_event);
 
         return $parent_event;

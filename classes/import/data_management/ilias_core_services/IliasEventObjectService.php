@@ -47,23 +47,25 @@ class IliasEventObjectService
         }
 
         $result = $this->db->query($query);
-        $found_obj = null;
 
-        if ($this->db->numRows($result) == 1) {
-            $row = $this->db->fetchAssoc($result);
+        if ($this->db->numRows($result) !== 1) {
+            return null;
+        }
 
-            if ($row['type'] == 'crs') {
-                $found_obj = $this->getCourseObjectForRefId((int) $row['ref_id']);
-            } elseif ($row['type'] == 'grp') {
-                $group_obj = $this->getGroupObjectForRefId((int) $row['ref_id']);
+        $row = $this->db->fetchAssoc($result);
 
-                if ($this->isGroupObjPartOfACourse($group_obj)) {
-                    $found_obj = $group_obj;
-                }
+        if ($row['type'] == 'crs') {
+            return $this->getCourseObjectForRefId((int) $row['ref_id']);
+        }
+
+        if ($row['type'] == 'grp') {
+            $group_obj = $this->getGroupObjectForRefId((int) $row['ref_id']);
+            if ($this->isGroupObjPartOfACourse($group_obj)) {
+                return $group_obj;
             }
         }
 
-        return $found_obj;
+        return null;
     }
 
     public function createNewCourseObject(string $title, string $description, int $destination_ref_id) : \ilObjCourse
@@ -98,26 +100,26 @@ class IliasEventObjectService
         return new \ilObjGroup($ref_id, true);
     }
 
-    public function removeIliasEventObjectWithSubObjects(IliasEventoEvent $ilias_event_to_remove)
+    public function removeIliasEventObjectWithSubObjects(IliasEventoEvent $ilias_event_to_remove): void
     {
         $ref_id = $ilias_event_to_remove->getRefId();
         $type = $this->getObjTypeForRefId($ref_id);
-        if ($type == 'crs' || $type == 'grp') {
-            \ilRepUtil::deleteObjects($this->tree->getParentId($ref_id), [$ref_id]);
-        } else {
+        if ($type !== 'crs' && $type !== 'grp') {
             throw new \ilException("Failed deleting Parent Event with ref_id = $ref_id. The ILIAS Object had type $type instead of crs");
         }
+
+        \ilRepUtil::deleteObjects($this->tree->getParentId($ref_id), [$ref_id]);
     }
 
-    public function removeIliasParentEventObject(IliasEventoParentEvent $ilias_evento_parent_event)
+    public function removeIliasParentEventObject(IliasEventoParentEvent $ilias_evento_parent_event): void
     {
         $ref_id = $ilias_evento_parent_event->getRefId();
         $type = $this->getObjTypeForRefId($ref_id);
-        if ($type == 'crs') {
-            \ilRepUtil::deleteObjects($this->tree->getParentId($ref_id), [$ref_id]);
-        } else {
+        if ($type !== 'crs') {
             throw new \ilException("Failed deleting Parent Event with ref_id = $ref_id. The ILIAS Object had type $type instead of crs");
         }
+
+        \ilRepUtil::deleteObjects($this->tree->getParentId($ref_id), [$ref_id]);
     }
 
     public function isGroupObjPartOfACourse(\ilObjGroup $group_obj) : bool
@@ -129,7 +131,9 @@ class IliasEventObjectService
 
             if ($type == 'crs') {
                 return true;
-            } elseif ($type == 'cat' || $type == 'root') {
+            }
+
+            if ($type == 'cat' || $type == 'root') {
                 return false;
             }
         } while ($current_ref_id > 1);
@@ -174,14 +178,12 @@ class IliasEventObjectService
 
     private function removeDeletePermissionsFromAdminRole(\ilObject $obj)
     {
-        if ($obj instanceof \ilObjCourse) {
-            $admin_role = $obj->getDefaultAdminRole();
-        } else if ($obj instanceof \ilObjGroup) {
-            $admin_role = $obj->getDefaultAdminRole();
-        } else {
+        if (!($obj instanceof \ilObjCourse)
+            && !($obj instanceof \ilObjGroup)) {
             return;
         }
 
+        $admin_role = $obj->getDefaultAdminRole();
         $ref_id = $obj->getRefId();
         $rbac_admin = $this->rbac->admin();
 

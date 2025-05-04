@@ -81,7 +81,7 @@ class SwitchIliasObjectForEventoEvent implements AdminScriptInterface
     {
         $form = $this->getParameterFormUI();
 
-        if(!$form->checkInput()) {
+        if (!$form->checkInput()) {
             throw new \InvalidArgumentException($this->getTitle(), 'Invalid Form Input');
         }
 
@@ -125,7 +125,7 @@ class SwitchIliasObjectForEventoEvent implements AdminScriptInterface
         if ($target_ilias_object instanceof \ilObjCourse) {
             $changed_ilias_evento_event = $ilias_evento_event->switchToAnotherIliasObejct($target_ilias_object);
             $this->repo->updateIliasEventoEvent($changed_ilias_evento_event);
-        } else if ($target_ilias_object instanceof \ilObjGroup) {
+        } elseif ($target_ilias_object instanceof \ilObjGroup) {
             if (!$this->isChildOfCourseObject($target_ilias_object)) {
                 throw new \InvalidArgumentException('Target group object is not child of course object. Events MUST be a course object or a group object, which is in a course object');
             }
@@ -135,7 +135,7 @@ class SwitchIliasObjectForEventoEvent implements AdminScriptInterface
             $parent_key = '';
             try {
                 $evento_event = $importer->fetchEventDataRecordById($ilias_evento_event->getEventoEventId());
-                if(!is_null($evento_event) && $evento_event->getGroupUniqueKey()) {
+                if (!is_null($evento_event) && $evento_event->getGroupUniqueKey()) {
                     $parent_event = $this->repo->getParentEventbyGroupUniqueKey($evento_event->getGroupUniqueKey());
                     if (isset($parent_event) && $this->tree->isGrandChild($parent_event->getRefId(), $target_ilias_object->getRefId())) {
                         $parent_key = $parent_event->getGroupUniqueKey();
@@ -163,7 +163,7 @@ class SwitchIliasObjectForEventoEvent implements AdminScriptInterface
         $type = \ilObject::_lookupType($ref_id, true);
         if ($type == 'crs') {
             return new \ilObjCourse($ref_id, true);
-        } else if ($type == 'grp') {
+        } elseif ($type == 'grp') {
             return new \ilObjGroup($ref_id, true);
         }
 

@@ -31,6 +31,21 @@ trait JSONDataValidator
      * @param string $key
      * @return string|null
      */
+    protected function validateAndReturnStringOrNull(array $data_array, string $key) : ?string
+    {
+        if (!array_key_exists($key, $data_array)) {
+            $this->key_errors[$key] = 'Value not set';
+            return null;
+        }
+
+        return (string) $data_array[$key];
+    }
+
+    /**
+     * @param array  $data_array
+     * @param string $key
+     * @return string|null
+     */
     protected function validateAndReturnString(array $data_array, string $key) : ?string
     {
         if (!isset($data_array[$key])) {
@@ -56,19 +71,23 @@ trait JSONDataValidator
 
         if (is_bool($data_array[$key])) {
             return $data_array[$key];
-        } elseif ($as_string_possible && is_string($data_array[$key])) {
+        }
+
+        if ($as_string_possible && is_string($data_array[$key])) {
             if ($data_array[$key] == 'true') {
                 return true;
-            } elseif ($data_array[$key] == 'false') {
-                return false;
-            } else {
-                $this->key_errors[$key] = 'Invalid string given as boolean';
-                return null;
             }
-        } else {
-            $this->key_errors[$key] = 'Value ist not a boolean';
+
+            if ($data_array[$key] == 'false') {
+                return false;
+            }
+
+            $this->key_errors[$key] = 'Invalid string given as boolean';
             return null;
         }
+
+        $this->key_errors[$key] = 'Value ist not a boolean';
+        return null;
     }
 
     /**
@@ -81,7 +100,9 @@ trait JSONDataValidator
         if (!isset($data_array[$key])) {
             $this->key_errors[$key] = 'Value not set';
             return null;
-        } elseif (!is_array($data_array)) {
+        }
+
+        if (!is_array($data_array)) {
             $this->key_errors[$key] = 'Value MUST be an array';
             return null;
         }

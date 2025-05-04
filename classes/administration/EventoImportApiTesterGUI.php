@@ -185,25 +185,29 @@ class EventoImportApiTesterGUI
 
     public function getApiDataAsString($cmd) : string
     {
-        if ($cmd == 'by_id') {
+        if ($cmd === 'by_id') {
             $form = $this->initDataRecordForm()->withRequest($this->request);
             $data = $form->getData();
 
             if ($data) {
                 return $this->fetchDataRecordFromFormInput(...$data[0]);
-            } else {
-                return "Form data Invalid";
             }
-        } else if ($cmd == 'data_set') {
+
+            return "Form data Invalid";
+        }
+
+        if ($cmd === 'data_set') {
             $form = $this->initDataSetForm()->withRequest($this->request);
             $data = $form->getData();
 
             if ($data) {
                 return $this->fetchDataSetFromFormInput(...$data[0]);
-            } else {
-                return "Form data Invalid";
             }
-        } else if ($cmd == 'parameterless') {
+
+            return "Form data Invalid";
+        }
+
+        if ($cmd === 'parameterless') {
             return $this->fetchParameterlessDataset();
         }
 

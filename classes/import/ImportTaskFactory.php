@@ -38,7 +38,11 @@ class ImportTaskFactory
     private Logger $logger;
     private \ilTree $tree;
 
-    public function __construct(ConfigurationManager $config_manager, \ilDBInterface $db, \ilTree $tree, RBACServices $rbac)
+    public function __construct(
+        ConfigurationManager $config_manager,
+        \ilDBInterface $db,
+        \ilTree $tree,
+        RBACServices $rbac)
     {
         $this->config_manager = $config_manager;
         $this->db = $db;
@@ -50,7 +54,7 @@ class ImportTaskFactory
     public function buildUserImport(EventoUserImporter $user_importer, EventoUserPhotoImporter $user_photo_importer) : UserImportTask
     {
         $user_settings = $this->config_manager->getDefaultUserConfiguration();
-        $ilias_user_service = new IliasUserServices($user_settings, $this->db, $this->rbac);
+        $ilias_user_service = new IliasUserServices($user_settings, $this->db, $this->rbac->review(), $this->rbac->admin());
         $evento_user_repo = new IliasEventoUserRepository($this->db);
 
         return new UserImportTask(
@@ -90,7 +94,7 @@ class ImportTaskFactory
             new MembershipablesEventInTreeSeeker($this->tree),
             new IliasEventoEventMembershipRepository($this->db),
             new UserManager(
-                new IliasUserServices($user_settings, $this->db, $this->rbac),
+                new IliasUserServices($user_settings, $this->db, $this->rbac->review(), $this->rbac->admin()),
                 new IliasEventoUserRepository($this->db),
                 $user_settings,
                 $this->logger
@@ -132,7 +136,7 @@ class ImportTaskFactory
                 new HiddenAdminRepository($this->db),
                 new MembershipablesEventInTreeSeeker($this->tree),
                 new UserManager(
-                    new IliasUserServices($user_settings, $this->db, $this->rbac),
+                    new IliasUserServices($user_settings, $this->db, $this->rbac->review(), $this->rbac->admin()),
                     new IliasEventoUserRepository($this->db),
                     $user_settings,
                     $this->logger
@@ -151,7 +155,7 @@ class ImportTaskFactory
             $employee_import,
             new LocalVisitorRoleRepository($this->db),
             new UserManager(
-                new IliasUserServices($user_settings, $this->db, $this->rbac),
+                new IliasUserServices($user_settings, $this->db, $this->rbac->review(), $this->rbac->admin()),
                 new IliasEventoUserRepository($this->db),
                 $user_settings,
                 $this->logger

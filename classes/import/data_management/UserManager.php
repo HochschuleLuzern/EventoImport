@@ -26,11 +26,12 @@ class UserManager
         $this->logger = $logger;
     }
 
-    public function createAndSetupNewIliasUser(EventoUser $evento_user) : \ilObjUser
+    public function createAndSetupNewIliasUser(EventoUser $evento_user): \ilObjUser
     {
-        $ilias_user_object = $this->ilias_user_service->createNewIliasUserObject();
-
-        $ilias_user_object = $this->setUserValuesFromEventoUserObject($ilias_user_object, $evento_user);
+        $ilias_user_object = $this->setUserValuesFromEventoUserObject(
+            $this->ilias_user_service->createNewIliasUserObject(),
+            $evento_user
+        );
 
         $ilias_user_object->create();
         $ilias_user_object->saveAsNew(false);
@@ -38,7 +39,11 @@ class UserManager
         $this->setUserDefaultSettings($ilias_user_object, $this->default_user_settings);
         $this->setForcedUserSettings($ilias_user_object, $this->default_user_settings);
 
-        $this->evento_user_repo->addNewEventoIliasUserByEventoUser($evento_user, $ilias_user_object, IliasEventoUserRepository::TYPE_HSLU_AD);
+        $this->evento_user_repo->addNewEventoIliasUser(
+            $evento_user->getEventoId(),
+            $ilias_user_object->getId(),
+            IliasEventoUserRepository::TYPE_HSLU_AD
+        );
 
         return $ilias_user_object;
     }
@@ -48,7 +53,7 @@ class UserManager
         $this->setForcedUserSettings($ilias_user, $this->default_user_settings);
     }
 
-    public function importAndSetUserPhoto(\ilObjUser $ilias_user, int $evento_id, EventoUserPhotoImporter $photo_importer) : void
+    public function importAndSetUserPhoto(\ilObjUser $ilias_user, int $evento_id, EventoUserPhotoImporter $photo_importer): void
     {
         if ($this->ilias_user_service->userHasPersonalPicture($ilias_user->getId())) {
             return;
@@ -70,18 +75,108 @@ class UserManager
         }
     }
 
-    public function synchronizeIliasUserWithEventoRoles(\ilObjUser $user, array $imported_evento_roles) : void
+    public function synchronizeIliasUserWithEventoRoles(\ilObjUser $user, array $imported_evento_roles): void
     {
-        $this->ilias_user_service->assignUserToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
+        if ($imported_evento_roles === []) {
+            if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId())) {
+                $this->ilias_user_service->deassignUserFromRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
+            }
+
+            if (!$this->ilias_user_service->isUserAssignedToRole($user->getId(), $this->default_user_settings->getDefaultGuestRoleId())) {
+                $this->ilias_user_service->assignUserToRole($user->getId(), $this->default_user_settings->getDefaultGuestRoleId());
+            }
+        } else {
+            if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $this->default_user_settings->getDefaultGuestRoleId())) {
+                $this->ilias_user_service->deassignUserFromRole($user->getId(), $this->default_user_settings->getDefaultGuestRoleId());
+            }
+
+            if (!$this->ilias_user_service->isUserAssignedToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId())) {
+                $this->ilias_user_service->assignUserToRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
+            }
+        }
 
         // Set ilias roles according to given evento roles
         foreach ($this->default_user_settings->getEventoCodeToIliasRoleMapping() as $evento_role_code => $ilias_role_id) {
+            if ($this->ilias_user_service->isUserAssignedToRole($user->getId(), $ilias_role_id)
+                    && in_array($evento_role_code, $imported_evento_roles)
+                || !$this->ilias_user_service->isUserAssignedToRole($user->getId(), $ilias_role_id)
+                    && !in_array($evento_role_code, $imported_evento_roles)) {
+                continue;
+            }
+
             if (in_array($evento_role_code, $imported_evento_roles)) {
-                $this->ilias_user_service->assignUserToRole($user->getId(), $ilias_role_id);
-            } else {
-                $this->ilias_user_service->deassignUserFromRole($user->getId(), $ilias_role_id);
+                $this->performAddToUserRoleSubTasks($user, $ilias_role_id);
+                continue;
+            }
+
+            $this->removeUserAccessAfterRemovalOfEventoRole($user, $ilias_role_id);
+        }
+    }
+
+    private function performAddToUserRoleSubTasks(
+        \ilObjUser $user,
+        int $ilias_role_id
+    ): void {
+        $follow_up_roles_mapping = $this->default_user_settings->getFollowUpRoleMapping();
+        if (array_key_exists($ilias_role_id, $follow_up_roles_mapping)
+            && $this->ilias_user_service->isUserAssignedToRole(
+                $user->getId(),
+                $follow_up_roles_mapping[$ilias_role_id])
+            ) {
+            $this->ilias_user_service->deassignUserFromRole($user->getId(), $follow_up_roles_mapping[$ilias_role_id]);
+        }
+
+        $track_removal_custom_fields_mapping = $this->default_user_settings->getTrackRemovalCustomFieldsMapping();
+        if (array_key_exists($ilias_role_id, $track_removal_custom_fields_mapping)
+            && $track_removal_custom_fields_mapping[$ilias_role_id] !== 0) {
+            $this->saveUserRoleRemovalDateToCustomField($user, (int) $track_removal_custom_fields_mapping[$ilias_role_id], '');
+        }
+
+        $this->ilias_user_service->assignUserToRole($user->getId(), $ilias_role_id);
+    }
+
+    public function removeUserAccessesAfterLeavingInstitution(\ilObjUser $user): void
+    {
+        $this->ilias_user_service->deassignUserFromRole($user->getId(), $this->default_user_settings->getDefaultUserRoleId());
+
+        $assigned_global_roles = $this->ilias_user_service->getGlobalRolesOfUser($user->getId());
+        $roles_mapped_to_evento = $this->default_user_settings->getEventoCodeToIliasRoleMapping();
+        foreach ($assigned_global_roles as $global_role_id) {
+            if (!in_array($global_role_id, $roles_mapped_to_evento)) {
+                continue;
+            }
+            $this->removeUserAccessAfterRemovalOfEventoRole($user, (int) $global_role_id);
+        }
+    }
+
+    private function removeUserAccessAfterRemovalOfEventoRole(\ilObjUser $user, int $role_id): void
+    {
+        $this->ilias_user_service->deassignUserFromRole($user->getId(), $role_id);
+
+        $follow_up_roles_mapping = $this->default_user_settings->getFollowUpRoleMapping();
+        if (array_key_exists($role_id, $follow_up_roles_mapping)) {
+            $this->ilias_user_service->assignUserToRole($user->getId(), $follow_up_roles_mapping[$role_id]);
+        }
+
+        $track_removal_custom_fields_mapping = $this->default_user_settings->getTrackRemovalCustomFieldsMapping();
+        if (array_key_exists($role_id, $track_removal_custom_fields_mapping)
+            && $track_removal_custom_fields_mapping[$role_id] !== 0) {
+            $this->saveUserRoleRemovalDateToCustomField($user, (int) $track_removal_custom_fields_mapping[$role_id], date('Y-m-d H:i:s'));
+        }
+
+        $roles_needing_admin_removal = $this->default_user_settings->getDeleteFromAdminWhenRemovedFromRoleMapping();
+        if (in_array($role_id, $roles_needing_admin_removal)) {
+            $admin_roles = $this->ilias_user_service->getCrsAdminButNotOwnerRolesOfUser($user->getId());
+            foreach ($admin_roles as $admin_role_id) {
+                $this->ilias_user_service->deassignUserFromRole($user->getId(), $admin_role_id);
             }
         }
+    }
+
+    public function saveUserRoleRemovalDateToCustomField(\ilObjUser $user, int $custom_field_id, string $date): void
+    {
+        $user->setUserDefinedData([$custom_field_id => $date]);
+        $user->update();
     }
 
     public function renameAndDeactivateIliasUser(\ilObjUser $old_user_to_rename, string $new_login)
@@ -92,9 +187,9 @@ class UserManager
         $old_user_to_rename->updateLogin($old_user_to_rename->getLogin());
     }
 
-    public function registerEventoUserAsDelivered(EventoUser $evento_user)
+    public function registerEventoUserAsDelivered(\ilObjUser $ilias_user, EventoUser $evento_user)
     {
-        $this->evento_user_repo->registerUserAsDelivered($evento_user->getEventoId());
+        $this->evento_user_repo->registerUserAsDelivered($evento_user->getEventoId(),$ilias_user->getId());
     }
 
     public function updateIliasUserFromEventoUser(\ilObjUser $ilias_user, EventoUser $evento_user)
@@ -119,7 +214,7 @@ class UserManager
         }
 
         $received_gender_char = $this->convertEventoToIliasGenderChar($evento_user->getGender());
-        if ($ilias_user->getGender() != $received_gender_char) {
+        if ($ilias_user->getGender() !== $received_gender_char) {
             $changed_user_data['gender'] = [
                 'old' => $ilias_user->getGender(),
                 'new' => $received_gender_char
@@ -128,7 +223,7 @@ class UserManager
         }
 
         $mail_list = $evento_user->getEmailList();
-        if (isset($mail_list[0]) && ($ilias_user->getSecondEmail() != $mail_list[0])) {
+        if (isset($mail_list[0]) && ($ilias_user->getSecondEmail() !== $mail_list[0])) {
             $changed_user_data['second_mail'] = [
                 'old' => $ilias_user->getSecondEmail(),
                 'new' => $mail_list[0]
@@ -136,7 +231,7 @@ class UserManager
             $ilias_user->setSecondEmail($mail_list[0]);
         }
 
-        if ($ilias_user->getMatriculation() != ('Evento:' . $evento_user->getEventoId())) {
+        if ($ilias_user->getMatriculation() !== ('Evento:' . $evento_user->getEventoId())) {
             $changed_user_data['matriculation'] = [
                 'old' => $ilias_user->getMatriculation(),
                 'new' => 'Evento:' . $evento_user->getEventoId()
@@ -144,12 +239,20 @@ class UserManager
             $ilias_user->setMatriculation('Evento:' . $evento_user->getEventoId());
         }
 
-        if ($ilias_user->getAuthMode() != $this->default_user_settings->getAuthMode()) {
+        if ($ilias_user->getAuthMode() !== $this->default_user_settings->getAuthMode()) {
             $changed_user_data['auth_mode'] = [
                 'old' => $ilias_user->getAuthMode(),
                 'new' => $this->default_user_settings->getAuthMode()
             ];
             $ilias_user->setAuthMode($this->default_user_settings->getAuthMode());
+        }
+
+        if ($ilias_user->getExternalAccount() !== $evento_user->getEduId()) {
+            $changed_user_data['external_account'] = [
+                'old' => $ilias_user->getExternalAccount(),
+                'new' => $evento_user->getEduId()
+            ];
+            $ilias_user->setExternalAccount($evento_user->getEduId());
         }
 
         if (!$ilias_user->getActive()) {
@@ -160,14 +263,14 @@ class UserManager
             $ilias_user->setActive(true);
         }
 
-        if (count($changed_user_data) > 0) {
+        if ($changed_user_data !== []) {
             $ilias_user->update();
         }
 
         return $changed_user_data;
     }
 
-    private function setUserValuesFromEventoUserObject(\ilObjUser $ilias_user, EventoUser $evento_user) : \ilObjUser
+    private function setUserValuesFromEventoUserObject(\ilObjUser $ilias_user, EventoUser $evento_user): \ilObjUser
     {
         $ilias_user->setLogin($evento_user->getLoginName());
         $ilias_user->setFirstname($this->shortenStringIfTooLong($evento_user->getFirstName(), 32));
@@ -178,7 +281,7 @@ class UserManager
         $ilias_user->setTitle($ilias_user->getFullname());
         $ilias_user->setDescription($ilias_user->getEmail());
         $ilias_user->setMatriculation('Evento:' . $evento_user->getEventoId());
-        $ilias_user->setExternalAccount($evento_user->getEventoId() . '@hslu.ch');
+        $ilias_user->setExternalAccount($evento_user->getEduId());
         $ilias_user->setAuthMode($this->default_user_settings->getAuthMode());
 
         return $ilias_user;
@@ -190,7 +293,6 @@ class UserManager
 
         // Reset login attempts over night -> needed since login attempts are limited to 8
         $ilias_user->setLoginAttempts(0);
-
         $ilias_user->setTimeLimitUnlimited(true);
         $ilias_user->setPasswd('');
 
@@ -237,7 +339,7 @@ class UserManager
         );
     }
 
-    private function convertEventoToIliasGenderChar(string $evento_gender_char) : string
+    private function convertEventoToIliasGenderChar(string $evento_gender_char): string
     {
         switch (strtolower($evento_gender_char)) {
             case 'f':
@@ -255,36 +357,39 @@ class UserManager
         $this->evento_user_repo->deleteEventoIliasUserConnectionByEventoId($evento_id);
     }
 
-    public function getExistingIliasUserObjectById(int $ilias_user_id) : \ilObjUser
+    public function getExistingIliasUserObjectById(int $ilias_user_id): \ilObjUser
     {
         return $this->ilias_user_service->getExistingIliasUserObjectById($ilias_user_id);
     }
 
-    public function getIliasEventoUserByEventoId(int $evento_id) : IliasEventoUser
+    public function getIliasEventoUserByEventoId(int $evento_id): IliasEventoUser
     {
         return $this->evento_user_repo->getIliasEventoUserByEventoId($evento_id);
     }
 
-    public function getIliasUserIdByEventoId(int $evento_id) : ?int
+    public function getIliasUserIdByEventoId(int $evento_id): ?int
     {
         return $this->evento_user_repo->getIliasUserIdByEventoId($evento_id);
     }
 
-    public function getIliasUserIdByEventoUserShort(EventoUserShort $evento_user) : ?int
+    public function getIliasUserIdByEventoUserShort(EventoUserShort $evento_user): ?int
     {
         $ilias_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
         if (is_null($ilias_user_id)) {
-            $edu_user = $this->ilias_user_service->searchEduUserByEmail($evento_user->getEmailAddress());
-            if (!is_null($edu_user)) {
-                $ilias_user_id = (int) $edu_user->getId();
-                $this->evento_user_repo->addNewEventoIliasUserByEventoUserShort($evento_user, $edu_user, IliasEventoUserRepository::TYPE_EDU_ID);
+            $ilias_user_id = $this->ilias_user_service->getUserIdByExternalAccount($evento_user->getEduId());
+            if ($ilias_user_id !== 0) {
+                $this->evento_user_repo->addNewEventoIliasUser(
+                    $evento_user->getEventoId(),
+                    $ilias_user_id,
+                    IliasEventoUserRepository::TYPE_EDU_ID
+                );
             }
         }
 
         return $ilias_user_id;
     }
 
-    public function getIliasEventoUserForEventoUser(EventoUserShort $evento_user) : ?IliasEventoUser
+    public function getIliasEventoUserForEventoUser(EventoUserShort $evento_user): ?IliasEventoUser
     {
         return $this->evento_user_repo->getIliasEventoUserByEventoId($evento_user->getEventoId());
     }

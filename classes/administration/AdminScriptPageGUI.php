@@ -53,10 +53,9 @@ class AdminScriptPageGUI
         $this->user = $user;
         $this->error = $error;
 
+        $this->ref_id = 31;
         if (isset($query_params['ref_id'])) {
             $this->ref_id = (int) $query_params['ref_id'];
-        } else {
-            $this->ref_id = 31;
         }
 
         $this->scripts = [
@@ -126,7 +125,7 @@ class AdminScriptPageGUI
                 $f->legacy($script->getParameterFormUI()->getHTML())
             );
 
-            if(!is_null($executed_script) && $script->getScriptId() == $executed_script) {
+            if (!is_null($executed_script) && $script->getScriptId() == $executed_script) {
                 try {
                     $modal = $script->getResultModalFromRequest(
                         $this->ctrl->getCmd(),

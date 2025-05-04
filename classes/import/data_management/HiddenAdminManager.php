@@ -57,10 +57,10 @@ class HiddenAdminManager
     {
         $type = \ilObject::_lookupType($ref_id, true);
 
-        if($type == 'crs') {
+        if ($type == 'crs') {
             $title = self::ROLE_TITLE_CRS;
             $role_template = 'il_crs_admin';
-        } else if($type == 'grp') {
+        } elseif ($type == 'grp') {
             $title = self::ROLE_TITLE_GRP;
             $role_template = 'il_grp_admin';
         } else {

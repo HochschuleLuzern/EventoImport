@@ -64,7 +64,7 @@ class LookupEventByEventoTitle implements AdminScriptInterface
     public function getResultModalFromRequest(string $cmd, Factory $f) : Modal
     {
         $form = $this->getParameterFormUI();
-        if(!$form->checkInput()) {
+        if (!$form->checkInput()) {
             throw new \InvalidArgumentException("Invalid Form Input!");
         }
 

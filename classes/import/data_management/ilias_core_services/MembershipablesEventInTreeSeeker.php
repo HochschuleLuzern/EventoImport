@@ -18,12 +18,14 @@ class MembershipablesEventInTreeSeeker
         foreach ($this->tree->getChilds($parent_ref_id) as $child_node) {
             $child_ref_id = (int) $child_node['ref_id'];
             $type = $child_node['type'];
-            if ($type == 'grp') {
+            if ($type === 'grp') {
                 $sub_group_list[$child_ref_id] = $child_ref_id;
                 if ($search_below_groups) {
                     $sub_group_list = $this->recursiveSearchSubGroups($child_ref_id, $sub_group_list, $search_below_groups);
                 }
-            } elseif ($type == 'fold') {
+            }
+
+            if ($type === 'fold') {
                 $sub_group_list = $this->recursiveSearchSubGroups($child_ref_id, $sub_group_list, $search_below_groups);
             }
         }
@@ -58,20 +60,25 @@ class MembershipablesEventInTreeSeeker
         do {
             $current_obj_ref = (int) $this->tree->getParentId($current_obj_ref);
             $type = $this->lookupObjTypeByRefId($current_obj_ref);
-            if ($type == 'crs') {
-                $parent_membershipable_objs[] = $current_obj_ref;
-                $has_found_super_parent = true;
-            } elseif ($type == 'grp') {
-                $parent_membershipable_objs[] = $current_obj_ref;
-            } elseif ($type == 'cat' || $type == 'root') {
-                $has_found_super_parent = true;
-            } elseif ($type == "") {
+
+            if ($type === "") {
                 throw new \ilException("Parent event of $src_ref_id, which has the ref id $current_obj_ref seems not to have a type declared");
+            }
+
+            if ($type === 'crs') {
+                $parent_membershipable_objs[] = $current_obj_ref;
+                $has_found_super_parent = true;
+            } elseif ($type === 'grp') {
+                $parent_membershipable_objs[] = $current_obj_ref;
+            } elseif ($type === 'cat' || $type === 'root') {
+                $has_found_super_parent = true;
             }
 
             if ($deadlock_prevention++ > 15) {
                 throw new \ilException("Event with the ref_id of " . $src_ref_id . " seems to have either over 15 parent objects or there is a circular connection in the Repository-Tree");
-            } elseif ($current_obj_ref <= 1) {
+            }
+
+            if ($current_obj_ref <= 1) {
                 throw new \ilException("Event with the ref_id of $src_ref_id seems to be either in root or has no category above it");
             }
         } while (!$has_found_super_parent);

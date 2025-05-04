@@ -59,8 +59,8 @@ class LocalVisitorRoleFactory
 
         if (!is_null($rolt_id)) {
             return $rolt_id;
-        } else {
-            throw new \ilException("Error in finding the course member role template to base the visitor role on");
         }
+
+        throw new \ilException("Error in finding the course member role template to base the visitor role on");
     }
 }

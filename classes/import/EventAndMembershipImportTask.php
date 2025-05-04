@@ -60,6 +60,7 @@ class EventAndMembershipImportTask
             try {
                 $this->importNextEventPage();
             } catch (\ilEventoImportCommunicationException $e) {
+                $this->logger->logException('Importing Event Page', $e->getMessage(), $e->getTraceAsString());
                 throw $e;
             } catch (\Exception $e) {
                 $this->logger->logException('Importing Event Page', $e->getMessage(), $e->getTraceAsString());
@@ -80,10 +81,11 @@ class EventAndMembershipImportTask
                 if (is_null($result)) {
                     $action = $this->event_import_action_decider->determineDeleteAction($ilias_evento_event);
                     $action->executeAction();
-                } else {
-                    $this->evento_event_obj_repo->registerEventAsDelivered($result->getEventoId());
-                    $this->logger->logException('Deleting Event', 'Event which was not delivered during "Import Events" can be requested by ID. Therefore it still exsits. Evento ID = ' . $ilias_evento_event->getEventoEventId());
+                    continue;
                 }
+
+                $this->evento_event_obj_repo->registerEventAsDelivered($result->getEventoId());
+                $this->logger->logException('Deleting Event', 'Event which was not delivered during "Import Events" can be requested by ID. Therefore it still exsits. Evento ID = ' . $ilias_evento_event->getEventoEventId());
             } catch (\Exception $e) {
                 $this->logger->logException('Deleting Event', 'Exception on deleting event with evento_id ' . $ilias_evento_event->getEventoEventId()
                     . ', exception message: ' . $e->getMessage());
@@ -94,23 +96,24 @@ class EventAndMembershipImportTask
     private function importNextEventPage() : void
     {
         foreach ($this->evento_importer->fetchNextEventDataSet() as $data_set) {
+            $eventoid = 0;
             try {
                 $evento_event = new EventoEvent($data_set);
-
+                $eventoid = $evento_event->getEventoId();
                 $action = $this->event_import_action_decider->determineImportAction($evento_event);
                 $action->executeAction();
             } catch (\ilEventoImportApiDataException $e) {
                 $data = $e->getApiData();
+
+                $evento_id_msg = "Evento ID not given";
                 if (isset($data[EventoEvent::JSON_ID])) {
                     $id = $data[EventoEvent::JSON_ID];
                     $evento_id_msg = "Evento ID: $id";
-                } else {
-                    $evento_id_msg = "Evento ID not given";
                 }
 
                 $this->logger->logException('API Data Exception - Importing Event', $evento_id_msg . ' - ' . $e->getMessage());
             } catch (\Exception $e) {
-                $this->logger->logException(get_class($e) . ' - Importing Event', $e->getMessage());
+                $this->logger->logException(get_class($e) . ' - Importing Event - eventoid: ' . var_export($eventoid, true), $e->getMessage());
             }
         }
     }

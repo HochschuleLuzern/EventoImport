@@ -38,10 +38,9 @@ class EventLocationCategoryBuilder
             // inherit parents content style, if not individual
             $parent_id = \ilObject::_lookupObjId($parent_ref_id);
             $style_id = \ilObjStyleSheet::lookupObjectStyle($parent_id);
-            if ($style_id > 0) {
-                if (\ilObjStyleSheet::_lookupStandard($style_id)) {
-                    \ilObjStyleSheet::writeStyleUsage($new_category->getId(), $style_id);
-                }
+            if ($style_id > 0
+                && \ilObjStyleSheet::_lookupStandard($style_id)) {
+                \ilObjStyleSheet::writeStyleUsage($new_category->getId(), $style_id);
             }
         } catch (\Exception $e) {
         }

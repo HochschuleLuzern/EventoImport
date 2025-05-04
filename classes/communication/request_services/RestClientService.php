@@ -19,13 +19,12 @@ class RestClientService implements RequestClientService
         string $api_key,
         string $api_secret
     ) {
-        //$this->base_uri = "https://$base_url:$port$base_path";
         $this->base_uri = $base_uri;
         $this->timeout_after_request_seconds = $timeout_after_request_seconds;
         $this->api_key = $api_key;
         $this->api_secret = $api_secret;
 
-        if (filter_var($this->base_uri, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) === false) {
+        if (filter_var($this->base_uri, FILTER_VALIDATE_URL) === false) {
             throw new \InvalidArgumentException('Invalid Base-URI given! ' . $this->base_uri);
         }
     }
@@ -57,7 +56,12 @@ class RestClientService implements RequestClientService
     {
         $url_without_query_params = $this->base_uri . $path;
 
-        if (filter_var($this->base_uri, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) === false) {
+        if (filter_var(
+                $this->base_uri,
+                FILTER_VALIDATE_URL,
+                FILTER_FLAG_PATH_REQUIRED
+            ) === false
+        ) {
             throw new \InvalidArgumentException('Invalid Base-URI given! ' . $this->base_uri);
         }
 

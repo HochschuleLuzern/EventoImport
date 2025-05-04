@@ -19,21 +19,11 @@ class IliasEventoUserRepository
         $this->db = $db;
     }
 
-    public function addNewEventoIliasUserByEventoUser(EventoUser $evento_user, \ilObjUser $ilias_user, string $account_type) : IliasEventoUser
-    {
-        return $this->addNewEventoIliasUser($evento_user->getEventoId(), (int) $ilias_user->getId(), $account_type);
-    }
-
-    public function addNewEventoIliasUserByEventoUserShort(
-        EventoUserShort $evento_user,
-        \ilObjUser $ilias_user,
+    public function addNewEventoIliasUser(
+        int $evento_id,
+        int $ilias_user_id,
         string $account_type
     ) : IliasEventoUser {
-        return $this->addNewEventoIliasUser($evento_user->getEventoId(), (int) $ilias_user->getId(), $account_type);
-    }
-
-    private function addNewEventoIliasUser(int $evento_id, int $ilias_user_id, string $account_type) : IliasEventoUser
-    {
         $this->db->insert(
         // INSERT INTO
             IliasEventoUserTblDef::TABLE_NAME,
@@ -105,17 +95,28 @@ class IliasEventoUserRepository
         return $user_ids;
     }
 
-    public function registerUserAsDelivered(int $evento_id) : void
+    public function registerUserAsDelivered(int $evento_id, int $ilias_user_id) : void
     {
-        $this->db->update(
-            IliasEventoUserTblDef::TABLE_NAME,
-            [
-                IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")]
-            ],
-            [
-                IliasEventoUserTblDef::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER, $evento_id]
-            ]
-        );
+        $eventoUser = $this->getIliasEventoUserByEventoId($evento_id);
+        if(!is_null($eventoUser)) {
+            $this->db->update(
+                IliasEventoUserTblDef::TABLE_NAME,
+                [
+                    IliasEventoUserTblDef::COL_LAST_TIME_DELIVERED => [\ilDBConstants::T_DATETIME, date("Y-m-d H:i:s")]
+                ],
+                [
+                    IliasEventoUserTblDef::COL_EVENTO_ID => [\ilDBConstants::T_INTEGER, $evento_id]
+                ]
+            );
+        }
+        else{
+            // do insert
+            $this->addNewEventoIliasUser(
+                $evento_id,
+                $ilias_user_id,
+                IliasEventoUserRepository::TYPE_HSLU_AD
+            );
+        }
     }
 
     public function getUsersWithLastImportOlderThanGivenDays(int $min_days_not_delivered, string $only_searched_account_type) : array

@@ -18,7 +18,7 @@ class EventLocationsBuilder
 
         $this->hard_coded_department_mapping = [
             "Hochschule Luzern" => "HSLU",
-            "Design & Kunst" => "DK",
+            "Design Film Kunst" => "DK",
             "Informatik" => "I",
             "Musik" => "M",
             "Soziale Arbeit" => "SA",
@@ -47,13 +47,15 @@ class EventLocationsBuilder
 
         foreach ($locations_settings['departments'] as $department) {
             $department_ref_id = $this->fetchRefIdForObjTitle($repository_root_ref_id, $department);
-            if ($department_ref_id) {
-                foreach ($locations_settings['kinds'] as $kind) {
-                    $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
-                    if (is_null($kind_ref_id)) {
-                        $this->createCategoryObject($department_ref_id, $kind);
-                        $newly_created_locations[] = strip_tags("$department/$kind");
-                    }
+            if ($department_ref_id === null) {
+                continue;
+            }
+
+            foreach ($locations_settings['kinds'] as $kind) {
+                $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
+                if (is_null($kind_ref_id)) {
+                    $this->createCategoryObject($department_ref_id, $kind);
+                    $newly_created_locations[] = strip_tags("$department/$kind");
                 }
             }
         }
@@ -68,15 +70,15 @@ class EventLocationsBuilder
         $missing_locations = [];
         foreach ($locations_settings['departments'] as $department) {
             $department_ref_id = $this->fetchRefIdForObjTitle($repository_root_ref_id, $department);
-            if (!is_null($department_ref_id)) {
-                foreach ($locations_settings['kinds'] as $kind) {
-                    $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
-                    if (is_null($kind_ref_id)) {
-                        $missing_locations[] = strip_tags("/$department/$kind/*");
-                    }
-                }
-            } else {
+            if (is_null($department_ref_id)) {
                 $missing_locations[] = strip_tags("/$department/*");
+            }
+
+            foreach ($locations_settings['kinds'] as $kind) {
+                $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
+                if (is_null($kind_ref_id)) {
+                    $missing_locations[] = strip_tags("/$department/$kind/*");
+                }
             }
         }
 
@@ -104,7 +106,6 @@ class EventLocationsBuilder
         $new_category->setPermissions($parent_ref_id);
 
         // default: sort by title
-        include_once('Services/Container/classes/class.ilContainerSortingSettings.php');
         $settings = new \ilContainerSortingSettings($new_category->getId());
         $settings->setSortMode(\ilContainer::SORT_TITLE);
         $settings->save();
@@ -112,7 +113,6 @@ class EventLocationsBuilder
         try {
             // inherit parents content style, if not individual
             $parent_id = \ilObject::_lookupObjId($parent_ref_id);
-            include_once("./Services/Style/Content/classes/class.ilObjStyleSheet.php");
             $style_id = \ilObjStyleSheet::lookupObjectStyle($parent_id);
             if ($style_id > 0) {
                 if (\ilObjStyleSheet::_lookupStandard($style_id)) {
@@ -129,7 +129,7 @@ class EventLocationsBuilder
     {
         foreach ($this->tree->getChildsByType($root_ref_id, 'cat') as $child_node) {
             $child_ref = $child_node['child'];
-            $obj_id = \ilObject::_lookupObjectId($child_ref);
+            $obj_id = \ilObject::_lookupObjectId((int) $child_ref);
             if (\ilObject::_lookupTitle($obj_id) == $searched_obj_title) {
                 return (int) $child_ref;
             }
@@ -152,20 +152,24 @@ class EventLocationsBuilder
         $repository_root_ref_id = 1;
         foreach ($locations_settings['departments'] as $department) {
             $department_ref_id = $this->fetchRefIdForObjTitle($repository_root_ref_id, $department);
-            if ($department_ref_id) {
-                foreach ($locations_settings['kinds'] as $kind) {
-                    $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
-                    if ($kind_ref_id) {
-                        foreach ($this->tree->getChildsByType($kind_ref_id, 'cat') as $child_node) {
-                            if ($this->isPossibleYearCategory($child_node)) {
-                                $this->locations_repository->addNewLocation(
-                                    $this->getMappedDepartmentName($department),
-                                    $kind,
-                                    (int) $child_node['title'],
-                                    (int) $child_node['ref_id']
-                                );
-                            }
-                        }
+            if ($department_ref_id === null) {
+                continue;
+            }
+
+            foreach ($locations_settings['kinds'] as $kind) {
+                $kind_ref_id = $this->fetchRefIdForObjTitle($department_ref_id, $kind);
+                if ($kind_ref_id === null) {
+                    continue;
+                }
+
+                foreach ($this->tree->getChildsByType($kind_ref_id, 'cat') as $child_node) {
+                    if ($this->isPossibleYearCategory($child_node)) {
+                        $this->locations_repository->addNewLocation(
+                            $this->getMappedDepartmentName($department),
+                            $kind,
+                            (int) $child_node['title'],
+                            (int) $child_node['ref_id']
+                        );
                     }
                 }
             }

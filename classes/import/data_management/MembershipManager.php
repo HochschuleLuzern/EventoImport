@@ -50,26 +50,27 @@ class MembershipManager
 
     public function syncMemberships(EventoEvent $imported_event, IliasEventoEvent $ilias_event) : void
     {
+        $delete_not_delivered_members = true;
         if (is_null($imported_event->getEndDate()) || $imported_event->getEndDate() <= $this->now) {
             $delete_not_delivered_members = false;
-        } else {
-            $delete_not_delivered_members = true;
         }
 
         // If Ilias Event is already a course -> no need to find parent membershipables
         if ($ilias_event->getIliasType() == 'crs') {
             $this->syncMembershipsWithoutParentObjects($imported_event, $ilias_event, $delete_not_delivered_members);
-        } else {
-            // Else -> search for parent membershipable objects
-            $parent_events = $this->tree_seeker->getRefIdsOfParentMembershipables($ilias_event->getRefId());
-
-            // Check if any parent membershipables were found
-            if (count($parent_events) > 0) {
-                $this->syncMembershipsWithParentObjects($imported_event, $ilias_event, $parent_events, $delete_not_delivered_members);
-            } else {
-                $this->syncMembershipsWithoutParentObjects($imported_event, $ilias_event, $delete_not_delivered_members);
-            }
+            return;
         }
+
+        // Else -> search for parent membershipable objects
+        $parent_events = $this->tree_seeker->getRefIdsOfParentMembershipables($ilias_event->getRefId());
+
+        // Check if any parent membershipables were found
+        if (count($parent_events) > 0) {
+            $this->syncMembershipsWithParentObjects($imported_event, $ilias_event, $parent_events, $delete_not_delivered_members);
+            return;
+        }
+
+        $this->syncMembershipsWithoutParentObjects($imported_event, $ilias_event, $delete_not_delivered_members);
     }
 
     private function addUsersToMembershipableObject(
@@ -83,33 +84,37 @@ class MembershipManager
         /** @var EventoUserShort $employee */
         foreach ($evento_event->getEmployees() as $employee) {
             $employee_user_id = $this->user_manager->getIliasUserIdByEventoUserShort($employee);
-            if (!is_null($employee_user_id)) {
-                if (!$participants_object->isAssigned($employee_user_id)) {
-                    $participants_object->add($employee_user_id, $admin_role_code);
-                    $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
-                    \ilForumNotification::checkForumsExistsInsert($membershipable_ref_id, $employee_user_id);
-                } else {
-                    $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
-                }
-                $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $employee->getEventoId(), $admin_role_code);
-                $this->membership_repo->addMembershipIfNotExist($evento_event->getEventoId(), $employee->getEventoId(), $admin_role_code);
+            if (is_null($employee_user_id)) {
+                continue;
             }
+
+            $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
+            if (!$participants_object->isAssigned($employee_user_id)) {
+                $participants_object->add($employee_user_id, $admin_role_code);
+                $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
+                \ilForumNotification::checkForumsExistsInsert($membershipable_ref_id, $employee_user_id);
+            }
+
+            $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $employee->getEventoId(), $admin_role_code);
+            $this->membership_repo->addMembershipIfNotExist($evento_event->getEventoId(), $employee->getEventoId(), $admin_role_code);
         }
 
         /** @var EventoUserShort $student */
         foreach ($evento_event->getStudents() as $student) {
             $student_user_id = $this->user_manager->getIliasUserIdByEventoUserShort($student);
-            if (!is_null($student_user_id)) {
-                if (!$participants_object->isAssigned($student_user_id)) {
-                    $participants_object->add($student_user_id, $student_role_code);
-                    $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
-                    \ilForumNotification::checkForumsExistsInsert($membershipable_ref_id, $student_user_id);
-                } else {
-                    $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
-                }
-                $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $student->getEventoId(), $student_role_code);
-                $this->membership_repo->addMembershipIfNotExist($evento_event->getEventoId(), $student->getEventoId(), $student_role_code);
+            if (is_null($student_user_id)) {
+                continue;
             }
+
+            $log_info_code = Logger::CREVENTO_SUB_ALREADY_ASSIGNED;
+            if (!$participants_object->isAssigned($student_user_id)) {
+                $participants_object->add($student_user_id, $student_role_code);
+                $log_info_code = Logger::CREVENTO_SUB_NEWLY_ADDED;
+                \ilForumNotification::checkForumsExistsInsert($membershipable_ref_id, $student_user_id);
+            }
+
+            $this->logger->logEventMembership($log_info_code, $evento_event->getEventoId(), $student->getEventoId(), $student_role_code);
+            $this->membership_repo->addMembershipIfNotExist($evento_event->getEventoId(), $student->getEventoId(), $student_role_code);
         }
     }
 
@@ -120,11 +125,13 @@ class MembershipManager
         $user_ids_to_remove = [];
 
         foreach ($from_import_subscribed_members as $member_id) {
-            if (!$this->isUserInCurrentImport((int) $member_id, $imported_event)) {
-                $ilias_evento_user = $this->user_manager->getIliasEventoUserByEventoId((int) $member_id);
-                if (!is_null($ilias_evento_user)) {
-                    $user_ids_to_remove[] = $ilias_evento_user;
-                }
+            if ($this->isUserInCurrentImport((int) $member_id, $imported_event)) {
+                continue;
+            }
+
+            $ilias_evento_user = $this->user_manager->getIliasEventoUserByEventoId((int) $member_id);
+            if (!is_null($ilias_evento_user)) {
+                $user_ids_to_remove[] = $ilias_evento_user;
             }
         }
 
@@ -194,7 +201,10 @@ class MembershipManager
                     \ilParticipants::IL_CRS_MEMBER,
                     $parent_event
                 );
-            } elseif ($participants_obj_of_parent instanceof \ilGroupParticipants) {
+                continue;
+            }
+
+            if ($participants_obj_of_parent instanceof \ilGroupParticipants) {
                 $this->addUsersToMembershipableObject(
                     $participants_obj_of_parent,
                     $imported_event,
@@ -304,7 +314,10 @@ class MembershipManager
                     $event_admin_list->getAccountList(),
                     \ilParticipants::IL_CRS_ADMIN,
                 );
-            } elseif ($participants_obj instanceof \ilGroupParticipants) {
+                continue;
+            }
+
+            if ($participants_obj instanceof \ilGroupParticipants) {
                 $this->addAdminListToObject(
                     $participants_obj,
                     $event_admin_list->getAccountList(),

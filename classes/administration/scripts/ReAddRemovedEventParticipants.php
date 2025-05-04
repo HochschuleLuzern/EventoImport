@@ -99,7 +99,7 @@ class ReAddRemovedEventParticipants implements AdminScriptInterface
         $repo = new IliasEventoEventObjectRepository($this->db);
 
         $form = $this->getParameterFormUI();
-        if(!$form->checkInput()) {
+        if (!$form->checkInput()) {
             throw new \InvalidArgumentException('Invalid form input');
         }
 
@@ -136,13 +136,13 @@ class ReAddRemovedEventParticipants implements AdminScriptInterface
     private function reAddParticipants($f) : Modal
     {
         $query_params = $this->request->getQueryParams();
-        if(!isset($query_params['readd_to_event'])) {
+        if (!isset($query_params['readd_to_event'])) {
             throw new \InvalidArgumentException('No Event ID to readd participants');
         }
         $event = $this->repo->getEventByEventoId((int) $query_params['readd_to_event']);
 
         $readd_form = $this->getFormWithRemovedUsers($event);
-        if(!$readd_form->checkInput()) {
+        if (!$readd_form->checkInput()) {
             throw new \InvalidArgumentException('Invalid form input');
         }
 

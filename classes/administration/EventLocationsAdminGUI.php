@@ -3,6 +3,7 @@
 namespace EventoImport\administration;
 
 use EventoImport\config\locations\EventLocationsRepository;
+use EventoImport\config\locations\BaseLocationConfiguration;
 use ILIAS\DI\UIServices;
 
 class EventLocationsAdminGUI
@@ -29,7 +30,7 @@ class EventLocationsAdminGUI
         $ui_components = [];
 
         // Show Location settings from the cron-job
-        $json_settings = $this->settings->get('crevento_location_settings');
+        $json_settings = $this->settings->get(BaseLocationConfiguration::CONF_LOCATIONS);
         $locations_settings = $json_settings ? json_decode($json_settings, true) : [];
         if (!is_array($locations_settings)) {
             $locations_settings = [];

@@ -54,15 +54,9 @@ class IliasEventoEventObjectRepository
                 // foreign keys
                 IliasEventoEventsTblDef::COL_REF_ID => [\ilDBConstants::T_INTEGER, $ilias_evento_event->getRefId()],
                 IliasEventoEventsTblDef::COL_OBJ_ID => [\ilDBConstants::T_INTEGER, $ilias_evento_event->getObjId()],
-                IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER,
-                                                                    $ilias_evento_event->getAdminRoleId()
-                ],
-                IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER,
-                                                                      $ilias_evento_event->getStudentRoleId()
-                ],
-                IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => [\ilDBConstants::T_TEXT,
-                                                                       $ilias_evento_event->getParentEventKey()
-                ]
+                IliasEventoEventsTblDef::COL_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER, $ilias_evento_event->getAdminRoleId()],
+                IliasEventoEventsTblDef::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER, $ilias_evento_event->getStudentRoleId()],
+                IliasEventoEventsTblDef::COL_PARENT_EVENT_KEY => [\ilDBConstants::T_TEXT, $ilias_evento_event->getParentEventKey()]
             ]
         );
     }
@@ -83,9 +77,32 @@ class IliasEventoEventObjectRepository
                 IliasParentEventTblDef::COL_TITLE => [\ilDBConstants::T_TEXT, $parent_event->getTitle()],
                 IliasParentEventTblDef::COL_REF_ID => [\ilDBConstants::T_INTEGER, $parent_event->getRefId()],
                 IliasParentEventTblDef::COL_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER, $parent_event->getAdminRoleId()],
-                IliasParentEventTblDef::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER,
-                                                                $parent_event->getStudentRoleId()
-                ],
+                IliasParentEventTblDef::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER, $parent_event->getStudentRoleId()],
+            ]
+        );
+    }
+
+    public function updateExistingParentEvent(IliasEventoParentEvent $parent_event) : void
+    {
+        $this->db->update(
+        // UPDATE
+            IliasParentEventTblDef::TABLE_NAME,
+
+            // VALUES
+            [
+                // id
+                IliasParentEventTblDef::COL_GROUP_EVENTO_ID => [\ilDBConstants::T_INTEGER, $parent_event->getGroupEventoId()],
+
+                // foreign keys
+                IliasParentEventTblDef::COL_TITLE => [\ilDBConstants::T_TEXT, $parent_event->getTitle()],
+                IliasParentEventTblDef::COL_REF_ID => [\ilDBConstants::T_INTEGER, $parent_event->getRefId()],
+                IliasParentEventTblDef::COL_ADMIN_ROLE_ID => [\ilDBConstants::T_INTEGER, $parent_event->getAdminRoleId()],
+                IliasParentEventTblDef::COL_STUDENT_ROLE_ID => [\ilDBConstants::T_INTEGER, $parent_event->getStudentRoleId()]
+            ],
+
+            // WHERE
+            [
+                IliasParentEventTblDef::COL_GROUP_UNIQUE_KEY => [\ilDBConstants::T_TEXT, $parent_event->getGroupUniqueKey()]
             ]
         );
     }
@@ -200,7 +217,7 @@ class IliasEventoEventObjectRepository
         return new IliasEventoEvent(
             $row[IliasEventoEventsTblDef::COL_EVENTO_ID],
             $row[IliasEventoEventsTblDef::COL_EVENTO_TITLE],
-            $row[IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION],
+            substr($row[IliasEventoEventsTblDef::COL_EVENTO_DESCRIPTION],0, 128),
             $row[IliasEventoEventsTblDef::COL_EVENTO_TYPE],
             $row[IliasEventoEventsTblDef::COL_WAS_AUTOMATICALLY_CREATED],
             $this->toDateTimeOrNull($row[IliasEventoEventsTblDef::COL_START_DATE]),

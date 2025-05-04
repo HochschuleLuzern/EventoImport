@@ -24,14 +24,15 @@ class LocalVisitorRoleManager
         return $this->local_role_repo->getVisitorRoleByDepartmentAndKind($department_name, $kind_name);
     }
 
-    public function configLocalRoleByDepartmentAndKind(string $department_name, string $kind_name, int $location_ref_id, string $dep_api_name)
+    public function configLocalRoleByDepartmentAndKind(string $department_name, string $kind_name, int $location_ref_id, string $dep_api_name): void
     {
         $role = $this->local_role_repo->getVisitorRoleByDepartmentAndKind($department_name, $kind_name);
         if (!is_null($role)) {
             $this->local_role_repo->updateDepartmentApiName($role, $dep_api_name);
-        } else {
-            $this->createNewLocalVisitorRole($department_name, $kind_name, $location_ref_id, $dep_api_name);
+            return;
         }
+
+        $this->createNewLocalVisitorRole($department_name, $kind_name, $location_ref_id, $dep_api_name);
     }
 
     public function unconfigLocalRoleByDepartmentAndKind(string $department_name, string $kind_name, int $location_ref_id)

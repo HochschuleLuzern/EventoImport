@@ -24,7 +24,7 @@ trait AdminScriptCommonMethods
             new RestClientService(
                 $api_settings->getUrl(),
                 $api_settings->getTimeoutFailedRequest(),
-                $api_settings->getApikey(),
+                $api_settings->getApiKey(),
                 $api_settings->getApiSecret()
             ),
             new ImporterIterator($api_settings->getPageSize()),
