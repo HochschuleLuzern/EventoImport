@@ -6,6 +6,7 @@ use EventoImport\import\data_management\ilias_core_service\IliasUserServices;
 use EventoImport\import\action\user\UserActionFactory;
 use EventoImport\communication\api_models\EventoUser;
 use EventoImport\import\data_management\repository\IliasEventoUserRepository;
+use ilObjUser;
 
 class UserImportActionDecider
 {
@@ -33,6 +34,13 @@ class UserImportActionDecider
     public function determineImportAction(EventoUser $evento_user): EventoImportAction
     {
         $matched_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
+
+        if ($matched_user_id !== null) {
+            if (!ilObjUser::userExists([$matched_user_id])) {
+                $this->evento_user_repo->deleteEventoIliasUserConnectionByEventoId($evento_user->getEventoId());
+                $matched_user_id = null;
+            }
+        }
 
         if ($matched_user_id === null) {
             return $this->matchToIliasUsersAndDetermineAction($evento_user);
