@@ -4,6 +4,7 @@ namespace EventoImport\import\data_management\ilias_core_service;
 
 use ILIAS\DI\RBACServices;
 use EventoImport\config\DefaultUserSettings;
+use ilFileUtils;
 
 /**
  * Class IliasUserServices
@@ -195,10 +196,7 @@ class IliasUserServices
     public function saveEncodedPersonalPictureToUserProfile(int $ilias_user_id, string $encoded_image_string): void
     {
         try {
-            return;
-
-            // Deactivated for the moment since the method does not exist anymore
-            $tmp_file = \ilUtil::ilTempnam();
+            $tmp_file = ilFileUtils::ilTempnam();
             imagepng(
                 imagecreatefromstring(
                     base64_decode(
