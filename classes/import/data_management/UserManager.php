@@ -192,6 +192,15 @@ class UserManager
         $this->evento_user_repo->registerUserAsDelivered($evento_user->getEventoId(),$ilias_user->getId());
     }
 
+    public function isEventoUserRegisteredAsDelivered(\ilObjUser $ilias_user, EventoUser $evento_user): bool
+    {
+        $matched_user_id = $this->evento_user_repo->getIliasUserIdByEventoId($evento_user->getEventoId());
+        if ($matched_user_id !== null) {
+            return true;
+        }
+        return false;
+    }
+
     public function updateIliasUserFromEventoUser(\ilObjUser $ilias_user, EventoUser $evento_user)
     {
         $changed_user_data = [];
@@ -220,6 +229,17 @@ class UserManager
                 'new' => $received_gender_char
             ];
             $ilias_user->setGender($received_gender_char);
+        }
+
+        if(!$this->isEventoUserRegisteredAsDelivered($ilias_user, $evento_user)){
+            $mail_list = $evento_user->getEmailList();
+            if (isset($mail_list[0]) && ($ilias_user->getEmail() !== $mail_list[0])) {
+                $changed_user_data['email'] = [
+                    'old' => $ilias_user->getEmail(),
+                    'new' => $mail_list[0]
+                ];
+                $ilias_user->setEmail($mail_list[0]);
+            }
         }
 
         $mail_list = $evento_user->getEmailList();
