@@ -3,19 +3,19 @@
 Evento Import is a Cron-Plugin that updates Users and ILIAS-Object-Members based on information received from a SOAP-Interface
 
 **Minimum ILIAS Version:**
-8.0
+9.0
 
 **Maximum ILIAS Version:**
-9.999
+10.999
 
-**Responsible Developer:**
-Stephan Winiker - stephan.winiker@hslu.ch
+**Contact:**
+Hochschule Luzern
 
 **Supported Languages:**
 German, English
 
 ### Quick Installation Guide
-1. Copy the content of this folder in <ILIAS_directory>/Customizing/global/plugins/Services/Cron/CronHook/EventoImport or clon this Github-Repo to <ILIAS_directory>/Customizing/global/plugins/Services/Cron/CronHook/
+1. Copy the content of this folder in <ILIAS_directory>/public/Customizing/global/plugins/Services/Cron/CronHook/EventoImport or clon this Github-Repo to <ILIAS_directory>/Customizing/global/plugins/Services/Cron/CronHook/
 
 2. Access ILIAS, go to the administration menu and select "Plugins" in the menu on the right.
 
